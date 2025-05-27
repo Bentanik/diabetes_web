@@ -24,7 +24,7 @@ const renderHeaderNavigations = () => {
 export default function Header() {
     return (
         <motion.header
-            className="fixed top-0 left-0 w-full bg-white px-6 md:px-[66px] h-[80px] flex items-center justify-between z-50 font-be-vietnam-pro"
+            className="fixed top-0 left-0 w-full bg-gradient-to-br from-blue-50 via-white to-cyan-50 px-6 md:px-[66px] h-[80px] flex items-center justify-between z-50 font-be-vietnam-pro"
             initial="visible"
             // animate={hidden === null ? "hidden" : "visible"}
             exit="hidden"
