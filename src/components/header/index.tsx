@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { HEADER_NAVIGATIONS } from '@/constants/home';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 
 const renderHeaderNavigations = () => {
@@ -22,6 +23,11 @@ const renderHeaderNavigations = () => {
 }
 
 export default function Header() {
+    const router = useRouter();
+    
+    const handleRouteToLogin = () => {
+        router.push('/login')
+    }
     return (
         <motion.header
             className="fixed top-0 left-0 w-full bg-gradient-to-br from-blue-50 via-white to-cyan-50 px-6 md:px-[66px] h-[80px] flex items-center justify-between z-50 font-be-vietnam-pro"
@@ -61,7 +67,9 @@ export default function Header() {
             <section className="flex items-center gap-x-9">
 
                 {/* Apply Button */}
-                <Button type="button" className="hidden md:block px-5 py-2 text-sm font-medium bg-[#248fca] text-white hover:bg-[#2485ca] cursor-pointer">
+                <Button type="button" className="hidden md:block px-5 py-2 text-sm font-medium bg-[#248fca] text-white hover:bg-[#2485ca] cursor-pointer"
+                    onClick={handleRouteToLogin}
+                >
                     Đăng nhập
                 </Button>
 
