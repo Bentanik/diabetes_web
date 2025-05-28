@@ -38,8 +38,4 @@ declare namespace API {
     authUser: TAuthUserDto;
     authToken: TAuthTokenDto;
   };
-
-  type TLoginResponse = {
-    responses: TLoginResponseDto;
-  };
 }

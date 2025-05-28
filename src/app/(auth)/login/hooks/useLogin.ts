@@ -52,10 +52,14 @@ export default function useLogin() {
         },
         onError: (error) => {
           hideBackdrop();
-          if (error.errorCode === "AUTH_007") {
+          if (error.errorCode === "auth13") {
             setError("email", {
               type: "manual",
-              message: error.detail,
+              message: "Xin vui lòng kiểm tra lại địa chỉ email và mật khẩu",
+            });
+            setError("password", {
+              type: "manual",
+              message: "Xin vui lòng kiểm tra lại địa chỉ email và mật khẩu",
             });
           }
         },

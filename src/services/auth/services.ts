@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import useToast from "@/hooks/use-toast";
 import {
   loginAsync,
@@ -49,7 +51,7 @@ export const useServiceRegisterEmail = () => {
   const dispatch = useAppDispatch();
 
   return useMutation<
-    TResponseData<API.TLoginResponse>,
+    TResponseData<API.TLoginResponseDto>,
     TMeta,
     REQUEST.TRegisterEmail
   >({
@@ -57,7 +59,7 @@ export const useServiceRegisterEmail = () => {
     onSuccess: (data) => {
       try {
         if (data) {
-          const { authToken, authUser } = data.value.data.responses;
+          const { authToken, authUser } = data.value.data;
           addToast({
             type: "success",
             description: data.value.message,
@@ -66,7 +68,7 @@ export const useServiceRegisterEmail = () => {
           setAuthStorage(authToken);
           dispatch(setInfoUser(authUser));
         }
-      } catch (ex) {
+      } catch (ex: any) {
         removeAuthStorage();
       }
     },
@@ -78,7 +80,7 @@ export const useServiceLogin = () => {
   const dispatch = useAppDispatch();
 
   return useMutation<
-    TResponseData<API.TLoginResponse>,
+    TResponseData<API.TLoginResponseDto>,
     TMeta,
     REQUEST.TLogin
   >({
@@ -86,7 +88,8 @@ export const useServiceLogin = () => {
     onSuccess: (data) => {
       try {
         if (data) {
-          const { authToken, authUser } = data.value.data.responses;
+          const { authToken, authUser } = data.value.data;
+          console.log(authToken, authUser);
           addToast({
             type: "success",
             description: data.value.message,

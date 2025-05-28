@@ -4,7 +4,7 @@ export interface InitialState {
   user: API.TAuthUserDto | null;
 }
 
-let initialState: InitialState = {
+const initialState: InitialState = {
   user: null,
 };
 

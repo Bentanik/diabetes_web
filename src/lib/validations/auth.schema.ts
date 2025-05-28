@@ -1,5 +1,4 @@
 import { validationMessages } from "@/lib/messages/validationMessages";
-import { validateHeaderName } from "http";
 import z from "zod";
 
 export const sendRegisterEmailSchema = z.object({

@@ -27,7 +27,7 @@ export const verifyRegisterEmailAsync = async (
 };
 
 export const registerEmailAsync = async (body: REQUEST.TRegisterEmail) => {
-  const response = await request<TResponseData<API.TLoginResponse>>(
+  const response = await request<TResponseData<API.TLoginResponseDto>>(
     API_ENDPOINTS.REGISTER_EMAIL,
     {
       method: "POST",
@@ -39,7 +39,7 @@ export const registerEmailAsync = async (body: REQUEST.TRegisterEmail) => {
 };
 
 export const loginAsync = async (body: REQUEST.TLogin) => {
-  const response = await request<TResponseData<API.TLoginResponse>>(
+  const response = await request<TResponseData<API.TLoginResponseDto>>(
     API_ENDPOINTS.LOGIN,
     {
       method: "POST",

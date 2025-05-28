@@ -5,7 +5,7 @@ export interface InitialState {
   verifyRegisterEmail: REQUEST.TVerifyRegisterEmail | null;
 }
 
-let initialState: InitialState = {
+const initialState: InitialState = {
   sendRegisterEmail: null,
   verifyRegisterEmail: null,
 };
