@@ -1,34 +1,28 @@
-import { BellIcon, CalendarRangeIcon, ChartColumnBigIcon, HouseIcon, MailIcon, SquareLibraryIcon, Users2Icon } from "lucide-react";
-
+import { ActivityIcon, BarChart, MessageSquareIcon, UserCogIcon, UsersIcon } from "lucide-react";
 export const sidebar_items = [
   {
     href: "/hospital/home",
-    icon: HouseIcon,
-    label: "Trang chủ",
+    icon: ActivityIcon,
+    label: "Dashboard",
   },
   {
-    href: "/hospital/calendar",
-    icon: CalendarRangeIcon,
-    label: "Lịch hẹn",
+    href: "/hospital/employee",
+    icon: UsersIcon,
+    label: "Nhân viên",
   },
   {
-    href: "/mentor/student",
-    icon: Users2Icon,
-    label: "Học viên",
-  },
-  {
-    href: "/mentor/course",
-    icon: SquareLibraryIcon,
-    label: "Khóa học",
+    href: "/hospital/group",
+    icon: MessageSquareIcon,
+    label: "Group Chat",
   },
   {
     href: "/mentor/setting",
-    icon: MailIcon,
-    label: "Tin nhắn",
+    icon: BarChart,
+    label: "Báo cáo",
   },
   {
     href: "/mentor/setting",
-    icon: BellIcon,
-    label: "Thông báo",
+    icon: UserCogIcon,
+    label: "Quản lí tài khoản",
   },
 ];
