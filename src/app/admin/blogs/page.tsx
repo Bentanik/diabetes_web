@@ -1,5 +1,10 @@
 import React from "react";
+import ModeratorManageBlogComponent from "./components/index";
 
-export default function CreateBlog() {
-    return <div>CreateBlog</div>;
+export default function ModeratorManageBlog() {
+    return (
+        <div>
+            <ModeratorManageBlogComponent />
+        </div>
+    );
 }

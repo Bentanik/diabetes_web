@@ -33,7 +33,7 @@ export const sidebar_items = [
         label: "Báo cáo",
     },
     {
-        href: "/admin/create_blog",
+        href: "/admin/blogs",
         icon: SquarePen,
         label: "Quản lý bài viết",
     },

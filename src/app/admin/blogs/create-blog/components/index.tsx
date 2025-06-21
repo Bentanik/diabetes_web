@@ -36,7 +36,7 @@ const Header = () => {
     );
 };
 
-export default function CreateHospitalComponent() {
+export default function CreateBlogComponent() {
     return (
         <div>
             {/* Header */}
