@@ -1,4 +1,4 @@
-import CreateBlogComponent from "@/app/admin/blogs/create-blog/components";
+import CreatePostForm from "@/app/admin/blogs/create-blog/components";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function CreateHospitalPage() {
     return (
         <div>
-            <CreateBlogComponent />
+            <CreatePostForm />
         </div>
     );
 }

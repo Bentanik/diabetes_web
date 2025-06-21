@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import CreateHospitalForm from "@/app/admin/hospitals/create-hospital/components/create-hospital-form";
+import CreateBlogForm from "@/app/admin/blogs/create-blog/components/create-blog-form";
 import { BellIcon } from "lucide-react";
 
 const Header = () => {
@@ -17,10 +17,10 @@ const Header = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Thêm thông tin bệnh viện
+                        Tạo nội dung bài viết
                     </h1>
                     <p className="text-gray-600 mt-1 text-sm">
-                        Thêm thông tin bệnh viện mới
+                        Tạo bài viết mới
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -51,7 +51,7 @@ export default function CreateBlogComponent() {
                 transition={{ delay: 0.3 }}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
-                <CreateHospitalForm />
+                <CreateBlogForm />
             </motion.div>
         </div>
     );
