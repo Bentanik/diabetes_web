@@ -1,45 +1,49 @@
-import HospitalBox from "@/components/hospital_box"
-import { BotIcon, MessageCircleIcon, MessageSquareIcon, UsersIcon } from 'lucide-react'
+import HospitalBox from "@/components/hospital_box";
+import {
+    BotIcon,
+    MessageCircleIcon,
+    MessageSquareIcon,
+    UsersIcon,
+} from "lucide-react";
 
 const START_CARDS = [
     {
-      title: "Tổng số nhân viên",
-      value: "156",
-      change: "+12",
-      changeText: "so với tháng trước",
-      positive: true,
-      color: "#248fca",
-      icon: UsersIcon,
+        title: "Tổng số nhân viên",
+        value: "156",
+        change: "+12",
+        changeText: "so với tháng trước",
+        positive: true,
+        color: "#248fca",
+        icon: UsersIcon,
     },
     {
-      title: "Thành viên trong group",
-      value: "2,847",
-      change: "+234",
-      changeText: "thành viên mới tháng này",
-      positive: true,
-      color: "#10b981",
-      icon: MessageSquareIcon,
+        title: "Thành viên trong group",
+        value: "2,847",
+        change: "+234",
+        changeText: "thành viên mới tháng này",
+        positive: true,
+        color: "#10b981",
+        icon: MessageSquareIcon,
     },
     {
-      title: "Tương tác AI hôm nay",
-      value: "1,289",
-      change: "+15%",
-      changeText: "so với hôm qua",
-      positive: true,
-      color: "#8b5cf6",
-      icon: BotIcon,
+        title: "Tương tác AI hôm nay",
+        value: "1,289",
+        change: "+15%",
+        changeText: "so với hôm qua",
+        positive: true,
+        color: "#8b5cf6",
+        icon: BotIcon,
     },
     {
-      title: "Tin nhắn mới hôm nay",
-      value: "1,247",
-      change: "+8%",
-      changeText: "so với hôm qua",
-      positive: true,
-      color: "#f97316",
-      icon: MessageCircleIcon,
+        title: "Tin nhắn mới hôm nay",
+        value: "1,247",
+        change: "+8%",
+        changeText: "so với hôm qua",
+        positive: true,
+        color: "#f97316",
+        icon: MessageCircleIcon,
     },
-  ]
-
+];
 
 export default function ListTotalStatisticHospitalDashboard() {
     return (
@@ -50,7 +54,7 @@ export default function ListTotalStatisticHospitalDashboard() {
                     title={card.title}
                     value={card.value}
                     icon={card.icon}
-                    unit={''}
+                    unit={""}
                     changeText={card.changeText}
                     change={card.change}
                     positive={card.positive}
@@ -58,5 +62,5 @@ export default function ListTotalStatisticHospitalDashboard() {
                 />
             ))}
         </div>
-    )
+    );
 }
