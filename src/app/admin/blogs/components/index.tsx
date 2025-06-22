@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
     AlertCircleIcon,
     BadgeIcon,
-    BarChartIcon,
     BellIcon,
     CheckCircleIcon,
     ClockIcon,
@@ -139,13 +138,13 @@ const staffData = [
     },
 ];
 
-const departmentStats = [
-    { name: "Nội tiết", count: 12, color: "bg-blue-500" },
-    { name: "Tim mạch", count: 8, color: "bg-red-500" },
-    { name: "Nhi khoa", count: 15, color: "bg-green-500" },
-    { name: "Ngoại khoa", count: 10, color: "bg-purple-500" },
-    { name: "Cấp cứu", count: 6, color: "bg-orange-500" },
-];
+// const departmentStats = [
+//     { name: "Nội tiết", count: 12, color: "bg-blue-500" },
+//     { name: "Tim mạch", count: 8, color: "bg-red-500" },
+//     { name: "Nhi khoa", count: 15, color: "bg-green-500" },
+//     { name: "Ngoại khoa", count: 10, color: "bg-purple-500" },
+//     { name: "Cấp cứu", count: 6, color: "bg-orange-500" },
+// ];
 
 const Header = () => {
     return (
@@ -187,7 +186,6 @@ const Header = () => {
 
 export default function ModeratorManageBlogComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -235,13 +233,11 @@ export default function ModeratorManageBlogComponent() {
             staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             staff.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             staff.department.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesDepartment =
-            selectedDepartment === "all" ||
-            staff.department === selectedDepartment;
+
         const matchesStatus =
             selectedStatus === "all" || staff.status === selectedStatus;
 
-        return matchesSearch && matchesDepartment && matchesStatus;
+        return matchesSearch && matchesStatus;
     });
 
     return (
