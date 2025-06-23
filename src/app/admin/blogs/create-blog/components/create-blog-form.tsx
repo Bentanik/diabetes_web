@@ -6,6 +6,21 @@ import { FileText, ImageIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Check, ChevronsUpDown, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import {
     Form,
     FormControl,
@@ -17,6 +32,29 @@ import {
 import React, { useState } from "react";
 import TiptapEditor from "@/components/tiptap";
 import Image from "next/image";
+
+const frameworks = [
+    {
+        value: "next.js",
+        label: "Next.js",
+    },
+    {
+        value: "sveltekit",
+        label: "SvelteKit",
+    },
+    {
+        value: "nuxt.js",
+        label: "Nuxt.js",
+    },
+    {
+        value: "remix",
+        label: "Remix",
+    },
+    {
+        value: "astro",
+        label: "Astro",
+    },
+];
 
 // Định nghĩa kiểu dữ liệu cho form
 interface PostFormData {
@@ -39,16 +77,17 @@ export default function CreatePostForm() {
             doctorId: "",
         },
     });
-
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState("");
 
-    // Function to update contentHtml with title + content
-    const updateContentHtml = (title: string, editorContent: string) => {
-        const titleHtml = title ? `<h1>${title}</h1>` : "";
-        const fullHtml = titleHtml + editorContent;
-        form.setValue("contentHtml", fullHtml);
+    // Function to update contentHtml with only editor content
+    const updateContentHtml = (editorContent: string) => {
+        form.setValue("contentHtml", editorContent);
     };
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +104,32 @@ export default function CreatePostForm() {
             setImageFile(file);
             const reader = new FileReader();
             reader.onload = (e) => setImagePreview(e.target?.result as string);
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Kích thước file không được vượt quá 5MB");
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("Vui lòng chọn file hình ảnh");
+                return;
+            }
+
+            setLogoFile(file);
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setLogoPreview(e.target?.result as string);
+            };
             reader.readAsDataURL(file);
         }
     };
@@ -113,16 +178,16 @@ export default function CreatePostForm() {
                     <motion.div variants={itemVariants} className="space-y-4">
                         <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                             <ImageIcon className="h-5 w-5 text-[#248fca]" />
-                            Hình ảnh bài post
+                            Logo bệnh viện
                         </Label>
                         <div className="flex items-center gap-6">
                             <div className="relative">
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    onChange={handleImageUpload}
+                                    onChange={handleLogoUpload}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    id="image-upload"
+                                    id="logo-upload"
                                 />
                                 <Button
                                     type="button"
@@ -131,22 +196,23 @@ export default function CreatePostForm() {
                                     asChild
                                 >
                                     <label
-                                        htmlFor="image-upload"
+                                        htmlFor="logo-upload"
                                         className="cursor-pointer"
                                     >
-                                        Chọn hình ảnh
+                                        <Upload className="h-5 w-5" />
+                                        Chọn logo
                                     </label>
                                 </Button>
                             </div>
-                            {imagePreview && (
+                            {logoPreview && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
                                 >
-                                    <Image
-                                        src={imagePreview || "/placeholder.svg"}
-                                        alt="Image preview"
+                                    <img
+                                        src={logoPreview || "/placeholder.svg"}
+                                        alt="Logo preview"
                                         className="w-full h-full object-cover"
                                     />
                                 </motion.div>
@@ -172,23 +238,7 @@ export default function CreatePostForm() {
                                             {...field}
                                             placeholder="Nhập tiêu đề bài post"
                                             className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
-                                            onChange={(e) => {
-                                                field.onChange(e);
-                                                // Lấy content từ editor mà không có title
-                                                const currentContentHtml =
-                                                    form.getValues(
-                                                        "contentHtml"
-                                                    );
-                                                const contentWithoutTitle =
-                                                    currentContentHtml.replace(
-                                                        /^<h1>.*?<\/h1>/,
-                                                        ""
-                                                    );
-                                                updateContentHtml(
-                                                    e.target.value,
-                                                    contentWithoutTitle
-                                                );
-                                            }}
+                                            onChange={field.onChange}
                                         />
                                     </FormControl>
                                     <FormMessage className="flex items-center gap-1">
@@ -208,20 +258,13 @@ export default function CreatePostForm() {
                                 <FormItem>
                                     <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                         <FileText className="h-5 w-5 text-[#248fca]" />
-                                        Nội dung HTML *
+                                        Nội dung bài viết
                                     </FormLabel>
                                     <FormControl>
                                         <TiptapEditor
-                                            content={field.value.replace(
-                                                /^<h1>.*?<\/h1>/,
-                                                ""
-                                            )} // Chỉ hiển thị content, không có title
+                                            content={field.value}
                                             onUpdate={(content) => {
-                                                // Cập nhật với title hiện tại
-                                                updateContentHtml(
-                                                    form.getValues("title"),
-                                                    content
-                                                );
+                                                updateContentHtml(content);
                                             }}
                                         />
                                     </FormControl>
@@ -258,6 +301,141 @@ export default function CreatePostForm() {
                         <p className="text-sm text-gray-500">
                             Xem trước nội dung như khi bài blog được đăng.
                         </p>
+                    </motion.div>
+
+                    {/* Select Doctor and Category */}
+                    <motion.div
+                        variants={itemVariants}
+                        className="flex justify-between gap-4 pt-8 border-t-2 border-gray-100"
+                    >
+                        {/* Select Doctor */}
+                        <div className="">
+                            <Popover open={open} onOpenChange={setOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={open}
+                                        className="w-[200px] justify-between"
+                                    >
+                                        {value
+                                            ? frameworks.find(
+                                                  (framework) =>
+                                                      framework.value === value
+                                              )?.label
+                                            : "Select framework..."}
+                                        <ChevronsUpDown className="opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[200px] p-0">
+                                    <Command>
+                                        <CommandInput
+                                            placeholder="Search framework..."
+                                            className="h-9"
+                                        />
+                                        <CommandList>
+                                            <CommandEmpty>
+                                                No framework found.
+                                            </CommandEmpty>
+                                            <CommandGroup>
+                                                {frameworks.map((framework) => (
+                                                    <CommandItem
+                                                        key={framework.value}
+                                                        value={framework.value}
+                                                        onSelect={(
+                                                            currentValue
+                                                        ) => {
+                                                            setValue(
+                                                                currentValue ===
+                                                                    value
+                                                                    ? ""
+                                                                    : currentValue
+                                                            );
+                                                            setOpen(false);
+                                                        }}
+                                                    >
+                                                        {framework.label}
+                                                        <Check
+                                                            className={cn(
+                                                                "ml-auto",
+                                                                value ===
+                                                                    framework.value
+                                                                    ? "opacity-100"
+                                                                    : "opacity-0"
+                                                            )}
+                                                        />
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                        {/* Select Category */}
+                        {/* <div className="">
+                            <Popover open={open} onOpenChange={setOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={open}
+                                        className="w-[200px] justify-between"
+                                    >
+                                        {value
+                                            ? frameworks.find(
+                                                  (framework) =>
+                                                      framework.value === value
+                                              )?.label
+                                            : "Select framework..."}
+                                        <ChevronsUpDown className="opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[200px] p-0">
+                                    <Command>
+                                        <CommandInput
+                                            placeholder="Search framework..."
+                                            className="h-9"
+                                        />
+                                        <CommandList>
+                                            <CommandEmpty>
+                                                No framework found.
+                                            </CommandEmpty>
+                                            <CommandGroup>
+                                                {frameworks.map((framework) => (
+                                                    <CommandItem
+                                                        key={framework.value}
+                                                        value={framework.value}
+                                                        onSelect={(
+                                                            currentValue
+                                                        ) => {
+                                                            setValue(
+                                                                currentValue ===
+                                                                    value
+                                                                    ? ""
+                                                                    : currentValue
+                                                            );
+                                                            setOpen(false);
+                                                        }}
+                                                    >
+                                                        {framework.label}
+                                                        <Check
+                                                            className={cn(
+                                                                "ml-auto",
+                                                                value ===
+                                                                    framework.value
+                                                                    ? "opacity-100"
+                                                                    : "opacity-0"
+                                                            )}
+                                                        />
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </div> */}
                     </motion.div>
 
                     {/* Submit Buttons */}

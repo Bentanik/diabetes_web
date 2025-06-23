@@ -10,7 +10,6 @@ import TextStyle from "@tiptap/extension-text-style";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
-import Heading from "@tiptap/extension-heading";
 
 interface TiptapEditorProps {
     content: string;

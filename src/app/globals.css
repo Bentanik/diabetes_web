@@ -127,12 +127,23 @@
     body {
         @apply bg-background text-foreground;
     }
-    h1,
+    /* h1,
     h2,
     h3 {
         scroll-margin-top: 100px;
+    } */
+    .prose h1 {
+        font-size: 2em !important;
+        font-weight: bold !important;
     }
-
+    .prose h2 {
+        font-size: 1.5em !important;
+        font-weight: bold !important;
+    }
+    .prose h3 {
+        font-size: 1.25em !important;
+        font-weight: bold !important;
+    }
     /* Smooth scrolling */
     html {
         scroll-behavior: smooth;
