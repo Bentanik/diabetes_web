@@ -1,5 +1,5 @@
 declare namespace REQUEST {
-    type TCreateHospital = {
+    type TCreateBlog = {
         name: string;
         address: string;
         contactNumber: string;

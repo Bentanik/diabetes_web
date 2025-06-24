@@ -2,11 +2,11 @@
 
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { FileText, ImageIcon, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, ChevronsUpDown, Upload } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Command,
@@ -29,34 +29,19 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import React, { useState } from "react";
+import { useState } from "react";
 import TiptapEditor from "@/components/tiptap";
 import Image from "next/image";
+import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
 
 const frameworks = [
-    {
-        value: "next.js",
-        label: "Next.js",
-    },
-    {
-        value: "sveltekit",
-        label: "SvelteKit",
-    },
-    {
-        value: "nuxt.js",
-        label: "Nuxt.js",
-    },
-    {
-        value: "remix",
-        label: "Remix",
-    },
-    {
-        value: "astro",
-        label: "Astro",
-    },
+    { value: "next.js", label: "Next.js" },
+    { value: "sveltekit", label: "SvelteKit" },
+    { value: "nuxt.js", label: "Nuxt.js" },
+    { value: "remix", label: "Remix" },
+    { value: "astro", label: "Astro" },
 ];
 
-// Định nghĩa kiểu dữ liệu cho form
 interface PostFormData {
     title: string;
     content: string;
@@ -64,6 +49,7 @@ interface PostFormData {
     references: string[];
     categoryId: string;
     doctorId: string;
+    thumbnailUrl?: string; // Thêm trường cho thumbnail
 }
 
 export default function CreatePostForm() {
@@ -75,82 +61,46 @@ export default function CreatePostForm() {
             references: [],
             categoryId: "",
             doctorId: "",
+            thumbnailUrl: "",
         },
     });
-    const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const { onSubmit: uploadImage, isPending: isUploading } = useUploadImage();
+    const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("");
 
-    // Function to update contentHtml with only editor content
     const updateContentHtml = (editorContent: string) => {
         form.setValue("contentHtml", editorContent);
     };
 
-    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Kích thước file không được vượt quá 5MB");
-                return;
-            }
-            if (!file.type.startsWith("image/")) {
-                alert("Vui lòng chọn file hình ảnh");
-                return;
-            }
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onload = (e) => setImagePreview(e.target?.result as string);
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            // Validate file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Kích thước file không được vượt quá 5MB");
-                return;
-            }
-
-            // Validate file type
-            if (!file.type.startsWith("image/")) {
-                alert("Vui lòng chọn file hình ảnh");
-                return;
-            }
-
-            setLogoFile(file);
-
-            // Create preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setLogoPreview(e.target?.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleClearImages = () => {
-        setImageFile(null);
-        setImagePreview(null);
+        setThumbnailUrl(null);
+        form.setValue("thumbnailUrl", "");
+    };
+
+    const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            uploadImage(
+                { image: file },
+                () => {
+                    e.target.value = "";
+                },
+                (imageId, publicId, publicUrl) => {
+                    setThumbnailUrl(publicUrl);
+                    form.setValue("thumbnailUrl", publicUrl);
+                }
+            );
+        }
     };
 
     const handleFormSubmit = (data: PostFormData) => {
         setIsSubmitting(true);
         try {
-            if (imageFile !== null) {
-                const formData = {
-                    ...data,
-                    image: imageFile,
-                };
-                console.log("Post data:", formData);
-                handleClearImages();
-                form.reset();
-            }
+            console.log("Post data:", data);
+            handleClearImages();
+            form.reset();
         } catch (error) {
             console.error("Error creating post:", error);
         } finally {
@@ -174,55 +124,6 @@ export default function CreatePostForm() {
                     onSubmit={form.handleSubmit(handleFormSubmit)}
                     className="space-y-8"
                 >
-                    {/* Image Upload Section */}
-                    <motion.div variants={itemVariants} className="space-y-4">
-                        <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                            <ImageIcon className="h-5 w-5 text-[#248fca]" />
-                            Logo bệnh viện
-                        </Label>
-                        <div className="flex items-center gap-6">
-                            <div className="relative">
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleLogoUpload}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    id="logo-upload"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white transition-all duration-300"
-                                    asChild
-                                >
-                                    <label
-                                        htmlFor="logo-upload"
-                                        className="cursor-pointer"
-                                    >
-                                        <Upload className="h-5 w-5" />
-                                        Chọn logo
-                                    </label>
-                                </Button>
-                            </div>
-                            {logoPreview && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
-                                >
-                                    <img
-                                        src={logoPreview || "/placeholder.svg"}
-                                        alt="Logo preview"
-                                        className="w-full h-full object-cover"
-                                    />
-                                </motion.div>
-                            )}
-                        </div>
-                        <p className="text-sm text-gray-500">
-                            Chấp nhận file JPG, PNG. Kích thước tối đa 5MB.
-                        </p>
-                    </motion.div>
-
                     {/* Title */}
                     <motion.div variants={itemVariants}>
                         <FormField
@@ -249,6 +150,55 @@ export default function CreatePostForm() {
                         />
                     </motion.div>
 
+                    {/* Thumbnail Upload */}
+                    <motion.div variants={itemVariants}>
+                        <FormField
+                            control={form.control}
+                            name="thumbnailUrl"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                        Ảnh đại diện
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleThumbnailUpload}
+                                            disabled={isUploading}
+                                            className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
+                                        />
+                                    </FormControl>
+                                    {thumbnailUrl && (
+                                        <div className="mt-2">
+                                            <Image
+                                                src={thumbnailUrl}
+                                                alt="Thumbnail Preview"
+                                                width={200}
+                                                height={200}
+                                                className="rounded-lg object-cover"
+                                            />
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                Thumbnail URL:{" "}
+                                                <a
+                                                    href={thumbnailUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-500 underline"
+                                                >
+                                                    {thumbnailUrl}
+                                                </a>
+                                            </p>
+                                        </div>
+                                    )}
+                                    <FormMessage className="flex items-center gap-1">
+                                        <AlertCircle className="h-4 w-4" />
+                                    </FormMessage>
+                                </FormItem>
+                            )}
+                        />
+                    </motion.div>
+
                     {/* Content HTML with Tiptap */}
                     <motion.div variants={itemVariants}>
                         <FormField
@@ -263,9 +213,7 @@ export default function CreatePostForm() {
                                     <FormControl>
                                         <TiptapEditor
                                             content={field.value}
-                                            onUpdate={(content) => {
-                                                updateContentHtml(content);
-                                            }}
+                                            onUpdate={updateContentHtml}
                                         />
                                     </FormControl>
                                     <FormMessage className="flex items-center gap-1">
@@ -308,8 +256,7 @@ export default function CreatePostForm() {
                         variants={itemVariants}
                         className="flex justify-between gap-4 pt-8 border-t-2 border-gray-100"
                     >
-                        {/* Select Doctor */}
-                        <div className="">
+                        <div>
                             <Popover open={open} onOpenChange={setOpen}>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -372,70 +319,6 @@ export default function CreatePostForm() {
                                 </PopoverContent>
                             </Popover>
                         </div>
-                        {/* Select Category */}
-                        {/* <div className="">
-                            <Popover open={open} onOpenChange={setOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={open}
-                                        className="w-[200px] justify-between"
-                                    >
-                                        {value
-                                            ? frameworks.find(
-                                                  (framework) =>
-                                                      framework.value === value
-                                              )?.label
-                                            : "Select framework..."}
-                                        <ChevronsUpDown className="opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[200px] p-0">
-                                    <Command>
-                                        <CommandInput
-                                            placeholder="Search framework..."
-                                            className="h-9"
-                                        />
-                                        <CommandList>
-                                            <CommandEmpty>
-                                                No framework found.
-                                            </CommandEmpty>
-                                            <CommandGroup>
-                                                {frameworks.map((framework) => (
-                                                    <CommandItem
-                                                        key={framework.value}
-                                                        value={framework.value}
-                                                        onSelect={(
-                                                            currentValue
-                                                        ) => {
-                                                            setValue(
-                                                                currentValue ===
-                                                                    value
-                                                                    ? ""
-                                                                    : currentValue
-                                                            );
-                                                            setOpen(false);
-                                                        }}
-                                                    >
-                                                        {framework.label}
-                                                        <Check
-                                                            className={cn(
-                                                                "ml-auto",
-                                                                value ===
-                                                                    framework.value
-                                                                    ? "opacity-100"
-                                                                    : "opacity-0"
-                                                            )}
-                                                        />
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                        </div> */}
                     </motion.div>
 
                     {/* Submit Buttons */}
@@ -456,7 +339,7 @@ export default function CreatePostForm() {
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || isUploading}
                             className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
                         >
                             {isSubmitting ? (

@@ -1,0 +1,6 @@
+const MEDIA =
+    "https://media-doctor-cth2d9c9c0gwdfg6.southeastasia-01.azurewebsites.net/api/v1/media";
+
+export default {
+    MEDIA,
+};
