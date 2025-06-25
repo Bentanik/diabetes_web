@@ -29,10 +29,20 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/tiptap";
 import Image from "next/image";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
 
 const frameworks = [
     { value: "next.js", label: "Next.js" },
@@ -45,11 +55,17 @@ const frameworks = [
 interface PostFormData {
     title: string;
     content: string;
+    // Định nghĩa content cho danh mục
     contentHtml: string;
+    // Định dạng HTML cho nội dung
     references: string[];
+    // Mảng chứa các tham chiếu
     categoryId: string;
+    // ID của danh mục được chọn
     doctorId: string;
-    thumbnailUrl?: string; // Thêm trường cho thumbnail
+    // ID của bác sĩ được chọn
+    thumbnail_url?: string;
+    // URL của ảnh thumbnail, có thể không bắt buộc
 }
 
 export default function CreatePostForm() {
@@ -61,14 +77,27 @@ export default function CreatePostForm() {
             references: [],
             categoryId: "",
             doctorId: "",
-            thumbnailUrl: "",
+            thumbnail_url: "",
         },
     });
     const { onSubmit: uploadImage, isPending: isUploading } = useUploadImage();
+    const { getCategoriesApi } = useGetDataCategories();
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("");
+    const [data, setData] = useState<API.TGetCategories>([]);
+
+    useEffect(() => {
+        handleGetData();
+    }, []);
+
+    const handleGetData = async () => {
+        try {
+            const res = await getCategoriesApi();
+            setData(res?.value.data || []);
+        } catch (err) {}
+    };
 
     const updateContentHtml = (editorContent: string) => {
         form.setValue("contentHtml", editorContent);
@@ -76,7 +105,7 @@ export default function CreatePostForm() {
 
     const handleClearImages = () => {
         setThumbnailUrl(null);
-        form.setValue("thumbnailUrl", "");
+        form.setValue("thumbnail_url", "");
     };
 
     const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +118,7 @@ export default function CreatePostForm() {
                 },
                 (imageId, publicId, publicUrl) => {
                     setThumbnailUrl(publicUrl);
-                    form.setValue("thumbnailUrl", publicUrl);
+                    form.setValue("thumbnail_url", publicUrl);
                 }
             );
         }
@@ -154,8 +183,8 @@ export default function CreatePostForm() {
                     <motion.div variants={itemVariants}>
                         <FormField
                             control={form.control}
-                            name="thumbnailUrl"
-                            render={({ field }) => (
+                            name="thumbnail_url"
+                            render={() => (
                                 <FormItem>
                                     <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                         Ảnh đại diện
@@ -256,6 +285,52 @@ export default function CreatePostForm() {
                         variants={itemVariants}
                         className="flex justify-between gap-4 pt-8 border-t-2 border-gray-100"
                     >
+                        {/* Categories Select */}
+                        <FormField
+                            control={form.control}
+                            name="categoryId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Chọn danh mục</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                        disabled={data.length === 0} // Disable Select if no categories
+                                    >
+                                        <SelectTrigger className="w-[280px]">
+                                            <SelectValue placeholder="Chọn danh mục" />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-40">
+                                            <SelectGroup>
+                                                <SelectLabel>
+                                                    Danh mục
+                                                </SelectLabel>
+                                                {data.length > 0 ? (
+                                                    data.map((category) => (
+                                                        <SelectItem
+                                                            key={category.id}
+                                                            value={category.id}
+                                                        >
+                                                            {category.name}
+                                                        </SelectItem>
+                                                    ))
+                                                ) : (
+                                                    <SelectItem
+                                                        value="no-categories"
+                                                        disabled
+                                                    >
+                                                        Không có danh mục
+                                                    </SelectItem>
+                                                )}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Select Doctor */}
                         <div>
                             <Popover open={open} onOpenChange={setOpen}>
                                 <PopoverTrigger asChild>

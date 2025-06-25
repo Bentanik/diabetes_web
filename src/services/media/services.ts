@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 export default function services() {
     const { addToast } = useToast();
     return useMutation<
-        { value: API.TUploadImageResponse },
+        TResponseData<API.TUploadImageResponse>,
         TMeta,
         REQUEST.TUploadImage
     >({
@@ -14,10 +14,10 @@ export default function services() {
             formData.append("Image", data.image);
             return await UploadImageAsync(formData);
         },
-        onSuccess: () => {
+        onSuccess: (res) => {
             addToast({
                 type: "success",
-                description: "Tải ảnh thành công",
+                description: res.value.message,
                 duration: 5000,
             });
         },

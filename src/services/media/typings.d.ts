@@ -6,10 +6,8 @@ declare namespace REQUEST {
 
 declare namespace API {
     type TUploadImageResponse = {
-        data: {
-            imageId: string;
-            publicId: string;
-            publicUrl: string;
-        };
+        imageId: string;
+        publicId: string;
+        publicUrl: string;
     };
 }

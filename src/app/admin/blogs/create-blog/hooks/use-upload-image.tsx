@@ -67,9 +67,6 @@ export default function useUploadImage() {
         mutate(data, {
             onSuccess: (res) => {
                 const { imageId, publicId, publicUrl } = res.value.data;
-                console.log("Received imageId:", imageId); // Debug
-                console.log("Received publicId:", publicId); // Debug
-                console.log("Received URL:", publicUrl); // Debug
                 form.reset();
                 clearImage();
                 onImageUploaded(imageId, publicId, publicUrl);
