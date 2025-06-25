@@ -81,7 +81,7 @@ export default function CreatePostForm() {
         },
     });
     const { onSubmit: uploadImage, isPending: isUploading } = useUploadImage();
-    const { getCategoriesApi } = useGetDataCategories();
+    const { getCategoriesApi, isPending } = useGetDataCategories();
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [open, setOpen] = useState(false);
@@ -89,15 +89,16 @@ export default function CreatePostForm() {
     const [data, setData] = useState<API.TGetCategories>([]);
 
     useEffect(() => {
+        const handleGetData = async () => {
+            try {
+                const res = await getCategoriesApi();
+                setData(res?.value.data || []);
+            } catch (err) {
+                console.log(err);
+            }
+        };
         handleGetData();
-    }, []);
-
-    const handleGetData = async () => {
-        try {
-            const res = await getCategoriesApi();
-            setData(res?.value.data || []);
-        } catch (err) {}
-    };
+    }, [getCategoriesApi]);
 
     const updateContentHtml = (editorContent: string) => {
         form.setValue("contentHtml", editorContent);
@@ -295,7 +296,7 @@ export default function CreatePostForm() {
                                     <Select
                                         onValueChange={field.onChange}
                                         value={field.value}
-                                        disabled={data.length === 0} // Disable Select if no categories
+                                        disabled={isPending} // Disable Select if no categories
                                     >
                                         <SelectTrigger className="w-[280px]">
                                             <SelectValue placeholder="Chọn danh mục" />

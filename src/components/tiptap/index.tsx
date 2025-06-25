@@ -29,9 +29,9 @@ const TiptapToolbar = ({
     onDeleteImage: () => void;
 }) => {
     const { onSubmit, isPending } = useUploadImage();
-    const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
-        null
-    );
+    // const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
+    //     null
+    // );
 
     if (!editor) return null;
 
@@ -147,7 +147,7 @@ const TiptapToolbar = ({
                                         "HTML after setImage:",
                                         editor.getHTML()
                                     );
-                                    setUploadedImageUrl(publicUrl);
+                                    // setUploadedImageUrl(publicUrl);
                                 }
                             );
                         }
@@ -170,21 +170,6 @@ const TiptapToolbar = ({
                 </button>
             </div>
 
-            {/* Image URL */}
-            <button
-                type="button"
-                onClick={() => {
-                    const url = window.prompt("Enter image URL:");
-                    if (url) {
-                        editor.chain().focus().setImage({ src: url }).run();
-                        setUploadedImageUrl(url);
-                    }
-                }}
-                className="px-2 py-1 border border-gray-300 rounded text-sm bg-white"
-            >
-                🖼️ URL
-            </button>
-
             {/* Delete Image Button - Only visible when image is selected */}
             {selectedImagePos !== null && (
                 <button
@@ -201,9 +186,9 @@ const TiptapToolbar = ({
 
 const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
     const editorRef = useRef<Editor | null>(null);
-    const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
-        null
-    );
+    // const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
+    //     null
+    // );
     const [selectedImagePos, setSelectedImagePos] = useState<number | null>(
         null
     );
@@ -265,7 +250,6 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                         // Add selection to clicked image
                         imageElement.style.border = "2px solid #3b82f6";
                     }
-
                     return true;
                 }
                 // Clear selection if clicking elsewhere
@@ -385,12 +369,12 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
             {selectedImagePos !== null && (
                 <div className="p-2 bg-blue-50 border-t border-blue-200">
                     <p className="text-sm text-blue-600">
-                        ✅ Image selected - Click "Delete Selected Image" button
-                        to remove
+                        ✅ Image selected - Click &quot;Delete Selected
+                        Image&quot; button to remove
                     </p>
                 </div>
             )}
-            {uploadedImageUrl && (
+            {/* {uploadedImageUrl && (
                 <div className="p-2 bg-gray-50 border-t border-gray-200">
                     <p className="text-sm text-gray-600">
                         Image URL:{" "}
@@ -404,7 +388,7 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                         </a>
                     </p>
                 </div>
-            )}
+            )} */}
         </div>
     );
 };

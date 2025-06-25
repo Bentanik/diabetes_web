@@ -2,7 +2,7 @@ import useToast from "@/hooks/use-toast";
 import { UploadImageAsync } from "@/services/media/api-services";
 import { useMutation } from "@tanstack/react-query";
 
-export default function services() {
+export default function useUploadImageService() {
     const { addToast } = useToast();
     return useMutation<
         TResponseData<API.TUploadImageResponse>,

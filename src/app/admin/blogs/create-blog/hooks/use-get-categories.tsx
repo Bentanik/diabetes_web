@@ -20,15 +20,16 @@ export default function useGetDataCategories() {
                 });
                 return null;
             }
-        } catch (error) {
+        } catch (err) {
             addToast({
                 type: "error",
                 description: "An error occurred while fetching applications",
             });
+            console.log(err);
             return null;
         } finally {
             setPending(false);
         }
     };
-    return { getCategoriesApi };
+    return { getCategoriesApi, isPending };
 }
