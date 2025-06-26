@@ -17,7 +17,7 @@ export default function useUploadImageService() {
         onSuccess: (res) => {
             addToast({
                 type: "success",
-                description: res.value.message,
+                description: res.message,
                 duration: 5000,
             });
         },

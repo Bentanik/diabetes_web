@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -10,7 +10,9 @@ import TextStyle from "@tiptap/extension-text-style";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
+import { v4 as uuidv4 } from "uuid"; // For generating unique IDs
 
 interface TiptapEditorProps {
     content: string;
@@ -19,25 +21,176 @@ interface TiptapEditorProps {
 
 let editorInstance: Editor | null = null;
 
-const TiptapToolbar = ({
-    editor,
-    selectedImagePos,
-    onDeleteImage,
-}: {
-    editor: Editor | null;
-    selectedImagePos: number | null;
-    onDeleteImage: () => void;
-}) => {
+// Class to manage image deletion tracking
+class ImageDeleteTracker {
+    private uploadedImages: Map<
+        string,
+        { url: string; element?: HTMLElement }
+    > = new Map();
+    private observer: MutationObserver | null = null;
+    private editorContainer: HTMLElement | null = null;
+
+    constructor() {
+        this.initObserver();
+    }
+
+    private initObserver() {
+        this.observer = new MutationObserver((mutations) => {
+            const deletedImageIds: string[] = [];
+
+            mutations.forEach((mutation) => {
+                if (mutation.type === "childList") {
+                    mutation.removedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            this.handleRemovedNode(
+                                node as HTMLElement,
+                                deletedImageIds
+                            );
+                        }
+                    });
+                }
+            });
+
+            if (deletedImageIds.length > 0) {
+                console.log(
+                    "🗑️ Image deleted from editor:",
+                    deletedImageIds.join(", ")
+                );
+            }
+        });
+    }
+
+    private handleRemovedNode(node: HTMLElement, deletedImageIds: string[]) {
+        const images =
+            node.tagName === "IMG" ? [node] : node.querySelectorAll("img");
+        images.forEach((img) => {
+            const imageId = img.getAttribute("title");
+            if (imageId && this.uploadedImages.has(imageId)) {
+                deletedImageIds.push(imageId);
+                this.uploadedImages.delete(imageId);
+            }
+        });
+    }
+
+    public setEditorContainer(container: HTMLElement) {
+        if (this.editorContainer) {
+            this.observer?.disconnect();
+        }
+        this.editorContainer = container;
+        if (this.observer && container) {
+            this.observer.observe(container, {
+                childList: true,
+                subtree: true,
+            });
+        }
+    }
+
+    public addImage(imageId: string, imageUrl: string, element?: HTMLElement) {
+        this.uploadedImages.set(imageId, { url: imageUrl, element });
+        console.log("📸 Image added to tracker:", {
+            imageId,
+            imageUrl,
+            totalTracked: this.uploadedImages.size,
+        });
+    }
+
+    public cleanup() {
+        this.observer?.disconnect();
+        this.uploadedImages.clear();
+    }
+}
+
+// Create global instance for ImageDeleteTracker
+const imageTracker = new ImageDeleteTracker();
+
+const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
     const { onSubmit, isPending } = useUploadImage();
-    // const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
-    //     null
-    // );
 
     if (!editor) return null;
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Generate a unique ID for the placeholder
+            const placeholderId = uuidv4();
+            // Insert placeholder text with a unique identifier
+            editor
+                .chain()
+                .focus()
+                .insertContent({
+                    type: "paragraph",
+                    content: [
+                        {
+                            type: "text",
+                            text: `Uploading image (${placeholderId})...`,
+                            marks: [
+                                {
+                                    type: "textStyle",
+                                },
+                            ],
+                        },
+                    ],
+                })
+                .run();
+
+            onSubmit(
+                { image: file },
+                () => {
+                    e.target.value = "";
+                },
+                (imageId, publicId, publicUrl) => {
+                    setTimeout(() => {
+                        let targetPos: number | null = null;
+                        let textLength = 0;
+
+                        // Tìm đoạn text chứa placeholderId trong document thực
+                        editor.state.doc.descendants((node, pos) => {
+                            if (
+                                node.isText &&
+                                node.text?.includes(placeholderId)
+                            ) {
+                                targetPos = pos;
+                                textLength = node.text.length;
+                                return false; // dừng duyệt
+                            }
+                            return true;
+                        });
+
+                        if (targetPos !== null) {
+                            const transaction = editor.state.tr;
+
+                            // Xoá đoạn văn bản chứa placeholder và chèn ảnh vào cùng vị trí
+                            transaction.replaceWith(
+                                targetPos,
+                                targetPos + textLength,
+                                editor.schema.nodes.image.create({
+                                    src: publicUrl,
+                                    title: imageId,
+                                })
+                            );
+
+                            editor.view.dispatch(transaction);
+
+                            imageTracker.addImage(imageId, publicUrl);
+                            console.log(
+                                "✅ Image uploaded successfully. URL:",
+                                publicUrl
+                            );
+                            console.log("Image ID:", imageId);
+                        } else {
+                            console.warn(
+                                "⚠️ Could not find placeholder with ID:",
+                                placeholderId
+                            );
+                        }
+                    }, 0);
+                }
+            );
+        }
+    };
+
     return (
-        <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50 relative">
-            {/* Headers */}
+        <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50">
             <select
                 value={
                     editor.isActive("heading")
@@ -65,7 +218,6 @@ const TiptapToolbar = ({
                 <option value="3">Heading 3</option>
             </select>
 
-            {/* Text formatting */}
             <button
                 type="button"
                 onClick={() => editor.chain().focus().toggleBold().run()}
@@ -103,7 +255,6 @@ const TiptapToolbar = ({
                 S
             </button>
 
-            {/* Link */}
             <button
                 type="button"
                 onClick={() => {
@@ -119,39 +270,11 @@ const TiptapToolbar = ({
                 Link
             </button>
 
-            {/* Image Upload */}
             <div className="relative">
                 <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                            onSubmit(
-                                { image: file },
-                                () => {
-                                    e.target.value = "";
-                                },
-                                (imageId, publicId, publicUrl) => {
-                                    console.log("Uploaded URL:", publicUrl);
-                                    console.log("Received imageId:", imageId);
-                                    editor
-                                        .chain()
-                                        .focus()
-                                        .setImage({
-                                            src: publicUrl,
-                                            title: imageId,
-                                        })
-                                        .run();
-                                    console.log(
-                                        "HTML after setImage:",
-                                        editor.getHTML()
-                                    );
-                                    // setUploadedImageUrl(publicUrl);
-                                }
-                            );
-                        }
-                    }}
+                    onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     id="editor-image-upload"
                     disabled={isPending}
@@ -169,37 +292,18 @@ const TiptapToolbar = ({
                     {isPending ? "Đang tải..." : "📷 Image"}
                 </button>
             </div>
-
-            {/* Delete Image Button - Only visible when image is selected */}
-            {selectedImagePos !== null && (
-                <button
-                    type="button"
-                    onClick={onDeleteImage}
-                    className="px-2 py-1 border border-red-300 rounded text-sm bg-red-100 hover:bg-red-200 text-red-600"
-                >
-                    🗑️ Delete Selected Image
-                </button>
-            )}
         </div>
     );
 };
 
 const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
     const editorRef = useRef<Editor | null>(null);
-    // const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(
-    //     null
-    // );
-    const [selectedImagePos, setSelectedImagePos] = useState<number | null>(
-        null
-    );
 
     const editor = useEditor({
         extensions: [
             StarterKit,
             Underline,
-            TextAlign.configure({
-                types: ["heading", "paragraph"],
-            }),
+            TextAlign.configure({ types: ["heading", "paragraph"] }),
             TextStyle,
             Color,
             Highlight.configure({ multicolor: true }),
@@ -213,14 +317,16 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                 inline: true,
                 allowBase64: false,
                 HTMLAttributes: {
-                    class: "max-w-full h-[500px] object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-300 transition-colors",
+                    class: "max-w-full h-[500px] object-cover rounded-lg",
                 },
+            }),
+            Placeholder.configure({
+                placeholder: "Write something...",
             }),
         ],
         content,
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
-            console.log(html);
             onUpdate(html);
             editorInstance = editor;
         },
@@ -229,97 +335,8 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
             attributes: {
                 class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4",
             },
-            handleClickOn(view, pos, node, nodePos, event) {
-                if (node.type.name === "image") {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    const publicUrl = node.attrs.src;
-                    const imageId = node.attrs.title;
-                    console.log("Clicked image publicUrl:", publicUrl);
-                    console.log("Clicked image imageId:", imageId);
-                    setSelectedImagePos(nodePos);
-
-                    // Add visual selection to the image
-                    const imageElement = event.target as HTMLImageElement;
-                    if (imageElement && imageElement.tagName === "IMG") {
-                        // Remove selection from other images
-                        const allImages = view.dom.querySelectorAll("img");
-                        allImages.forEach((img) => {
-                            img.style.border = "2px solid transparent";
-                        });
-                        // Add selection to clicked image
-                        imageElement.style.border = "2px solid #3b82f6";
-                    }
-                    return true;
-                }
-                // Clear selection if clicking elsewhere
-                setSelectedImagePos(null);
-                const allImages = view.dom.querySelectorAll("img");
-                allImages.forEach((img) => {
-                    img.style.border = "2px solid transparent";
-                });
-                return false;
-            },
-            handleKeyDown(view, event) {
-                const { selection } = view.state;
-                const node = view.state.doc.nodeAt(selection.from);
-
-                // Prevent all keyboard deletion of images
-                if (event.key === "Backspace" || event.key === "Delete") {
-                    // Check if cursor is near an image or image is selected
-                    if (node && node.type.name === "image") {
-                        event.preventDefault();
-                        return true;
-                    }
-
-                    // Check if the previous node is an image (for backspace)
-                    if (event.key === "Backspace" && selection.from > 0) {
-                        const prevNode = view.state.doc.nodeAt(
-                            selection.from - 1
-                        );
-                        if (prevNode && prevNode.type.name === "image") {
-                            event.preventDefault();
-                            return true;
-                        }
-                    }
-
-                    // Check if the next node is an image (for delete)
-                    if (event.key === "Delete") {
-                        const nextNode = view.state.doc.nodeAt(
-                            selection.from + 1
-                        );
-                        if (nextNode && nextNode.type.name === "image") {
-                            event.preventDefault();
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            },
         },
     });
-
-    const handleDeleteImage = () => {
-        if (editor && selectedImagePos !== null) {
-            // Clear visual selection first
-            const allImages = editor.view.dom.querySelectorAll("img");
-            allImages.forEach((img) => {
-                (img as HTMLImageElement).style.border =
-                    "2px solid transparent";
-            });
-
-            // Delete the image
-            editor
-                .chain()
-                .focus()
-                .setNodeSelection(selectedImagePos)
-                .deleteSelection()
-                .run();
-
-            setSelectedImagePos(null);
-        }
-    };
 
     useEffect(() => {
         if (editor && content !== editor.getHTML()) {
@@ -331,72 +348,36 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
         if (editor) {
             editorRef.current = editor;
             editorInstance = editor;
+            const editorContainer = editor.view.dom;
+            imageTracker.setEditorContainer(editorContainer);
         }
     }, [editor]);
 
-    // Clear selection when clicking outside the editor
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (editor && !editor.view.dom.contains(event.target as Node)) {
-                setSelectedImagePos(null);
-                const allImages = editor.view.dom.querySelectorAll("img");
-                allImages.forEach((img) => {
-                    (img as HTMLImageElement).style.border =
-                        "2px solid transparent";
-                });
-            }
-        };
-
-        document.addEventListener("click", handleClickOutside);
         return () => {
-            document.removeEventListener("click", handleClickOutside);
+            imageTracker.cleanup();
         };
-    }, [editor]);
+    }, []);
 
     if (!editor) return null;
 
     return (
         <div className="border-2 border-gray-200 rounded-lg overflow-hidden focus-within:border-[#248fca] transition-colors">
-            <TiptapToolbar
-                editor={editor}
-                selectedImagePos={selectedImagePos}
-                onDeleteImage={handleDeleteImage}
-            />
+            <TiptapToolbar editor={editor} />
             <EditorContent
                 editor={editor}
                 className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[300px] max-h-[500px] overflow-y-auto"
             />
-            {selectedImagePos !== null && (
-                <div className="p-2 bg-blue-50 border-t border-blue-200">
-                    <p className="text-sm text-blue-600">
-                        ✅ Image selected - Click &quot;Delete Selected
-                        Image&quot; button to remove
-                    </p>
-                </div>
-            )}
-            {/* {uploadedImageUrl && (
-                <div className="p-2 bg-gray-50 border-t border-gray-200">
-                    <p className="text-sm text-gray-600">
-                        Image URL:{" "}
-                        <a
-                            href={uploadedImageUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 underline"
-                        >
-                            {uploadedImageUrl}
-                        </a>
-                    </p>
-                </div>
-            )} */}
         </div>
     );
 };
 
 const TiptapEditor = TiptapEditorComponent as React.FC<TiptapEditorProps> & {
     getEditor: () => Editor | null;
+    getImageTracker: () => typeof imageTracker;
 };
 
 TiptapEditor.getEditor = () => editorInstance;
+TiptapEditor.getImageTracker = () => imageTracker;
 
 export default TiptapEditor;

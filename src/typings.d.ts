@@ -19,11 +19,9 @@ declare type TResponse = {
 };
 
 declare type TResponseData<T = object> = {
-    value: {
-        code: string;
-        message: string;
-        data: T;
-    };
+    code: string;
+    message: string;
+    data: T;
     isSuccess: boolean;
     isFailure: boolean;
     error: {

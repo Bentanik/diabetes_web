@@ -55,17 +55,11 @@ const frameworks = [
 interface PostFormData {
     title: string;
     content: string;
-    // Định nghĩa content cho danh mục
     contentHtml: string;
-    // Định dạng HTML cho nội dung
     references: string[];
-    // Mảng chứa các tham chiếu
     categoryId: string;
-    // ID của danh mục được chọn
     doctorId: string;
-    // ID của bác sĩ được chọn
     thumbnail_url?: string;
-    // URL của ảnh thumbnail, có thể không bắt buộc
 }
 
 export default function CreatePostForm() {
@@ -92,13 +86,13 @@ export default function CreatePostForm() {
         const handleGetData = async () => {
             try {
                 const res = await getCategoriesApi();
-                setData(res?.value.data || []);
+                setData(res?.data || []);
             } catch (err) {
                 console.log(err);
             }
         };
         handleGetData();
-    }, [getCategoriesApi]);
+    }, []);
 
     const updateContentHtml = (editorContent: string) => {
         form.setValue("contentHtml", editorContent);

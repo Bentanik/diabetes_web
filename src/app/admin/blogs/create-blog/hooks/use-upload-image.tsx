@@ -35,10 +35,12 @@ export default function useUploadImage() {
         mutationFn: async (data: ImageFormData) => {
             const formData = new FormData();
             formData.append("Image", data.image);
-            return await UploadImageAsync(formData);
+            const response = await UploadImageAsync(formData);
+            console.log("Raw response from UploadImageAsync:", response); // Log raw response
+            return response;
         },
         onSuccess: (res) => {
-            console.log("Upload image response:", res);
+            console.log("Upload image response in onSuccess:", res);
             addToast({
                 type: "success",
                 description: "Tải ảnh lên thành công",
@@ -46,10 +48,12 @@ export default function useUploadImage() {
             });
         },
         onError: (error) => {
-            console.error("Upload error:", error);
+            console.error("Upload error details:", error);
             addToast({
                 type: "error",
-                description: "Failed to upload image: " + error.message,
+                description:
+                    "Failed to upload image: " +
+                    (error.message || "Unknown error"),
                 duration: 5000,
             });
         },
@@ -66,16 +70,39 @@ export default function useUploadImage() {
     ) => {
         mutate(data, {
             onSuccess: (res) => {
-                const { imageId, publicId, publicUrl } = res.value.data;
-                form.reset();
-                clearImage();
-                onImageUploaded(imageId, publicId, publicUrl);
+                // Validate response data
+                if (
+                    res &&
+                    res.data &&
+                    res.data.imageId &&
+                    res.data.publicId &&
+                    res.data.publicUrl
+                ) {
+                    const { imageId, publicId, publicUrl } = res.data;
+                    console.log("Validated upload data:", {
+                        imageId,
+                        publicId,
+                        publicUrl,
+                    });
+                    onImageUploaded(imageId, publicId, publicUrl); // Call callback first
+                    form.reset();
+                    clearImage();
+                } else {
+                    console.error("Invalid response data:", res);
+                    addToast({
+                        type: "error",
+                        description: "Dữ liệu phản hồi không hợp lệ",
+                        duration: 5000,
+                    });
+                }
             },
             onError: (error) => {
-                console.error("Mutation error:", error);
+                console.error("Mutation error details:", error);
                 addToast({
                     type: "error",
-                    description: "Failed to upload image: " + error.message,
+                    description:
+                        "Failed to upload image: " +
+                        (error.message || "Unknown error"),
                     duration: 5000,
                 });
             },
