@@ -13,6 +13,7 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
 import { v4 as uuidv4 } from "uuid"; // For generating unique IDs
+import useDeleteImage from "@/app/admin/blogs/create-blog/hooks/use-delete-image";
 
 interface TiptapEditorProps {
     content: string;
@@ -29,6 +30,11 @@ class ImageDeleteTracker {
     > = new Map();
     private observer: MutationObserver | null = null;
     private editorContainer: HTMLElement | null = null;
+    private deleteImageFn: ((ids: string[]) => void) | null = null;
+
+    public setDeleteImageFn(fn: (ids: string[]) => void) {
+        this.deleteImageFn = fn;
+    }
 
     constructor() {
         this.initObserver();
@@ -56,6 +62,9 @@ class ImageDeleteTracker {
                     "🗑️ Image deleted from editor:",
                     deletedImageIds.join(", ")
                 );
+                if (this.deleteImageFn) {
+                    this.deleteImageFn(deletedImageIds);
+                }
             }
         });
     }
@@ -105,6 +114,15 @@ const imageTracker = new ImageDeleteTracker();
 
 const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
     const { onSubmit, isPending } = useUploadImage();
+    const { onSubmitDelete } = useDeleteImage();
+
+    const handleDeleteImages = (ids: string[]) => {
+        onSubmitDelete(ids, () => {});
+    };
+
+    useEffect(() => {
+        imageTracker.setDeleteImageFn(handleDeleteImages);
+    }, []);
 
     if (!editor) return null;
 

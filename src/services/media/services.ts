@@ -1,5 +1,8 @@
 import useToast from "@/hooks/use-toast";
-import { UploadImageAsync } from "@/services/media/api-services";
+import {
+    deleteImageAsync,
+    uploadImageAsync,
+} from "@/services/media/api-services";
 import { useMutation } from "@tanstack/react-query";
 
 export default function useUploadImageService() {
@@ -12,7 +15,7 @@ export default function useUploadImageService() {
         mutationFn: async (data: REQUEST.TUploadImage) => {
             const formData = new FormData();
             formData.append("Image", data.image);
-            return await UploadImageAsync(formData);
+            return await uploadImageAsync(formData);
         },
         onSuccess: (res) => {
             addToast({
@@ -23,3 +26,27 @@ export default function useUploadImageService() {
         },
     });
 }
+
+export const useDeleteImageService = () => {
+    const { addToast } = useToast();
+    return useMutation<TResponse, TMeta, REQUEST.TDeleteImage>({
+        mutationFn: deleteImageAsync,
+        onSuccess: (data) => {
+            addToast(
+                {
+                    type: "success",
+                    description: data.value.message,
+                    duration: 5000,
+                },
+                false
+            );
+        },
+        onError: () => {
+            addToast({
+                type: "error",
+                description: "Please try again!",
+                duration: 5000,
+            });
+        },
+    });
+};

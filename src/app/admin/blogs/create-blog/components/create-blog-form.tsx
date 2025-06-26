@@ -6,7 +6,14 @@ import { FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, ChevronsUpDown } from "lucide-react";
+import {
+    Check,
+    ChevronsUpDown,
+    Upload,
+    ImageIcon,
+    Stethoscope,
+    ListTree,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Command,
@@ -44,12 +51,32 @@ import {
 } from "@/components/ui/select";
 import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
 
-const frameworks = [
-    { value: "next.js", label: "Next.js" },
-    { value: "sveltekit", label: "SvelteKit" },
-    { value: "nuxt.js", label: "Nuxt.js" },
-    { value: "remix", label: "Remix" },
-    { value: "astro", label: "Astro" },
+const doctors = [
+    {
+        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        value: "tanphat",
+        label: "Bs.Lâm Tấn Phát",
+    },
+    {
+        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        value: "tanphat1",
+        label: "Bs.Lâm Tấn Phát1",
+    },
+    {
+        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        value: "tanphat2",
+        label: "Bs.Lâm Tấn Phát2",
+    },
+    {
+        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        value: "tanphat3",
+        label: "Bs.Lâm Tấn Phát3",
+    },
+    {
+        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        value: "tanphat4",
+        label: "Bs.Lâm Tấn Phát4",
+    },
 ];
 
 interface PostFormData {
@@ -81,6 +108,8 @@ export default function CreatePostForm() {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("");
     const [data, setData] = useState<API.TGetCategories>([]);
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
     useEffect(() => {
         const handleGetData = async () => {
@@ -103,19 +132,29 @@ export default function CreatePostForm() {
         form.setValue("thumbnail_url", "");
     };
 
-    const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
         if (file) {
-            uploadImage(
-                { image: file },
-                () => {
-                    e.target.value = "";
-                },
-                (imageId, publicId, publicUrl) => {
-                    setThumbnailUrl(publicUrl);
-                    form.setValue("thumbnail_url", publicUrl);
-                }
-            );
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Kích thước file không được vượt quá 5MB");
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                alert("Vui lòng chọn file hình ảnh");
+                return;
+            }
+
+            setLogoFile(file);
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setLogoPreview(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -148,6 +187,207 @@ export default function CreatePostForm() {
                     onSubmit={form.handleSubmit(handleFormSubmit)}
                     className="space-y-8"
                 >
+                    <motion.div variants={itemVariants} className="space-y-4">
+                        <div className="flex justify-between">
+                            <div>
+                                <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                    <ImageIcon className="h-5 w-5 text-[#248fca]" />
+                                    Chọn ảnh đại diện
+                                </Label>
+                                <div className="flex items-center gap-6 mt-2">
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleLogoUpload}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            id="logo-upload"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white transition-all duration-300"
+                                            asChild
+                                        >
+                                            <label
+                                                htmlFor="logo-upload"
+                                                className="cursor-pointer"
+                                            >
+                                                <Upload className="h-5 w-5" />
+                                                Chọn ảnh
+                                            </label>
+                                        </Button>
+                                    </div>
+                                    {logoPreview && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
+                                        >
+                                            <img
+                                                src={
+                                                    logoPreview ||
+                                                    "/placeholder.svg"
+                                                }
+                                                alt="Logo preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </motion.div>
+                                    )}
+                                </div>
+                                <p className="text-sm text-gray-500 mt-2">
+                                    Chấp nhận file JPG, PNG. Kích thước tối đa
+                                    5MB.
+                                </p>
+                            </div>
+                            {/* Categories Select */}
+                            <div>
+                                <FormField
+                                    control={form.control}
+                                    name="categoryId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                                <ListTree className="h-5 w-5 text-[#248fca]" />
+                                                Chọn thể loại
+                                            </Label>
+                                            <div className="mt-2">
+                                                <Select
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
+                                                    value={field.value}
+                                                    disabled={isPending} // Disable Select if no categories
+                                                >
+                                                    <SelectTrigger className="w-[280px]">
+                                                        <SelectValue placeholder="Chọn danh mục" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="max-h-40">
+                                                        <SelectGroup>
+                                                            <SelectLabel>
+                                                                Danh mục
+                                                            </SelectLabel>
+                                                            {data.length > 0 ? (
+                                                                data.map(
+                                                                    (
+                                                                        category
+                                                                    ) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                category.id
+                                                                            }
+                                                                            value={
+                                                                                category.id
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                category.name
+                                                                            }
+                                                                        </SelectItem>
+                                                                    )
+                                                                )
+                                                            ) : (
+                                                                <SelectItem
+                                                                    value="no-categories"
+                                                                    disabled
+                                                                >
+                                                                    Không có
+                                                                    danh mục
+                                                                </SelectItem>
+                                                            )}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            {/* Select Doctor */}
+                            <div>
+                                <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                    <Stethoscope className="h-5 w-5 text-[#248fca]" />
+                                    Chọn bác sĩ
+                                </Label>
+                                <div className="mt-4">
+                                    <Popover open={open} onOpenChange={setOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={open}
+                                                className="w-[200px] justify-between"
+                                            >
+                                                {value
+                                                    ? doctors.find(
+                                                          (doctor) =>
+                                                              doctor.value ===
+                                                              value
+                                                      )?.label
+                                                    : "Lựa chọn bác sĩ"}
+                                                <ChevronsUpDown className="opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[200px] p-0">
+                                            <Command>
+                                                <CommandInput
+                                                    placeholder="Search framework..."
+                                                    className="h-9"
+                                                />
+                                                <CommandList>
+                                                    <CommandEmpty>
+                                                        No framework found.
+                                                    </CommandEmpty>
+                                                    <CommandGroup>
+                                                        {doctors.map(
+                                                            (doctor) => (
+                                                                <CommandItem
+                                                                    key={
+                                                                        doctor.value
+                                                                    }
+                                                                    value={
+                                                                        doctor.value
+                                                                    }
+                                                                    onSelect={(
+                                                                        currentValue
+                                                                    ) => {
+                                                                        setValue(
+                                                                            currentValue ===
+                                                                                value
+                                                                                ? ""
+                                                                                : currentValue
+                                                                        );
+                                                                        setOpen(
+                                                                            false
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        doctor.label
+                                                                    }
+                                                                    <Check
+                                                                        className={cn(
+                                                                            "ml-auto",
+                                                                            value ===
+                                                                                doctor.value
+                                                                                ? "opacity-100"
+                                                                                : "opacity-0"
+                                                                        )}
+                                                                    />
+                                                                </CommandItem>
+                                                            )
+                                                        )}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
                     {/* Title */}
                     <motion.div variants={itemVariants}>
                         <FormField
@@ -166,55 +406,6 @@ export default function CreatePostForm() {
                                             onChange={field.onChange}
                                         />
                                     </FormControl>
-                                    <FormMessage className="flex items-center gap-1">
-                                        <AlertCircle className="h-4 w-4" />
-                                    </FormMessage>
-                                </FormItem>
-                            )}
-                        />
-                    </motion.div>
-
-                    {/* Thumbnail Upload */}
-                    <motion.div variants={itemVariants}>
-                        <FormField
-                            control={form.control}
-                            name="thumbnail_url"
-                            render={() => (
-                                <FormItem>
-                                    <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                        Ảnh đại diện
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleThumbnailUpload}
-                                            disabled={isUploading}
-                                            className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
-                                        />
-                                    </FormControl>
-                                    {thumbnailUrl && (
-                                        <div className="mt-2">
-                                            <Image
-                                                src={thumbnailUrl}
-                                                alt="Thumbnail Preview"
-                                                width={200}
-                                                height={200}
-                                                className="rounded-lg object-cover"
-                                            />
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                Thumbnail URL:{" "}
-                                                <a
-                                                    href={thumbnailUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-500 underline"
-                                                >
-                                                    {thumbnailUrl}
-                                                </a>
-                                            </p>
-                                        </div>
-                                    )}
                                     <FormMessage className="flex items-center gap-1">
                                         <AlertCircle className="h-4 w-4" />
                                     </FormMessage>
@@ -273,122 +464,6 @@ export default function CreatePostForm() {
                         <p className="text-sm text-gray-500">
                             Xem trước nội dung như khi bài blog được đăng.
                         </p>
-                    </motion.div>
-
-                    {/* Select Doctor and Category */}
-                    <motion.div
-                        variants={itemVariants}
-                        className="flex justify-between gap-4 pt-8 border-t-2 border-gray-100"
-                    >
-                        {/* Categories Select */}
-                        <FormField
-                            control={form.control}
-                            name="categoryId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Chọn danh mục</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                        disabled={isPending} // Disable Select if no categories
-                                    >
-                                        <SelectTrigger className="w-[280px]">
-                                            <SelectValue placeholder="Chọn danh mục" />
-                                        </SelectTrigger>
-                                        <SelectContent className="max-h-40">
-                                            <SelectGroup>
-                                                <SelectLabel>
-                                                    Danh mục
-                                                </SelectLabel>
-                                                {data.length > 0 ? (
-                                                    data.map((category) => (
-                                                        <SelectItem
-                                                            key={category.id}
-                                                            value={category.id}
-                                                        >
-                                                            {category.name}
-                                                        </SelectItem>
-                                                    ))
-                                                ) : (
-                                                    <SelectItem
-                                                        value="no-categories"
-                                                        disabled
-                                                    >
-                                                        Không có danh mục
-                                                    </SelectItem>
-                                                )}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* Select Doctor */}
-                        <div>
-                            <Popover open={open} onOpenChange={setOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={open}
-                                        className="w-[200px] justify-between"
-                                    >
-                                        {value
-                                            ? frameworks.find(
-                                                  (framework) =>
-                                                      framework.value === value
-                                              )?.label
-                                            : "Select framework..."}
-                                        <ChevronsUpDown className="opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[200px] p-0">
-                                    <Command>
-                                        <CommandInput
-                                            placeholder="Search framework..."
-                                            className="h-9"
-                                        />
-                                        <CommandList>
-                                            <CommandEmpty>
-                                                No framework found.
-                                            </CommandEmpty>
-                                            <CommandGroup>
-                                                {frameworks.map((framework) => (
-                                                    <CommandItem
-                                                        key={framework.value}
-                                                        value={framework.value}
-                                                        onSelect={(
-                                                            currentValue
-                                                        ) => {
-                                                            setValue(
-                                                                currentValue ===
-                                                                    value
-                                                                    ? ""
-                                                                    : currentValue
-                                                            );
-                                                            setOpen(false);
-                                                        }}
-                                                    >
-                                                        {framework.label}
-                                                        <Check
-                                                            className={cn(
-                                                                "ml-auto",
-                                                                value ===
-                                                                    framework.value
-                                                                    ? "opacity-100"
-                                                                    : "opacity-0"
-                                                            )}
-                                                        />
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                        </div>
                     </motion.div>
 
                     {/* Submit Buttons */}

@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UploadImageAsync } from "@/services/media/api-services";
+import { uploadImageAsync } from "@/services/media/api-services";
 import useToast from "@/hooks/use-toast";
 
 export const imageSchema = z.object({
@@ -35,7 +35,7 @@ export default function useUploadImage() {
         mutationFn: async (data: ImageFormData) => {
             const formData = new FormData();
             formData.append("Image", data.image);
-            const response = await UploadImageAsync(formData);
+            const response = await uploadImageAsync(formData);
             console.log("Raw response from UploadImageAsync:", response); // Log raw response
             return response;
         },

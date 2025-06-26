@@ -2,6 +2,8 @@ declare namespace REQUEST {
     type TUploadImage = {
         image: File;
     };
+
+    type TDeleteImage = string[];
 }
 
 declare namespace API {
