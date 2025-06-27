@@ -51,6 +51,33 @@ import {
 } from "@/components/ui/select";
 import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
 
+const extractTextContent = (html: string): string => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    // Loại bỏ tất cả thẻ <img>
+    const images = doc.querySelectorAll("img");
+    images.forEach((img) => img.remove());
+
+    // Thay thế thẻ <br> bằng dấu phẩy và một khoảng trắng
+    const brs = doc.querySelectorAll("br");
+    brs.forEach((br) => {
+        br.replaceWith(", ");
+    });
+
+    // Lấy tất cả nội dung văn bản, loại bỏ khoảng trắng thừa và nối bằng dấu phẩy
+    const textNodes: string[] = []; // Explicitly declare as string[]
+    const walk = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
+            textNodes.push(node.textContent.trim());
+        }
+        node.childNodes.forEach((child) => walk(child));
+    };
+    walk(doc.body);
+
+    // Lọc các chuỗi rỗng và nối bằng dấu phẩy
+    return textNodes.filter((text) => text !== "").join(", ");
+};
 const doctors = [
     {
         Id: "019771dd-87ee-75a9-513c-1e6200629b79",
@@ -110,6 +137,7 @@ export default function CreatePostForm() {
     const [data, setData] = useState<API.TGetCategories>([]);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [imageIds, setImageIds] = useState<string[]>([]);
 
     useEffect(() => {
         const handleGetData = async () => {
@@ -123,13 +151,37 @@ export default function CreatePostForm() {
         handleGetData();
     }, []);
 
+    const extractImageIds = (html: string): string[] => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const images = doc.querySelectorAll("img");
+        const imageIds: string[] = [];
+        images.forEach((img) => {
+            const imageId = img.getAttribute("title");
+            if (imageId) {
+                imageIds.push(imageId);
+            }
+        });
+        return imageIds;
+    };
+
     const updateContentHtml = (editorContent: string) => {
         form.setValue("contentHtml", editorContent);
+        // Cập nhật trường content từ contentHtml
+        const textContent = extractTextContent(editorContent);
+        console.log(textContent);
+        form.setValue("content", textContent);
+        // Cập nhật danh sách imageId từ contentHtml
+        const newImageIds = extractImageIds(editorContent);
+        setImageIds(newImageIds);
+        console.log("📸 Image IDs:", newImageIds);
     };
 
     const handleClearImages = () => {
         setThumbnailUrl(null);
         form.setValue("thumbnail_url", "");
+        setImageIds([]);
+        console.log("📸 Image IDs cleared:", []);
     };
 
     const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

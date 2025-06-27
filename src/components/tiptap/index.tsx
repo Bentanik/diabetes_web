@@ -12,7 +12,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
-import { v4 as uuidv4 } from "uuid"; // For generating unique IDs
+import { v4 as uuidv4 } from "uuid";
 import useDeleteImage from "@/app/admin/blogs/create-blog/hooks/use-delete-image";
 
 interface TiptapEditorProps {
@@ -28,9 +28,11 @@ class ImageDeleteTracker {
         string,
         { url: string; element?: HTMLElement }
     > = new Map();
+    private deletedImageIds: Set<string> = new Set(); // Track deleted image IDs
     private observer: MutationObserver | null = null;
     private editorContainer: HTMLElement | null = null;
     private deleteImageFn: ((ids: string[]) => void) | null = null;
+    private preventedUndoSteps: Set<string> = new Set(); // Track prevented undo steps
 
     public setDeleteImageFn(fn: (ids: string[]) => void) {
         this.deleteImageFn = fn;
@@ -62,9 +64,17 @@ class ImageDeleteTracker {
                     "🗑️ Image deleted from editor:",
                     deletedImageIds.join(", ")
                 );
+                // Mark images as deleted
+                deletedImageIds.forEach((id) => this.deletedImageIds.add(id));
+                // Set last action as image deletion
+                this.setLastAction("delete_image");
+                // Invalidate URLs in the editor
+                this.invalidateImageUrls(deletedImageIds);
                 if (this.deleteImageFn) {
                     this.deleteImageFn(deletedImageIds);
                 }
+                // Better undo prevention
+                this.preventUndoForDeletedImages(deletedImageIds);
             }
         });
     }
@@ -79,6 +89,70 @@ class ImageDeleteTracker {
                 this.uploadedImages.delete(imageId);
             }
         });
+    }
+
+    private preventUndoForDeletedImages(imageIds: string[]) {
+        if (!editorInstance) return;
+
+        // Method 1: Clear history completely and force a new history entry
+        const currentContent = editorInstance.getHTML();
+
+        // Disable history temporarily
+        editorInstance.setOptions({
+            enableInputRules: false,
+            enablePasteRules: false,
+        });
+
+        // Create a new editor state without history
+        setTimeout(() => {
+            if (editorInstance) {
+                // Force recreation of editor state
+                editorInstance.commands.clearContent();
+                editorInstance.commands.setContent(currentContent, false);
+
+                // Add a checkpoint to history that can't be undone past
+                editorInstance.commands.setMeta("preventUndo", true);
+
+                // Re-enable input rules
+                editorInstance.setOptions({
+                    enableInputRules: true,
+                    enablePasteRules: true,
+                });
+
+                console.log(
+                    "🔒 Prevented undo for deleted images:",
+                    imageIds.join(", ")
+                );
+            }
+        }, 0);
+    }
+
+    public invalidateImageUrls(imageIds: string[]) {
+        if (!editorInstance) return;
+
+        const transaction = editorInstance.state.tr;
+        let updated = false;
+
+        editorInstance.state.doc.descendants((node, pos) => {
+            if (node.type.name === "image") {
+                const imageId = node.attrs.title;
+                if (imageIds.includes(imageId)) {
+                    // Add a random character to break the URL
+                    const invalidUrl =
+                        node.attrs.src + "#invalid_" + Date.now();
+                    transaction.setNodeMarkup(pos, undefined, {
+                        ...node.attrs,
+                        src: invalidUrl, // Invalidate the URL
+                    });
+                    updated = true;
+                }
+            }
+        });
+
+        if (updated) {
+            editorInstance.view.dispatch(transaction);
+            console.log("🔗 Invalidated URLs for images:", imageIds.join(", "));
+        }
     }
 
     public setEditorContainer(container: HTMLElement) {
@@ -103,9 +177,76 @@ class ImageDeleteTracker {
         });
     }
 
+    public isImageDeleted(imageId: string): boolean {
+        return this.deletedImageIds.has(imageId);
+    }
+
+    // Method to check if undo would restore deleted images
+    public wouldUndoRestoreDeletedImages(): boolean {
+        if (!editorInstance || this.deletedImageIds.size === 0) return false;
+
+        // Get the current state
+        const currentState = editorInstance.state;
+
+        try {
+            // Get current content
+            const currentHTML = editorInstance.getHTML();
+
+            // Check if current content contains any deleted image IDs
+            for (const deletedId of this.deletedImageIds) {
+                if (currentHTML.includes(deletedId)) {
+                    // If current content already has deleted image,
+                    // this means undo would restore it
+                    return true;
+                }
+            }
+
+            // Since direct access to history state is not reliable,
+            // assume undo might restore deleted images if recent deletion occurred
+            if (
+                this.lastAction === "delete_image" &&
+                Date.now() - this.lastActionTime < 1000
+            ) {
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.warn("Error checking undo state:", error);
+            return false;
+        }
+    }
+
+    // Track the last action to make smarter decisions
+    private lastAction: "delete_image" | "other" | null = null;
+    private lastActionTime: number = 0;
+
+    public setLastAction(action: "delete_image" | "other") {
+        this.lastAction = action;
+        this.lastActionTime = Date.now();
+    }
+
+    public shouldPreventUndo(): boolean {
+        if (!editorInstance || this.deletedImageIds.size === 0) return false;
+
+        // If the last action was deleting an image and it was recent (within 1 second),
+        // prevent undo to avoid restoring the deleted image
+        if (
+            this.lastAction === "delete_image" &&
+            Date.now() - this.lastActionTime < 1000
+        ) {
+            return true;
+        }
+
+        // Otherwise, allow undo for other actions
+        return false;
+    }
+
     public cleanup() {
         this.observer?.disconnect();
         this.uploadedImages.clear();
+        this.deletedImageIds.clear();
+        this.preventedUndoSteps.clear();
     }
 }
 
@@ -117,7 +258,10 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
     const { onSubmitDelete } = useDeleteImage();
 
     const handleDeleteImages = (ids: string[]) => {
-        onSubmitDelete(ids, () => {});
+        onSubmitDelete(ids, () => {
+            // Invalidate URLs after API delete
+            imageTracker.invalidateImageUrls(ids);
+        });
     };
 
     useEffect(() => {
@@ -129,9 +273,7 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // Generate a unique ID for the placeholder
             const placeholderId = uuidv4();
-            // Insert placeholder text with a unique identifier
             editor
                 .chain()
                 .focus()
@@ -161,7 +303,6 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
                         let targetPos: number | null = null;
                         let textLength = 0;
 
-                        // Tìm đoạn text chứa placeholderId trong document thực
                         editor.state.doc.descendants((node, pos) => {
                             if (
                                 node.isText &&
@@ -169,7 +310,7 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
                             ) {
                                 targetPos = pos;
                                 textLength = node.text.length;
-                                return false; // dừng duyệt
+                                return false;
                             }
                             return true;
                         });
@@ -177,7 +318,6 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
                         if (targetPos !== null) {
                             const transaction = editor.state.tr;
 
-                            // Xoá đoạn văn bản chứa placeholder và chèn ảnh vào cùng vị trí
                             transaction.replaceWith(
                                 targetPos,
                                 targetPos + textLength,
@@ -319,7 +459,12 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
 
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                history: {
+                    depth: 10, // Limit history depth
+                    newGroupDelay: 500, // Group changes within 500ms
+                },
+            }),
             Underline,
             TextAlign.configure({ types: ["heading", "paragraph"] }),
             TextStyle,
@@ -345,13 +490,124 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
         content,
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
+            console.log(html);
             onUpdate(html);
             editorInstance = editor;
+
+            // Track that user made an edit (not image deletion)
+            imageTracker.setLastAction("other");
         },
         immediatelyRender: false,
         editorProps: {
             attributes: {
                 class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4",
+            },
+            handleKeyDown: (view, event) => {
+                // Intercept Ctrl+Z (Undo) and Ctrl+Y (Redo)
+                if (
+                    (event.ctrlKey || event.metaKey) &&
+                    event.key === "z" &&
+                    !event.shiftKey
+                ) {
+                    // Only prevent undo if it would actually restore a deleted image
+                    if (imageTracker.shouldPreventUndo()) {
+                        console.log(
+                            "🚫 Undo prevented - would restore recently deleted image"
+                        );
+                        event.preventDefault();
+                        return true;
+                    }
+
+                    // Allow undo for normal text/content changes
+                    console.log("✅ Undo allowed - normal content change");
+                    return false;
+                }
+
+                // Handle Ctrl+Y (Redo) - be more permissive with redo
+                if (
+                    (event.ctrlKey || event.metaKey) &&
+                    (event.key === "y" || (event.key === "z" && event.shiftKey))
+                ) {
+                    // Only prevent redo in very specific cases
+                    const wouldRestoreDeleted =
+                        imageTracker.wouldUndoRestoreDeletedImages();
+                    if (wouldRestoreDeleted) {
+                        console.log(
+                            "🚫 Redo prevented - would restore deleted image"
+                        );
+                        event.preventDefault();
+                        return true;
+                    }
+
+                    console.log("✅ Redo allowed");
+                    return false;
+                }
+
+                return false;
+            },
+            handlePaste: (view, event) => {
+                const items = event.clipboardData?.items;
+                if (items) {
+                    for (const item of items) {
+                        if (item.type.startsWith("image/")) {
+                            // Handle pasted image files (not relevant here)
+                            return false;
+                        }
+                    }
+                }
+
+                // Check pasted HTML content for images
+                const html = event.clipboardData?.getData("text/html");
+                if (html) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, "text/html");
+                    const images = doc.querySelectorAll("img");
+                    let hasDeletedImage = false;
+
+                    images.forEach((img) => {
+                        const imageId = img.getAttribute("title");
+                        if (imageId && imageTracker.isImageDeleted(imageId)) {
+                            hasDeletedImage = true;
+                            console.log(
+                                "🚫 Blocked paste of deleted image with ID:",
+                                imageId
+                            );
+                        }
+                    });
+
+                    if (hasDeletedImage) {
+                        event.preventDefault();
+                        return true; // Prevent paste if any deleted image is found
+                    }
+                }
+
+                return false; // Allow paste for non-deleted content
+            },
+            handleDOMEvents: {
+                paste: (view, event) => {
+                    // Additional check to ensure no deleted images are pasted
+                    const html = event.clipboardData?.getData("text/html");
+                    if (html) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, "text/html");
+                        const images = doc.querySelectorAll("img");
+                        for (const img of images) {
+                            const imageId = img.getAttribute("title");
+                            if (
+                                imageId &&
+                                imageTracker.isImageDeleted(imageId)
+                            ) {
+                                event.preventDefault();
+                                console.log(
+                                    "🚫 Prevented paste of deleted image with ID:",
+                                    imageId
+                                );
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                },
             },
         },
     });
