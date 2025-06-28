@@ -383,6 +383,7 @@ export default function CreatePostForm() {
                             className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors cursor-pointer"
                             onClick={() => {
                                 form.reset();
+                                setLogoPreview(null);
                                 handleClearImages();
                             }}
                         >
