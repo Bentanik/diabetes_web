@@ -14,10 +14,12 @@ import Placeholder from "@tiptap/extension-placeholder";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
 import { v4 as uuidv4 } from "uuid";
 import useDeleteImage from "@/app/admin/blogs/create-blog/hooks/use-delete-image";
+import { Controller, Control, useFormContext } from "react-hook-form";
 
 interface TiptapEditorProps {
     content: string;
     onUpdate: (content: string) => void;
+    name: string;
 }
 
 let editorInstance: Editor | null = null;
@@ -60,10 +62,6 @@ class ImageDeleteTracker {
             });
 
             if (deletedImageIds.length > 0) {
-                console.log(
-                    "🗑️ Image deleted from editor:",
-                    deletedImageIds.join(", ")
-                );
                 // Mark images as deleted
                 deletedImageIds.forEach((id) => this.deletedImageIds.add(id));
                 // Set last action as image deletion
@@ -118,11 +116,6 @@ class ImageDeleteTracker {
                     enableInputRules: true,
                     enablePasteRules: true,
                 });
-
-                console.log(
-                    "🔒 Prevented undo for deleted images:",
-                    imageIds.join(", ")
-                );
             }
         }, 0);
     }
@@ -151,7 +144,6 @@ class ImageDeleteTracker {
 
         if (updated) {
             editorInstance.view.dispatch(transaction);
-            console.log("🔗 Invalidated URLs for images:", imageIds.join(", "));
         }
     }
 
@@ -170,11 +162,6 @@ class ImageDeleteTracker {
 
     public addImage(imageId: string, imageUrl: string, element?: HTMLElement) {
         this.uploadedImages.set(imageId, { url: imageUrl, element });
-        console.log("📸 Image added to tracker:", {
-            imageId,
-            imageUrl,
-            totalTracked: this.uploadedImages.size,
-        });
     }
 
     public isImageDeleted(imageId: string): boolean {
@@ -212,7 +199,6 @@ class ImageDeleteTracker {
 
             return false;
         } catch (error) {
-            console.warn("Error checking undo state:", error);
             return false;
         }
     }
@@ -330,11 +316,6 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
                             editor.view.dispatch(transaction);
 
                             imageTracker.addImage(imageId, publicUrl);
-                            console.log(
-                                "✅ Image uploaded successfully. URL:",
-                                publicUrl
-                            );
-                            console.log("Image ID:", imageId);
                         } else {
                             console.warn(
                                 "⚠️ Could not find placeholder with ID:",
@@ -453,9 +434,20 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
         </div>
     );
 };
-
-const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
+const TiptapEditorComponent = ({
+    content,
+    onUpdate,
+    name,
+}: TiptapEditorProps) => {
     const editorRef = useRef<Editor | null>(null);
+
+    // Thêm useFormContext để lấy errors
+    const {
+        formState: { errors },
+    } = useFormContext();
+
+    // Check error của field cụ thể
+    const hasError = name ? !!errors[name] : false;
 
     const editor = useEditor({
         extensions: [
@@ -490,7 +482,6 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
         content,
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
-            console.log(html);
             onUpdate(html);
             editorInstance = editor;
 
@@ -511,15 +502,10 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                 ) {
                     // Only prevent undo if it would actually restore a deleted image
                     if (imageTracker.shouldPreventUndo()) {
-                        console.log(
-                            "🚫 Undo prevented - would restore recently deleted image"
-                        );
                         event.preventDefault();
                         return true;
                     }
-
                     // Allow undo for normal text/content changes
-                    console.log("✅ Undo allowed - normal content change");
                     return false;
                 }
 
@@ -532,14 +518,10 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                     const wouldRestoreDeleted =
                         imageTracker.wouldUndoRestoreDeletedImages();
                     if (wouldRestoreDeleted) {
-                        console.log(
-                            "🚫 Redo prevented - would restore deleted image"
-                        );
                         event.preventDefault();
                         return true;
                     }
 
-                    console.log("✅ Redo allowed");
                     return false;
                 }
 
@@ -568,10 +550,6 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                         const imageId = img.getAttribute("title");
                         if (imageId && imageTracker.isImageDeleted(imageId)) {
                             hasDeletedImage = true;
-                            console.log(
-                                "🚫 Blocked paste of deleted image with ID:",
-                                imageId
-                            );
                         }
                     });
 
@@ -598,10 +576,7 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                                 imageTracker.isImageDeleted(imageId)
                             ) {
                                 event.preventDefault();
-                                console.log(
-                                    "🚫 Prevented paste of deleted image with ID:",
-                                    imageId
-                                );
+
                                 return true;
                             }
                         }
@@ -636,7 +611,13 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
     if (!editor) return null;
 
     return (
-        <div className="border-2 border-gray-200 rounded-lg overflow-hidden focus-within:border-[#248fca] transition-colors">
+        <div
+            className={`border-2 rounded-lg overflow-hidden transition-colors ${
+                hasError
+                    ? "border-red-500 focus-within:border-red-500"
+                    : "border-gray-200 focus-within:border-[#248fca]"
+            }`}
+        >
             <TiptapToolbar editor={editor} />
             <EditorContent
                 editor={editor}

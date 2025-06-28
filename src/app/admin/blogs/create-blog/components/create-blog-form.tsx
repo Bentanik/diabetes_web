@@ -1,33 +1,11 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-    Check,
-    ChevronsUpDown,
-    Upload,
-    ImageIcon,
-    Stethoscope,
-    ListTree,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+import { Upload, ImageIcon, Stethoscope } from "lucide-react";
 import {
     Form,
     FormControl,
@@ -40,33 +18,27 @@ import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/tiptap";
 import Image from "next/image";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import MultiSelectCategories from "@/app/admin/blogs/create-blog/components/select-category";
 import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
+import DoctorSelect from "@/app/admin/blogs/create-blog/components/select-doctor";
+import useCreateBlog, {
+    BlogFormData,
+} from "@/app/admin/blogs/create-blog/hooks/use-create-blog";
+import { da } from "date-fns/locale";
 
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
 
-    // Loại bỏ tất cả thẻ <img>
     const images = doc.querySelectorAll("img");
     images.forEach((img) => img.remove());
 
-    // Thay thế thẻ <br> bằng dấu phẩy và một khoảng trắng
     const brs = doc.querySelectorAll("br");
     brs.forEach((br) => {
         br.replaceWith(", ");
     });
 
-    // Lấy tất cả nội dung văn bản, loại bỏ khoảng trắng thừa và nối bằng dấu phẩy
-    const textNodes: string[] = []; // Explicitly declare as string[]
+    const textNodes: string[] = [];
     const walk = (node: Node) => {
         if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
             textNodes.push(node.textContent.trim());
@@ -75,69 +47,48 @@ const extractTextContent = (html: string): string => {
     };
     walk(doc.body);
 
-    // Lọc các chuỗi rỗng và nối bằng dấu phẩy
     return textNodes.filter((text) => text !== "").join(", ");
 };
+
 const doctors = [
     {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        Id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
         value: "tanphat",
         label: "Bs.Lâm Tấn Phát",
     },
     {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b71",
         value: "tanphat1",
         label: "Bs.Lâm Tấn Phát1",
     },
     {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b72",
         value: "tanphat2",
         label: "Bs.Lâm Tấn Phát2",
     },
     {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b73",
         value: "tanphat3",
         label: "Bs.Lâm Tấn Phát3",
     },
     {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b79",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b74",
         value: "tanphat4",
         label: "Bs.Lâm Tấn Phát4",
     },
 ];
 
-interface PostFormData {
-    title: string;
-    content: string;
-    contentHtml: string;
-    references: string[];
-    categoryId: string;
-    doctorId: string;
-    thumbnail_url?: string;
-}
-
 export default function CreatePostForm() {
-    const form = useForm<PostFormData>({
-        defaultValues: {
-            title: "",
-            content: "",
-            contentHtml: "",
-            references: [],
-            categoryId: "",
-            doctorId: "",
-            thumbnail_url: "",
-        },
-    });
     const { onSubmit: uploadImage, isPending: isUploading } = useUploadImage();
     const { getCategoriesApi, isPending } = useGetDataCategories();
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState("");
     const [data, setData] = useState<API.TGetCategories>([]);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageIds, setImageIds] = useState<string[]>([]);
+    const [content, setContent] = useState("");
+    const { form, onSubmit } = useCreateBlog();
 
     useEffect(() => {
         const handleGetData = async () => {
@@ -167,33 +118,25 @@ export default function CreatePostForm() {
 
     const updateContentHtml = (editorContent: string) => {
         form.setValue("contentHtml", editorContent);
-        // Cập nhật trường content từ contentHtml
         const textContent = extractTextContent(editorContent);
-        console.log(textContent);
-        form.setValue("content", textContent);
-        // Cập nhật danh sách imageId từ contentHtml
+        setContent(textContent);
         const newImageIds = extractImageIds(editorContent);
         setImageIds(newImageIds);
-        console.log("📸 Image IDs:", newImageIds);
     };
 
     const handleClearImages = () => {
         setThumbnailUrl(null);
-        form.setValue("thumbnail_url", "");
         setImageIds([]);
-        console.log("📸 Image IDs cleared:", []);
     };
 
     const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            // Validate file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 alert("Kích thước file không được vượt quá 5MB");
                 return;
             }
 
-            // Validate file type
             if (!file.type.startsWith("image/")) {
                 alert("Vui lòng chọn file hình ảnh");
                 return;
@@ -201,7 +144,6 @@ export default function CreatePostForm() {
 
             setLogoFile(file);
 
-            // Create preview
             const reader = new FileReader();
             reader.onload = (e) => {
                 setLogoPreview(e.target?.result as string);
@@ -210,12 +152,22 @@ export default function CreatePostForm() {
         }
     };
 
-    const handleFormSubmit = (data: PostFormData) => {
+    const handleFormSubmit = (data: BlogFormData) => {
         setIsSubmitting(true);
+
         try {
-            console.log("Post data:", data);
-            handleClearImages();
-            form.reset();
+            if (logoFile != null) {
+                const formData: REQUEST.TCreateBlog = {
+                    title: data.title,
+                    content: content,
+                    contentHtml: data.contentHtml,
+                    thumbnail: logoFile,
+                    categoryIds: data.categoryIds,
+                    images: imageIds,
+                    doctorId: data.doctorId,
+                };
+                onSubmit(formData, handleClearImages);
+            }
         } catch (error) {
             console.error("Error creating post:", error);
         } finally {
@@ -292,152 +244,49 @@ export default function CreatePostForm() {
                                     5MB.
                                 </p>
                             </div>
-                            {/* Categories Select */}
-                            <div>
+
+                            {/* Categories Multi-Select */}
+                            <motion.div variants={itemVariants}>
                                 <FormField
                                     control={form.control}
-                                    name="categoryId"
-                                    render={({ field }) => (
+                                    name="categoryIds"
+                                    render={() => (
                                         <FormItem>
-                                            <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                                <ListTree className="h-5 w-5 text-[#248fca]" />
-                                                Chọn thể loại
-                                            </Label>
-                                            <div className="mt-2">
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    value={field.value}
-                                                    disabled={isPending} // Disable Select if no categories
-                                                >
-                                                    <SelectTrigger className="w-[280px]">
-                                                        <SelectValue placeholder="Chọn danh mục" />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="max-h-40">
-                                                        <SelectGroup>
-                                                            <SelectLabel>
-                                                                Danh mục
-                                                            </SelectLabel>
-                                                            {data.length > 0 ? (
-                                                                data.map(
-                                                                    (
-                                                                        category
-                                                                    ) => (
-                                                                        <SelectItem
-                                                                            key={
-                                                                                category.id
-                                                                            }
-                                                                            value={
-                                                                                category.id
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                category.name
-                                                                            }
-                                                                        </SelectItem>
-                                                                    )
-                                                                )
-                                                            ) : (
-                                                                <SelectItem
-                                                                    value="no-categories"
-                                                                    disabled
-                                                                >
-                                                                    Không có
-                                                                    danh mục
-                                                                </SelectItem>
-                                                            )}
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <FormMessage />
+                                            <FormControl>
+                                                <MultiSelectCategories
+                                                    control={form.control}
+                                                    data={data}
+                                                    isPending={isPending}
+                                                />
+                                            </FormControl>
+                                            <FormMessage className="flex items-center gap-1">
+                                                <AlertCircle className="h-4 w-4" />
+                                            </FormMessage>
                                         </FormItem>
                                     )}
                                 />
-                            </div>
+                            </motion.div>
 
-                            {/* Select Doctor */}
-                            <div>
-                                <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                    <Stethoscope className="h-5 w-5 text-[#248fca]" />
-                                    Chọn bác sĩ
-                                </Label>
-                                <div className="mt-4">
-                                    <Popover open={open} onOpenChange={setOpen}>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                aria-expanded={open}
-                                                className="w-[200px] justify-between"
-                                            >
-                                                {value
-                                                    ? doctors.find(
-                                                          (doctor) =>
-                                                              doctor.value ===
-                                                              value
-                                                      )?.label
-                                                    : "Lựa chọn bác sĩ"}
-                                                <ChevronsUpDown className="opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[200px] p-0">
-                                            <Command>
-                                                <CommandInput
-                                                    placeholder="Search framework..."
-                                                    className="h-9"
+                            {/* Select Doctor with Combobox */}
+                            <motion.div variants={itemVariants}>
+                                <FormField
+                                    control={form.control}
+                                    name="doctorId"
+                                    render={() => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <DoctorSelect
+                                                    control={form.control}
+                                                    doctors={doctors}
                                                 />
-                                                <CommandList>
-                                                    <CommandEmpty>
-                                                        No framework found.
-                                                    </CommandEmpty>
-                                                    <CommandGroup>
-                                                        {doctors.map(
-                                                            (doctor) => (
-                                                                <CommandItem
-                                                                    key={
-                                                                        doctor.value
-                                                                    }
-                                                                    value={
-                                                                        doctor.value
-                                                                    }
-                                                                    onSelect={(
-                                                                        currentValue
-                                                                    ) => {
-                                                                        setValue(
-                                                                            currentValue ===
-                                                                                value
-                                                                                ? ""
-                                                                                : currentValue
-                                                                        );
-                                                                        setOpen(
-                                                                            false
-                                                                        );
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        doctor.label
-                                                                    }
-                                                                    <Check
-                                                                        className={cn(
-                                                                            "ml-auto",
-                                                                            value ===
-                                                                                doctor.value
-                                                                                ? "opacity-100"
-                                                                                : "opacity-0"
-                                                                        )}
-                                                                    />
-                                                                </CommandItem>
-                                                            )
-                                                        )}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                            </div>
+                                            </FormControl>
+                                            <FormMessage className="flex items-center gap-1">
+                                                <AlertCircle className="h-4 w-4" />
+                                            </FormMessage>
+                                        </FormItem>
+                                    )}
+                                />
+                            </motion.div>
                         </div>
                     </motion.div>
                     {/* Title */}
@@ -480,7 +329,11 @@ export default function CreatePostForm() {
                                     <FormControl>
                                         <TiptapEditor
                                             content={field.value}
-                                            onUpdate={updateContentHtml}
+                                            onUpdate={(html) => {
+                                                updateContentHtml(html); // Update field value
+                                                form.trigger("contentHtml");
+                                            }}
+                                            name="contentHtml"
                                         />
                                     </FormControl>
                                     <FormMessage className="flex items-center gap-1">
@@ -526,7 +379,7 @@ export default function CreatePostForm() {
                         <Button
                             type="button"
                             variant="outline"
-                            className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors"
+                            className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors cursor-pointer"
                             onClick={() => {
                                 form.reset();
                                 handleClearImages();
@@ -537,7 +390,7 @@ export default function CreatePostForm() {
                         <Button
                             type="submit"
                             disabled={isSubmitting || isUploading}
-                            className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
+                            className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                         >
                             {isSubmitting ? (
                                 <div className="flex items-center gap-2">

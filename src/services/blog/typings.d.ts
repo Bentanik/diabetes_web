@@ -1,12 +1,12 @@
 declare namespace REQUEST {
-    type TCreateBlog = {
-        name: string;
-        address: string;
-        contactNumber: string;
-        email: string;
-        description: string;
-        establishedDate: Date;
-        logo: File;
+    export type TCreateBlog = {
+        title: string;
+        content: string;
+        contentHtml: string;
+        thumbnail: File;
+        categoryIds: string[];
+        images: string[];
+        doctorId: string;
     };
 }
 

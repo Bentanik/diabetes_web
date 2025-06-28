@@ -83,7 +83,6 @@ export default function CreateHospitalForm() {
 
     const handleFormSubmit = (data: HospitalFormData) => {
         setIsSubmitting(true);
-
         try {
             if (logoFile !== null) {
                 const formData: REQUEST.TCreateHospital = {
