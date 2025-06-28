@@ -35,12 +35,13 @@ export default function useCreateBlog() {
 
     const onSubmit = (data: REQUEST.TCreateBlog, clearImages: () => void) => {
         mutate(data, {
-            onSuccess: () => {
-                form.reset(); // Reset form về defaultValues
-                clearImages(); // Xóa hình ảnh
+            onSuccess: (res) => {
+                console.log("API Success:", res);
+                form.reset();
+                clearImages();
             },
-            onError: (error) => {
-                alert("Đã có lỗi xảy ra khi tạo bài viết");
+            onError: (err) => {
+                console.log("API Fail:", err);
             },
         });
     };

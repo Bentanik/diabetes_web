@@ -2,10 +2,11 @@
 
 import { motion } from "framer-motion";
 import { FileText, AlertCircle } from "lucide-react";
+import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, ImageIcon, Stethoscope } from "lucide-react";
+import { Upload, ImageIcon } from "lucide-react";
 import {
     Form,
     FormControl,
@@ -24,7 +25,6 @@ import DoctorSelect from "@/app/admin/blogs/create-blog/components/select-doctor
 import useCreateBlog, {
     BlogFormData,
 } from "@/app/admin/blogs/create-blog/hooks/use-create-blog";
-import { da } from "date-fns/locale";
 
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
@@ -154,7 +154,6 @@ export default function CreatePostForm() {
 
     const handleFormSubmit = (data: BlogFormData) => {
         setIsSubmitting(true);
-
         try {
             if (logoFile != null) {
                 const formData: REQUEST.TCreateBlog = {
@@ -168,6 +167,7 @@ export default function CreatePostForm() {
                 };
                 onSubmit(formData, handleClearImages);
             }
+            setLogoPreview(null);
         } catch (error) {
             console.error("Error creating post:", error);
         } finally {
@@ -186,6 +186,7 @@ export default function CreatePostForm() {
 
     return (
         <div className="min-h-screen">
+            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleFormSubmit)}

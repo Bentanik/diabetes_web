@@ -22,12 +22,14 @@ export const useServiceCreateBlog = () => {
 
             return await createBlogAsync(formData);
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
+            console.log("onSuccess called, attempting to show toast");
             addToast({
                 type: "success",
-                description: data.value.message,
+                description: "Tạo bài viết thành công",
                 duration: 5000,
             });
+            console.log("Toast dispatched");
         },
     });
 };
