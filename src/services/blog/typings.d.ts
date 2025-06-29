@@ -10,17 +10,24 @@ declare namespace REQUEST {
     };
 
     type BlogRequestParam = {
-        SearchContent: string;
-        CategoryIds: string[];
-        Status: number;
-        ModeratorId: string;
-        DoctorId: string;
-        IsAdmin: boolean;
-        PageIndex: number;
-        PageSize: number;
-        SortType: string;
-        IsSortAsc: boolean;
+        searchContent: string;
+        categoryIds: string[];
+        status: BlogStatus;
+        moderatorId: string;
+        doctorId: string;
+        isAdmin: boolean;
+        pageIndex: number;
+        pageSize: number;
+        sortType: string;
+        isSortAsc: boolean;
     };
+
+    enum BlogStatus {
+        Draft = -2,
+        Pending = 0,
+        Approved = 1,
+        Rejected = -1,
+    }
 }
 
 declare namespace API {
@@ -29,7 +36,6 @@ declare namespace API {
         name: string;
         imageUrl: string;
     };
-
     // GET BLOG type
     type Moderator = {
         id: string;

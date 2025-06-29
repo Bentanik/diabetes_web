@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     BellIcon,
-    EditIcon,
-    EyeIcon,
     HospitalIcon,
-    MoreHorizontalIcon,
     SearchIcon,
     XCircleIcon,
     FileWarning,
@@ -20,73 +17,38 @@ import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
+import useGetBlogs from "../hooks/use-get-blogs";
+import PaginatedComponent from "@/components/paginated";
+import BlogStatusDropdown from "./select-status";
+import DoctorSelectFilter from "@/components/select_doctor";
+import MultiSelectCategoriesFilter from "@/components/select-category";
+import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
 
-const staffData = [
+const doctors = [
     {
-        id: 1,
-        title: "Nhận biết sớm, điều trị kịp thời triệu chứng đái tháo đường",
-        thumbnail:
-            "https://images.unsplash.com/photo-1685485276224-d78ce78f3b95?q=80&w=1056&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        createDate: "2025-06-28",
-        status: "approved",
-        doctorAvatar:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-        doctorName: "Bác sĩ A",
+        Id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
+        value: "tanphat",
+        label: "Bs.Lâm Tấn Phát",
     },
     {
-        id: 2,
-        title: "Nhận biết sớm, điều trị kịp thời triệu chứng đái tháo đường",
-        thumbnail:
-            "https://images.unsplash.com/photo-1625035446600-9c5c6b1e4b02?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzl8fGRpYWJldHxlbnwwfHwwfHx8MA%3D%3D",
-        createDate: "2025-06-28",
-        status: "reject",
-        doctorAvatar:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-        doctorName: "Bác sĩ R",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b71",
+        value: "tanphat1",
+        label: "Bs.Lâm Tấn Phát1",
     },
     {
-        id: 3,
-        title: "Nhận biết sớm, điều trị kịp thời triệu chứng đái tháo đường",
-        thumbnail:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1751097334/diabetesdoctor/kmoytobhasblvasp8uwo.jpg",
-        createDate: "2025-06-28",
-        status: "approved",
-        doctorAvatar:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-        doctorName: "Bác sĩ L",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b72",
+        value: "tanphat2",
+        label: "Bs.Lâm Tấn Phát2",
     },
     {
-        id: 4,
-        title: "Nhận biết sớm, điều trị kịp thời triệu chứng đái tháo đường",
-        thumbnail:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1751097334/diabetesdoctor/kmoytobhasblvasp8uwo.jpg",
-        createDate: "2025-06-28",
-        status: "pending",
-        doctorAvatar:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-        doctorName: "Bác sĩ L",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b73",
+        value: "tanphat3",
+        label: "Bs.Lâm Tấn Phát3",
     },
     {
-        id: 5,
-        title: "Nhận biết sớm, điều trị kịp thời triệu chứng đái tháo đường",
-        thumbnail:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1751097334/diabetesdoctor/kmoytobhasblvasp8uwo.jpg",
-        createDate: "2025-06-28",
-        status: "pending",
-        doctorAvatar:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-        doctorName: "Bác sĩ H",
-    },
-    {
-        id: 6,
-        title: "Nhận biết sớm, điều trị kịp thời triệu chứng đái tháo đường",
-        thumbnail:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1751097334/diabetesdoctor/kmoytobhasblvasp8uwo.jpg",
-        createDate: "2025-06-28",
-        status: "reject",
-        doctorAvatar:
-            "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-        doctorName: "Bác sĩ G",
+        Id: "019771dd-87ee-75a9-513c-1e6200629b74",
+        value: "tanphat4",
+        label: "Bs.Lâm Tấn Phát4",
     },
 ];
 
@@ -130,41 +92,102 @@ const Header = () => {
 
 export default function ModeratorManageBlogComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [selectedStatus, setSelectedStatus] = useState<string>("all");
+    const [selectedStatus, setSelectedStatus] = useState<number>(1);
+    const { getBlogsApi } = useGetBlogs();
+    const [data, setData] = useState<API.Blog[]>([]);
+    const [categoryData, setCategoryData] = useState<API.TGetCategories>([]);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [totalPage, setTotalPage] = useState<number>(1);
+    const [selectDoctor, setSelectDoctor] = useState<string>("");
+    const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+        []
+    );
+    const { getCategoriesApi, isPending } = useGetDataCategories();
 
-    const getStatusIcon = (status: string) => {
+    const handleGetData = async (pageIndex: number) => {
+        try {
+            const res = await getBlogsApi({
+                searchContent: searchTerm,
+                categoryIds: selectedCategoryIds,
+                status: selectedStatus,
+                moderatorId: "",
+                doctorId: selectDoctor,
+                isAdmin: false,
+                pageIndex: pageIndex,
+                pageSize: 6,
+                sortType: "",
+                isSortAsc: false,
+            });
+            setTotalPage(res?.data.totalPages || 1);
+            console.log(totalPage);
+            console.log(selectedStatus);
+            setData(res?.data.items || []);
+        } catch (err) {
+            setData([]);
+        }
+    };
+
+    useEffect(() => {
+        const handleGetData = async () => {
+            try {
+                const res = await getCategoriesApi();
+                setCategoryData(res?.data || []);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        handleGetData();
+    }, []);
+
+    useEffect(() => {
+        if (currentPage == 1) {
+            handleGetData(1);
+            setCurrentPage(1);
+        } else handleGetData(currentPage);
+    }, [selectedStatus, selectDoctor, selectedCategoryIds, searchTerm]);
+
+    const getStatusIcon = (status: number) => {
         switch (status) {
-            case "approved":
-                return <BadgeCheck color="green" className="w-4 h-4" />;
-            case "reject":
-                return <BadgeX color="red" className="w-4 h-4" />;
-            case "pending":
+            case 0:
                 return <CircleDotDashed color="orange" className="w-4 h-4" />;
+            case 1:
+                return <BadgeCheck color="green" className="w-4 h-4" />;
+            case -1:
+                return <BadgeX color="red" className="w-4 h-4" />;
+            case -2:
+                return <BadgeX color="gray" className="w-4 h-4" />;
             default:
                 return <XCircleIcon className="w-4 h-4" />;
         }
     };
 
-    const getStatusText = (status: string) => {
+    const getStatusText = (status: number) => {
         switch (status) {
-            case "approved":
+            case 1:
                 return "Đã duyệt";
-            case "reject":
+            case -1:
                 return "Từ chối";
-            case "pending":
+            case 0:
                 return "Chờ xác thực";
+            case -2:
+                return "Bản nháp";
             default:
                 return "Không xác định";
         }
     };
 
-    const filteredStaff = staffData.filter((staff) => {
-        const matchesSearch =
-            staff.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            staff.doctorName.toLowerCase().includes(searchTerm.toLowerCase());
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        handleGetData(page);
+    };
+
+    const blogData = data.filter((data) => {
+        const matchesSearch = data.title
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase());
 
         const matchesStatus =
-            selectedStatus === "all" || staff.status === selectedStatus;
+            selectedStatus === 1 || data.status === selectedStatus;
 
         return matchesSearch && matchesStatus;
     });
@@ -195,23 +218,29 @@ export default function ModeratorManageBlogComponent() {
                             />
                         </div>
                         {/* drop down blog status */}
-                        <select
-                            value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value)}
-                            className="px-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="approved">Đã được duyệt</option>
-                            <option value="pending">Đang đợi duyệt</option>
-                            <option value="reject">Bị từ chối</option>
-                        </select>
+                        <BlogStatusDropdown
+                            selectedStatus={selectedStatus}
+                            onStatusChange={setSelectedStatus} // Truyền hàm setSelectedStatus
+                        />
                     </div>
+
+                    {/* Categories Multi-Select */}
+                    <MultiSelectCategoriesFilter
+                        data={categoryData}
+                        isPending={isPending}
+                        onCategoryChange={setSelectedCategoryIds}
+                    />
+                    {/* Select Doctor with Combobox */}
+                    <DoctorSelectFilter
+                        doctors={doctors}
+                        onDoctorChange={setSelectDoctor}
+                    />
                 </div>
             </motion.div>
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredStaff.map((data, index) => (
+                {blogData.map((data, index) => (
                     <motion.div
                         key={data.id}
                         initial={{ y: 20, opacity: 0 }}
@@ -238,7 +267,7 @@ export default function ModeratorManageBlogComponent() {
                                     {getStatusText(data.status)}
                                 </div>
                                 <p className="text-gray-600 text-[0.9rem] font-light">
-                                    {data.createDate}
+                                    {data.createdDate}
                                 </p>
                             </div>
                             <div className="content-center mt-4">
@@ -249,21 +278,32 @@ export default function ModeratorManageBlogComponent() {
 
                             <div className="flex mt-4 items-center gap-4">
                                 <Image
-                                    src={data.doctorAvatar}
+                                    src={data.doctor.imageUrl}
                                     alt="avatar"
                                     width={50}
                                     height={50}
                                     className="w-[50px] h-[50px]"
                                 />
-                                <p className="">{data.doctorName}</p>
+                                <p className="">{data.doctor.fullName}</p>
                             </div>
                         </div>
                     </motion.div>
                 ))}
             </div>
+            {data?.length > 0 && (
+                <div className="my-10">
+                    <div className="mt-5">
+                        <PaginatedComponent
+                            totalPages={totalPage}
+                            currentPage={currentPage}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Empty State */}
-            {filteredStaff.length === 0 && (
+            {blogData.length === 0 && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

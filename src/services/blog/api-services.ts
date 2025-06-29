@@ -11,3 +11,53 @@ export const createBlogAsync = async (body: FormData) => {
     });
     return response.data;
 };
+
+export const getAllPost = async ({
+    searchContent = "",
+    categoryIds = [],
+    status,
+    moderatorId = "",
+    doctorId = "",
+    isAdmin,
+    pageIndex = 1,
+    pageSize = 10,
+    sortType = "",
+    isSortAsc,
+}: REQUEST.BlogRequestParam) => {
+    const params: Record<string, any> = {};
+    params.pageIndex = pageIndex;
+    params.pageSize = pageSize;
+
+    if (isAdmin !== undefined) {
+        params.isAdmin = isAdmin;
+    }
+    if (searchContent && searchContent.trim() !== "") {
+        params.searchContent = searchContent.trim();
+    }
+    if (categoryIds && categoryIds.length > 0) {
+        params.categoryIds = categoryIds.join(",");
+    }
+    if (status !== undefined && status !== null) {
+        params.status = status;
+    }
+    if (moderatorId && moderatorId.trim() !== "") {
+        params.moderatorId = moderatorId.trim();
+    }
+    if (doctorId && doctorId.trim() !== "") {
+        params.doctorId = doctorId.trim();
+    }
+    if (sortType && sortType.trim() !== "") {
+        params.sortType = sortType.trim();
+    }
+    if (isSortAsc !== undefined) {
+        params.isSortAsc = isSortAsc;
+    }
+    const response = await request<TResponseData<API.TGetBlogs>>(
+        API_ENDPOINTS.GET_POSTS,
+        {
+            method: "GET",
+            params: Object.keys(params).length > 0 ? params : undefined,
+        }
+    );
+    return response.data;
+};

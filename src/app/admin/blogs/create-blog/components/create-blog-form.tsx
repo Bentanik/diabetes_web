@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/form";
 import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/tiptap";
-import Image from "next/image";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
 import MultiSelectCategories from "@/app/admin/blogs/create-blog/components/select-category";
 import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
