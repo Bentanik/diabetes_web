@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import {
@@ -265,59 +265,63 @@ export default function ModeratorManageBlogComponent() {
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {blogData.map((data, index) => (
-                    <motion.div
-                        key={data.id}
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
-                    >
-                        {/* Header */}
-                        <div>
-                            <Image
-                                src={data.thumbnail}
-                                alt="thumbnail"
-                                width={100}
-                                height={50}
-                                className="w-full rounded-2xl h-[250px] object-cover"
-                            />
-                        </div>
-
-                        {/* Body */}
-                        <div className="p-4">
-                            <div className="flex justify-between gap-4">
-                                <div className="flex items-center gap-2">
-                                    {getStatusIcon(data.status)}
-                                    {getStatusText(data.status)}
-                                </div>
-                                <p className="text-gray-600 text-[0.9rem] font-light">
-                                    {data.createdDate.split("T")[0]}
-                                </p>
-                            </div>
-                            <div className="content-center mt-4">
-                                <h1 className="text-[1.5rem] font-medium line-clamp-2">
-                                    {data.title}
-                                </h1>
+                    <Link href={`/admin/blogs/blog-detail/${data.id}`}>
+                        <motion.div
+                            key={data.id}
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+                        >
+                            {/* Header */}
+                            <div>
+                                <Image
+                                    src={data.thumbnail}
+                                    alt="thumbnail"
+                                    width={100}
+                                    height={50}
+                                    className="w-full rounded-2xl h-[250px] object-cover"
+                                />
                             </div>
 
-                            <div className="flex justify-between items-center mt-4">
-                                <div className="flex items-center gap-4">
-                                    <Image
-                                        src={data.doctor.imageUrl}
-                                        alt="avatar"
-                                        width={50}
-                                        height={50}
-                                        className="w-[50px] h-[50px]"
-                                    />
-                                    <p className="">{data.doctor.fullName}</p>
+                            {/* Body */}
+                            <div className="p-4">
+                                <div className="flex justify-between gap-4">
+                                    <div className="flex items-center gap-2">
+                                        {getStatusIcon(data.status)}
+                                        {getStatusText(data.status)}
+                                    </div>
+                                    <p className="text-gray-600 text-[0.9rem] font-light">
+                                        {data.createdDate.split("T")[0]}
+                                    </p>
                                 </div>
-                                <div className="flex gap-3">
-                                    <Eye />
-                                    <p>{data.view}</p>
+                                <div className="content-center mt-4">
+                                    <h1 className="text-[1.5rem] font-medium line-clamp-2">
+                                        {data.title}
+                                    </h1>
+                                </div>
+
+                                <div className="flex justify-between items-center mt-4">
+                                    <div className="flex items-center gap-4">
+                                        <Image
+                                            src={data.doctor.imageUrl}
+                                            alt="avatar"
+                                            width={50}
+                                            height={50}
+                                            className="w-[50px] h-[50px]"
+                                        />
+                                        <p className="">
+                                            {data.doctor.fullName}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <Eye />
+                                        <p>{data.view}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </Link>
                 ))}
             </div>
             {data?.length > 0 && (
