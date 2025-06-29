@@ -9,7 +9,7 @@ type Category = {
 type MultiSelectCategoriesFilterProps = {
     data: Category[];
     isPending: boolean;
-    onCategoryChange: (categoryIds: string[]) => void; // Callback để truyền danh sách categoryIds
+    onCategoryChange: (categoryIds: string[]) => void;
 };
 
 export default function MultiSelectCategoriesFilter({

@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 import {
     BellIcon,
     HospitalIcon,
-    SearchIcon,
     XCircleIcon,
     FileWarning,
     BadgeCheck,
     BadgeX,
     CircleDotDashed,
+    Eye,
+    ArrowUpDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
@@ -23,6 +25,8 @@ import BlogStatusDropdown from "./select-status";
 import DoctorSelectFilter from "@/components/select_doctor";
 import MultiSelectCategoriesFilter from "@/components/select-category";
 import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
+import BlogSortDropdown from "@/components/select-sort";
+import SearchInput from "@/components/search";
 
 const doctors = [
     {
@@ -52,7 +56,12 @@ const doctors = [
     },
 ];
 
-const Header = () => {
+interface HeaderProps {
+    searchTerm: string;
+    setSearchTerm: (value: string) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -69,6 +78,10 @@ const Header = () => {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
+                    <SearchInput
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                    />
                     <Link href="/admin/blogs/create-blog">
                         <Button
                             variant="outline"
@@ -99,9 +112,12 @@ export default function ModeratorManageBlogComponent() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPage, setTotalPage] = useState<number>(1);
     const [selectDoctor, setSelectDoctor] = useState<string>("");
+    const [selectSortType, setSelectSortType] = useState<string>("");
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
+    const [isSortAsc, setIsSortAsc] = useState(true);
+
     const { getCategoriesApi, isPending } = useGetDataCategories();
 
     const handleGetData = async (pageIndex: number) => {
@@ -115,8 +131,8 @@ export default function ModeratorManageBlogComponent() {
                 isAdmin: false,
                 pageIndex: pageIndex,
                 pageSize: 6,
-                sortType: "",
-                isSortAsc: false,
+                sortType: selectSortType,
+                isSortAsc: isSortAsc,
             });
             setTotalPage(res?.data.totalPages || 1);
             console.log(totalPage);
@@ -144,7 +160,14 @@ export default function ModeratorManageBlogComponent() {
             handleGetData(1);
             setCurrentPage(1);
         } else handleGetData(currentPage);
-    }, [selectedStatus, selectDoctor, selectedCategoryIds, searchTerm]);
+    }, [
+        selectedStatus,
+        selectDoctor,
+        selectedCategoryIds,
+        searchTerm,
+        selectSortType,
+        isSortAsc,
+    ]);
 
     const getStatusIcon = (status: number) => {
         switch (status) {
@@ -196,7 +219,7 @@ export default function ModeratorManageBlogComponent() {
         <div>
             {/* Header */}
             <header>
-                <Header />
+                <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
             </header>
 
             {/* Main */}
@@ -208,33 +231,34 @@ export default function ModeratorManageBlogComponent() {
             >
                 <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                     <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                        <div className="relative flex-1">
-                            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <Input
-                                placeholder="Tìm kiếm theo tiêu đề bài viết..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10"
-                            />
-                        </div>
-                        {/* drop down blog status */}
+                        {/*Select status*/}
                         <BlogStatusDropdown
                             selectedStatus={selectedStatus}
                             onStatusChange={setSelectedStatus} // Truyền hàm setSelectedStatus
                         />
+                        {/* Select Category*/}
+                        <MultiSelectCategoriesFilter
+                            data={categoryData}
+                            isPending={isPending}
+                            onCategoryChange={setSelectedCategoryIds}
+                        />
+                        {/* Select Doctor */}
+                        <DoctorSelectFilter
+                            doctors={doctors}
+                            onDoctorChange={setSelectDoctor}
+                        />
+                        {/* Select Sort Type */}
+                        <BlogSortDropdown onSortChange={setSelectSortType} />
+                        {/* Sort ASC/ DES */}
+                        <Toggle
+                            pressed={isSortAsc}
+                            onPressedChange={setIsSortAsc}
+                            className="cursor-pointer"
+                        >
+                            <ArrowUpDown className="h-4 w-4 mr-2" />
+                            {isSortAsc ? "A → Z" : "Z → A"}
+                        </Toggle>
                     </div>
-
-                    {/* Categories Multi-Select */}
-                    <MultiSelectCategoriesFilter
-                        data={categoryData}
-                        isPending={isPending}
-                        onCategoryChange={setSelectedCategoryIds}
-                    />
-                    {/* Select Doctor with Combobox */}
-                    <DoctorSelectFilter
-                        doctors={doctors}
-                        onDoctorChange={setSelectDoctor}
-                    />
                 </div>
             </motion.div>
 
@@ -267,7 +291,7 @@ export default function ModeratorManageBlogComponent() {
                                     {getStatusText(data.status)}
                                 </div>
                                 <p className="text-gray-600 text-[0.9rem] font-light">
-                                    {data.createdDate}
+                                    {data.createdDate.split("T")[0]}
                                 </p>
                             </div>
                             <div className="content-center mt-4">
@@ -276,15 +300,21 @@ export default function ModeratorManageBlogComponent() {
                                 </h1>
                             </div>
 
-                            <div className="flex mt-4 items-center gap-4">
-                                <Image
-                                    src={data.doctor.imageUrl}
-                                    alt="avatar"
-                                    width={50}
-                                    height={50}
-                                    className="w-[50px] h-[50px]"
-                                />
-                                <p className="">{data.doctor.fullName}</p>
+                            <div className="flex justify-between items-center mt-4">
+                                <div className="flex items-center gap-4">
+                                    <Image
+                                        src={data.doctor.imageUrl}
+                                        alt="avatar"
+                                        width={50}
+                                        height={50}
+                                        className="w-[50px] h-[50px]"
+                                    />
+                                    <p className="">{data.doctor.fullName}</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Eye />
+                                    <p>{data.view}</p>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
