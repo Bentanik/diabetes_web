@@ -22,6 +22,10 @@ declare namespace REQUEST {
         isSortAsc: boolean;
     };
 
+    type BlogId = {
+        blogId: string;
+    };
+
     enum BlogStatus {
         Draft = -2,
         Pending = 0,
@@ -70,5 +74,20 @@ declare namespace API {
         totalPages: number;
         hasNextPage: boolean;
         hasPreviousPage: boolean;
+    };
+
+    type TGetBlog = {
+        id: string;
+        title: string;
+        content: string;
+        contentHtml: string;
+        thumbnail: string;
+        createdDate: string;
+        view: number;
+        like: number;
+        categories: Category[];
+        status: number;
+        moderator: Moderator;
+        doctor: Doctor;
     };
 }

@@ -12,7 +12,18 @@ export const createBlogAsync = async (body: FormData) => {
     return response.data;
 };
 
-export const getAllPost = async ({
+export const getBlog = async ({ blogId }: REQUEST.BlogId) => {
+    const response = await request<TResponseData<API.TGetBlog>>(
+        API_ENDPOINTS.GET_POST,
+        {
+            method: "GET",
+            params: { id: blogId },
+        }
+    );
+    return response.data;
+};
+
+export const getAllBlogs = async ({
     searchContent = "",
     categoryIds = [],
     status,
