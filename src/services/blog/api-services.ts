@@ -14,10 +14,9 @@ export const createBlogAsync = async (body: FormData) => {
 
 export const getBlog = async ({ blogId }: REQUEST.BlogId) => {
     const response = await request<TResponseData<API.TGetBlog>>(
-        API_ENDPOINTS.GET_POST,
+        API_ENDPOINTS.GET_POST(blogId),
         {
             method: "GET",
-            params: { id: blogId },
         }
     );
     return response.data;

@@ -22,7 +22,7 @@ declare namespace REQUEST {
         isSortAsc: boolean;
     };
 
-    type BlogId = {
+    export type BlogId = {
         blogId: string;
     };
 

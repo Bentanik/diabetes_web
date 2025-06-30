@@ -1,11 +1,14 @@
-"use client";
-
 import React from "react";
-import { useParams } from "next/navigation";
+import BlogDetail from "../components";
 
-export default function BlogDetailPage() {
-    const params = useParams();
-    const blogId = params.blogId;
-
-    return <div>BlogDetail {blogId}</div>;
+export default function BlogDetailPage({
+    params,
+}: {
+    params: { blogId: string };
+}) {
+    return (
+        <div>
+            <BlogDetail blogId={params?.blogId} />
+        </div>
+    );
 }

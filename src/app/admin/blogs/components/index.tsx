@@ -118,6 +118,15 @@ export default function ModeratorManageBlogComponent() {
     );
     const [isSortAsc, setIsSortAsc] = useState(true);
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    };
+
     const { getCategoriesApi, isPending } = useGetDataCategories();
 
     const handleGetData = async (pageIndex: number) => {
@@ -292,7 +301,9 @@ export default function ModeratorManageBlogComponent() {
                                         {getStatusText(data.status)}
                                     </div>
                                     <p className="text-gray-600 text-[0.9rem] font-light">
-                                        {data.createdDate.split("T")[0]}
+                                        {data?.createdDate
+                                            ? formatDate(data.createdDate)
+                                            : "Không hiển thị ngày đăng"}
                                     </p>
                                 </div>
                                 <div className="content-center mt-4">
