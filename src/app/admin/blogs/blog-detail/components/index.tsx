@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import useGetBlog from "../hooks/use-get-blog";
-import { da } from "date-fns/locale";
 import Image from "next/image";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
@@ -36,7 +35,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
             <div className="mt-5 py-[2%] px-[10%] bg-[#ffffff] shadow-2xl rounded-2xl">
                 {/*Header*/}
                 <div>
-                    <h1 className="text-[2.7rem] font-bold leading-[49px] text-justify">
+                    <h1 className="text-[2.7rem] font-bold leading-[49px]">
                         {data?.title}
                     </h1>
                     <div className="flex mt-4">

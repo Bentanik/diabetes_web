@@ -8,10 +8,7 @@ export const blogSchema = z.object({
         .string()
         .min(2, "Tiêu đề bài viết phải có ít nhất 2 kí tự")
         .max(100, "Tiêu đề bài viết không được quá 100 kí tự"),
-    contentHtml: z
-        .string()
-        .min(100, "Nội dung phải hơn 100 kí tự")
-        .max(3000, "Nội dung không đươc vượt quá 3000 kí tự"),
+    contentHtml: z.string().min(100, "Nội dung phải hơn 100 kí tự"),
     categoryIds: z
         .array(z.string())
         .min(1, "Phải chọn ít nhất 1 thể loại cho bài viết"),

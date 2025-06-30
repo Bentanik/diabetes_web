@@ -330,7 +330,7 @@ export default function CreatePostForm() {
                                         <TiptapEditor
                                             content={field.value}
                                             onUpdate={(html) => {
-                                                updateContentHtml(html); // Update field value
+                                                updateContentHtml(html);
                                                 form.trigger("contentHtml");
                                             }}
                                             name="contentHtml"

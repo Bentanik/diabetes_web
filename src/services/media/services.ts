@@ -31,11 +31,11 @@ export const useDeleteImageService = () => {
     const { addToast } = useToast();
     return useMutation<TResponse, TMeta, REQUEST.TDeleteImage>({
         mutationFn: deleteImageAsync,
-        onSuccess: (data) => {
+        onSuccess: () => {
             addToast(
                 {
                     type: "success",
-                    description: data.value.message,
+                    description: "Xóa ảnh thành công",
                     duration: 5000,
                 },
                 false

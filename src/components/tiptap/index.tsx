@@ -15,12 +15,52 @@ import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image
 import { v4 as uuidv4 } from "uuid";
 import useDeleteImage from "@/app/admin/blogs/create-blog/hooks/use-delete-image";
 import { Controller, Control, useFormContext } from "react-hook-form";
+import { Extension } from "@tiptap/core";
 
 interface TiptapEditorProps {
     content: string;
     onUpdate: (content: string) => void;
     name: string;
 }
+
+// Extension tùy chỉnh để xử lý phím Enter
+const CustomEnter = Extension.create({
+    name: "customEnter",
+
+    addKeyboardShortcuts() {
+        return {
+            Enter: ({ editor }) => {
+                const { state, view } = editor;
+                const { selection } = state;
+                const { $from, $to } = selection;
+
+                // Kiểm tra xem con trỏ có đang ở giữa một đoạn văn không
+                if ($from.parent.type.name === "paragraph") {
+                    // Nếu con trỏ ở cuối đoạn văn, chèn thẻ <br>
+                    if (
+                        $from.pos === $to.pos &&
+                        $from.parentOffset === $from.parent.nodeSize - 2
+                    ) {
+                        editor.commands.insertContent("<br><br>");
+                        return true;
+                    } else {
+                        // Nếu con trỏ ở giữa đoạn văn, tách đoạn văn
+                        editor.commands.splitBlock();
+                        return true;
+                    }
+                }
+
+                // Hành vi mặc định cho các node khác (như heading)
+                return false;
+            },
+            "Shift-Enter": ({ editor }) => {
+                // Shift+Enter luôn chèn <br>
+                editor.commands.insertContent("<br>");
+                return true;
+            },
+        };
+    },
+});
 
 let editorInstance: Editor | null = null;
 
@@ -30,11 +70,11 @@ class ImageDeleteTracker {
         string,
         { url: string; element?: HTMLElement }
     > = new Map();
-    private deletedImageIds: Set<string> = new Set(); // Track deleted image IDs
+    private deletedImageIds: Set<string> = new Set();
     private observer: MutationObserver | null = null;
     private editorContainer: HTMLElement | null = null;
     private deleteImageFn: ((ids: string[]) => void) | null = null;
-    private preventedUndoSteps: Set<string> = new Set(); // Track prevented undo steps
+    private preventedUndoSteps: Set<string> = new Set();
 
     public setDeleteImageFn(fn: (ids: string[]) => void) {
         this.deleteImageFn = fn;
@@ -62,16 +102,12 @@ class ImageDeleteTracker {
             });
 
             if (deletedImageIds.length > 0) {
-                // Mark images as deleted
                 deletedImageIds.forEach((id) => this.deletedImageIds.add(id));
-                // Set last action as image deletion
                 this.setLastAction("delete_image");
-                // Invalidate URLs in the editor
                 this.invalidateImageUrls(deletedImageIds);
                 if (this.deleteImageFn) {
                     this.deleteImageFn(deletedImageIds);
                 }
-                // Better undo prevention
                 this.preventUndoForDeletedImages(deletedImageIds);
             }
         });
@@ -92,26 +128,17 @@ class ImageDeleteTracker {
     private preventUndoForDeletedImages(imageIds: string[]) {
         if (!editorInstance) return;
 
-        // Method 1: Clear history completely and force a new history entry
         const currentContent = editorInstance.getHTML();
-
-        // Disable history temporarily
         editorInstance.setOptions({
             enableInputRules: false,
             enablePasteRules: false,
         });
 
-        // Create a new editor state without history
         setTimeout(() => {
             if (editorInstance) {
-                // Force recreation of editor state
                 editorInstance.commands.clearContent();
                 editorInstance.commands.setContent(currentContent, false);
-
-                // Add a checkpoint to history that can't be undone past
                 editorInstance.commands.setMeta("preventUndo", true);
-
-                // Re-enable input rules
                 editorInstance.setOptions({
                     enableInputRules: true,
                     enablePasteRules: true,
@@ -130,12 +157,11 @@ class ImageDeleteTracker {
             if (node.type.name === "image") {
                 const imageId = node.attrs.title;
                 if (imageIds.includes(imageId)) {
-                    // Add a random character to break the URL
                     const invalidUrl =
                         node.attrs.src + "#invalid_" + Date.now();
                     transaction.setNodeMarkup(pos, undefined, {
                         ...node.attrs,
-                        src: invalidUrl, // Invalidate the URL
+                        src: invalidUrl,
                     });
                     updated = true;
                 }
@@ -168,42 +194,29 @@ class ImageDeleteTracker {
         return this.deletedImageIds.has(imageId);
     }
 
-    // Method to check if undo would restore deleted images
     public wouldUndoRestoreDeletedImages(): boolean {
         if (!editorInstance || this.deletedImageIds.size === 0) return false;
 
-        // Get the current state
         const currentState = editorInstance.state;
-
         try {
-            // Get current content
             const currentHTML = editorInstance.getHTML();
-
-            // Check if current content contains any deleted image IDs
             for (const deletedId of this.deletedImageIds) {
                 if (currentHTML.includes(deletedId)) {
-                    // If current content already has deleted image,
-                    // this means undo would restore it
                     return true;
                 }
             }
-
-            // Since direct access to history state is not reliable,
-            // assume undo might restore deleted images if recent deletion occurred
             if (
                 this.lastAction === "delete_image" &&
                 Date.now() - this.lastActionTime < 1000
             ) {
                 return true;
             }
-
             return false;
         } catch (error) {
             return false;
         }
     }
 
-    // Track the last action to make smarter decisions
     private lastAction: "delete_image" | "other" | null = null;
     private lastActionTime: number = 0;
 
@@ -215,16 +228,12 @@ class ImageDeleteTracker {
     public shouldPreventUndo(): boolean {
         if (!editorInstance || this.deletedImageIds.size === 0) return false;
 
-        // If the last action was deleting an image and it was recent (within 1 second),
-        // prevent undo to avoid restoring the deleted image
         if (
             this.lastAction === "delete_image" &&
             Date.now() - this.lastActionTime < 1000
         ) {
             return true;
         }
-
-        // Otherwise, allow undo for other actions
         return false;
     }
 
@@ -236,7 +245,6 @@ class ImageDeleteTracker {
     }
 }
 
-// Create global instance for ImageDeleteTracker
 const imageTracker = new ImageDeleteTracker();
 
 const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
@@ -245,7 +253,6 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
 
     const handleDeleteImages = (ids: string[]) => {
         onSubmitDelete(ids, () => {
-            // Invalidate URLs after API delete
             imageTracker.invalidateImageUrls(ids);
         });
     };
@@ -352,7 +359,6 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
                 className="px-2 py-1 border border-gray-300 rounded text-sm"
             >
                 <option value="0">Paragraph</option>
-                <option value="1">Heading 1</option>
                 <option value="2">Heading 2</option>
                 <option value="3">Heading 3</option>
             </select>
@@ -434,29 +440,32 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
         </div>
     );
 };
+
 const TiptapEditorComponent = ({
     content,
     onUpdate,
     name,
 }: TiptapEditorProps) => {
     const editorRef = useRef<Editor | null>(null);
-
-    // Thêm useFormContext để lấy errors
     const {
         formState: { errors },
     } = useFormContext();
-
-    // Check error của field cụ thể
     const hasError = name ? !!errors[name] : false;
 
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
                 history: {
-                    depth: 10, // Limit history depth
-                    newGroupDelay: 500, // Group changes within 500ms
+                    depth: 10,
+                    newGroupDelay: 500,
+                },
+                paragraph: {
+                    HTMLAttributes: {
+                        class: "m-0",
+                    },
                 },
             }),
+            CustomEnter,
             Underline,
             TextAlign.configure({ types: ["heading", "paragraph"] }),
             TextStyle,
@@ -472,7 +481,7 @@ const TiptapEditorComponent = ({
                 inline: true,
                 allowBase64: false,
                 HTMLAttributes: {
-                    class: "max-w-full h-[500px] object-cover rounded-lg",
+                    class: "w-full h-[500px] object-cover rounded-lg",
                 },
             }),
             Placeholder.configure({
@@ -484,8 +493,6 @@ const TiptapEditorComponent = ({
             const html = editor.getHTML();
             onUpdate(html);
             editorInstance = editor;
-
-            // Track that user made an edit (not image deletion)
             imageTracker.setLastAction("other");
         },
         immediatelyRender: false,
@@ -494,37 +501,29 @@ const TiptapEditorComponent = ({
                 class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4",
             },
             handleKeyDown: (view, event) => {
-                // Intercept Ctrl+Z (Undo) and Ctrl+Y (Redo)
                 if (
                     (event.ctrlKey || event.metaKey) &&
                     event.key === "z" &&
                     !event.shiftKey
                 ) {
-                    // Only prevent undo if it would actually restore a deleted image
                     if (imageTracker.shouldPreventUndo()) {
                         event.preventDefault();
                         return true;
                     }
-                    // Allow undo for normal text/content changes
                     return false;
                 }
-
-                // Handle Ctrl+Y (Redo) - be more permissive with redo
                 if (
                     (event.ctrlKey || event.metaKey) &&
                     (event.key === "y" || (event.key === "z" && event.shiftKey))
                 ) {
-                    // Only prevent redo in very specific cases
                     const wouldRestoreDeleted =
                         imageTracker.wouldUndoRestoreDeletedImages();
                     if (wouldRestoreDeleted) {
                         event.preventDefault();
                         return true;
                     }
-
                     return false;
                 }
-
                 return false;
             },
             handlePaste: (view, event) => {
@@ -532,13 +531,10 @@ const TiptapEditorComponent = ({
                 if (items) {
                     for (const item of items) {
                         if (item.type.startsWith("image/")) {
-                            // Handle pasted image files (not relevant here)
                             return false;
                         }
                     }
                 }
-
-                // Check pasted HTML content for images
                 const html = event.clipboardData?.getData("text/html");
                 if (html) {
                     const parser = new DOMParser();
@@ -555,15 +551,13 @@ const TiptapEditorComponent = ({
 
                     if (hasDeletedImage) {
                         event.preventDefault();
-                        return true; // Prevent paste if any deleted image is found
+                        return true;
                     }
                 }
-
-                return false; // Allow paste for non-deleted content
+                return false;
             },
             handleDOMEvents: {
                 paste: (view, event) => {
-                    // Additional check to ensure no deleted images are pasted
                     const html = event.clipboardData?.getData("text/html");
                     if (html) {
                         const parser = new DOMParser();
@@ -576,7 +570,6 @@ const TiptapEditorComponent = ({
                                 imageTracker.isImageDeleted(imageId)
                             ) {
                                 event.preventDefault();
-
                                 return true;
                             }
                         }
