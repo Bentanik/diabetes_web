@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -12,21 +12,14 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
+import { useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
-import useDeleteImage from "@/app/admin/blogs/create-blog/hooks/use-delete-image";
-import { Controller, Control, useFormContext } from "react-hook-form";
 import { Extension } from "@tiptap/core";
-
-interface TiptapEditorProps {
-    content: string;
-    onUpdate: (content: string) => void;
-    name: string;
-}
+import debounce from "lodash.debounce";
 
 // Extension tùy chỉnh để xử lý phím Enter
 const CustomEnter = Extension.create({
     name: "customEnter",
-
     addKeyboardShortcuts() {
         return {
             Enter: ({ editor }) => {
@@ -34,9 +27,7 @@ const CustomEnter = Extension.create({
                 const { selection } = state;
                 const { $from, $to } = selection;
 
-                // Kiểm tra xem con trỏ có đang ở giữa một đoạn văn không
                 if ($from.parent.type.name === "paragraph") {
-                    // Nếu con trỏ ở cuối đoạn văn, chèn thẻ <br>
                     if (
                         $from.pos === $to.pos &&
                         $from.parentOffset === $from.parent.nodeSize - 2
@@ -44,17 +35,13 @@ const CustomEnter = Extension.create({
                         editor.commands.insertContent("<br><br>");
                         return true;
                     } else {
-                        // Nếu con trỏ ở giữa đoạn văn, tách đoạn văn
                         editor.commands.splitBlock();
                         return true;
                     }
                 }
-
-                // Hành vi mặc định cho các node khác (như heading)
                 return false;
             },
             "Shift-Enter": ({ editor }) => {
-                // Shift+Enter luôn chèn <br>
                 editor.commands.insertContent("<br>");
                 return true;
             },
@@ -73,12 +60,7 @@ class ImageDeleteTracker {
     private deletedImageIds: Set<string> = new Set();
     private observer: MutationObserver | null = null;
     private editorContainer: HTMLElement | null = null;
-    private deleteImageFn: ((ids: string[]) => void) | null = null;
     private preventedUndoSteps: Set<string> = new Set();
-
-    public setDeleteImageFn(fn: (ids: string[]) => void) {
-        this.deleteImageFn = fn;
-    }
 
     constructor() {
         this.initObserver();
@@ -105,9 +87,6 @@ class ImageDeleteTracker {
                 deletedImageIds.forEach((id) => this.deletedImageIds.add(id));
                 this.setLastAction("delete_image");
                 this.invalidateImageUrls(deletedImageIds);
-                if (this.deleteImageFn) {
-                    this.deleteImageFn(deletedImageIds);
-                }
                 this.preventUndoForDeletedImages(deletedImageIds);
             }
         });
@@ -197,7 +176,6 @@ class ImageDeleteTracker {
     public wouldUndoRestoreDeletedImages(): boolean {
         if (!editorInstance || this.deletedImageIds.size === 0) return false;
 
-        const currentState = editorInstance.state;
         try {
             const currentHTML = editorInstance.getHTML();
             for (const deletedId of this.deletedImageIds) {
@@ -247,19 +225,22 @@ class ImageDeleteTracker {
 
 const imageTracker = new ImageDeleteTracker();
 
-const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
+interface TiptapEditorProps {
+    content: string;
+    onUpdate: (content: string) => void;
+    name: string;
+}
+
+const TiptapToolbar = ({
+    editor,
+    countdown,
+    savedMessage,
+}: {
+    editor: Editor | null;
+    countdown: number | null;
+    savedMessage: string;
+}) => {
     const { onSubmit, isPending } = useUploadImage();
-    const { onSubmitDelete } = useDeleteImage();
-
-    const handleDeleteImages = (ids: string[]) => {
-        onSubmitDelete(ids, () => {
-            imageTracker.invalidateImageUrls(ids);
-        });
-    };
-
-    useEffect(() => {
-        imageTracker.setDeleteImageFn(handleDeleteImages);
-    }, []);
 
     if (!editor) return null;
 
@@ -336,7 +317,7 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
     };
 
     return (
-        <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50">
+        <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50 items-center">
             <select
                 value={
                     editor.isActive("heading")
@@ -408,7 +389,7 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
                         editor.chain().focus().setLink({ href: url }).run();
                     }
                 }}
-                className={`px-2 py-1 border border-gray-300 rounded text-sm ${
+                className={`px-2 py-1 border border-gray-300 flared text-sm ${
                     editor.isActive("link") ? "bg-blue-200" : "bg-white"
                 }`}
             >
@@ -437,6 +418,12 @@ const TiptapToolbar = ({ editor }: { editor: Editor | null }) => {
                     {isPending ? "Đang tải..." : "📷 Image"}
                 </button>
             </div>
+
+            <div className="ml-auto text-sm text-gray-500">
+                {countdown !== null && countdown > 0
+                    ? `Sẽ lưu sau ${countdown}s...`
+                    : savedMessage || " "}
+            </div>
         </div>
     );
 };
@@ -451,6 +438,39 @@ const TiptapEditorComponent = ({
         formState: { errors },
     } = useFormContext();
     const hasError = name ? !!errors[name] : false;
+    const [countdown, setCountdown] = useState<number | null>(null);
+    const [savedMessage, setSavedMessage] = useState<string>("");
+
+    // Hàm xử lý lưu (thay vì gọi API, in ra console và hiển thị thông báo)
+    const handleSave = useCallback((content: string) => {
+        console.log("Đã lưu:", content);
+        setSavedMessage("Đã lưu");
+        setTimeout(() => setSavedMessage(""), 2000); // Ẩn thông báo sau 2 giây
+    }, []);
+
+    // Sử dụng debounce để trì hoãn lưu sau 5 giây
+    const debouncedSave = useCallback(
+        debounce((content: string) => {
+            handleSave(content);
+        }, 5000),
+        [handleSave]
+    );
+
+    // Xử lý đếm ngược
+    useEffect(() => {
+        if (countdown === null) return;
+
+        if (countdown === 0) {
+            setCountdown(null);
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setCountdown((prev) => (prev !== null ? prev - 1 : null));
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [countdown]);
 
     const editor = useEditor({
         extensions: [
@@ -494,6 +514,10 @@ const TiptapEditorComponent = ({
             onUpdate(html);
             editorInstance = editor;
             imageTracker.setLastAction("other");
+            // Kích hoạt đếm ngược và lưu
+            setCountdown(5);
+            setSavedMessage("");
+            debouncedSave(html);
         },
         immediatelyRender: false,
         editorProps: {
@@ -611,7 +635,11 @@ const TiptapEditorComponent = ({
                     : "border-gray-200 focus-within:border-[#248fca]"
             }`}
         >
-            <TiptapToolbar editor={editor} />
+            <TiptapToolbar
+                editor={editor}
+                countdown={countdown}
+                savedMessage={savedMessage}
+            />
             <EditorContent
                 editor={editor}
                 className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[300px] max-h-[500px] overflow-y-auto"

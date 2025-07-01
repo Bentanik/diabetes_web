@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import useGetBlog from "../hooks/use-get-blog";
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const { getBlogApi, isPending } = useGetBlog();
@@ -75,6 +77,26 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                         __html: data?.contentHtml || "",
                     }}
                 />
+
+                {data?.status == -2 && (
+                    <div className="mt-10 flex justify-end gap-4">
+                        <Button
+                            variant="outline"
+                            className="cursor-pointer px-6 py-6 min-w-[180px] hover:border-red-500 hover:text-red-500"
+                        >
+                            Xóa bài viết
+                        </Button>
+                        <Link href="/admin/blogs/create-blog">
+                            <Button
+                                variant="outline"
+                                color="red"
+                                className="cursor-pointer px-6 py-6 min-w-[180px] bg-[#248FCA] hover:bg-[#2490cad8] text-white hover:text-white"
+                            >
+                                Chỉnh sửa bài viết
+                            </Button>
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );

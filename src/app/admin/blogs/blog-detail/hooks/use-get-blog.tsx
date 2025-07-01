@@ -1,7 +1,7 @@
 import useToast from "@/hooks/use-toast";
 import { getBlog } from "@/services/blog/api-services";
 import { isTResponseData } from "@/utils/compare";
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function useGetBlog() {
     const { addToast } = useToast();

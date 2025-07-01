@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import {
@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
 import useGetBlogs from "../hooks/use-get-blogs";
@@ -144,7 +143,6 @@ export default function ModeratorManageBlogComponent() {
                 isSortAsc: isSortAsc,
             });
             setTotalPage(res?.data.totalPages || 1);
-            console.log(totalPage);
             console.log(selectedStatus);
             setData(res?.data.items || []);
         } catch (err) {
@@ -274,9 +272,11 @@ export default function ModeratorManageBlogComponent() {
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {blogData.map((data, index) => (
-                    <Link href={`/admin/blogs/blog-detail/${data.id}`}>
+                    <Link
+                        href={`/admin/blogs/blog-detail/${data.id}`}
+                        key={data.id}
+                    >
                         <motion.div
-                            key={data.id}
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: index * 0.1 }}
@@ -307,7 +307,7 @@ export default function ModeratorManageBlogComponent() {
                                     </p>
                                 </div>
                                 <div className="content-center mt-4">
-                                    <h1 className="text-[1.5rem] font-medium line-clamp-2">
+                                    <h1 className="text-[1.5rem] font-medium line-clamp-2 min-h-[72px]">
                                         {data.title}
                                     </h1>
                                 </div>

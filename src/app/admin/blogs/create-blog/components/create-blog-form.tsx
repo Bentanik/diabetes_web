@@ -163,6 +163,7 @@ export default function CreatePostForm() {
                     categoryIds: data.categoryIds,
                     images: imageIds,
                     doctorId: data.doctorId,
+                    isDraft: true,
                 };
                 onSubmit(formData, handleClearImages);
             }

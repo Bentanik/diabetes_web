@@ -7,6 +7,7 @@ declare namespace REQUEST {
         categoryIds: string[];
         images: string[];
         doctorId: string;
+        isDraft: boolean;
     };
 
     type BlogRequestParam = {

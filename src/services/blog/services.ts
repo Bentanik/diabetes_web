@@ -19,6 +19,7 @@ export const useServiceCreateBlog = () => {
                 formData.append("Images", id);
             });
             formData.append("DoctorId", data.doctorId);
+            formData.append("IsDraft", "true");
 
             return await createBlogAsync(formData);
         },

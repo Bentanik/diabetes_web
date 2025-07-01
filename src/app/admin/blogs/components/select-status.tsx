@@ -32,8 +32,8 @@ export default function BlogStatusDropdown({
     const options = [
         { value: "0", label: "Chờ xác thực" },
         { value: "1", label: "Đã duyệt" },
-        { value: "(-1)", label: "Từ chối" }, // Sử dụng chuỗi để tránh xung đột với kiểu number
-        { value: "(-2)", label: "Bản nháp" },
+        { value: "-1", label: "Từ chối" },
+        { value: "-2", label: "Bản nháp" },
     ];
 
     const handleChange = (
