@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
-    const { getBlogApi, isPending } = useGetBlog();
+    const { getBlogApi, isBlogPending } = useGetBlog();
     const [data, setData] = useState<API.TGetBlog>();
 
     useEffect(() => {
@@ -33,7 +33,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
 
     return (
         <div>
-            {isPending && <div>...Loading</div>}
+            {isBlogPending && <div>...Loading</div>}
             <div className="mt-5 py-[2%] px-[10%] bg-[#ffffff] shadow-2xl rounded-2xl">
                 {/*Header*/}
                 <div>

@@ -1,4 +1,4 @@
-import { useServiceCreateBlog } from "@/services/blog/services";
+import { useServiceUpdateBlog } from "@/services/blog/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,7 +17,7 @@ export const blogSchema = z.object({
 
 export type BlogFormData = z.infer<typeof blogSchema>;
 
-export default function useCreateBlog() {
+export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
     const form = useForm<BlogFormData>({
         resolver: zodResolver(blogSchema),
         defaultValues: {
@@ -28,9 +28,9 @@ export default function useCreateBlog() {
         },
     });
 
-    const { mutate, isPending } = useServiceCreateBlog();
+    const { mutate, isPending } = useServiceUpdateBlog({ blogId });
 
-    const onSubmit = (data: REQUEST.TCreateBlog, clearImages: () => void) => {
+    const onSubmit = (data: REQUEST.TUpdateBlog, clearImages: () => void) => {
         mutate(data, {
             onSuccess: (res) => {
                 console.log("API Success:", res);

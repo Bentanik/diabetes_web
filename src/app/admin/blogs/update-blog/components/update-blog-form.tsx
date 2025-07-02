@@ -17,14 +17,14 @@ import {
 } from "@/components/ui/form";
 import { useState, useEffect } from "react";
 import TiptapEditor from "@/components/tiptap";
-import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
-import MultiSelectCategories from "@/app/admin/blogs/create-blog/components/select-category";
-import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
-import DoctorSelect from "@/app/admin/blogs/create-blog/components/select-doctor";
-import useCreateBlog, {
+import useUploadImage from "@/app/admin/blogs/update-blog/hooks/use-upload-image";
+import MultiSelectCategories from "@/app/admin/blogs/update-blog/components/select-category";
+import useGetDataCategories from "@/app/admin/blogs/update-blog/hooks/use-get-categories";
+import DoctorSelect from "@/app/admin/blogs/update-blog/components/select-doctor";
+import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
+import useUpdateBlog, {
     BlogFormData,
-} from "@/app/admin/blogs/create-blog/hooks/use-create-blog";
-
+} from "@/app/admin/blogs/update-blog/hooks/use-update-blog";
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -77,7 +77,7 @@ const doctors = [
     },
 ];
 
-export default function CreatePostForm() {
+export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const { onSubmit: uploadImage, isPending: isUploading } = useUploadImage();
     const { getCategoriesApi, isPending } = useGetDataCategories();
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
@@ -87,7 +87,9 @@ export default function CreatePostForm() {
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
-    const { form, onSubmit } = useCreateBlog();
+    const { getBlogApi, isBlogPending } = useGetBlog();
+    const [blogData, setBlogData] = useState<API.TGetBlog>();
+    const { form, onSubmit } = useUpdateBlog({ blogId: blogId });
 
     useEffect(() => {
         const handleGetData = async () => {
@@ -100,6 +102,18 @@ export default function CreatePostForm() {
         };
         handleGetData();
     }, []);
+
+    useEffect(() => {
+        const handleGetBlogData = async (id: string) => {
+            try {
+                const res = await getBlogApi({ blogId: id });
+                setBlogData(res?.data);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        handleGetBlogData(blogId);
+    }, [blogId]);
 
     const extractImageIds = (html: string): string[] => {
         const parser = new DOMParser();
@@ -155,7 +169,7 @@ export default function CreatePostForm() {
         setIsSubmitting(true);
         try {
             if (logoFile != null) {
-                const formData: REQUEST.TCreateBlog = {
+                const formData: REQUEST.TUpdateBlog = {
                     title: data.title,
                     content: content,
                     contentHtml: data.contentHtml,
@@ -187,6 +201,7 @@ export default function CreatePostForm() {
     return (
         <div className="min-h-screen">
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
+            {isBlogPending && <div>...Loading</div>}
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleFormSubmit)}

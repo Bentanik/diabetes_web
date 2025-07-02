@@ -23,9 +23,10 @@ import PaginatedComponent from "@/components/paginated";
 import BlogStatusDropdown from "./select-status";
 import DoctorSelectFilter from "@/components/select_doctor";
 import MultiSelectCategoriesFilter from "@/components/select-category";
-import useGetDataCategories from "@/app/admin/blogs/create-blog/hooks/use-get-categories";
+import useGetDataCategories from "@/app/admin/blogs/update-blog/hooks/use-get-categories";
 import BlogSortDropdown from "@/components/select-sort";
 import SearchInput from "@/components/search";
+import useCreateBlog from "@/app/admin/blogs/hooks/use-create-blog";
 
 const doctors = [
     {
@@ -61,6 +62,19 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
+    const { onSubmit } = useCreateBlog();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleCreateForm = () => {
+        setIsSubmitting(true);
+        try {
+            onSubmit();
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -83,11 +97,28 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
                     />
                     <Link href="/admin/blogs/create-blog">
                         <Button
+                            type="submit"
+                            disabled={isSubmitting}
                             variant="outline"
                             className="gap-2 cursor-pointer"
+                            onClick={handleCreateForm}
                         >
-                            <HospitalIcon className="w-4 h-4" />
-                            Thêm bài viết
+                            {isSubmitting ? (
+                                <div className="flex items-center gap-2">
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{
+                                            duration: 1,
+                                            repeat: Infinity,
+                                            ease: "linear",
+                                        }}
+                                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                    />
+                                    Đang tạo...
+                                </div>
+                            ) : (
+                                "Tạo bài post"
+                            )}
                         </Button>
                     </Link>
                     <Button variant="ghost" size="icon">
@@ -185,7 +216,7 @@ export default function ModeratorManageBlogComponent() {
             case -1:
                 return <BadgeX color="red" className="w-4 h-4" />;
             case -2:
-                return <BadgeX color="gray" className="w-4 h-4" />;
+                return <CircleDotDashed color="gray" className="w-4 h-4" />;
             default:
                 return <XCircleIcon className="w-4 h-4" />;
         }
@@ -213,9 +244,8 @@ export default function ModeratorManageBlogComponent() {
 
     const blogData = data.filter((data) => {
         const matchesSearch = data.title
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase());
-
+            ? data.title.toLowerCase().includes(searchTerm.toLowerCase())
+            : false;
         const matchesStatus =
             selectedStatus === 1 || data.status === selectedStatus;
 

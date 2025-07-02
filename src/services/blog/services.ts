@@ -1,12 +1,31 @@
 import useToast from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { createBlogAsync } from "./api-services";
+import { createBlogAsync, UpdateBlogAsync } from "./api-services";
 
 export const useServiceCreateBlog = () => {
     const { addToast } = useToast();
 
-    return useMutation<TResponse, TMeta, REQUEST.TCreateBlog>({
-        mutationFn: async (data: REQUEST.TCreateBlog) => {
+    return useMutation<TResponse, TMeta, void>({
+        mutationFn: async () => {
+            return await createBlogAsync();
+        },
+        onSuccess: () => {
+            console.log("onSuccess called, attempting to show toast");
+            addToast({
+                type: "success",
+                description: "Tạo bài viết thành công",
+                duration: 5000,
+            });
+            console.log("Toast dispatched");
+        },
+    });
+};
+
+export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
+    const { addToast } = useToast();
+
+    return useMutation<TResponse, TMeta, REQUEST.TUpdateBlog>({
+        mutationFn: async (data: REQUEST.TUpdateBlog) => {
             const formData = new FormData();
             formData.append("Title", data.title);
             formData.append("Content", data.content);
@@ -21,7 +40,7 @@ export const useServiceCreateBlog = () => {
             formData.append("DoctorId", data.doctorId);
             formData.append("IsDraft", "true");
 
-            return await createBlogAsync(formData);
+            return await UpdateBlogAsync({ blogId }, formData);
         },
         onSuccess: () => {
             console.log("onSuccess called, attempting to show toast");

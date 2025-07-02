@@ -5,10 +5,10 @@ import { useState } from "react";
 
 export default function useGetBlog() {
     const { addToast } = useToast();
-    const [isPending, setIsPending] = useState<boolean>(false);
+    const [isBlogPending, setIsBlogPending] = useState<boolean>(false);
 
     const getBlogApi = async (param: REQUEST.BlogId) => {
-        setIsPending(true);
+        setIsBlogPending(true);
         try {
             const res = await getBlog(param);
             if (isTResponseData(res)) {
@@ -27,9 +27,9 @@ export default function useGetBlog() {
             });
             return null;
         } finally {
-            setIsPending(false);
+            setIsBlogPending(false);
         }
     };
 
-    return { getBlogApi, isPending };
+    return { getBlogApi, isBlogPending };
 }

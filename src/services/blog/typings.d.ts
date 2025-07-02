@@ -1,5 +1,5 @@
 declare namespace REQUEST {
-    type TCreateBlog = {
+    type TUpdateBlog = {
         title: string;
         content: string;
         contentHtml: string;
@@ -90,5 +90,9 @@ declare namespace API {
         status: number;
         moderator: Moderator;
         doctor: Doctor;
+    };
+
+    type TGetBlogId = {
+        blogId: string;
     };
 }

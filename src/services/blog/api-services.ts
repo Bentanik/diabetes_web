@@ -1,14 +1,27 @@
 import API_ENDPOINTS from "@/services/blog/api-path";
 import request from "@/services/interceptor";
 
-export const createBlogAsync = async (body: FormData) => {
+export const createBlogAsync = async () => {
     const response = await request<TResponse>(API_ENDPOINTS.POST, {
         method: "POST",
-        data: body,
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
     });
+    return response.data;
+};
+
+export const UpdateBlogAsync = async (
+    { blogId }: REQUEST.BlogId,
+    body: FormData
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.UPDATE_POST(blogId),
+        {
+            method: "PUT",
+            data: body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
     return response.data;
 };
 
