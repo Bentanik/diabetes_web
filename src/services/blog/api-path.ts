@@ -5,10 +5,12 @@ const POST =
 const GET_POSTS = POST + "/system";
 const GET_POST = (id: string) => `${GET_POSTS}/${id}`;
 const UPDATE_POST = GET_POST;
+const REVIEW_POST = (id: string) => `${POST}/review/${id}`;
 
 export default {
     POST,
     GET_POSTS,
     GET_POST,
     UPDATE_POST,
+    REVIEW_POST,
 };

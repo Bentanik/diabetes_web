@@ -1,6 +1,10 @@
 import useToast from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { createBlogAsync, UpdateBlogAsync } from "./api-services";
+import {
+    createBlogAsync,
+    updateBlogAsync,
+    reviewBlogAsync,
+} from "./api-services";
 
 export const useServiceCreateBlog = () => {
     const { addToast } = useToast();
@@ -40,7 +44,7 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
             formData.append("DoctorId", data.doctorId);
             formData.append("IsDraft", "true");
 
-            return await UpdateBlogAsync({ blogId }, formData);
+            return await updateBlogAsync({ blogId }, formData);
         },
         onSuccess: () => {
             console.log("onSuccess called, attempting to show toast");
@@ -50,6 +54,40 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
                 duration: 5000,
             });
             console.log("Toast dispatched");
+        },
+    });
+};
+
+export const useServiceReviewBlog = ({ blogId }: REQUEST.BlogId) => {
+    const { addToast } = useToast();
+
+    return useMutation<TResponse, TMeta, REQUEST.ReviewBlog>({
+        mutationFn: async (data: REQUEST.ReviewBlog) => {
+            // Gửi dữ liệu dạng JSON
+            const response = await reviewBlogAsync(
+                { blogId },
+                {
+                    isApproved: data.isApproved,
+                    reasonRejected: data.reasonRejected,
+                }
+            );
+            return response as TResponse;
+        },
+        onSuccess: () => {
+            console.log("Gửi đánh giá bài viết thành công");
+            addToast({
+                type: "success",
+                description: "Duyệt bài viết thành công",
+                duration: 5000,
+            });
+        },
+        onError: (err: any) => {
+            console.error("Lỗi API:", err);
+            addToast({
+                type: "error",
+                description: "Duyệt bài viết không thành công",
+                duration: 5000,
+            });
         },
     });
 };

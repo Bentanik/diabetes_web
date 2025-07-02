@@ -1,5 +1,5 @@
 import React from "react";
-import UpdateBlogForm from "../components/update-blog-form";
+import UpdateBlogComponent from "../components";
 
 export default function BlogUpdateFormPage({
     params,
@@ -8,7 +8,7 @@ export default function BlogUpdateFormPage({
 }) {
     return (
         <div>
-            <UpdateBlogForm blogId={params?.blogId} />
+            <UpdateBlogComponent blogId={params?.blogId} />
         </div>
     );
 }

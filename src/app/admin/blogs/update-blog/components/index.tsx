@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import CreateBlogForm from "@/app/admin/blogs/create-blog/components/create-blog-form";
+import UpdateBlogForm from "@/app/admin/blogs/update-blog/components/update-blog-form";
 import { BellIcon } from "lucide-react";
 
 const Header = () => {
@@ -36,7 +36,7 @@ const Header = () => {
     );
 };
 
-export default function CreateBlogComponent() {
+export default function UpdateBlogComponent({ blogId }: REQUEST.BlogId) {
     return (
         <div>
             {/* Header */}
@@ -51,7 +51,7 @@ export default function CreateBlogComponent() {
                 transition={{ delay: 0.3 }}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
-                <CreateBlogForm />
+                <UpdateBlogForm blogId={blogId} />
             </motion.div>
         </div>
     );

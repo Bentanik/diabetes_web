@@ -10,6 +10,11 @@ declare namespace REQUEST {
         isDraft: boolean;
     };
 
+    type ReviewBlog = {
+        isApproved: boolean;
+        reasonRejected: string;
+    };
+
     type BlogRequestParam = {
         searchContent: string;
         categoryIds: string[];

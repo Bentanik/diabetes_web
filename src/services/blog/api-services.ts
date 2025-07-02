@@ -8,7 +8,7 @@ export const createBlogAsync = async () => {
     return response.data;
 };
 
-export const UpdateBlogAsync = async (
+export const updateBlogAsync = async (
     { blogId }: REQUEST.BlogId,
     body: FormData
 ) => {
@@ -23,6 +23,32 @@ export const UpdateBlogAsync = async (
         }
     );
     return response.data;
+};
+
+export const reviewBlogAsync = async (
+    { blogId }: REQUEST.BlogId,
+    body: { isApproved: boolean; reasonRejected: string }
+) => {
+    // Kiểm tra blogId hợp lệ
+    if (!blogId) {
+        throw new Error("blogId là bắt buộc");
+    }
+
+    try {
+        const response = await request<TResponse>(
+            API_ENDPOINTS.REVIEW_POST(blogId),
+            {
+                method: "PUT",
+                data: body,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        console.log(error);
+    }
 };
 
 export const getBlog = async ({ blogId }: REQUEST.BlogId) => {
