@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable prefer-const */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 import {
     getStorageItem,
@@ -10,6 +8,7 @@ import {
 import axios, { AxiosError } from "axios";
 //   import { refreshToken } from "@/services/auth/api-services";
 import useToast from "@/hooks/use-toast";
+import { refreshTokenAsync } from "@/services/auth/api-services";
 //   import useLogout from "@/hooks/use-logout";
 
 const request = axios.create({
@@ -18,7 +17,7 @@ const request = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-    withCredentials: true,
+    withCredentials: false,
 });
 
 const handleLogout = () => {
@@ -80,31 +79,32 @@ const errorHandler = async (error: AxiosError) => {
         return Promise.reject(result);
     }
 
-    // if (error.response?.status === 401 && error?.config) {
-    //   const originalRequest = error?.config;
+    if (error.response?.status === 401 && error?.config) {
+        const originalRequest = error?.config;
+        const refreshToken = getStorageItem("refreshToken");
+        if (!refreshTokenPromise) {
+            refreshTokenPromise = refreshTokenAsync({
+                refreshToken: refreshToken || ""
+            })
+                .then((res: any) => {
+                    setStorageItem("accessToken", res.value.data.accessToken);
+                    setStorageItem("refreshToken", res.value.data.refreshToken);
+                })
+                .catch((err: any) => {
+                    removeStorageItem("accessToken");
+                    location.href = "/";
+                    return Promise.reject(err);
+                })
+                .finally(() => {
+                    refreshTokenPromise = null;
+                });
+        }
 
-    //   if (!refreshTokenPromise) {
-    //     refreshTokenPromise = refreshToken()
-    //       .then((res: any) => {
-    //         const accessToken = `${res?.tokenType} ${res?.accessToken}`;
-    //         setStorageItem("accessToken", accessToken);
-    //         request.defaults.headers.Authorization = accessToken;
-    //       })
-    //       .catch((err: any) => {
-    //         removeStorageItem("accessToken");
-    //         location.href = "/";
-    //         return Promise.reject(err);
-    //       })
-    //       .finally(() => {
-    //         refreshTokenPromise = null;
-    //       });
-    //   }
-
-    //   return refreshTokenPromise.then(() => {
-    //     originalRequest.headers.Authorization = getStorageItem("accessToken");
-    //     return request(originalRequest);
-    //   });
-    // }
+        return refreshTokenPromise.then(() => {
+            originalRequest.headers.Authorization = getStorageItem("accessToken");
+            return request(originalRequest);
+        });
+    }
 
     return Promise.reject(responseMeta);
 };

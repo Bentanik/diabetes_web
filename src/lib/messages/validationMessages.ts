@@ -24,4 +24,10 @@ export const validationMessages = {
     max_length: "Xác nhận mật khẩu phải có tối đa 50 ký tự",
     not_match: "Mật khẩu xác nhận không khớp",
   },
+  knowledge_name: {
+    required: "Tên thư mục không được để trống",
+  },
+  knowledge_description: {
+    required: "Mô tả thư mục không được để trống",
+  },
 };

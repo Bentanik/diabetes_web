@@ -24,7 +24,7 @@ const renderHeaderNavigations = () => {
 
 export default function Header() {
     const router = useRouter();
-    
+
     const handleRouteToLogin = () => {
         router.push('/login')
     }
@@ -75,8 +75,8 @@ export default function Header() {
 
                 {/* Login / Avatar */}
                 {/* <div>
-            <ProfileMenu profile={userInfo} />
-          </div> */}
+                    <ProfileHospitalMenu profile={userInfo} />
+                </div> */}
             </section>
         </motion.header>
     )
