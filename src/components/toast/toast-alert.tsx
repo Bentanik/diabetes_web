@@ -51,21 +51,24 @@ function ToastAlert({ type, description, dateTime, onClose }: ToastAlertProps) {
 
     return (
         <div
-            className={`border ${borderColor} rounded-md w-[400px] ${bgColor} flex flex-col border-l-4 ${type === "success"
-                ? "bg-white border-l-green-500 text-green-500"
-                : type === "error"
+            className={`border ${borderColor} rounded-md w-[400px] ${bgColor} flex flex-col border-l-4 ${
+                type === "success"
+                    ? "bg-white border-l-green-500 text-green-500"
+                    : type === "error"
                     ? "bg-white border-l-red-500 text-red-500"
                     : type === "warning"
-                        ? "bg-white border-l-yellow-500 text-yellow-500"
-                        : ""
-                }`}
+                    ? "bg-white border-l-yellow-500 text-yellow-500"
+                    : ""
+            }`}
         >
             <div className="relative py-4 pl-4 pr-10">
                 <div className="flex items-start gap-2">
                     <div className="text-green-600 text-xl"> {icon}</div>
                     <div>
                         <strong className={`${textColor}`}>{title}</strong>
-                        <div className="text-gray-600 text-sm mt-1">{description}</div>
+                        <div className="text-gray-600 text-sm mt-1">
+                            {description}
+                        </div>
                     </div>
                 </div>
                 {onClose && (
