@@ -19,6 +19,7 @@ export const removeStorageItem = (key: string): void => {
 // Lưu thông tin đăng nhập vào localStorage
 export const setAuthStorage = (authData: API.TAuthTokenDto): void => {
   setStorageItem("accessToken", authData.accessToken || "");
+  setStorageItem("refreshToken", authData.refreshToken || "");
 };
 
 // Lấy thông tin đăng nhập từ localStorage
