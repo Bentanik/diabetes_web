@@ -1,3 +1,4 @@
+// eslint-disable-next-line react-hooks/exhaustive-deps
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -5,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import {
     BellIcon,
-    HospitalIcon,
     XCircleIcon,
     FileWarning,
     BadgeCheck,
@@ -175,6 +175,7 @@ export default function ModeratorManageBlogComponent() {
             console.log(selectedStatus);
             setData(res?.data.items || []);
         } catch (err) {
+            console.log(err);
             setData([]);
         }
     };

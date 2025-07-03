@@ -16,14 +16,16 @@ import { useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { Extension } from "@tiptap/core";
 import debounce from "lodash.debounce";
+import useUpdateDraftBlog from "@/app/admin/blogs/update-blog/hooks/use-update-blog-draft";
+import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
 
-// Extension tùy chỉnh để xử lý phím Enter
+// Custom Enter Extension
 const CustomEnter = Extension.create({
     name: "customEnter",
     addKeyboardShortcuts() {
         return {
             Enter: ({ editor }) => {
-                const { state, view } = editor;
+                const { state } = editor;
                 const { selection } = state;
                 const { $from, $to } = selection;
 
@@ -51,7 +53,7 @@ const CustomEnter = Extension.create({
 
 let editorInstance: Editor | null = null;
 
-// Class to manage image deletion tracking
+// ImageDeleteTracker Class
 class ImageDeleteTracker {
     private uploadedImages: Map<
         string,
@@ -61,6 +63,8 @@ class ImageDeleteTracker {
     private observer: MutationObserver | null = null;
     private editorContainer: HTMLElement | null = null;
     private preventedUndoSteps: Set<string> = new Set();
+    private lastAction: "delete_image" | "other" | null = null;
+    private lastActionTime: number = 0;
 
     constructor() {
         this.initObserver();
@@ -85,9 +89,7 @@ class ImageDeleteTracker {
 
             if (deletedImageIds.length > 0) {
                 deletedImageIds.forEach((id) => this.deletedImageIds.add(id));
-                this.setLastAction("delete_image");
                 this.invalidateImageUrls(deletedImageIds);
-                this.preventUndoForDeletedImages(deletedImageIds);
             }
         });
     }
@@ -102,28 +104,6 @@ class ImageDeleteTracker {
                 this.uploadedImages.delete(imageId);
             }
         });
-    }
-
-    private preventUndoForDeletedImages(imageIds: string[]) {
-        if (!editorInstance) return;
-
-        const currentContent = editorInstance.getHTML();
-        editorInstance.setOptions({
-            enableInputRules: false,
-            enablePasteRules: false,
-        });
-
-        setTimeout(() => {
-            if (editorInstance) {
-                editorInstance.commands.clearContent();
-                editorInstance.commands.setContent(currentContent, false);
-                editorInstance.commands.setMeta("preventUndo", true);
-                editorInstance.setOptions({
-                    enableInputRules: true,
-                    enablePasteRules: true,
-                });
-            }
-        }, 0);
     }
 
     public invalidateImageUrls(imageIds: string[]) {
@@ -191,28 +171,9 @@ class ImageDeleteTracker {
             }
             return false;
         } catch (error) {
+            console.log(error);
             return false;
         }
-    }
-
-    private lastAction: "delete_image" | "other" | null = null;
-    private lastActionTime: number = 0;
-
-    public setLastAction(action: "delete_image" | "other") {
-        this.lastAction = action;
-        this.lastActionTime = Date.now();
-    }
-
-    public shouldPreventUndo(): boolean {
-        if (!editorInstance || this.deletedImageIds.size === 0) return false;
-
-        if (
-            this.lastAction === "delete_image" &&
-            Date.now() - this.lastActionTime < 1000
-        ) {
-            return true;
-        }
-        return false;
     }
 
     public cleanup() {
@@ -225,10 +186,12 @@ class ImageDeleteTracker {
 
 const imageTracker = new ImageDeleteTracker();
 
+// TiptapEditor Component
 interface TiptapEditorProps {
     content: string;
     onUpdate: (content: string) => void;
     name: string;
+    blogId: string;
 }
 
 const TiptapToolbar = ({
@@ -239,6 +202,7 @@ const TiptapToolbar = ({
     editor: Editor | null;
     countdown: number | null;
     savedMessage: string;
+    handleFormSubmit: () => Promise<void>;
 }) => {
     const { onSubmit, isPending } = useUploadImage();
 
@@ -288,6 +252,7 @@ const TiptapToolbar = ({
                             }
                             return true;
                         });
+                        console.log(publicId);
 
                         if (targetPos !== null) {
                             const transaction = editor.state.tr;
@@ -389,7 +354,7 @@ const TiptapToolbar = ({
                         editor.chain().focus().setLink({ href: url }).run();
                     }
                 }}
-                className={`px-2 py-1 border border-gray-300 flared text-sm ${
+                className={`px-2 py-1 border border-gray-300 rounded text-sm ${
                     editor.isActive("link") ? "bg-blue-200" : "bg-white"
                 }`}
             >
@@ -431,36 +396,136 @@ const TiptapToolbar = ({
 const TiptapEditorComponent = ({
     content,
     onUpdate,
-    name,
+    blogId,
 }: TiptapEditorProps) => {
     const editorRef = useRef<Editor | null>(null);
-    const {
-        formState: { errors },
-    } = useFormContext();
-    const hasError = name ? !!errors[name] : false;
+    const { setValue } = useFormContext();
     const [countdown, setCountdown] = useState<number | null>(null);
     const [savedMessage, setSavedMessage] = useState<string>("");
+    const { form, onSubmit } = useUpdateDraftBlog({ blogId });
+    const { getBlogApi } = useGetBlog();
+    const [data, setData] = useState<API.TGetBlog | null>(null);
 
-    // Hàm xử lý lưu (thay vì gọi API, in ra console và hiển thị thông báo)
-    const handleSave = useCallback((content: string) => {
-        console.log("Đã lưu:", content);
-        setSavedMessage("Đã lưu");
-        setTimeout(() => setSavedMessage(""), 2000); // Ẩn thông báo sau 2 giây
+    console.log(form);
+
+    useEffect(() => {
+        const handleGetData = async (id: string) => {
+            try {
+                const res = await getBlogApi({ blogId: id });
+                setData(res?.data || null);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        handleGetData(blogId);
     }, []);
 
-    // Sử dụng debounce để trì hoãn lưu sau 5 giây
-    const debouncedSave = useCallback(
-        debounce((content: string) => {
-            handleSave(content);
-        }, 5000),
-        [handleSave]
+    const latestDataRef = useRef({
+        contentText: "",
+        imageIds: [] as string[],
+        contentHtml: "",
+    });
+
+    // Lưu nội dung trước đó để so sánh
+    const previousContentRef = useRef<string>("");
+
+    // Cập nhật nội dung HTML và các thông tin liên quan
+    const updateContentHtml = useCallback(
+        (editorContent: string) => {
+            const extractTextContent = (html: string): string => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                return doc.body.textContent?.trim() || "";
+            };
+
+            const extractImageIds = (html: string): string[] => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const images = doc.querySelectorAll("img");
+                const ids: string[] = [];
+                images.forEach((img) => {
+                    const imageId = img.getAttribute("title");
+                    if (imageId && !imageTracker.isImageDeleted(imageId)) {
+                        ids.push(imageId);
+                    }
+                });
+                return ids;
+            };
+
+            const textContent = extractTextContent(editorContent);
+            const newImageIds = extractImageIds(editorContent);
+
+            // Chỉ cập nhật nếu nội dung HTML thay đổi
+            if (editorContent !== latestDataRef.current.contentHtml) {
+                setValue("contentHtml", editorContent, {
+                    shouldValidate: true,
+                });
+                latestDataRef.current = {
+                    contentText: textContent,
+                    imageIds: newImageIds,
+                    contentHtml: editorContent,
+                };
+            }
+        },
+        [setValue]
     );
 
-    // Xử lý đếm ngược
+    // Xử lý submit form
+    const handleFormSubmit = useCallback(async () => {
+        if (!onSubmit || typeof onSubmit !== "function") {
+            console.error("onSubmit is not a function");
+            setSavedMessage("Lỗi: Không thể lưu bài viết.");
+            setTimeout(() => setSavedMessage(""), 3000);
+            return;
+        }
+
+        try {
+            const formData: REQUEST.TUpdateBlogDraft = {
+                content: latestDataRef.current.contentText,
+                contentHtml: latestDataRef.current.contentHtml,
+                images: latestDataRef.current.imageIds,
+            };
+
+            await onSubmit(formData);
+            setSavedMessage("Đã lưu thành công!");
+            setTimeout(() => setSavedMessage(""), 2000);
+        } catch (error) {
+            console.error("Error updating blog draft:", error);
+            setSavedMessage("Lỗi: Không thể lưu bài viết.");
+            setTimeout(() => setSavedMessage(""), 3000);
+        }
+    }, [onSubmit]);
+
+    // Debounced function để bắt đầu đếm ngược sau khi dừng chỉnh sửa
+    const startCountdown = useCallback(
+        debounce(
+            (content: string) => {
+                if (content !== previousContentRef.current) {
+                    previousContentRef.current = content;
+                    setCountdown(5);
+                }
+            },
+            1000, // Chờ 1 giây sau khi dừng chỉnh sửa
+            { leading: false, trailing: true }
+        ),
+        []
+    );
+
+    // Gọi API khi đếm ngược hoàn tất
+    const handleSave = useCallback(
+        async (content: string) => {
+            updateContentHtml(content);
+            await handleFormSubmit();
+        },
+        [updateContentHtml, handleFormSubmit]
+    );
+
+    // Hiệu ứng để quản lý đếm ngược
     useEffect(() => {
         if (countdown === null) return;
 
         if (countdown === 0) {
+            handleSave(latestDataRef.current.contentHtml);
             setCountdown(null);
             return;
         }
@@ -470,7 +535,14 @@ const TiptapEditorComponent = ({
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [countdown]);
+    }, [countdown, handleSave]);
+
+    // Hủy debounced function khi component unmount
+    useEffect(() => {
+        return () => {
+            startCountdown.cancel();
+        };
+    }, [startCountdown]);
 
     const editor = useEditor({
         extensions: [
@@ -508,77 +580,19 @@ const TiptapEditorComponent = ({
                 placeholder: "Write something...",
             }),
         ],
-        content,
+        content: data?.contentHtml || content,
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
             onUpdate(html);
             editorInstance = editor;
-            imageTracker.setLastAction("other");
-            // Kích hoạt đếm ngược và lưu
-            setCountdown(5);
+            updateContentHtml(html);
             setSavedMessage("");
-            debouncedSave(html);
+            startCountdown(html); // Gọi debounced function để bắt đầu đếm ngược
         },
         immediatelyRender: false,
         editorProps: {
             attributes: {
                 class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4",
-            },
-            handleKeyDown: (view, event) => {
-                if (
-                    (event.ctrlKey || event.metaKey) &&
-                    event.key === "z" &&
-                    !event.shiftKey
-                ) {
-                    if (imageTracker.shouldPreventUndo()) {
-                        event.preventDefault();
-                        return true;
-                    }
-                    return false;
-                }
-                if (
-                    (event.ctrlKey || event.metaKey) &&
-                    (event.key === "y" || (event.key === "z" && event.shiftKey))
-                ) {
-                    const wouldRestoreDeleted =
-                        imageTracker.wouldUndoRestoreDeletedImages();
-                    if (wouldRestoreDeleted) {
-                        event.preventDefault();
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            },
-            handlePaste: (view, event) => {
-                const items = event.clipboardData?.items;
-                if (items) {
-                    for (const item of items) {
-                        if (item.type.startsWith("image/")) {
-                            return false;
-                        }
-                    }
-                }
-                const html = event.clipboardData?.getData("text/html");
-                if (html) {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, "text/html");
-                    const images = doc.querySelectorAll("img");
-                    let hasDeletedImage = false;
-
-                    images.forEach((img) => {
-                        const imageId = img.getAttribute("title");
-                        if (imageId && imageTracker.isImageDeleted(imageId)) {
-                            hasDeletedImage = true;
-                        }
-                    });
-
-                    if (hasDeletedImage) {
-                        event.preventDefault();
-                        return true;
-                    }
-                }
-                return false;
             },
             handleDOMEvents: {
                 paste: (view, event) => {
@@ -598,11 +612,22 @@ const TiptapEditorComponent = ({
                             }
                         }
                     }
+                    console.log(view);
                     return false;
                 },
             },
         },
     });
+
+    useEffect(() => {
+        if (
+            editor &&
+            data?.contentHtml &&
+            data.contentHtml !== editor.getHTML()
+        ) {
+            editor.commands.setContent(data.contentHtml, false);
+        }
+    }, [data, editor]);
 
     useEffect(() => {
         if (editor && content !== editor.getHTML()) {
@@ -629,20 +654,18 @@ const TiptapEditorComponent = ({
 
     return (
         <div
-            className={`border-2 rounded-lg overflow-hidden transition-colors ${
-                hasError
-                    ? "border-red-500 focus-within:border-red-500"
-                    : "border-gray-200 focus-within:border-[#248fca]"
+            className={`border- "border-gray-200 focus-within:border-[#248fca]"
             }`}
         >
             <TiptapToolbar
                 editor={editor}
                 countdown={countdown}
                 savedMessage={savedMessage}
+                handleFormSubmit={handleFormSubmit}
             />
             <EditorContent
                 editor={editor}
-                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[300px] max-h-[500px] overflow-y-auto"
+                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[300px] max-h-[500px] overflow-y-auto border rounded-b-3xl"
             />
         </div>
     );

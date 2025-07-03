@@ -25,6 +25,7 @@ export default function useGetBlog() {
                 type: "error",
                 description: "An error occurred while fetching applications",
             });
+            console.log(error);
             return null;
         } finally {
             setIsBlogPending(false);

@@ -1,3 +1,5 @@
+// eslint-disable-next-line react-hooks/exhaustive-deps
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -32,6 +34,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const [data, setData] = useState<API.TGetBlog>();
     const { onSubmit, form, isPending } = useReviewBlog({ blogId: blogId });
     const router = useRouter();
+
     useEffect(() => {
         const handleGetData = async (id: string) => {
             try {

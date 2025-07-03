@@ -21,6 +21,7 @@ export default function useGetBlogs() {
                 return null;
             }
         } catch (err) {
+            console.log(err);
             return null;
         } finally {
             setPending(false);

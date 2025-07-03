@@ -3,7 +3,7 @@ import request from "@/services/interceptor";
 
 export const createBlogAsync = async () => {
     const response = await request<TResponseData<API.TGetBlogId>>(
-        API_ENDPOINTS.POST,
+        API_ENDPOINTS.CREATE_POST,
         {
             method: "POST",
         }
@@ -17,6 +17,23 @@ export const updateBlogAsync = async (
 ) => {
     const response = await request<TResponse>(
         API_ENDPOINTS.UPDATE_POST(blogId),
+        {
+            method: "PUT",
+            data: body,
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+    return response.data;
+};
+
+export const updateBlogDraftAsync = async (
+    { blogId }: REQUEST.BlogId,
+    body: FormData
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.UPDATE_POST_DRAFT(blogId),
         {
             method: "PUT",
             data: body,
@@ -49,7 +66,7 @@ export const reviewBlogAsync = async (
             }
         );
         return response.data;
-    } catch (error: any) {
+    } catch (error) {
         console.log(error);
     }
 };

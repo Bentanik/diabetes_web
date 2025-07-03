@@ -10,6 +10,12 @@ declare namespace REQUEST {
         isDraft: boolean;
     };
 
+    type TUpdateBlogDraft = {
+        content: string;
+        contentHtml: string;
+        images: string[];
+    };
+
     type ReviewBlog = {
         isApproved: boolean;
         reasonRejected: string;

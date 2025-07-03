@@ -103,14 +103,14 @@ export default function CreateHospitalForm() {
         }
     };
 
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: "easeOut" },
-        },
-    };
+    // const itemVariants = {
+    //     hidden: { opacity: 0, y: 20 },
+    //     visible: {
+    //         opacity: 1,
+    //         y: 0,
+    //         transition: { duration: 0.5, ease: "easeOut" },
+    //     },
+    // };
 
     return (
         <div className="min-h-screen">
@@ -120,7 +120,7 @@ export default function CreateHospitalForm() {
                     className="space-y-8"
                 >
                     {/* Logo Upload Section */}
-                    <motion.div variants={itemVariants} className="space-y-4">
+                    <motion.div className="space-y-4">
                         <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                             <ImageIcon className="h-5 w-5 text-[#248fca]" />
                             Logo bệnh viện
@@ -170,7 +170,7 @@ export default function CreateHospitalForm() {
 
                     {/* Basic Information */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <motion.div variants={itemVariants}>
+                        <motion.div>
                             <FormField
                                 control={form.control}
                                 name="name"
@@ -195,7 +195,7 @@ export default function CreateHospitalForm() {
                             />
                         </motion.div>
 
-                        <motion.div variants={itemVariants}>
+                        <motion.div>
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -223,7 +223,7 @@ export default function CreateHospitalForm() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <motion.div variants={itemVariants}>
+                        <motion.div>
                             <FormField
                                 control={form.control}
                                 name="contactNumber"
@@ -248,7 +248,7 @@ export default function CreateHospitalForm() {
                             />
                         </motion.div>
 
-                        <motion.div variants={itemVariants}>
+                        <motion.div>
                             <FormField
                                 control={form.control}
                                 name="establishedDate"
@@ -308,7 +308,7 @@ export default function CreateHospitalForm() {
                         </motion.div>
                     </div>
 
-                    <motion.div variants={itemVariants}>
+                    <motion.div>
                         <FormField
                             control={form.control}
                             name="address"
@@ -333,7 +333,7 @@ export default function CreateHospitalForm() {
                         />
                     </motion.div>
 
-                    <motion.div variants={itemVariants}>
+                    <motion.div>
                         <FormField
                             control={form.control}
                             name="description"
@@ -360,10 +360,7 @@ export default function CreateHospitalForm() {
                     </motion.div>
 
                     {/* Submit Buttons */}
-                    <motion.div
-                        variants={itemVariants}
-                        className="flex justify-end gap-4 pt-8 border-t-2 border-gray-100"
-                    >
+                    <motion.div className="flex justify-end gap-4 pt-8 border-t-2 border-gray-100">
                         <Button
                             type="button"
                             variant="outline"

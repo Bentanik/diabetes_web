@@ -4,6 +4,7 @@ import {
     createBlogAsync,
     updateBlogAsync,
     reviewBlogAsync,
+    updateBlogDraftAsync,
 } from "./api-services";
 
 export const useServiceCreateBlog = () => {
@@ -64,12 +65,25 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
     });
 };
 
+export const useServiceUpdateBlogDraft = ({ blogId }: REQUEST.BlogId) => {
+    return useMutation<TResponse, TMeta, REQUEST.TUpdateBlogDraft>({
+        mutationFn: async (data: REQUEST.TUpdateBlogDraft) => {
+            const formData = new FormData();
+            formData.append("Content", data.content);
+            formData.append("ContentHtml", data.contentHtml);
+            data.images.forEach((id) => {
+                formData.append("Images", id);
+            });
+            return await updateBlogDraftAsync({ blogId }, formData);
+        },
+    });
+};
+
 export const useServiceReviewBlog = ({ blogId }: REQUEST.BlogId) => {
     const { addToast } = useToast();
 
     return useMutation<TResponse, TMeta, REQUEST.ReviewBlog>({
         mutationFn: async (data: REQUEST.ReviewBlog) => {
-            // Gửi dữ liệu dạng JSON
             const response = await reviewBlogAsync(
                 { blogId },
                 {
@@ -87,7 +101,7 @@ export const useServiceReviewBlog = ({ blogId }: REQUEST.BlogId) => {
                 duration: 5000,
             });
         },
-        onError: (err: any) => {
+        onError: (err) => {
             console.error("Lỗi API:", err);
             addToast({
                 type: "error",

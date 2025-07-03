@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 import {
     Dialog,
     DialogContent,
@@ -85,7 +86,7 @@ const doctors = [
 ];
 
 export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
-    const { onSubmit: uploadImage, isPending: isUploading } = useUploadImage();
+    const { isPending: isUploading } = useUploadImage();
     const { getCategoriesApi, isPending } = useGetDataCategories();
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,6 +99,9 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const { getBlogApi, isBlogPending } = useGetBlog();
     const [blogData, setBlogData] = useState<API.TGetBlog>();
     const { form, onSubmit } = useUpdateBlog({ blogId });
+
+    console.log(thumbnailUrl);
+    console.log(blogData);
 
     useEffect(() => {
         const handleGetData = async () => {
@@ -121,7 +125,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             }
         };
         handleGetBlogData(blogId);
-    }, [blogId]);
+    }, []);
 
     const extractImageIds = (html: string): string[] => {
         const parser = new DOMParser();
@@ -237,21 +241,21 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         }
     };
 
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: "easeOut" },
-        },
-    };
+    // const itemVariants = {
+    //     hidden: { opacity: 0, y: 20 },
+    //     visible: {
+    //         opacity: 1,
+    //         y: 0,
+    //         transition: { duration: 0.5, ease: "easeOut" },
+    //     },
+    // };
 
     return (
         <div className="min-h-screen">
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             {isBlogPending && <div>...Loading</div>}
             <Form {...form}>
-                <motion.div variants={itemVariants} className="space-y-4">
+                <motion.div className="space-y-4">
                     <FormField
                         control={form.control}
                         name="contentHtml"
@@ -269,6 +273,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                             form.trigger("contentHtml");
                                         }}
                                         name="contentHtml"
+                                        blogId={blogId}
                                     />
                                 </FormControl>
                                 <FormMessage className="flex items-center gap-1">
@@ -357,11 +362,13 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                             animate={{ opacity: 1, scale: 1 }}
                                             className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
                                         >
-                                            <img
+                                            <Image
                                                 src={
                                                     logoPreview ||
                                                     "/placeholder.svg"
                                                 }
+                                                width={20}
+                                                height={20}
                                                 alt="Logo preview"
                                                 className="w-full h-full object-cover"
                                             />
