@@ -3,7 +3,7 @@ declare namespace REQUEST {
         title: string;
         content: string;
         contentHtml: string;
-        thumbnail: File;
+        thumbnail: File | null;
         categoryIds: string[];
         images: string[];
         doctorId: string;
@@ -98,6 +98,6 @@ declare namespace API {
     };
 
     type TGetBlogId = {
-        blogId: string;
+        id: string;
     };
 }

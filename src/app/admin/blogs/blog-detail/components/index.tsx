@@ -16,7 +16,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Form,
     FormControl,
@@ -88,11 +87,14 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 {/*Header*/}
                 <div>
                     <h1 className="text-[2.7rem] font-bold leading-[49px]">
-                        {data?.title}
+                        {data?.title || "Chưa cập nhật tiêu đề bài viết"}
                     </h1>
                     <div className="flex mt-4 items-center gap-3">
                         <Image
-                            src={data?.doctor.imageUrl ?? "/images/auth1.jpg"}
+                            src={
+                                data?.doctor.imageUrl ||
+                                "/images/default_user.png"
+                            }
                             alt="doctor-avatar"
                             width={50}
                             height={50}
@@ -100,7 +102,8 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                         />
                         <div>
                             <p className="font-medium">
-                                {data?.doctor.fullName}
+                                {data?.doctor.fullName ||
+                                    "Chưa cập nhật bác sĩ"}
                             </p>
                             <p className="text-gray-400">
                                 {data?.createdDate
@@ -125,7 +128,9 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 <div
                     className="mt-6 prose prose-lg max-w-none"
                     dangerouslySetInnerHTML={{
-                        __html: data?.contentHtml || "",
+                        __html:
+                            data?.contentHtml ||
+                            "Chưa cập nhật nội dung cho bài viết",
                     }}
                 />
 
@@ -138,7 +143,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                         >
                             Xóa bài viết
                         </Button>
-                        <Link href={`/admin/blogs/edit/${blogId}`}>
+                        <Link href={`/admin/blogs/update-blog/${blogId}`}>
                             <Button
                                 variant="outline"
                                 className="cursor-pointer px-6 py-6 min-w-[180px] bg-[#248FCA] hover:bg-[#2490cad8] text-white hover:text-white"

@@ -11,7 +11,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
-import useUploadImage from "@/app/admin/blogs/create-blog/hooks/use-upload-image";
+import useUploadImage from "@/app/admin/blogs/update-blog/hooks/use-upload-image";
 import { useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { Extension } from "@tiptap/core";

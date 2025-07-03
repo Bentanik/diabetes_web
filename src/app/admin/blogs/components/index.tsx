@@ -79,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
         <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital"
+            className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shadow-hospital"
         >
             <div className="flex items-center justify-between">
                 <div>
@@ -95,32 +95,30 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
                     />
-                    <Link href="/admin/blogs/create-blog">
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            variant="outline"
-                            className="gap-2 cursor-pointer"
-                            onClick={handleCreateForm}
-                        >
-                            {isSubmitting ? (
-                                <div className="flex items-center gap-2">
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{
-                                            duration: 1,
-                                            repeat: Infinity,
-                                            ease: "linear",
-                                        }}
-                                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                                    />
-                                    Đang tạo...
-                                </div>
-                            ) : (
-                                "Tạo bài post"
-                            )}
-                        </Button>
-                    </Link>
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        variant="outline"
+                        className="gap-2 cursor-pointer"
+                        onClick={handleCreateForm}
+                    >
+                        {isSubmitting ? (
+                            <div className="flex items-center gap-2">
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{
+                                        duration: 1,
+                                        repeat: Infinity,
+                                        ease: "linear",
+                                    }}
+                                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                />
+                                Đang tạo...
+                            </div>
+                        ) : (
+                            "Tạo bài post"
+                        )}
+                    </Button>
                     <Button variant="ghost" size="icon">
                         <BellIcon className="w-5 h-5" />
                     </Button>
@@ -242,12 +240,14 @@ export default function ModeratorManageBlogComponent() {
         handleGetData(page);
     };
 
-    const blogData = data.filter((data) => {
-        const matchesSearch = data.title
-            ? data.title.toLowerCase().includes(searchTerm.toLowerCase())
-            : false;
+    const blogData = data.filter((item) => {
+        const matchesSearch =
+            !searchTerm ||
+            (item.title &&
+                item.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
         const matchesStatus =
-            selectedStatus === 1 || data.status === selectedStatus;
+            selectedStatus === 1 ? true : item.status === selectedStatus;
 
         return matchesSearch && matchesStatus;
     });
@@ -315,7 +315,10 @@ export default function ModeratorManageBlogComponent() {
                             {/* Header */}
                             <div>
                                 <Image
-                                    src={data.thumbnail}
+                                    src={
+                                        data.thumbnail ||
+                                        "/images/default_img.jpg"
+                                    }
                                     alt="thumbnail"
                                     width={100}
                                     height={50}
@@ -338,26 +341,31 @@ export default function ModeratorManageBlogComponent() {
                                 </div>
                                 <div className="content-center mt-4">
                                     <h1 className="text-[1.5rem] font-medium line-clamp-2 min-h-[72px]">
-                                        {data.title}
+                                        {data.title ||
+                                            "Tiêu đề bài viết chưa được thiết lập"}
                                     </h1>
                                 </div>
 
                                 <div className="flex justify-between items-center mt-4">
                                     <div className="flex items-center gap-4">
                                         <Image
-                                            src={data.doctor.imageUrl}
+                                            src={
+                                                data.doctor.imageUrl ||
+                                                "/images/default_user.png"
+                                            }
                                             alt="avatar"
                                             width={50}
                                             height={50}
-                                            className="w-[50px] h-[50px]"
+                                            className="w-[50px] h-[50px] rounded-full"
                                         />
                                         <p className="">
-                                            {data.doctor.fullName}
+                                            {data.doctor.fullName ||
+                                                "Chưa hiển thị bác sĩ"}
                                         </p>
                                     </div>
                                     <div className="flex gap-3">
                                         <Eye />
-                                        <p>{data.view}</p>
+                                        <p>{data.view || "0"}</p>
                                     </div>
                                 </div>
                             </div>

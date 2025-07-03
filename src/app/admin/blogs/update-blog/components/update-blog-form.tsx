@@ -1,12 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, AlertCircle } from "lucide-react";
+import { FileText, AlertCircle, ImageIcon, Upload } from "lucide-react";
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, ImageIcon } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog";
 import {
     Form,
     FormControl,
@@ -25,6 +31,7 @@ import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
 import useUpdateBlog, {
     BlogFormData,
 } from "@/app/admin/blogs/update-blog/hooks/use-update-blog";
+
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -87,9 +94,10 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { getBlogApi, isBlogPending } = useGetBlog();
     const [blogData, setBlogData] = useState<API.TGetBlog>();
-    const { form, onSubmit } = useUpdateBlog({ blogId: blogId });
+    const { form, onSubmit } = useUpdateBlog({ blogId });
 
     useEffect(() => {
         const handleGetData = async () => {
@@ -140,6 +148,8 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const handleClearImages = () => {
         setThumbnailUrl(null);
         setImageIds([]);
+        setLogoFile(null);
+        setLogoPreview(null);
     };
 
     const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,45 +157,83 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
                 alert("Kích thước file không được vượt quá 5MB");
+                event.target.value = ""; // Reset input
                 return;
             }
-
             if (!file.type.startsWith("image/")) {
                 alert("Vui lòng chọn file hình ảnh");
+                event.target.value = ""; // Reset input
                 return;
             }
-
+            console.log("Selected file:", {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+            });
             setLogoFile(file);
 
             const reader = new FileReader();
             reader.onload = (e) => {
                 setLogoPreview(e.target?.result as string);
             };
+            reader.onerror = () => {
+                console.error("Lỗi khi đọc file ảnh");
+                alert("Không thể đọc file ảnh, vui lòng thử lại.");
+                setLogoFile(null); // Reset nếu lỗi
+                event.target.value = "";
+            };
             reader.readAsDataURL(file);
         }
     };
 
-    const handleFormSubmit = (data: BlogFormData) => {
+    const handleFormSubmit = async (data: BlogFormData) => {
+        if (!onSubmit || typeof onSubmit !== "function") {
+            console.error("onSubmit is not a function");
+            return;
+        }
         setIsSubmitting(true);
         try {
-            if (logoFile != null) {
-                const formData: REQUEST.TUpdateBlog = {
-                    title: data.title,
-                    content: content,
-                    contentHtml: data.contentHtml,
-                    thumbnail: logoFile,
-                    categoryIds: data.categoryIds,
-                    images: imageIds,
-                    doctorId: data.doctorId,
-                    isDraft: true,
-                };
-                onSubmit(formData, handleClearImages);
-            }
-            setLogoPreview(null);
+            const formData: REQUEST.TUpdateBlog = {
+                title: data.title,
+                content: content,
+                contentHtml: data.contentHtml,
+                thumbnail: logoFile || null,
+                categoryIds: data.categoryIds,
+                images: imageIds,
+                doctorId: data.doctorId,
+                isDraft: false,
+            };
+            onSubmit(formData, () => {
+                handleClearImages();
+                setIsDialogOpen(false);
+                form.reset();
+                alert("Cập nhật bài viết thành công!"); // Thông báo thành công
+            });
         } catch (error) {
-            console.error("Error creating post:", error);
+            console.error("Error updating post:", error);
+            alert("Có lỗi xảy ra khi cập nhật bài viết.");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleCancel = () => {
+        try {
+            const formData: REQUEST.TUpdateBlog = {
+                title: form.getValues("title") || "Draft Blog",
+                content: content,
+                contentHtml: form.getValues("contentHtml"),
+                thumbnail: logoFile, // Allow null
+                categoryIds: form.getValues("categoryIds") || [],
+                images: imageIds,
+                doctorId: form.getValues("doctorId"),
+                isDraft: true,
+            };
+            onSubmit(formData, handleClearImages);
+            setIsDialogOpen(false);
+            form.reset();
+        } catch (error) {
+            console.error("Error saving draft:", error);
         }
     };
 
@@ -203,12 +251,77 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             {isBlogPending && <div>...Loading</div>}
             <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(handleFormSubmit)}
-                    className="space-y-8"
-                >
-                    <motion.div variants={itemVariants} className="space-y-4">
-                        <div className="flex justify-between">
+                <motion.div variants={itemVariants} className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="contentHtml"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                    <FileText className="h-5 w-5 text-[#248fca]" />
+                                    Nội dung bài viết
+                                </FormLabel>
+                                <FormControl>
+                                    <TiptapEditor
+                                        content={field.value}
+                                        onUpdate={(html) => {
+                                            updateContentHtml(html);
+                                            form.trigger("contentHtml");
+                                        }}
+                                        name="contentHtml"
+                                    />
+                                </FormControl>
+                                <FormMessage className="flex items-center gap-1">
+                                    <AlertCircle className="h-4 w-4" />
+                                </FormMessage>
+                            </FormItem>
+                        )}
+                    />
+                    <Button
+                        type="button"
+                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
+                        onClick={() => setIsDialogOpen(true)}
+                    >
+                        Hoàn tất nội dung
+                    </Button>
+                </motion.div>
+
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                            <DialogTitle>
+                                Cập nhật thông tin bài viết
+                            </DialogTitle>
+                        </DialogHeader>
+                        <form
+                            onSubmit={form.handleSubmit(handleFormSubmit)}
+                            className="space-y-6"
+                        >
+                            {/* Title */}
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                            Tiêu đề *
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Nhập tiêu đề bài post"
+                                                className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
+                                                onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="flex items-center gap-1">
+                                            <AlertCircle className="h-4 w-4" />
+                                        </FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Thumbnail Upload */}
                             <div>
                                 <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                     <ImageIcon className="h-5 w-5 text-[#248fca]" />
@@ -262,172 +375,79 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                             </div>
 
                             {/* Categories Multi-Select */}
-                            <motion.div variants={itemVariants}>
-                                <FormField
-                                    control={form.control}
-                                    name="categoryIds"
-                                    render={() => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <MultiSelectCategories
-                                                    control={form.control}
-                                                    data={data}
-                                                    isPending={isPending}
-                                                />
-                                            </FormControl>
-                                            <FormMessage className="flex items-center gap-1">
-                                                <AlertCircle className="h-4 w-4" />
-                                            </FormMessage>
-                                        </FormItem>
+                            <FormField
+                                control={form.control}
+                                name="categoryIds"
+                                render={() => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <MultiSelectCategories
+                                                control={form.control}
+                                                data={data}
+                                                isPending={isPending}
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="flex items-center gap-1">
+                                            <AlertCircle className="h-4 w-4" />
+                                        </FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Select Doctor */}
+                            <FormField
+                                control={form.control}
+                                name="doctorId"
+                                render={() => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <DoctorSelect
+                                                control={form.control}
+                                                doctors={doctors}
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="flex items-center gap-1">
+                                            <AlertCircle className="h-4 w-4" />
+                                        </FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors"
+                                    onClick={handleCancel}
+                                >
+                                    Hủy
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting || isUploading}
+                                    className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
+                                >
+                                    {isSubmitting ? (
+                                        <div className="flex items-center gap-2">
+                                            <motion.div
+                                                animate={{ rotate: 360 }}
+                                                transition={{
+                                                    duration: 1,
+                                                    repeat: Infinity,
+                                                    ease: "linear",
+                                                }}
+                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                            />
+                                            Đang tải lên...
+                                        </div>
+                                    ) : (
+                                        "Tải lên"
                                     )}
-                                />
-                            </motion.div>
-
-                            {/* Select Doctor with Combobox */}
-                            <motion.div variants={itemVariants}>
-                                <FormField
-                                    control={form.control}
-                                    name="doctorId"
-                                    render={() => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <DoctorSelect
-                                                    control={form.control}
-                                                    doctors={doctors}
-                                                />
-                                            </FormControl>
-                                            <FormMessage className="flex items-center gap-1">
-                                                <AlertCircle className="h-4 w-4" />
-                                            </FormMessage>
-                                        </FormItem>
-                                    )}
-                                />
-                            </motion.div>
-                        </div>
-                    </motion.div>
-                    {/* Title */}
-                    <motion.div variants={itemVariants}>
-                        <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                        Tiêu đề *
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            placeholder="Nhập tiêu đề bài post"
-                                            className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
-                                            onChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="flex items-center gap-1">
-                                        <AlertCircle className="h-4 w-4" />
-                                    </FormMessage>
-                                </FormItem>
-                            )}
-                        />
-                    </motion.div>
-
-                    {/* Content HTML with Tiptap */}
-                    <motion.div variants={itemVariants}>
-                        <FormField
-                            control={form.control}
-                            name="contentHtml"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                        <FileText className="h-5 w-5 text-[#248fca]" />
-                                        Nội dung bài viết
-                                    </FormLabel>
-                                    <FormControl>
-                                        <TiptapEditor
-                                            content={field.value}
-                                            onUpdate={(html) => {
-                                                updateContentHtml(html);
-                                                form.trigger("contentHtml");
-                                            }}
-                                            name="contentHtml"
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="flex items-center gap-1">
-                                        <AlertCircle className="h-4 w-4" />
-                                    </FormMessage>
-                                </FormItem>
-                            )}
-                        />
-                    </motion.div>
-
-                    {/* Preview Section */}
-                    <motion.div variants={itemVariants} className="space-y-4">
-                        <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                            <FileText className="h-5 w-5 text-[#248fca]" />
-                            Xem trước bài blog
-                        </Label>
-                        <div className="border-2 border-gray-200 rounded-lg p-4 min-h-[200px] bg-white">
-                            {form.watch("contentHtml") ? (
-                                <div
-                                    className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl max-w-none custom-preview"
-                                    dangerouslySetInnerHTML={{
-                                        __html:
-                                            form.watch("contentHtml") ||
-                                            "<p>Chưa có nội dung</p>",
-                                    }}
-                                />
-                            ) : (
-                                <p className="text-gray-500">
-                                    Chưa có nội dung để hiển thị
-                                </p>
-                            )}
-                        </div>
-                        <p className="text-sm text-gray-500">
-                            Xem trước nội dung như khi bài blog được đăng.
-                        </p>
-                    </motion.div>
-
-                    {/* Submit Buttons */}
-                    <motion.div
-                        variants={itemVariants}
-                        className="flex justify-end gap-4 pt-8 border-t-2 border-gray-100"
-                    >
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors cursor-pointer"
-                            onClick={() => {
-                                form.reset();
-                                setLogoPreview(null);
-                                handleClearImages();
-                            }}
-                        >
-                            Hủy bỏ
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting || isUploading}
-                            className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
-                        >
-                            {isSubmitting ? (
-                                <div className="flex items-center gap-2">
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{
-                                            duration: 1,
-                                            repeat: Infinity,
-                                            ease: "linear",
-                                        }}
-                                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                                    />
-                                    Đang tạo...
-                                </div>
-                            ) : (
-                                "Tạo bài post"
-                            )}
-                        </Button>
-                    </motion.div>
-                </form>
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </Form>
         </div>
     );

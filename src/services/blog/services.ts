@@ -9,7 +9,7 @@ import {
 export const useServiceCreateBlog = () => {
     const { addToast } = useToast();
 
-    return useMutation<TResponse, TMeta, void>({
+    return useMutation<TResponseData<API.TGetBlogId>, TMeta, void>({
         mutationFn: async () => {
             return await createBlogAsync();
         },
@@ -34,7 +34,13 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
             formData.append("Title", data.title);
             formData.append("Content", data.content);
             formData.append("ContentHtml", data.contentHtml);
-            formData.append("Thumbnail", data.thumbnail);
+            if (data.thumbnail) {
+                const fileData = new Blob([data.thumbnail], {
+                    type: data.thumbnail.type,
+                });
+                console.log("File data as Blob:", fileData);
+                formData.append("Thumbnail", data.thumbnail);
+            }
             data.categoryIds.forEach((id) => {
                 formData.append("CategoryIds", id);
             });
@@ -42,7 +48,7 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
                 formData.append("Images", id);
             });
             formData.append("DoctorId", data.doctorId);
-            formData.append("IsDraft", "true");
+            formData.append("IsDraft", "false");
 
             return await updateBlogAsync({ blogId }, formData);
         },
