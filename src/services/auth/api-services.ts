@@ -49,3 +49,15 @@ export const loginAsync = async (body: REQUEST.TLogin) => {
 
   return response.data;
 };
+
+export const refreshTokenAsync = async (body: REQUEST.TRereshToken) => {
+  const response = await request<TResponseData<API.TLoginResponseDto>>(
+    API_ENDPOINTS.LOGIN,
+    {
+      method: "POST",
+      data: body,
+    }
+  );
+
+  return response.data;
+};

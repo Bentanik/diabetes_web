@@ -3,9 +3,7 @@ import {
   loginSchema,
   LoginSchemaFormData,
 } from "@/lib/validations/auth.schema";
-import {
-  useServiceLogin,
-} from "@/services/auth/services";
+import { useServiceLogin } from "@/services/auth/services";
 import { useAppDispatch } from "@/stores";
 import { clearAllRegister } from "@/stores/auth-slice";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,7 +45,7 @@ export default function useLogin() {
             hideBackdrop();
             reset();
             dispatch(clearAllRegister());
-            router.push("/");
+            router.push("/admin/home");
           }
         },
         onError: (error) => {
