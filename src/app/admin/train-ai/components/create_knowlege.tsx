@@ -3,6 +3,7 @@ import { Modal } from "@/components/shared/Modal"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import InputAuth from "@/components/input_auth"
+import TextAreaComponent from "@/components/textarea"
 
 interface CreateKnowlegeModalProps {
     isOpen: boolean
@@ -36,11 +37,11 @@ export default function CreateKnowlegeModal({
 
                 {/* Input mô tả */}
                 <div>
-                    <InputAuth
-                        type="text"
+                    <TextAreaComponent
                         title="Mô tả"
                         register={register("description")}
                         error={errors.description?.message}
+                        className="resize-none"
                     />
                 </div>
 
