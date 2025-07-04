@@ -1,7 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, AlertCircle, ImageIcon, Upload } from "lucide-react";
+import {
+    FileText,
+    AlertCircle,
+    ImageIcon,
+    Upload,
+    Smartphone,
+} from "lucide-react";
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -241,50 +247,82 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         }
     };
 
-    // const itemVariants = {
-    //     hidden: { opacity: 0, y: 20 },
-    //     visible: {
-    //         opacity: 1,
-    //         y: 0,
-    //         transition: { duration: 0.5, ease: "easeOut" },
-    //     },
-    // };
-
     return (
         <div className="min-h-screen">
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             {isBlogPending && <div>...Loading</div>}
             <Form {...form}>
                 <motion.div className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="contentHtml"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                    <FileText className="h-5 w-5 text-[#248fca]" />
-                                    Nội dung bài viết
-                                </FormLabel>
-                                <FormControl>
-                                    <TiptapEditor
-                                        content={field.value}
-                                        onUpdate={(html) => {
-                                            updateContentHtml(html);
-                                            form.trigger("contentHtml");
-                                        }}
-                                        name="contentHtml"
-                                        blogId={blogId}
+                    <div className="flex gap-10">
+                        <div className="flex-2 h-[600px]">
+                            <FormField
+                                control={form.control}
+                                name="contentHtml"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                            <FileText className="h-5 w-5 text-[#248fca]" />
+                                            Nội dung bài viết
+                                        </FormLabel>
+                                        <FormControl>
+                                            <TiptapEditor
+                                                content={field.value}
+                                                onUpdate={(html) => {
+                                                    updateContentHtml(html);
+                                                    form.trigger("contentHtml");
+                                                }}
+                                                name="contentHtml"
+                                                blogId={blogId}
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="flex items-center gap-1">
+                                            <AlertCircle className="h-4 w-4" />
+                                        </FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="flex-1 relative">
+                            <div className="">
+                                <div className="flex justify-center gap-2 font-semibold text-lg items-center">
+                                    <Smartphone className="h-5 w-5 text-[#248fca]" />
+                                    Xem trước trên mobile
+                                </div>
+                                <div className="relative inline-block mt-10">
+                                    {/* Phone Frame Image */}
+                                    <Image
+                                        src="/images/phone.png"
+                                        alt="phone frame"
+                                        width={385}
+                                        height={667}
+                                        className="mx-auto"
                                     />
-                                </FormControl>
-                                <FormMessage className="flex items-center gap-1">
-                                    <AlertCircle className="h-4 w-4" />
-                                </FormMessage>
-                            </FormItem>
-                        )}
-                    />
+                                    {/* Screen Content */}
+                                    <div
+                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-white rounded-lg overflow-auto"
+                                        style={{
+                                            width: "340px",
+                                            height: "600px",
+                                        }}
+                                    >
+                                        <div
+                                            className="prose prose-sm max-w-none"
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    form.getValues(
+                                                        "contentHtml"
+                                                    ) || "",
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <Button
                         type="button"
-                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
+                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10"
                         onClick={() => setIsDialogOpen(true)}
                     >
                         Hoàn tất nội dung

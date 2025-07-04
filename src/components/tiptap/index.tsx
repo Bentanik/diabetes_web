@@ -573,7 +573,7 @@ const TiptapEditorComponent = ({
                 inline: true,
                 allowBase64: false,
                 HTMLAttributes: {
-                    class: "w-full h-[500px] object-cover rounded-lg",
+                    class: "w-full h-[250px] object-cover rounded-lg",
                 },
             }),
             Placeholder.configure({
@@ -665,7 +665,7 @@ const TiptapEditorComponent = ({
             />
             <EditorContent
                 editor={editor}
-                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[300px] max-h-[500px] overflow-y-auto border rounded-b-3xl"
+                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[660px] max-h-[660px] overflow-y-auto border rounded-b-3xl"
             />
         </div>
     );
