@@ -12,6 +12,17 @@ export const getKnowledgeBaseListAsync = async () => {
   return response.data;
 };
 
+export const getKnowledgeBaseStatAsync = async (name: string) => {
+  const response = await request<API.TKnowledgeBaseStats>(
+    API_ENDPOINTS.KNOWLEDGE_BASE_STATS(name),
+    {
+      method: "GET",
+    }
+  );
+
+  return response.data;
+};
+
 export const createKnowledgeBaseAsync = async (
   data: REQUEST.TCreateKnowledgeBaseRequest
 ) => {
@@ -20,6 +31,24 @@ export const createKnowledgeBaseAsync = async (
     {
       method: "POST",
       data,
+    }
+  );
+
+  return response.data;
+};
+
+export const createKnowledgeBaseDocumentAsync = async (
+  name: string,
+  formData: FormData
+) => {
+  const response = await request<API.TProcessedFileResponse>(
+    API_ENDPOINTS.KNOWLEDGE_BASE_UPLOAD_DOCUMENT(name),
+    {
+      method: "POST",
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     }
   );
 

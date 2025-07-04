@@ -22,7 +22,7 @@ const request = axios.create({
 
 const handleLogout = () => {
     //   useLogout().handleLogout();
-}
+};
 
 let refreshTokenPromise: any = null;
 

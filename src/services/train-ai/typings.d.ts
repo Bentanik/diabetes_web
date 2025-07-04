@@ -3,6 +3,12 @@ declare namespace REQUEST {
     name: string;
     description: string;
   };
+
+  type TCreateDocumentRequest = {
+    file: File;
+    chunk_size: 1000;
+    chunk_overlap: 200;
+  };
 }
 
 declare namespace API {
@@ -17,5 +23,38 @@ declare namespace API {
 
   type TGetKnowledgeBaseListResponse = {
     knowledge_bases: TKnowledgeBase[];
+  };
+
+  type TKnowledgeBaseDocument = {
+    filename: string;
+    size: number;
+    last_modified: string;
+    content_type: string;
+  };
+
+  type TKnowledgeBaseStats = {
+    total_documents: number;
+    total_size_bytes: number;
+    file_types: Record<string, number>;
+    documents: TKnowledgeBaseDocument[];
+    collection_name: string;
+    last_updated: string;
+  };
+
+  type TFileInfo = {
+    filename: string;
+    file_size: number;
+    file_extension: string;
+    content_type: string;
+    upload_time: string;
+    storage_path: string;
+    storage_time: string;
+  };
+
+  type TProcessedFileResponse = {
+    success: boolean;
+    message: string;
+    file_info: FileInfo;
+    document_ids: string[];
   };
 }

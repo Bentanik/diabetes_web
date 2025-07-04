@@ -3,7 +3,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { BellIcon, Calendar1Icon, LogOutIcon, MessageSquareQuoteIcon, SettingsIcon, SquareLibraryIcon, User2Icon, UserIcon } from "lucide-react";
+import {
+    BellIcon,
+    Calendar1Icon,
+    LogOutIcon,
+    MessageSquareQuoteIcon,
+    SettingsIcon,
+    SquareLibraryIcon,
+    User2Icon,
+    UserIcon,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 
@@ -14,20 +23,25 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node)
+            ) {
                 setIsOpen(false);
             }
         }
 
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () =>
+            document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     return (
         <div className="relative font-be-vietnam-pro" ref={menuRef}>
             {profile ? (
                 <div>
-                    <div className="relative w-13 h-13 rounded-full cursor-pointer group select-none"
+                    <div
+                        className="relative w-13 h-13 rounded-full cursor-pointer group select-none"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         <img
@@ -46,9 +60,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <UserIcon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span>
-                                    Trang cá nhân
-                                </span>
+                                <span>Trang cá nhân</span>
                             </button>
                             <button
                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[14px] flex items-center gap-x-6"
@@ -57,9 +69,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <SquareLibraryIcon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span>
-                                    Khóa học của tôi
-                                </span>
+                                <span>Khóa học của tôi</span>
                             </button>
                             <button
                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[14px] flex items-center gap-x-6"
@@ -68,9 +78,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <User2Icon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span>
-                                    Học viên của tôi
-                                </span>
+                                <span>Học viên của tôi</span>
                             </button>
                             <button
                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[14px] flex items-center gap-x-6"
@@ -79,9 +87,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <Calendar1Icon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span>
-                                    Lịch trình
-                                </span>
+                                <span>Lịch trình</span>
                             </button>
                             <button
                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[14px] flex items-center gap-x-6"
@@ -90,9 +96,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <BellIcon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span>
-                                    Thông báo
-                                </span>
+                                <span>Thông báo</span>
                             </button>
                             <button
                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[14px] flex items-center gap-x-6"
@@ -101,9 +105,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <MessageSquareQuoteIcon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span>
-                                    Hộp thư
-                                </span>
+                                <span>Hộp thư</span>
                             </button>
                             <button
                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[14px] flex items-center gap-x-6"
@@ -112,9 +114,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <SettingsIcon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span>
-                                    Cài đặt
-                                </span>
+                                <span>Cài đặt</span>
                             </button>
                             <button
                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[14px] flex items-center gap-x-6"
@@ -123,9 +123,7 @@ export default function ProfileHospitalMenu({ profile }: { profile: any }) {
                                 <div className="w-8 h-8 object-cover rounded-full bg-gray-200 flex items-center justify-center">
                                     <LogOutIcon className="w-5 h-5 object-cover" />
                                 </div>
-                                <span className="font-[600]">
-                                    Đăng xuất
-                                </span>
+                                <span className="font-[600]">Đăng xuất</span>
                             </button>
                         </div>
                     )}
