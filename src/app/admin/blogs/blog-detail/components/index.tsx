@@ -34,6 +34,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const [data, setData] = useState<API.TGetBlog>();
     const { onSubmit, form, isPending } = useReviewBlog({ blogId: blogId });
     const router = useRouter();
+    const [isOpenDialog, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
         const handleGetData = async (id: string) => {
@@ -54,7 +55,10 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 reasonRejected: formData.reasonRejected,
             };
             onSubmit(reviewData);
-            router.push("/admin/blogs");
+            setIsDialogOpen(false);
+            setTimeout(() => {
+                router.push("/admin/blogs");
+            }, 3000);
         } catch (err) {
             console.log(err);
         }
@@ -67,7 +71,9 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 reasonRejected: "",
             };
             onSubmit(reviewData);
-            router.push("/admin/blogs");
+            setTimeout(() => {
+                router.push("/admin/blogs");
+            }, 3000);
         } catch (err) {
             console.log(err);
         }
@@ -115,16 +121,6 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                             </p>
                         </div>
                     </div>
-                    {/* Uncomment if you want to show thumbnail */}
-                    {/* <div className="mt-4">
-                        <Image
-                            src={data?.thumbnail ?? "/images/auth1.jpg"}
-                            alt="blog-thumbnail"
-                            width={800}
-                            height={500}
-                            className="w-full h-[500px] rounded-2xl object-cover"
-                        />
-                    </div> */}
                 </div>
 
                 {/* Main Content */}
@@ -160,9 +156,15 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 {/* Actions for pending blog (status: 0) */}
                 {data?.status === 0 && (
                     <div className="mt-10 flex justify-end gap-4">
-                        <Dialog>
+                        <Dialog
+                            open={isOpenDialog}
+                            onOpenChange={setIsDialogOpen}
+                        >
                             <DialogTrigger asChild>
                                 <Button
+                                    onClick={() => {
+                                        setIsDialogOpen(true);
+                                    }}
                                     variant="outline"
                                     className="cursor-pointer px-6 py-6 min-w-[180px] hover:border-red-500 hover:text-red-500"
                                 >

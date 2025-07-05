@@ -1,3 +1,4 @@
+import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceUpdateBlog } from "@/services/blog/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -30,14 +31,20 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
 
     const { mutate, isPending } = useServiceUpdateBlog({ blogId });
 
+    const isPendingUpdate = isPending;
+    const { showBackdrop, hideBackdrop } = useBackdrop();
+
     const onSubmit = (data: REQUEST.TUpdateBlog, clearImages: () => void) => {
+        showBackdrop();
         mutate(data, {
             onSuccess: (res) => {
+                hideBackdrop();
                 console.log("API Success:", res);
                 form.reset();
                 clearImages();
             },
             onError: (err) => {
+                hideBackdrop();
                 console.log("API Fail:", err);
             },
         });
@@ -45,6 +52,6 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
     return {
         onSubmit,
         form,
-        isPending,
+        isPendingUpdate,
     };
 }

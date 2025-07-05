@@ -38,6 +38,7 @@ import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
 import useUpdateBlog, {
     BlogFormData,
 } from "@/app/admin/blogs/update-blog/hooks/use-update-blog";
+import { useRouter } from "next/navigation";
 
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
@@ -94,7 +95,6 @@ const doctors = [
 export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const { isPending: isUploading } = useUploadImage();
     const { getCategoriesApi, isPending } = useGetDataCategories();
-    const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [data, setData] = useState<API.TGetCategories>([]);
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -104,10 +104,8 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { getBlogApi, isBlogPending } = useGetBlog();
     const [blogData, setBlogData] = useState<API.TGetBlog>();
-    const { form, onSubmit } = useUpdateBlog({ blogId });
-
-    console.log(thumbnailUrl);
-    console.log(blogData);
+    const { form, onSubmit, isPendingUpdate } = useUpdateBlog({ blogId });
+    const router = useRouter();
 
     useEffect(() => {
         const handleGetData = async () => {
@@ -133,6 +131,14 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         handleGetBlogData(blogId);
     }, []);
 
+    useEffect(() => {
+        if (blogData?.contentHtml) {
+            form.setValue("contentHtml", blogData.contentHtml);
+            setContent(extractTextContent(blogData.contentHtml));
+            setImageIds(extractImageIds(blogData.contentHtml));
+        }
+    }, [blogData, form]);
+
     const extractImageIds = (html: string): string[] => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
@@ -154,9 +160,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         const newImageIds = extractImageIds(editorContent);
         setImageIds(newImageIds);
     };
-
     const handleClearImages = () => {
-        setThumbnailUrl(null);
         setImageIds([]);
         setLogoFile(null);
         setLogoPreview(null);
@@ -167,19 +171,15 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
                 alert("Kích thước file không được vượt quá 5MB");
-                event.target.value = ""; // Reset input
+                event.target.value = "";
                 return;
             }
             if (!file.type.startsWith("image/")) {
                 alert("Vui lòng chọn file hình ảnh");
-                event.target.value = ""; // Reset input
+                event.target.value = "";
                 return;
             }
-            console.log("Selected file:", {
-                name: file.name,
-                size: file.size,
-                type: file.type,
-            });
+
             setLogoFile(file);
 
             const reader = new FileReader();
@@ -201,6 +201,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             console.error("onSubmit is not a function");
             return;
         }
+
         setIsSubmitting(true);
         try {
             const formData: REQUEST.TUpdateBlog = {
@@ -217,7 +218,9 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                 handleClearImages();
                 setIsDialogOpen(false);
                 form.reset();
-                alert("Cập nhật bài viết thành công!"); // Thông báo thành công
+                setTimeout(() => {
+                    router.push("/admin/blogs");
+                }, 2000);
             });
         } catch (error) {
             console.error("Error updating post:", error);
@@ -228,29 +231,20 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     };
 
     const handleCancel = () => {
-        try {
-            const formData: REQUEST.TUpdateBlog = {
-                title: form.getValues("title") || "Draft Blog",
-                content: content,
-                contentHtml: form.getValues("contentHtml"),
-                thumbnail: logoFile, // Allow null
-                categoryIds: form.getValues("categoryIds") || [],
-                images: imageIds,
-                doctorId: form.getValues("doctorId"),
-                isDraft: true,
-            };
-            onSubmit(formData, handleClearImages);
-            setIsDialogOpen(false);
-            form.reset();
-        } catch (error) {
-            console.error("Error saving draft:", error);
-        }
+        form.setValue("title", "");
+        form.setValue("categoryIds", []);
+        form.setValue("doctorId", "");
+
+        setLogoFile(null);
+        setLogoPreview(null);
+        setImageIds([]);
+
+        setIsDialogOpen(false);
     };
 
     return (
         <div className="min-h-screen">
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-            {isBlogPending && <div>...Loading</div>}
             <Form {...form}>
                 <motion.div className="space-y-4">
                     <div className="flex gap-10">
@@ -299,7 +293,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                     />
                                     {/* Screen Content */}
                                     <div
-                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-white rounded-lg overflow-auto"
+                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-white rounded-lg overflow-auto wrap-break-word"
                                         style={{
                                             width: "340px",
                                             height: "600px",
@@ -322,14 +316,22 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
 
                     <Button
                         type="button"
-                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10"
+                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                         onClick={() => setIsDialogOpen(true)}
                     >
                         Hoàn tất nội dung
                     </Button>
                 </motion.div>
 
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Dialog
+                    open={isDialogOpen}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            handleCancel();
+                        }
+                        setIsDialogOpen(open);
+                    }}
+                >
                     <DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
                             <DialogTitle>
@@ -462,7 +464,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors"
+                                    className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors cursor-pointer"
                                     onClick={handleCancel}
                                 >
                                     Hủy
@@ -481,7 +483,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                                     repeat: Infinity,
                                                     ease: "linear",
                                                 }}
-                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full cursor-pointer"
                                             />
                                             Đang tải lên...
                                         </div>

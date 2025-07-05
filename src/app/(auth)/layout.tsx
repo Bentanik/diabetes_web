@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import AuthCarousel from "@/components/auth_carousel";
 import { MoveLeftIcon } from "lucide-react";
@@ -38,7 +38,9 @@ export default function AuthLayout({
                                 width={60}
                                 height={60}
                             />
-                            <h1 className="text-2xl font-bold text-[#248fca]">DbDoctor</h1>
+                            <h1 className="text-2xl font-bold text-[#248fca]">
+                                DbDoctor
+                            </h1>
                         </Link>
                     </div>
                     <motion.div
@@ -49,13 +51,12 @@ export default function AuthLayout({
                         <button
                             type="button"
                             className="w-12 h-12 backdrop-blur-md border border-[#248fca]/20 flex items-center justify-center rounded-full transition-all duration-300 cursor-pointer hover:bg-[var(--primary-color)] group"
-                        // onClick={handlePrevious}
+                            // onClick={handlePrevious}
                         >
                             <MoveLeftIcon className="w-5 h-5 text-[#248fca]  transition-colors group-hover:text-white!" />
                         </button>
                     </motion.div>
                 </div>
-
 
                 {/* Nội dung chính */}
                 <motion.div

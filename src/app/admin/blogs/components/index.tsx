@@ -272,7 +272,7 @@ export default function ModeratorManageBlogComponent() {
                         {/*Select status*/}
                         <BlogStatusDropdown
                             selectedStatus={selectedStatus}
-                            onStatusChange={setSelectedStatus} // Truyền hàm setSelectedStatus
+                            onStatusChange={setSelectedStatus}
                         />
                         {/* Select Category*/}
                         <MultiSelectCategoriesFilter

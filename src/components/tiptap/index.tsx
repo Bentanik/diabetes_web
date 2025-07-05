@@ -17,7 +17,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Extension } from "@tiptap/core";
 import debounce from "lodash.debounce";
 import useUpdateDraftBlog from "@/app/admin/blogs/update-blog/hooks/use-update-blog-draft";
-import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
 
 // Custom Enter Extension
 const CustomEnter = Extension.create({
@@ -402,23 +401,7 @@ const TiptapEditorComponent = ({
     const { setValue } = useFormContext();
     const [countdown, setCountdown] = useState<number | null>(null);
     const [savedMessage, setSavedMessage] = useState<string>("");
-    const { form, onSubmit } = useUpdateDraftBlog({ blogId });
-    const { getBlogApi } = useGetBlog();
-    const [data, setData] = useState<API.TGetBlog | null>(null);
-
-    console.log(form);
-
-    useEffect(() => {
-        const handleGetData = async (id: string) => {
-            try {
-                const res = await getBlogApi({ blogId: id });
-                setData(res?.data || null);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetData(blogId);
-    }, []);
+    const { onSubmit } = useUpdateDraftBlog({ blogId });
 
     const latestDataRef = useRef({
         contentText: "",
@@ -573,26 +556,26 @@ const TiptapEditorComponent = ({
                 inline: true,
                 allowBase64: false,
                 HTMLAttributes: {
-                    class: "w-full h-[250px] object-cover rounded-lg",
+                    class: "w-full max-w-full h-auto object-cover rounded-lg",
                 },
             }),
             Placeholder.configure({
                 placeholder: "Write something...",
             }),
         ],
-        content: data?.contentHtml || content,
+        content,
         onUpdate: ({ editor }) => {
             const html = editor.getHTML();
             onUpdate(html);
             editorInstance = editor;
             updateContentHtml(html);
             setSavedMessage("");
-            startCountdown(html); // Gọi debounced function để bắt đầu đếm ngược
+            startCountdown(html);
         },
         immediatelyRender: false,
         editorProps: {
             attributes: {
-                class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4",
+                class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4 overflow-wrap-anywhere word-break-break-word",
             },
             handleDOMEvents: {
                 paste: (view, event) => {
@@ -620,16 +603,6 @@ const TiptapEditorComponent = ({
     });
 
     useEffect(() => {
-        if (
-            editor &&
-            data?.contentHtml &&
-            data.contentHtml !== editor.getHTML()
-        ) {
-            editor.commands.setContent(data.contentHtml, false);
-        }
-    }, [data, editor]);
-
-    useEffect(() => {
         if (editor && content !== editor.getHTML()) {
             editor.commands.setContent(content, false);
         }
@@ -653,10 +626,7 @@ const TiptapEditorComponent = ({
     if (!editor) return null;
 
     return (
-        <div
-            className={`border- "border-gray-200 focus-within:border-[#248fca]"
-            }`}
-        >
+        <div className="border-gray-200 focus-within:border-[#248fca] w-[740px]">
             <TiptapToolbar
                 editor={editor}
                 countdown={countdown}
@@ -665,7 +635,7 @@ const TiptapEditorComponent = ({
             />
             <EditorContent
                 editor={editor}
-                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[660px] max-h-[660px] overflow-y-auto border rounded-b-3xl"
+                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl min-h-[660px] max-h-[660px] overflow-y-auto border rounded-b-3xl max-w-none wrap-break-word whitespace-pre-wrap w-full"
             />
         </div>
     );
