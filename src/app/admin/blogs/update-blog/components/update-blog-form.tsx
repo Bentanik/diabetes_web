@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { motion } from "framer-motion";
@@ -111,7 +112,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         const handleGetData = async () => {
             try {
                 const res = await getCategoriesApi();
-                setData(res?.data || []);
+                setData((res?.value.data as API.TGetCategories) || []);
             } catch (err) {
                 console.log(err);
             }
@@ -123,7 +124,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         const handleGetBlogData = async (id: string) => {
             try {
                 const res = await getBlogApi({ blogId: id });
-                setBlogData(res?.data);
+                setBlogData(res?.value.data as API.TGetBlog);
             } catch (err) {
                 console.log(err);
             }

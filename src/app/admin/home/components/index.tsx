@@ -164,7 +164,7 @@ export default function HomeHospitalComponent() {
                                                         height:
                                                             (data.messages /
                                                                 250) *
-                                                                120 +
+                                                            120 +
                                                             20,
                                                     }}
                                                     transition={{

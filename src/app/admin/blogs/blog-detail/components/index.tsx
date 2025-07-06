@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // eslint-disable-next-line react-hooks/exhaustive-deps
 
 "use client";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/form";
 import useReviewBlog, { ReviewFormData } from "../hooks/use-review-blog";
 import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/stores";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const { getBlogApi, isBlogPending } = useGetBlog();
@@ -36,11 +38,13 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const router = useRouter();
     const [isOpenDialog, setIsDialogOpen] = useState(false);
 
+    const user = useAppSelector((state) => state.userSlice);
+
     useEffect(() => {
         const handleGetData = async (id: string) => {
             try {
                 const res = await getBlogApi({ blogId: id });
-                setData(res?.data);
+                setData(res?.value.data as API.TGetBlog);
             } catch (err) {
                 console.log(err);
             }
@@ -154,7 +158,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 )}
 
                 {/* Actions for pending blog (status: 0) */}
-                {data?.status === 0 && (
+                {data?.status === 0 && user.user?.roles?.includes("SystemAdmin") && (
                     <div className="mt-10 flex justify-end gap-4">
                         <Dialog
                             open={isOpenDialog}

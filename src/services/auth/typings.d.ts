@@ -36,6 +36,7 @@ declare namespace API {
     fullName?: string | null;
     avatarUrl?: string | null;
     roleName?: number | null;
+    roles?: string[];
   };
 
   type TLoginResponseDto = {

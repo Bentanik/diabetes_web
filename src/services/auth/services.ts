@@ -51,7 +51,7 @@ export const useServiceRegisterEmail = () => {
     const dispatch = useAppDispatch();
 
     return useMutation<
-        TResponseData<API.TLoginResponseDto>,
+        TResponse<API.TLoginResponseDto>,
         TMeta,
         REQUEST.TRegisterEmail
     >({
@@ -59,10 +59,11 @@ export const useServiceRegisterEmail = () => {
         onSuccess: (data) => {
             try {
                 if (data) {
-                    const { authToken, authUser } = data.data;
+                    const { authToken, authUser } = data.value
+                        .data as API.TLoginResponseDto;
                     addToast({
                         type: "success",
-                        description: data.message,
+                        description: data.value.message,
                         duration: 5000,
                     });
                     setAuthStorage(authToken);
@@ -79,28 +80,26 @@ export const useServiceLogin = () => {
     const { addToast } = useToast();
     const dispatch = useAppDispatch();
 
-    return useMutation<
-        TResponseData<API.TLoginResponseDto>,
-        TMeta,
-        REQUEST.TLogin
-    >({
-        mutationFn: loginAsync,
-        onSuccess: (data) => {
-            try {
-                if (data) {
-                    const { authToken, authUser } = data.data;
-                    console.log(authToken, authUser);
-                    addToast({
-                        type: "success",
-                        description: data.message,
-                        duration: 5000,
-                    });
-                    setAuthStorage(authToken);
-                    dispatch(setInfoUser(authUser));
+    return useMutation<TResponse<API.TLoginResponseDto>, TMeta, REQUEST.TLogin>(
+        {
+            mutationFn: loginAsync,
+            onSuccess: (data) => {
+                try {
+                    if (data) {
+                        const { authToken, authUser } = data.value
+                            .data as API.TLoginResponseDto;
+                        addToast({
+                            type: "success",
+                            description: data.value.message,
+                            duration: 5000,
+                        });
+                        setAuthStorage(authToken);
+                        dispatch(setInfoUser(authUser));
+                    }
+                } catch (ex) {
+                    removeAuthStorage();
                 }
-            } catch (ex) {
-                removeAuthStorage();
-            }
-        },
-    });
+            },
+        }
+    );
 };

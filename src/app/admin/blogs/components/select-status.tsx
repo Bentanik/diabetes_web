@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/stores";
 import React, { useState } from "react";
 import Select, { SingleValue } from "react-select";
 
@@ -29,11 +30,15 @@ export default function BlogStatusDropdown({
         getStatusText(selectedStatus)
     );
 
+    const user = useAppSelector((state) => state.userSlice);
+
     const options = [
         { value: "0", label: "Chờ xác thực" },
         { value: "1", label: "Đã duyệt" },
         { value: "-1", label: "Từ chối" },
-        { value: "-2", label: "Bản nháp" },
+        ...(!user.user?.roles?.includes("SystemAdmin")
+            ? [{ value: "-2", label: "Bản nháp" }]
+            : []),
     ];
 
     const handleChange = (

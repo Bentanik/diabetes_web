@@ -14,7 +14,7 @@ export default function useCreateBlog() {
             onSuccess: (res) => {
                 hideBackdrop();
                 console.log("API Success:", res);
-                const blogId = res.data.id;
+                const blogId = res.value.data?.id;
                 if (blogId) {
                     router.push(`/admin/blogs/update-blog/${blogId}`);
                 }
