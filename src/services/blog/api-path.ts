@@ -1,7 +1,7 @@
 /* eslint-disable import/no-anonymous-default-export */
 
 const POST =
-    "https://media-doctor-cth2d9c9c0gwdfg6.southeastasia-01.azurewebsites.net/api/v1/posts";
+    "https://capstonegateway-dqdrf9g0g9h0ffdd.southeastasia-01.azurewebsites.net/api/v1/posts";
 const CREATE_POST = POST + "/draft";
 const UPDATE_POST_DRAFT = (id: string) => `${CREATE_POST}/${id}`;
 const GET_POSTS = POST + "/system";

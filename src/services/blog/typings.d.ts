@@ -27,7 +27,6 @@ declare namespace REQUEST {
         status: BlogStatus;
         moderatorId: string;
         doctorId: string;
-        isAdmin: boolean;
         pageIndex: number;
         pageSize: number;
         sortType: string;

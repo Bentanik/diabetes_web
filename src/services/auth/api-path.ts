@@ -1,5 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
-const AUTH = "http://localhost:5206/api/v1/auth";
+const AUTH =
+    "https://capstonegateway-dqdrf9g0g9h0ffdd.southeastasia-01.azurewebsites.net/api/v1/auth";
 const LOGIN = AUTH + "/system/login-email";
 const SEND_REGISTER_EMAIL = AUTH + "/send-register-email";
 const VERIFY_REGISTER_EMAIL = AUTH + "/verify-register-email";

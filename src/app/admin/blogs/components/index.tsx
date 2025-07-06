@@ -165,7 +165,6 @@ export default function ModeratorManageBlogComponent() {
                 status: selectedStatus,
                 moderatorId: "",
                 doctorId: selectDoctor,
-                isAdmin: false,
                 pageIndex: pageIndex,
                 pageSize: 6,
                 sortType: selectSortType,
