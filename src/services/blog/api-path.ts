@@ -2,7 +2,7 @@
 
 const POST =
     "https://capstonegateway-dqdrf9g0g9h0ffdd.southeastasia-01.azurewebsites.net/api/v1/posts";
-const CREATE_POST = POST + "/draft";
+const CREATE_POST = POST;
 const UPDATE_POST_DRAFT = (id: string) => `${CREATE_POST}/${id}`;
 const GET_POSTS = POST + "/system";
 const GET_POST = (id: string) => `${GET_POSTS}/${id}`;

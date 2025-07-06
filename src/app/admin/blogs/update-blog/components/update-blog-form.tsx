@@ -103,16 +103,16 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const { getBlogApi, isBlogPending } = useGetBlog();
+    const { getBlogApi } = useGetBlog();
     const [blogData, setBlogData] = useState<API.TGetBlog>();
-    const { form, onSubmit, isPendingUpdate } = useUpdateBlog({ blogId });
+    const { form, onSubmit } = useUpdateBlog({ blogId });
     const router = useRouter();
 
     useEffect(() => {
         const handleGetData = async () => {
             try {
                 const res = await getCategoriesApi();
-                setData((res?.value.data as API.TGetCategories) || []);
+                setData((res?.data as API.TGetCategories) || []);
             } catch (err) {
                 console.log(err);
             }
@@ -124,7 +124,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         const handleGetBlogData = async (id: string) => {
             try {
                 const res = await getBlogApi({ blogId: id });
-                setBlogData(res?.value.data as API.TGetBlog);
+                setBlogData(res?.data as API.TGetBlog);
             } catch (err) {
                 console.log(err);
             }

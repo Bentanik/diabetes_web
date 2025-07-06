@@ -10,8 +10,8 @@ export default function useGetDataCategories() {
         setPending(true);
         try {
             const res = await getCategories();
-            if (res.value.data != null) {
-                return res as TResponse<API.TGetCategories>;
+            if (res.data != null) {
+                return res as TResponseData<API.TGetCategories>;
             } else {
                 addToast({
                     type: "error",

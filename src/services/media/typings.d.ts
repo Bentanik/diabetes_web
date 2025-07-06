@@ -7,9 +7,11 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
-    type TUploadImageResponse = {
+    type UploadImageResponse = {
         imageId: string;
         publicId: string;
         publicUrl: string;
     };
+
+    type TUploadImageResponse = UploadImageResponse[];
 }

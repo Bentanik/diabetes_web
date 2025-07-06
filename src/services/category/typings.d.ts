@@ -6,8 +6,6 @@ declare namespace API {
         name: string;
         imageUrl: string;
         createdDate: string;
-        isAddedToFavourite: boolean;
-        numberOfPosts: number;
     };
 
     type TGetCategories = Category[];

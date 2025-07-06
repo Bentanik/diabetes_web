@@ -2,7 +2,7 @@ import API_ENDPOINTS from "@/services/blog/api-path";
 import request from "@/services/interceptor";
 
 export const createBlogAsync = async () => {
-    const response = await request<TResponse<API.TGetBlogId>>(
+    const response = await request<TResponseData<API.TGetBlogId>>(
         API_ENDPOINTS.CREATE_POST,
         {
             method: "POST",
@@ -72,7 +72,7 @@ export const reviewBlogAsync = async (
 };
 
 export const getBlog = async ({ blogId }: REQUEST.BlogId) => {
-    const response = await request<TResponse<API.TGetBlog>>(
+    const response = await request<TResponseData<API.TGetBlog>>(
         API_ENDPOINTS.GET_POST(blogId),
         {
             method: "GET",
