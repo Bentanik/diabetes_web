@@ -184,7 +184,7 @@ export default function ModeratorManageBlogComponent() {
         const handleGetData = async () => {
             try {
                 const res = await getCategoriesApi();
-                setCategoryData(res?.value.data as API.TGetCategories || []);
+                setCategoryData((res?.value.data as API.TGetCategories) || []);
             } catch (err) {
                 console.log(err);
             }
