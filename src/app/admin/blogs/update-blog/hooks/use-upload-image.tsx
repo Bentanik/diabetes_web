@@ -73,12 +73,12 @@ export default function useUploadImage() {
                 // Validate response data
                 if (
                     res &&
-                    res.data &&
-                    res.data.imageId &&
-                    res.data.publicId &&
-                    res.data.publicUrl
+                    res.value.data &&
+                    res.value.data.imageId &&
+                    res.value.data.publicId &&
+                    res.value.data.publicUrl
                 ) {
-                    const { imageId, publicId, publicUrl } = res.data;
+                    const { imageId, publicId, publicUrl } = res.value.data as API.TUploadImageResponse;
                     console.log("Validated upload data:", {
                         imageId,
                         publicId,

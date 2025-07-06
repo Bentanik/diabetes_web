@@ -1,6 +1,5 @@
 import useToast from "@/hooks/use-toast";
 import { getCategories } from "@/services/category/api-services";
-import { isTResponseData } from "@/utils/compare";
 import { useState } from "react";
 
 export default function useGetDataCategories() {
@@ -11,8 +10,8 @@ export default function useGetDataCategories() {
         setPending(true);
         try {
             const res = await getCategories();
-            if (isTResponseData(res)) {
-                return res as TResponseData<API.TGetCategories>;
+            if (res.value.data != null) {
+                return res as TResponse<API.TGetCategories>;
             } else {
                 addToast({
                     type: "error",

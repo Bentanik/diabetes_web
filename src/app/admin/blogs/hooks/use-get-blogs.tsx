@@ -1,7 +1,6 @@
 import useToast from "@/hooks/use-toast";
 import { useState } from "react";
 import { getAllBlogs } from "@/services/blog/api-services";
-import { isTResponseData } from "@/utils/compare";
 
 export default function useGetBlogs() {
     const { addToast } = useToast();
@@ -11,8 +10,8 @@ export default function useGetBlogs() {
         setPending(true);
         try {
             const res = await getAllBlogs(params);
-            if (isTResponseData(res)) {
-                return res as TResponseData<API.TGetBlogs>;
+            if (res.value.data != null) {
+                return res as TResponse<API.TGetBlogs>;
             } else {
                 addToast({
                     type: "error",

@@ -43,7 +43,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
         const handleGetData = async (id: string) => {
             try {
                 const res = await getBlogApi({ blogId: id });
-                setData(res?.data);
+                setData(res?.value.data as API.TGetBlog);
             } catch (err) {
                 console.log(err);
             }

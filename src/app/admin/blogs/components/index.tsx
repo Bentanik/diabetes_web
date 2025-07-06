@@ -172,9 +172,9 @@ export default function ModeratorManageBlogComponent() {
                 sortType: selectSortType,
                 isSortAsc: isSortAsc,
             });
-            setTotalPage(res?.data.totalPages || 1);
+            setTotalPage(res?.value.data?.totalPages || 1);
             console.log(selectedStatus);
-            setData(res?.data.items || []);
+            setData(res?.value.data?.items || []);
         } catch (err) {
             console.log(err);
             setData([]);
@@ -185,7 +185,7 @@ export default function ModeratorManageBlogComponent() {
         const handleGetData = async () => {
             try {
                 const res = await getCategoriesApi();
-                setCategoryData(res?.data || []);
+                setCategoryData(res?.value.data as API.TGetCategories || []);
             } catch (err) {
                 console.log(err);
             }

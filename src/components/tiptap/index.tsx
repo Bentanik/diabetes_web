@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
@@ -312,36 +313,32 @@ const TiptapToolbar = ({
             <button
                 type="button"
                 onClick={() => editor.chain().focus().toggleBold().run()}
-                className={`px-2 py-1 border border-gray-300 rounded text-sm font-bold ${
-                    editor.isActive("bold") ? "bg-blue-200" : "bg-white"
-                }`}
+                className={`px-2 py-1 border border-gray-300 rounded text-sm font-bold ${editor.isActive("bold") ? "bg-blue-200" : "bg-white"
+                    }`}
             >
                 B
             </button>
             <button
                 type="button"
                 onClick={() => editor.chain().focus().toggleItalic().run()}
-                className={`px-2 py-1 border border-gray-300 rounded text-sm italic ${
-                    editor.isActive("italic") ? "bg-blue-200" : "bg-white"
-                }`}
+                className={`px-2 py-1 border border-gray-300 rounded text-sm italic ${editor.isActive("italic") ? "bg-blue-200" : "bg-white"
+                    }`}
             >
                 I
             </button>
             <button
                 type="button"
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
-                className={`px-2 py-1 border border-gray-300 rounded text-sm underline ${
-                    editor.isActive("underline") ? "bg-blue-200" : "bg-white"
-                }`}
+                className={`px-2 py-1 border border-gray-300 rounded text-sm underline ${editor.isActive("underline") ? "bg-blue-200" : "bg-white"
+                    }`}
             >
                 U
             </button>
             <button
                 type="button"
                 onClick={() => editor.chain().focus().toggleStrike().run()}
-                className={`px-2 py-1 border border-gray-300 rounded text-sm line-through ${
-                    editor.isActive("strike") ? "bg-blue-200" : "bg-white"
-                }`}
+                className={`px-2 py-1 border border-gray-300 rounded text-sm line-through ${editor.isActive("strike") ? "bg-blue-200" : "bg-white"
+                    }`}
             >
                 S
             </button>
@@ -354,9 +351,8 @@ const TiptapToolbar = ({
                         editor.chain().focus().setLink({ href: url }).run();
                     }
                 }}
-                className={`px-2 py-1 border border-gray-300 rounded text-sm ${
-                    editor.isActive("link") ? "bg-blue-200" : "bg-white"
-                }`}
+                className={`px-2 py-1 border border-gray-300 rounded text-sm ${editor.isActive("link") ? "bg-blue-200" : "bg-white"
+                    }`}
             >
                 Link
             </button>
@@ -372,9 +368,8 @@ const TiptapToolbar = ({
                 />
                 <button
                     type="button"
-                    className={`px-2 py-1 border border-gray-300 rounded text-sm ${
-                        isPending ? "bg-gray-200" : "bg-white"
-                    } cursor-pointer`}
+                    className={`px-2 py-1 border border-gray-300 rounded text-sm ${isPending ? "bg-gray-200" : "bg-white"
+                        } cursor-pointer`}
                     onClick={() =>
                         document.getElementById("editor-image-upload")?.click()
                     }
@@ -412,7 +407,7 @@ const TiptapEditorComponent = ({
         const handleGetData = async (id: string) => {
             try {
                 const res = await getBlogApi({ blogId: id });
-                setData(res?.data || null);
+                setData(res?.value.data as API.TGetBlog || null);
             } catch (err) {
                 console.log(err);
             }
