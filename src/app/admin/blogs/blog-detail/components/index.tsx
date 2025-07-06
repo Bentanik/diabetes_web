@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // eslint-disable-next-line react-hooks/exhaustive-deps
 
 "use client";
@@ -28,12 +29,15 @@ import {
 } from "@/components/ui/form";
 import useReviewBlog, { ReviewFormData } from "../hooks/use-review-blog";
 import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/stores";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const { getBlogApi, isBlogPending } = useGetBlog();
     const [data, setData] = useState<API.TGetBlog>();
     const { onSubmit, form, isPending } = useReviewBlog({ blogId: blogId });
     const router = useRouter();
+
+    const user = useAppSelector((state) => state.userSlice);
 
     useEffect(() => {
         const handleGetData = async (id: string) => {
@@ -158,7 +162,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 )}
 
                 {/* Actions for pending blog (status: 0) */}
-                {data?.status === 0 && (
+                {data?.status === 0 && user.user?.roles?.includes("SystemAdmin") && (
                     <div className="mt-10 flex justify-end gap-4">
                         <Dialog>
                             <DialogTrigger asChild>

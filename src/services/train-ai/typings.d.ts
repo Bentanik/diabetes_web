@@ -9,6 +9,16 @@ declare namespace REQUEST {
     chunk_size: 1000;
     chunk_overlap: 200;
   };
+
+  type TSuggestPromptRequest = {
+    idea: string;
+    language: vi;
+  };
+
+  type TUpdateSettingsRequest = {
+    system_prompt: string;
+    available_collections: string[];
+  };
 }
 
 declare namespace API {
@@ -56,5 +66,22 @@ declare namespace API {
     message: string;
     file_info: FileInfo;
     document_ids: string[];
+  };
+
+  type TSuggestPromptResponse = {
+    suggested_template: string;
+  };
+
+  type TSettings = {
+    id: string;
+    system_prompt: string;
+    available_collections: string[];
+    default_language: string;
+    search_settings: {
+      k: number;
+      score_threshold: number;
+    };
+    created_at: string;
+    updated_at: string;
   };
 }

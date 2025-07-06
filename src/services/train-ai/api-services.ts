@@ -54,3 +54,28 @@ export const createKnowledgeBaseDocumentAsync = async (
 
   return response.data;
 };
+
+export const suggestPromptAsync = async (
+  data: REQUEST.TSuggestPromptRequest
+) => {
+  const response = await request<API.TSuggestPromptResponse>(
+    API_ENDPOINTS.SUGGEST_PROMPT,
+    {
+      method: "POST",
+      data,
+    }
+  );
+
+  return response.data;
+};
+
+export const updateSettingsAsync = async (
+  data: REQUEST.TUpdateSettingsRequest
+) => {
+  const response = await request<API.TSettings>(API_ENDPOINTS.UPDATE_SETTINGS, {
+    method: "PATCH",
+    data,
+  });
+
+  return response.data;
+};

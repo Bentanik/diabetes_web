@@ -6,7 +6,7 @@ import { ActivityIcon, BarChartIcon, BellIcon, BotIcon, ExternalLinkIcon, EyeIco
 import { motion } from "framer-motion"
 import ProfileHospitalMenu from '@/components/profile_hospital_menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import ListTotalStatisticHospitalDashboard from '@/app/hospital/home/components/list-total'
+// import ListTotalStatisticHospitalDashboard from '@/app/hospital/home/components/list-total'
 
 const messageData = [
   { day: "T2", messages: 145 },
@@ -114,7 +114,7 @@ export default function HomeHospitalComponent() {
         <Header />
       </header>
       {/* Start Cards */}
-      <ListTotalStatisticHospitalDashboard />
+      {/* <ListTotalStatisticHospitalDashboard /> */}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
