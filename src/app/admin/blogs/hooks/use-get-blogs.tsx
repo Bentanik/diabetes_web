@@ -10,8 +10,9 @@ export default function useGetBlogs() {
         setPending(true);
         try {
             const res = await getAllBlogs(params);
-            if (res.value.data != null) {
-                return res as TResponse<API.TGetBlogs>;
+            console.log("Blogs Data nè:");
+            if (res.data != null) {
+                return res as TResponseData<API.TGetBlogs>;
             } else {
                 addToast({
                     type: "error",

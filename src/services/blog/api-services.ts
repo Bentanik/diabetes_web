@@ -120,7 +120,7 @@ export const getAllBlogs = async ({
     if (isSortAsc !== undefined) {
         params.isSortAsc = isSortAsc;
     }
-    const response = await request<TResponse<API.TGetBlogs>>(
+    const response = await request<TResponseData<API.TGetBlogs>>(
         API_ENDPOINTS.GET_POSTS,
         {
             method: "GET",

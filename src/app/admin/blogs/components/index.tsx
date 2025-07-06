@@ -171,9 +171,8 @@ export default function ModeratorManageBlogComponent() {
                 sortType: selectSortType,
                 isSortAsc: isSortAsc,
             });
-            setTotalPage(res?.value.data?.totalPages || 1);
-            console.log(selectedStatus);
-            setData(res?.value.data?.items || []);
+            setTotalPage(res?.data?.totalPages || 1);
+            setData(res?.data?.items || []);
         } catch (err) {
             console.log(err);
             setData([]);
