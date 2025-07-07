@@ -43,7 +43,7 @@ export default function useUploadImage() {
             ) {
                 throw new Error("Không nhận được dữ liệu hợp lệ từ server");
             }
-            return response.data[0]; // Return the first item from the array
+            return response.data[0];
         },
         onSuccess: () => {
             addToast({

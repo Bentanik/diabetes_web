@@ -17,7 +17,6 @@ import { useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { Extension } from "@tiptap/core";
 import debounce from "lodash.debounce";
-import useUpdateDraftBlog from "@/app/admin/blogs/update-blog/hooks/use-update-blog-draft";
 
 // Custom Enter Extension
 const CustomEnter = Extension.create({
@@ -192,6 +191,7 @@ interface TiptapEditorProps {
     onUpdate: (content: string) => void;
     name: string;
     blogId: string;
+    onSubmitDraft: any;
 }
 
 const TiptapToolbar = ({
@@ -396,13 +396,12 @@ const TiptapToolbar = ({
 const TiptapEditorComponent = ({
     content,
     onUpdate,
-    blogId,
+    onSubmitDraft,
 }: TiptapEditorProps) => {
     const editorRef = useRef<Editor | null>(null);
     const { setValue } = useFormContext();
     const [countdown, setCountdown] = useState<number | null>(null);
     const [savedMessage, setSavedMessage] = useState<string>("");
-    const { onSubmit } = useUpdateDraftBlog({ blogId });
 
     const latestDataRef = useRef({
         contentText: "",
@@ -456,7 +455,7 @@ const TiptapEditorComponent = ({
 
     // Xử lý submit form
     const handleFormSubmit = useCallback(async () => {
-        if (!onSubmit || typeof onSubmit !== "function") {
+        if (!onSubmitDraft || typeof onSubmitDraft !== "function") {
             console.error("onSubmit is not a function");
             setSavedMessage("Lỗi: Không thể lưu bài viết.");
             setTimeout(() => setSavedMessage(""), 3000);
@@ -464,13 +463,18 @@ const TiptapEditorComponent = ({
         }
 
         try {
-            const formData: REQUEST.TUpdateBlogDraft = {
+            const formData: REQUEST.TUpdateBlog = {
+                title: null,
                 content: latestDataRef.current.contentText,
                 contentHtml: latestDataRef.current.contentHtml,
+                thumbnail: null,
+                categoryIds: null,
                 images: latestDataRef.current.imageIds,
+                doctorId: null,
+                isDraft: true,
             };
 
-            await onSubmit(formData);
+            await onSubmitDraft(formData);
             setSavedMessage("Đã lưu thành công!");
             setTimeout(() => setSavedMessage(""), 2000);
         } catch (error) {
@@ -478,7 +482,7 @@ const TiptapEditorComponent = ({
             setSavedMessage("Lỗi: Không thể lưu bài viết.");
             setTimeout(() => setSavedMessage(""), 3000);
         }
-    }, [onSubmit]);
+    }, [onSubmitDraft]);
 
     // Debounced function để bắt đầu đếm ngược sau khi dừng chỉnh sửa
     const startCountdown = useCallback(

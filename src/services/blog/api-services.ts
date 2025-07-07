@@ -13,7 +13,7 @@ export const createBlogAsync = async () => {
 
 export const updateBlogAsync = async (
     { blogId }: REQUEST.BlogId,
-    body: FormData
+    body: REQUEST.TUpdateBlog
 ) => {
     const response = await request<TResponse>(
         API_ENDPOINTS.UPDATE_POST(blogId),
@@ -21,29 +21,29 @@ export const updateBlogAsync = async (
             method: "PUT",
             data: body,
             headers: {
-                "Content-Type": "multipart/form-data",
+                "Content-Type": "application/json",
             },
         }
     );
     return response.data;
 };
 
-export const updateBlogDraftAsync = async (
-    { blogId }: REQUEST.BlogId,
-    body: FormData
-) => {
-    const response = await request<TResponse>(
-        API_ENDPOINTS.UPDATE_POST_DRAFT(blogId),
-        {
-            method: "PUT",
-            data: body,
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        }
-    );
-    return response.data;
-};
+// export const updateBlogDraftAsync = async (
+//     { blogId }: REQUEST.BlogId,
+//     body: FormData
+// ) => {
+//     const response = await request<TResponse>(
+//         API_ENDPOINTS.UPDATE_POST_DRAFT(blogId),
+//         {
+//             method: "PUT",
+//             data: body,
+//             headers: {
+//                 "Content-Type": "multipart/form-data",
+//             },
+//         }
+//     );
+//     return response.data;
+// };
 
 export const reviewBlogAsync = async (
     { blogId }: REQUEST.BlogId,

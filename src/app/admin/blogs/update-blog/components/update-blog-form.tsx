@@ -29,7 +29,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import TiptapEditor from "@/components/tiptap";
 import useUploadImage from "@/app/admin/blogs/update-blog/hooks/use-upload-image";
 import MultiSelectCategories from "@/app/admin/blogs/update-blog/components/select-category";
@@ -94,18 +94,21 @@ const doctors = [
 ];
 
 export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
-    const { isPending: isUploading } = useUploadImage();
+    const { isPending: isUploading, onSubmit: onSubmitImage } =
+        useUploadImage();
     const { getCategoriesApi, isPending } = useGetDataCategories();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [data, setData] = useState<API.TGetCategories>([]);
-    const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { getBlogApi } = useGetBlog();
     const [blogData, setBlogData] = useState<API.TGetBlog>();
     const { form, onSubmit } = useUpdateBlog({ blogId });
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+        null
+    );
+    const [thumbnailId, setThumbnailId] = useState<string | null>(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -119,6 +122,25 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         };
         handleGetData();
     }, []);
+
+    const handleImageChange = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const data = { image: file };
+
+            onSubmitImage(
+                data,
+                handleClearImages,
+                (imageId, publicId, publicUrl) => {
+                    form.setValue("thumbnail", imageId);
+                    setThumbnailPreview(publicUrl);
+                    setThumbnailId(imageId);
+                }
+            );
+        }
+    };
 
     useEffect(() => {
         const handleGetBlogData = async (id: string) => {
@@ -163,39 +185,21 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     };
     const handleClearImages = () => {
         setImageIds([]);
-        setLogoFile(null);
-        setLogoPreview(null);
     };
 
-    const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Kích thước file không được vượt quá 5MB");
-                event.target.value = "";
-                return;
+    const handleSubmitDraft = useCallback(
+        async (formData: REQUEST.TUpdateBlog) => {
+            try {
+                onSubmit(formData, () => {
+                    console.log("Draft saved successfully");
+                });
+            } catch (error) {
+                console.error("Error saving draft:", error);
+                throw error;
             }
-            if (!file.type.startsWith("image/")) {
-                alert("Vui lòng chọn file hình ảnh");
-                event.target.value = "";
-                return;
-            }
-
-            setLogoFile(file);
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setLogoPreview(e.target?.result as string);
-            };
-            reader.onerror = () => {
-                console.error("Lỗi khi đọc file ảnh");
-                alert("Không thể đọc file ảnh, vui lòng thử lại.");
-                setLogoFile(null); // Reset nếu lỗi
-                event.target.value = "";
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+        },
+        [onSubmit]
+    );
 
     const handleFormSubmit = async (data: BlogFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
@@ -206,13 +210,13 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         setIsSubmitting(true);
         try {
             const formData: REQUEST.TUpdateBlog = {
-                title: data.title,
-                content: content,
-                contentHtml: data.contentHtml,
-                thumbnail: logoFile || null,
-                categoryIds: data.categoryIds,
-                images: imageIds,
-                doctorId: data.doctorId,
+                title: data.title || null,
+                content: content || null,
+                contentHtml: data.contentHtml || null,
+                thumbnail: thumbnailId || null,
+                categoryIds: data.categoryIds || null,
+                images: imageIds || null,
+                doctorId: data.doctorId || null,
                 isDraft: false,
             };
             onSubmit(formData, () => {
@@ -235,9 +239,8 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         form.setValue("title", "");
         form.setValue("categoryIds", []);
         form.setValue("doctorId", "");
-
-        setLogoFile(null);
-        setLogoPreview(null);
+        setThumbnailPreview(null);
+        setThumbnailId(null);
         setImageIds([]);
 
         setIsDialogOpen(false);
@@ -268,6 +271,9 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                                 }}
                                                 name="contentHtml"
                                                 blogId={blogId}
+                                                onSubmitDraft={
+                                                    handleSubmitDraft
+                                                }
                                             />
                                         </FormControl>
                                         <FormMessage className="flex items-center gap-1">
@@ -378,7 +384,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         <input
                                             type="file"
                                             accept="image/*"
-                                            onChange={handleLogoUpload}
+                                            onChange={handleImageChange}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                             id="logo-upload"
                                         />
@@ -397,7 +403,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                             </label>
                                         </Button>
                                     </div>
-                                    {logoPreview && (
+                                    {thumbnailPreview && (
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.8 }}
                                             animate={{ opacity: 1, scale: 1 }}
@@ -405,7 +411,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         >
                                             <Image
                                                 src={
-                                                    logoPreview ||
+                                                    thumbnailPreview ||
                                                     "/placeholder.svg"
                                                 }
                                                 width={20}

@@ -1,19 +1,13 @@
 declare namespace REQUEST {
     type TUpdateBlog = {
-        title: string;
-        content: string;
-        contentHtml: string;
-        thumbnail: File | null;
-        categoryIds: string[];
-        images: string[];
-        doctorId: string;
+        title: string | null;
+        content: string | null;
+        contentHtml: string | null;
+        thumbnail: string | null;
+        categoryIds: string[] | null;
+        images: string[] | null;
+        doctorId: string | null;
         isDraft: boolean;
-    };
-
-    type TUpdateBlogDraft = {
-        content: string;
-        contentHtml: string;
-        images: string[];
     };
 
     type ReviewBlog = {

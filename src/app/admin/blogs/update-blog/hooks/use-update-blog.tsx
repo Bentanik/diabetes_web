@@ -14,6 +14,7 @@ export const blogSchema = z.object({
         .array(z.string())
         .min(1, "Phải chọn ít nhất 1 thể loại cho bài viết"),
     doctorId: z.string().nonempty("Vui lòng chọn bác sĩ"),
+    thumbnail: z.string(),
 });
 
 export type BlogFormData = z.infer<typeof blogSchema>;
@@ -26,6 +27,7 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
             contentHtml: "",
             categoryIds: [],
             doctorId: "",
+            thumbnail: "",
         },
     });
 
@@ -35,13 +37,17 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
     const onSubmit = (data: REQUEST.TUpdateBlog, clearImages: () => void) => {
-        showBackdrop();
+        if (!data.isDraft) {
+            showBackdrop();
+        }
         mutate(data, {
             onSuccess: (res) => {
-                hideBackdrop();
-                console.log("API Success:", res);
-                form.reset();
-                clearImages();
+                if (!data.isDraft) {
+                    hideBackdrop();
+                    console.log("API Success:", res);
+                    form.reset();
+                    clearImages();
+                }
             },
             onError: (err) => {
                 hideBackdrop();

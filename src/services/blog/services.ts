@@ -4,7 +4,6 @@ import {
     createBlogAsync,
     updateBlogAsync,
     reviewBlogAsync,
-    updateBlogDraftAsync,
 } from "./api-services";
 
 export const useServiceCreateBlog = () => {
@@ -31,50 +30,16 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
 
     return useMutation<TResponse, TMeta, REQUEST.TUpdateBlog>({
         mutationFn: async (data: REQUEST.TUpdateBlog) => {
-            const formData = new FormData();
-            formData.append("Title", data.title);
-            formData.append("Content", data.content);
-            formData.append("ContentHtml", data.contentHtml);
-            if (data.thumbnail) {
-                const fileData = new Blob([data.thumbnail], {
-                    type: data.thumbnail.type,
+            return await updateBlogAsync({ blogId }, data);
+        },
+        onSuccess: (_, variables) => {
+            if (!variables.isDraft) {
+                addToast({
+                    type: "success",
+                    description: "Tạo bài viết thành công",
+                    duration: 5000,
                 });
-                console.log("File data as Blob:", fileData);
-                formData.append("Thumbnail", data.thumbnail);
             }
-            data.categoryIds.forEach((id) => {
-                formData.append("CategoryIds", id);
-            });
-            data.images.forEach((id) => {
-                formData.append("Images", id);
-            });
-            formData.append("DoctorId", data.doctorId);
-            formData.append("IsDraft", "false");
-
-            return await updateBlogAsync({ blogId }, formData);
-        },
-        onSuccess: () => {
-            console.log("onSuccess called, attempting to show toast");
-            addToast({
-                type: "success",
-                description: "Tạo bài viết thành công",
-                duration: 5000,
-            });
-            console.log("Toast dispatched");
-        },
-    });
-};
-
-export const useServiceUpdateBlogDraft = ({ blogId }: REQUEST.BlogId) => {
-    return useMutation<TResponse, TMeta, REQUEST.TUpdateBlogDraft>({
-        mutationFn: async (data: REQUEST.TUpdateBlogDraft) => {
-            const formData = new FormData();
-            formData.append("Content", data.content);
-            formData.append("ContentHtml", data.contentHtml);
-            data.images.forEach((id) => {
-                formData.append("Images", id);
-            });
-            return await updateBlogDraftAsync({ blogId }, formData);
         },
     });
 };
