@@ -52,7 +52,6 @@ const CustomEnter = Extension.create({
 
 let editorInstance: Editor | null = null;
 
-// ImageDeleteTracker Class
 class ImageDeleteTracker {
     private uploadedImages: Map<
         string,
@@ -62,8 +61,6 @@ class ImageDeleteTracker {
     private observer: MutationObserver | null = null;
     private editorContainer: HTMLElement | null = null;
     private preventedUndoSteps: Set<string> = new Set();
-    private lastAction: "delete_image" | "other" | null = null;
-    private lastActionTime: number = 0;
 
     constructor() {
         this.initObserver();
@@ -150,29 +147,6 @@ class ImageDeleteTracker {
 
     public isImageDeleted(imageId: string): boolean {
         return this.deletedImageIds.has(imageId);
-    }
-
-    public wouldUndoRestoreDeletedImages(): boolean {
-        if (!editorInstance || this.deletedImageIds.size === 0) return false;
-
-        try {
-            const currentHTML = editorInstance.getHTML();
-            for (const deletedId of this.deletedImageIds) {
-                if (currentHTML.includes(deletedId)) {
-                    return true;
-                }
-            }
-            if (
-                this.lastAction === "delete_image" &&
-                Date.now() - this.lastActionTime < 1000
-            ) {
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.log(error);
-            return false;
-        }
     }
 
     public cleanup() {
@@ -291,22 +265,56 @@ const TiptapToolbar = ({
                 }
                 onChange={(e) => {
                     const level = parseInt(e.target.value);
+                    const { from, to } = editor.state.selection;
                     editor.commands.focus();
                     if (level === 0) {
-                        editor.chain().focus().setParagraph().run();
+                        if (from !== to) {
+                            const text = editor.state.doc.textBetween(from, to);
+                            // editor.chain().focus().setParagraph().run();
+                            editor
+                                .chain()
+                                .focus()
+                                .insertContentAt(
+                                    { from, to },
+                                    {
+                                        type: "paragraph",
+                                        content: [{ type: "text", text }],
+                                    }
+                                )
+                                .run();
+                        }
                     } else {
-                        editor
-                            .chain()
-                            .focus()
-                            .setNode("heading", { level })
-                            .run();
+                        if (from !== to) {
+                            // Có đoạn văn được tô đen
+                            const text = editor.state.doc.textBetween(from, to);
+                            editor
+                                .chain()
+                                .focus()
+                                .insertContentAt(
+                                    { from, to },
+                                    {
+                                        type: "heading",
+                                        attrs: { level },
+                                        content: [{ type: "text", text }],
+                                    }
+                                )
+                                .run();
+                        } else {
+                            // Không có vùng chọn, chỉ là con trỏ: tạo block heading mới
+                            editor
+                                .chain()
+                                .focus()
+                                .splitBlock()
+                                .setNode("heading", { level })
+                                .run();
+                        }
                     }
                 }}
                 className="px-2 py-1 border border-gray-300 rounded text-sm"
             >
                 <option value="0">Paragraph</option>
-                <option value="2">Heading 2</option>
-                <option value="3">Heading 3</option>
+                <option value="2">Heading 1</option>
+                <option value="3">Heading 2</option>
             </select>
 
             <button

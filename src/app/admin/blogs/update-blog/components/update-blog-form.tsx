@@ -111,6 +111,10 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const [thumbnailId, setThumbnailId] = useState<string | null>(null);
     const router = useRouter();
 
+    const categoryIds = form.watch("categoryIds");
+    const doctorId = form.watch("doctorId");
+    const title = form.watch("title");
+
     useEffect(() => {
         const handleGetData = async () => {
             try {
@@ -339,7 +343,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                         setIsDialogOpen(open);
                     }}
                 >
-                    <DialogContent className="sm:max-w-[600px]">
+                    <DialogContent className="sm:max-w-[600px] h-[700px] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>
                                 Cập nhật thông tin bài viết
@@ -417,7 +421,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                                 width={20}
                                                 height={20}
                                                 alt="Logo preview"
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full"
                                             />
                                         </motion.div>
                                     )}
@@ -478,7 +482,14 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 </Button>
                                 <Button
                                     type="submit"
-                                    disabled={isSubmitting || isUploading}
+                                    disabled={
+                                        isSubmitting ||
+                                        isUploading ||
+                                        !thumbnailId ||
+                                        !categoryIds ||
+                                        !doctorId ||
+                                        !title
+                                    }
                                     className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
                                 >
                                     {isSubmitting ? (
