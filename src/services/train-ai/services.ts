@@ -1,29 +1,54 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   createKnowledgeBaseAsync,
-  createKnowledgeBaseDocumentAsync,
+  deleteKnowledgeBaseAsync,
   getKnowledgeBaseListAsync,
   getKnowledgeBaseStatAsync,
 } from "@/services/train-ai/api-services";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const KNOWLEDGE_BASE_QUERY_KEY = "knowledge-base";
 export const KNOWLEDGE_BASE_STAT_QUERY_KEY = "knowledge-base-stat";
 
-export const useGetKnowledgeBaseListService = () => {
+interface IGetKnowledgeBaseListService {
+  search: string;
+  sort_by: "updated_at";
+  sort_order: "asc" | "desc";
+  page: number;
+  limit: number;
+}
+
+export const useGetKnowledgeBaseListService = ({
+  search = "",
+  sort_by = "updated_at",
+  sort_order = "desc",
+  page = 1,
+  limit = 10,
+}: IGetKnowledgeBaseListService) => {
   const {
     data: knowledge_bases,
     isPending,
     isError,
     error,
   } = useQuery({
-    queryKey: [KNOWLEDGE_BASE_QUERY_KEY],
-    queryFn: getKnowledgeBaseListAsync,
+    queryKey: [
+      KNOWLEDGE_BASE_QUERY_KEY,
+      search.trim(),
+      sort_by,
+      sort_order,
+      page,
+      limit,
+    ],
+    queryFn: () =>
+      getKnowledgeBaseListAsync(
+        search.trim(),
+        sort_by,
+        sort_order,
+        page,
+        limit
+      ),
+    select: (data) => data.value.data,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
-    select: (data) => {
-      return data.knowledge_bases;
-    },
   });
 
   return { knowledge_bases, isPending, isError, error };
@@ -48,7 +73,7 @@ export const useGetKnowledgeBaseStatService = (knowledgeBaseName: string) => {
 
 export const useCreateKnowledgeBaseService = () => {
   return useMutation<
-    API.TKnowledgeBase,
+    TResponse<API.TKnowledgeBase>,
     TMeta,
     REQUEST.TCreateKnowledgeBaseRequest
   >({
@@ -56,19 +81,8 @@ export const useCreateKnowledgeBaseService = () => {
   });
 };
 
-export const useCreateKnowledgeDocumentService = (name: string) => {
-  return useMutation<
-    API.TProcessedFileResponse,
-    TMeta,
-    REQUEST.TCreateDocumentRequest
-  >({
-    mutationFn: (data) => {
-      const form = new FormData();
-      form.append("file", data.file);
-      form.append("chunk_size", data.chunk_size.toString());
-      form.append("chunk_overlap", data.chunk_overlap.toString());
-      form.append("metadata_str", "");
-      return createKnowledgeBaseDocumentAsync(name, form);
-    },
+export const useDeleteKnowledgeBaseService = () => {
+  return useMutation<TResponse<API.TKnowledgeBase>, TMeta, string>({
+    mutationFn: (name) => deleteKnowledgeBaseAsync(name),
   });
 };

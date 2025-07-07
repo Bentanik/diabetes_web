@@ -9,6 +9,7 @@ export const createKnowledgeBaseSchema = z.object({
   description: z
     .string()
     .nonempty({ message: validationMessages.knowledge_description.required }),
+  useDescriptionForLLMCheck: z.boolean(),
 });
 
 export type CreateKnowledgeBaseFormData = z.infer<

@@ -2,6 +2,9 @@ declare namespace REQUEST {
   type TCreateKnowledgeBaseRequest = {
     name: string;
     description: string;
+    metadata: {
+      useDescriptionForLLMCheck: boolean;
+    };
   };
 
   type TCreateDocumentRequest = {
@@ -22,9 +25,23 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
+  type TTask = {
+    task_id: string;
+    status: "PENDING" | "PROGRESS" | "SUCCESS" | "FAILURE" | string;
+    step?: number;
+    total?: number;
+    message?: string;
+    percentage?: number;
+    result?: unknown;
+    error?: string;
+  };
+
   type TKnowledgeBase = {
     name: string;
     description: string;
+    metadata: {
+      useDescriptionForLLMCheck: boolean;
+    };
     document_count: number;
     created_at: string;
     updated_at: string;
@@ -33,6 +50,10 @@ declare namespace API {
 
   type TGetKnowledgeBaseListResponse = {
     knowledge_bases: TKnowledgeBase[];
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
   };
 
   type TKnowledgeBaseDocument = {

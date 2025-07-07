@@ -122,6 +122,9 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
     (response) => {
+        if (response.data?.status && response.data?.status >= 400) {
+            return Promise.reject(response.data);
+        }
         return response;
     },
     (error) => {
