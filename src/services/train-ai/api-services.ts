@@ -1,11 +1,24 @@
 import API_ENDPOINTS from "@/services/train-ai/api-path";
 import request from "@/services/interceptor";
 
-export const getKnowledgeBaseListAsync = async () => {
-  const response = await request<API.TGetKnowledgeBaseListResponse>(
+export const getKnowledgeBaseListAsync = async (
+  search: string,
+  sort_by: "updated_at" | "created_at",
+  sort_order: "asc" | "desc",
+  page: number,
+  limit: number
+) => {
+  const response = await request<TResponse<API.TGetKnowledgeBaseListResponse>>(
     API_ENDPOINTS.KNOWLEDGE_BASE,
     {
       method: "GET",
+      params: {
+        search,
+        sort_by,
+        sort_order,
+        page,
+        limit,
+      },
     }
   );
 
@@ -13,7 +26,7 @@ export const getKnowledgeBaseListAsync = async () => {
 };
 
 export const getKnowledgeBaseStatAsync = async (name: string) => {
-  const response = await request<API.TKnowledgeBaseStats>(
+  const response = await request<TResponse<API.TKnowledgeBaseStats>>(
     API_ENDPOINTS.KNOWLEDGE_BASE_STATS(name),
     {
       method: "GET",
@@ -26,7 +39,7 @@ export const getKnowledgeBaseStatAsync = async (name: string) => {
 export const createKnowledgeBaseAsync = async (
   data: REQUEST.TCreateKnowledgeBaseRequest
 ) => {
-  const response = await request<API.TKnowledgeBase>(
+  const response = await request<TResponse<API.TKnowledgeBase>>(
     API_ENDPOINTS.KNOWLEDGE_BASE,
     {
       method: "POST",
@@ -37,45 +50,13 @@ export const createKnowledgeBaseAsync = async (
   return response.data;
 };
 
-export const createKnowledgeBaseDocumentAsync = async (
-  name: string,
-  formData: FormData
-) => {
-  const response = await request<API.TProcessedFileResponse>(
-    API_ENDPOINTS.KNOWLEDGE_BASE_UPLOAD_DOCUMENT(name),
+export const deleteKnowledgeBaseAsync = async (name: string) => {
+  const response = await request<TResponse<API.TKnowledgeBase>>(
+    API_ENDPOINTS.KNOWLEDGE_BASE + "/" + name,
     {
-      method: "POST",
-      data: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      method: "DELETE",
     }
   );
-
-  return response.data;
-};
-
-export const suggestPromptAsync = async (
-  data: REQUEST.TSuggestPromptRequest
-) => {
-  const response = await request<API.TSuggestPromptResponse>(
-    API_ENDPOINTS.SUGGEST_PROMPT,
-    {
-      method: "POST",
-      data,
-    }
-  );
-
-  return response.data;
-};
-
-export const updateSettingsAsync = async (
-  data: REQUEST.TUpdateSettingsRequest
-) => {
-  const response = await request<API.TSettings>(API_ENDPOINTS.UPDATE_SETTINGS, {
-    method: "PATCH",
-    data,
-  });
 
   return response.data;
 };

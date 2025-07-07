@@ -1,13 +1,19 @@
-import { useBackdrop } from "@/context/backdrop_context";
 import {
-  CreateKnowledgeBaseFormData,
+  type CreateKnowledgeBaseFormData,
   createKnowledgeBaseSchema,
 } from "@/lib/validations/knowledge_base.schema";
-import { useCreateKnowledgeBaseService } from "@/services/train-ai/services";
+import {
+  KNOWLEDGE_BASE_QUERY_KEY,
+  useCreateKnowledgeBaseService,
+} from "@/services/train-ai/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function useCreateKnowlegeBase() {
+  const [isCreating, setIsCreating] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -15,42 +21,59 @@ export default function useCreateKnowlegeBase() {
     setError,
     setValue,
     reset,
+    watch,
   } = useForm<CreateKnowledgeBaseFormData>({
     resolver: zodResolver(createKnowledgeBaseSchema),
     defaultValues: {
       name: "",
       description: "",
+      useDescriptionForLLMCheck: true,
     },
   });
 
   const { mutate } = useCreateKnowledgeBaseService();
-  const { showBackdrop, hideBackdrop } = useBackdrop();
+  const queryClient = useQueryClient();
 
   const onSubmit = async (
     data: CreateKnowledgeBaseFormData,
     onClose: () => void
   ) => {
+    if (isCreating) return; // Prevent multiple submissions
+
     try {
+      setIsCreating(true);
+
+      // Prepare request
       const request: REQUEST.TCreateKnowledgeBaseRequest = {
         name: data?.name,
         description: data?.description,
+        metadata: {
+          useDescriptionForLLMCheck: data?.useDescriptionForLLMCheck,
+        },
       };
 
-      showBackdrop();
+      // Make API call
       mutate(request, {
-        onSuccess: async (data) => {
-          if (data) {
-            hideBackdrop();
-            reset();
+        onSuccess: async (responseData) => {
+          if (responseData) {
+            setIsCreating(false);
             onClose();
+            await queryClient.invalidateQueries({
+              queryKey: [KNOWLEDGE_BASE_QUERY_KEY],
+            });
           }
         },
-        onError: () => {
-          hideBackdrop();
+        onError: (data: TMeta) => {
+          if (data.errorCode === "KB001") {
+            setError("name", { message: "Thư mục đã tồn tại" });
+          }
+          setIsCreating(false);
         },
       });
     } catch (err) {
-      console.log("err: ", err);
+      console.error("Unexpected error:", err);
+
+      setIsCreating(false);
     }
   };
 
@@ -61,5 +84,8 @@ export default function useCreateKnowlegeBase() {
     onSubmit,
     setValue,
     setError,
+    watch,
+    isCreating,
+    reset,
   };
 }
