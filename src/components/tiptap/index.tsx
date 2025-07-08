@@ -20,6 +20,7 @@ import { useFormContext } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { Extension } from "@tiptap/core";
 import debounce from "lodash.debounce";
+import { List, ListOrdered, Link2, FileImage } from "lucide-react";
 
 export const CustomEnter = Extension.create({
     name: "customEnter",
@@ -257,7 +258,7 @@ const TiptapToolbar = ({
         <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50 items-center">
             <select
                 value={
-                    editor.isActive("heading")
+                    editor.isActive("headingss")
                         ? editor.getAttributes("heading").level
                         : 0
                 }
@@ -298,7 +299,6 @@ const TiptapToolbar = ({
                                 )
                                 .run();
                         } else {
-                            // Không có vùng chọn, chỉ là con trỏ: tạo block heading mới
                             editor
                                 .chain()
                                 .focus()
@@ -364,7 +364,7 @@ const TiptapToolbar = ({
                     editor.isActive("bulletList") ? "bg-blue-200" : "bg-white"
                 }`}
             >
-                • Bullet List
+                <List width={20} height={20} />
             </button>
 
             <button
@@ -380,22 +380,37 @@ const TiptapToolbar = ({
                     editor.isActive("orderedList") ? "bg-blue-200" : "bg-white"
                 }`}
             >
-                1. Ordered List
+                <ListOrdered width={20} height={20} />
             </button>
 
             <button
                 type="button"
                 onClick={() => {
-                    const url = window.prompt("Enter URL:");
-                    if (url) {
-                        editor.chain().focus().setLink({ href: url }).run();
+                    const { state, view } = editor;
+                    const { empty, from, to } = state.selection;
+
+                    // Nếu đang ở trong link
+                    if (editor.isActive("link")) {
+                        // Nếu không có vùng chọn (chỉ là con trỏ)
+                        if (empty) {
+                            // Gỡ mark "link" để ngăn việc chữ mới gõ tiếp tục bị dính link
+                            editor.chain().focus().unsetMark("link").run();
+                        } else {
+                            // Nếu có vùng chọn thì chỉ gỡ link khỏi vùng đó
+                            editor.chain().focus().unsetLink().run();
+                        }
+                    } else {
+                        const url = window.prompt("Enter URL:");
+                        if (url) {
+                            editor.chain().focus().setLink({ href: url }).run();
+                        }
                     }
                 }}
                 className={`px-2 py-1 border border-gray-300 rounded text-sm ${
                     editor.isActive("link") ? "bg-blue-200" : "bg-white"
                 }`}
             >
-                Link
+                <Link2 width={20} height={20} />
             </button>
 
             <div className="relative">
@@ -417,7 +432,7 @@ const TiptapToolbar = ({
                     }
                     disabled={isPending}
                 >
-                    {isPending ? "Đang tải..." : "📷 Image"}
+                    <FileImage width={20} height={20} />
                 </button>
             </div>
 
