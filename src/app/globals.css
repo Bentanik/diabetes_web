@@ -229,6 +229,12 @@
     animation: gradient-shift 8s ease infinite;
 }
 
+.preview-content p:empty::after {
+    content: "";
+    display: block;
+    height: 1.5rem;
+}
+
 /* Button hover effects */
 .btn-hover-effect {
     position: relative;

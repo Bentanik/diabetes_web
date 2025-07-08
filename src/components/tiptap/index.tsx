@@ -9,6 +9,9 @@ import TextAlign from "@tiptap/extension-text-align";
 import Color from "@tiptap/extension-color";
 import TextStyle from "@tiptap/extension-text-style";
 import Highlight from "@tiptap/extension-highlight";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import ListItem from "@tiptap/extension-list-item";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -18,33 +21,28 @@ import { v4 as uuidv4 } from "uuid";
 import { Extension } from "@tiptap/core";
 import debounce from "lodash.debounce";
 
-// Custom Enter Extension
-const CustomEnter = Extension.create({
+export const CustomEnter = Extension.create({
     name: "customEnter",
     addKeyboardShortcuts() {
         return {
             Enter: ({ editor }) => {
-                const { state } = editor;
-                const { selection } = state;
-                const { $from, $to } = selection;
-
-                if ($from.parent.type.name === "paragraph") {
-                    if (
-                        $from.pos === $to.pos &&
-                        $from.parentOffset === $from.parent.nodeSize - 2
-                    ) {
-                        editor.commands.insertContent("<br><br>");
-                        return true;
-                    } else {
-                        editor.commands.splitBlock();
-                        return true;
-                    }
+                const { empty, $head, from, to } = editor.state.selection;
+                // Nếu có vùng chọn (bôi đen nhiều dòng) thì để Tiptap xử lý mặc định
+                if (from !== to) {
+                    return false;
                 }
-                return false;
-            },
-            "Shift-Enter": ({ editor }) => {
-                editor.commands.insertContent("<br>");
-                return true;
+                // Nếu đang trong danh sách
+                const isInList =
+                    editor.isActive("bulletList") ||
+                    editor.isActive("orderedList");
+                if (isInList) {
+                    if (empty && $head.parent.content.size === 0) {
+                        return editor.commands.liftListItem("listItem");
+                    }
+                    return editor.commands.splitListItem("listItem");
+                }
+                // Ngoài danh sách → chèn <br>
+                return editor.commands.insertContent("<p>&nbsp;</p>");
             },
         };
     },
@@ -353,6 +351,37 @@ const TiptapToolbar = ({
             >
                 S
             </button>
+            <button
+                type="button"
+                onClick={() =>
+                    editor
+                        .chain()
+                        .focus()
+                        .toggleList("bulletList", "listItem")
+                        .run()
+                }
+                className={`px-2 py-1 border rounded text-sm ${
+                    editor.isActive("bulletList") ? "bg-blue-200" : "bg-white"
+                }`}
+            >
+                • Bullet List
+            </button>
+
+            <button
+                type="button"
+                onClick={() =>
+                    editor
+                        .chain()
+                        .focus()
+                        .toggleList("orderedList", "listItem")
+                        .run()
+                }
+                className={`px-2 py-1 border rounded text-sm ${
+                    editor.isActive("orderedList") ? "bg-blue-200" : "bg-white"
+                }`}
+            >
+                1. Ordered List
+            </button>
 
             <button
                 type="button"
@@ -552,7 +581,17 @@ const TiptapEditorComponent = ({
                         class: "m-0",
                     },
                 },
+                bulletList: false,
+                orderedList: false,
+                listItem: false,
             }),
+            BulletList.configure({
+                HTMLAttributes: { class: "list-disc pl-4" },
+            }),
+            OrderedList.configure({
+                HTMLAttributes: { class: "list-decimal pl-4" },
+            }),
+            ListItem,
             CustomEnter,
             Underline,
             TextAlign.configure({ types: ["heading", "paragraph"] }),

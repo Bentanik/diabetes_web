@@ -287,9 +287,9 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 )}
                             />
                         </div>
-                        <div className="flex-1 relative">
+                        <div className="flex-1 relative flex justify-center">
                             <div className="">
-                                <div className="flex justify-center gap-2 font-semibold text-lg items-center">
+                                <div className="flex justify-center font-semibold text-lg items-center gap-2">
                                     <Smartphone className="h-5 w-5 text-[#248fca]" />
                                     Xem trước trên mobile
                                 </div>
@@ -329,6 +329,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                         type="button"
                         className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                         onClick={() => setIsDialogOpen(true)}
+                        disabled={!content}
                     >
                         Hoàn tất nội dung
                     </Button>
@@ -493,7 +494,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                     className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
                                 >
                                     {isSubmitting ? (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 cursor-pointer">
                                             <motion.div
                                                 animate={{ rotate: 360 }}
                                                 transition={{
@@ -501,7 +502,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                                     repeat: Infinity,
                                                     ease: "linear",
                                                 }}
-                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full cursor-pointer"
+                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full "
                                             />
                                             Đang tải lên...
                                         </div>
