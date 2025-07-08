@@ -28,23 +28,6 @@ export const updateBlogAsync = async (
     return response.data;
 };
 
-// export const updateBlogDraftAsync = async (
-//     { blogId }: REQUEST.BlogId,
-//     body: FormData
-// ) => {
-//     const response = await request<TResponse>(
-//         API_ENDPOINTS.UPDATE_POST_DRAFT(blogId),
-//         {
-//             method: "PUT",
-//             data: body,
-//             headers: {
-//                 "Content-Type": "multipart/form-data",
-//             },
-//         }
-//     );
-//     return response.data;
-// };
-
 export const reviewBlogAsync = async (
     { blogId }: REQUEST.BlogId,
     body: { isApproved: boolean; reasonRejected: string }
