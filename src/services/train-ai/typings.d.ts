@@ -7,10 +7,24 @@ declare namespace REQUEST {
     };
   };
 
+  type TValidationResults = {
+    isValid: boolean;
+    confidence: number;
+    reasons: string[];
+    suggestions?: string[];
+    keyTopics?: string[];
+    error?: string;
+    errorCode?: string;
+  };
+
   type TCreateDocumentRequest = {
-    file: File;
-    chunk_size: 1000;
-    chunk_overlap: 200;
+    id: number;
+    name: string;
+    size: string;
+    type: string;
+    status: "uploading" | "validating" | "valid" | "invalid" | "error";
+    progress: number;
+    validationResults: API.TValidationResults | null;
   };
 
   type TSuggestPromptRequest = {
@@ -25,17 +39,6 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
-  type TTask = {
-    task_id: string;
-    status: "PENDING" | "PROGRESS" | "SUCCESS" | "FAILURE" | string;
-    step?: number;
-    total?: number;
-    message?: string;
-    percentage?: number;
-    result?: unknown;
-    error?: string;
-  };
-
   type TKnowledgeBase = {
     name: string;
     description: string;
