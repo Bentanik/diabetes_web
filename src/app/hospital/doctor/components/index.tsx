@@ -20,6 +20,7 @@ import {
     Trash2Icon,
     UsersIcon,
     XCircleIcon,
+    Plus,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
@@ -162,6 +163,10 @@ const Header = () => {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
+                    <Button variant="outline" className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Thêm bác sĩ
+                    </Button>
                     <Button variant="outline" className="gap-2">
                         <BarChartIcon className="w-4 h-4" />
                         Xuất báo cáo

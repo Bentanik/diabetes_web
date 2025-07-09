@@ -12,9 +12,9 @@ export const sidebar_items = [
         label: "Dashboard",
     },
     {
-        href: "/hospital/employee",
+        href: "/hospital/doctor",
         icon: UsersIcon,
-        label: "Nhân viên",
+        label: "Bác sĩ",
     },
     {
         href: "/hospital/group",
