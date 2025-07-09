@@ -1,3 +1,4 @@
+import { useBackdrop } from "@/context/backdrop_context";
 import useToast from "@/hooks/use-toast";
 import { getBlog } from "@/services/blog/api-services";
 import { useState } from "react";
@@ -5,8 +6,10 @@ import { useState } from "react";
 export default function useGetBlog() {
     const { addToast } = useToast();
     const [isBlogPending, setIsBlogPending] = useState<boolean>(false);
+    const { showBackdrop, hideBackdrop } = useBackdrop();
 
     const getBlogApi = async (param: REQUEST.BlogId) => {
+        showBackdrop();
         setIsBlogPending(true);
         try {
             const res = await getBlog(param);
@@ -28,6 +31,7 @@ export default function useGetBlog() {
             return null;
         } finally {
             setIsBlogPending(false);
+            hideBackdrop();
         }
     };
 

@@ -88,7 +88,7 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
                         Quản lý bài viết
                     </h1>
                     <p className="text-gray-600 mt-1 text-sm">
-                        Tổng cộng 6 bài viết - 6 kết quả hiển thị
+                        Hiện có 6 kết quả hiển thị
                     </p>
                 </div>
                 <div className="flex items-center gap-4">

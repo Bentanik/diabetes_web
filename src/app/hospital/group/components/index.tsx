@@ -5,10 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
     BarChartIcon,
     BellIcon,
-    EditIcon,
-    EyeIcon,
-    MailIcon,
-    MoreHorizontalIcon,
     PlusIcon,
     SearchIcon,
     UsersIcon,
@@ -16,15 +12,62 @@ import {
     CalendarClock,
     UserRound,
     Info,
+    Plus,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 const staffData = [
     {
         id: 1,
+        name: "Nhóm chat cho hội tiểu đường type 1",
+        avatar: "/images/auth1.jpg",
+        conversationType: "Loại 1",
+        createDate: "2023-01-15",
+        patientsCount: 45,
+        status: "Đang hoạt động",
+    },
+    {
+        id: 2,
+        name: "Nhóm chat cho hội tiểu đường type 1",
+        avatar: "/images/auth1.jpg",
+        conversationType: "Loại 1",
+        createDate: "2023-01-15",
+        patientsCount: 45,
+        status: "Đang hoạt động",
+    },
+    {
+        id: 3,
+        name: "Nhóm chat cho hội tiểu đường type 1",
+        avatar: "/images/auth1.jpg",
+        conversationType: "Loại 1",
+        createDate: "2023-01-15",
+        patientsCount: 45,
+        status: "Đã dừng hoạt động",
+    },
+    {
+        id: 4,
+        name: "Nhóm chat cho hội tiểu đường type 1",
+        avatar: "/images/auth1.jpg",
+        conversationType: "Loại 1",
+        createDate: "2023-01-15",
+        patientsCount: 45,
+        status: "Đang hoạt động",
+    },
+    {
+        id: 5,
+        name: "Nhóm chat cho hội tiểu đường type 1",
+        avatar: "/images/auth1.jpg",
+        conversationType: "Loại 1",
+        createDate: "2023-01-15",
+        patientsCount: 45,
+        status: "Đã dừng hoạt động",
+    },
+    {
+        id: 6,
         name: "Nhóm chat cho hội tiểu đường type 1",
         avatar: "/images/auth1.jpg",
         conversationType: "Loại 1",
@@ -55,7 +98,7 @@ const Header = () => {
                         Quản lí nhóm chat
                     </h1>
                     <p className="text-gray-600 mt-1 text-sm">
-                        Tổng cộng 6 nhóm chat - 6 kết quả hiển thị
+                        Hiện có 6 kết quả hiển thị
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -79,7 +122,6 @@ export default function GroupHospitalComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
-    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
     const filteredStaff = staffData.filter((staff) => {
         const matchesSearch = staff.name
@@ -143,22 +185,11 @@ export default function GroupHospitalComponent() {
                     </div>
                     <div className="flex gap-2">
                         <Button
-                            variant={
-                                viewMode === "grid" ? "default" : "outline"
-                            }
                             size="sm"
-                            onClick={() => setViewMode("grid")}
+                            className="px-6 py-5 bg-[#248FCA] hover:bg-[#2490cada] cursor-pointer"
                         >
-                            Grid
-                        </Button>
-                        <Button
-                            variant={
-                                viewMode === "list" ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => setViewMode("list")}
-                        >
-                            List
+                            <Plus width={20} height={20} color="white" />
+                            Thêm nhóm chat mới
                         </Button>
                     </div>
                 </div>
@@ -174,94 +205,72 @@ export default function GroupHospitalComponent() {
                         transition={{ delay: index * 0.1 }}
                         className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                     >
-                        {/* Header */}
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="w-12 h-12">
-                                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold">
-                                        {staff.avatar}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <h3 className="font-semibold text-gray-800">
-                                        {staff.name}
-                                    </h3>
+                        <Link
+                            href={`/hospital/group/group-detail/${staff.id}`}
+                            key={staff.id}
+                        >
+                            {/* Header */}
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="w-12 h-12">
+                                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold">
+                                            {staff.avatar}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800">
+                                            {staff.name}
+                                        </h3>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Info */}
-                        <div className="space-y-3 my-10">
-                            <div className="flex justify-between">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <ClipboardType className="w-4 h-4" />
-                                    <span>Loại nhóm chat:</span>
+                            {/* Info */}
+                            <div className="space-y-3 my-10">
+                                <div className="flex justify-between">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <ClipboardType className="w-4 h-4" />
+                                        <span>Loại nhóm chat:</span>
+                                    </div>
+                                    <span className="text-sm text-gray-600 border px-4 py-1 rounded-full">
+                                        {staff.conversationType}
+                                    </span>
                                 </div>
-                                <span className="text-sm text-gray-600 border px-4 py-1 rounded-full">
-                                    {staff.conversationType}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Info className="w-4 h-4" />
-                                    <span>Trang thái:</span>
+                                <div className="flex justify-between">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <Info className="w-4 h-4" />
+                                        <span>Trang thái:</span>
+                                    </div>
+                                    <span
+                                        className={`text-sm text-gray-600 ${
+                                            staff.status === "Đã dừng hoạt động"
+                                                ? "bg-red-100"
+                                                : "bg-green-100"
+                                        } px-4 py-1 flex items-center rounded-full`}
+                                    >
+                                        {staff.status}
+                                    </span>
                                 </div>
-                                <span
-                                    className={`text-sm text-gray-600 ${
-                                        staff.status === "closed"
-                                            ? "bg-red-100"
-                                            : "bg-green-100"
-                                    } px-4 py-1 flex items-center rounded-full`}
-                                >
-                                    {staff.status}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <CalendarClock className="w-4 h-4" />
-                                    <span>Ngày tạo: </span>
+                                <div className="flex justify-between">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <CalendarClock className="w-4 h-4" />
+                                        <span>Ngày tạo: </span>
+                                    </div>
+                                    <span className="text-sm text-gray-600">
+                                        {staff.createDate}
+                                    </span>
                                 </div>
-                                <span className="text-sm text-gray-600">
-                                    {staff.createDate}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <UserRound className="w-4 h-4" />
-                                    <span>Số lượng thành viên: </span>
+                                <div className="flex justify-between">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <UserRound className="w-4 h-4" />
+                                        <span>Số lượng thành viên: </span>
+                                    </div>
+                                    <span className="text-[1rem] font-bold text-[#248FCA]">
+                                        {staff.patientsCount}
+                                    </span>
                                 </div>
-                                <span className="text-[1rem] font-bold text-[#248FCA]">
-                                    {staff.patientsCount}
-                                </span>
                             </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 gap-2"
-                            >
-                                <EyeIcon className="w-4 h-4" />
-                                Xem
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 gap-2"
-                            >
-                                <EditIcon className="w-4 h-4" />
-                                Sửa
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-2"
-                            >
-                                <MoreHorizontalIcon className="w-4 h-4" />
-                            </Button>
-                        </div>
+                        </Link>
                     </motion.div>
                 ))}
             </div>

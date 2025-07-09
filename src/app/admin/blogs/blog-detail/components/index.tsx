@@ -9,6 +9,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
+import { motion } from "framer-motion";
+import { BarChartIcon, BellIcon, ArrowLeft } from "lucide-react";
 import {
     Dialog,
     DialogClose,
@@ -94,12 +96,22 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
 
     return (
         <div>
+            {/* Header */}
             {isBlogPending && <div>...Loading</div>}
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <div className="mt-5 py-[2%] px-[10%] bg-[#ffffff] shadow-2xl rounded-2xl">
                 {/*Header*/}
                 <div>
-                    <h1 className="text-[2.7rem] font-bold leading-[49px]">
+                    <div className="flex items-center gap-5">
+                        <Link href="/admin/blogs">
+                            <ArrowLeft color="#248fca" />
+                        </Link>
+
+                        <h1 className="text-2xl font-medium text-[var(--primary-color)]">
+                            Chi tiết bài viết
+                        </h1>
+                    </div>
+                    <h1 className="text-[2.7rem] font-bold leading-[49px] mt-10">
                         {data?.title || "Chưa cập nhật tiêu đề bài viết"}
                     </h1>
                     <div className="flex mt-4 items-center gap-3">

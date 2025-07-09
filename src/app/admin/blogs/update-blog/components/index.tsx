@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import UpdateBlogForm from "@/app/admin/blogs/update-blog/components/update-blog-form";
-import { BellIcon } from "lucide-react";
+import { BellIcon, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
-const Header = () => {
+const Header = ({ blogId }: REQUEST.BlogId) => {
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -16,10 +17,18 @@ const Header = () => {
         >
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Tạo nội dung bài viết
-                    </h1>
-                    <p className="text-gray-600 mt-1 text-sm">
+                    <div className="flex items-center gap-5">
+                        {blogId ? (
+                            <Link href={`/admin/blogs/blog-detail/${blogId}`}>
+                                <ArrowLeft color="#248fca" />
+                            </Link>
+                        ) : null}
+
+                        <h1 className="text-2xl font-bold text-[var(--primary-color)]">
+                            Tạo nội dung bài viết
+                        </h1>
+                    </div>
+                    <p className="text-gray-600 mt-1 ml-11 text-sm">
                         Tạo bài viết mới
                     </p>
                 </div>
@@ -41,7 +50,7 @@ export default function UpdateBlogComponent({ blogId }: REQUEST.BlogId) {
         <div>
             {/* Header */}
             <header>
-                <Header />
+                <Header blogId={blogId} />
             </header>
 
             {/* Main */}
