@@ -347,7 +347,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                     <DialogContent className="sm:max-w-[600px] h-[700px] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>
-                                Cập nhật thông tin bài viết
+                                Hoàn thiện thông tin bài viết
                             </DialogTitle>
                         </DialogHeader>
                         <form
