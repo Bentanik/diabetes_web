@@ -184,6 +184,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         form.setValue("contentHtml", editorContent);
         const textContent = extractTextContent(editorContent);
         setContent(textContent);
+
         const newImageIds = extractImageIds(editorContent);
         setImageIds(newImageIds);
     };

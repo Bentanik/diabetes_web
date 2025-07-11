@@ -39,13 +39,17 @@ export const CustomEnter = Extension.create({
                     return editor.commands.splitListItem("listItem");
                 }
                 // Ngoài danh sách → chèn <br>
-                return editor.commands.insertContent("<p>&nbsp;</p>");
+                // return editor.commands.insertContent("<p>&nbsp;</p>");
+                return editor.commands.splitBlock();
+                // return editor.commands.insertContent("<p></p>");
             },
         };
     },
 });
 
 let editorInstance: Editor | null = null;
+
+// const tracker = new
 
 // TiptapEditor Component
 interface TiptapEditorProps {
@@ -57,11 +61,8 @@ interface TiptapEditorProps {
 
 const TiptapToolbar = ({
     editor,
-    countdown,
-    savedMessage,
 }: {
     editor: Editor | null;
-    countdown: number | null;
     savedMessage: string;
     // handleFormSubmit: () => Promise<void>;
 }) => {
@@ -71,7 +72,7 @@ const TiptapToolbar = ({
         <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50 items-center">
             <select
                 value={
-                    editor.isActive("headingss")
+                    editor.isActive("headings")
                         ? editor.getAttributes("heading").level
                         : 0
                 }
@@ -82,7 +83,7 @@ const TiptapToolbar = ({
                     if (level === 0) {
                         if (from !== to) {
                             const text = editor.state.doc.textBetween(from, to);
-                            // editor.chain().focus().setParagraph().run();
+                            editor.chain().focus().setParagraph().run();
                             editor
                                 .chain()
                                 .focus()
@@ -199,8 +200,8 @@ const TiptapToolbar = ({
             <button
                 type="button"
                 onClick={() => {
-                    const { state, view } = editor;
-                    const { empty, from, to } = state.selection;
+                    const { state } = editor;
+                    const { empty } = state.selection;
 
                     // Nếu đang ở trong link
                     if (editor.isActive("link")) {
@@ -225,12 +226,6 @@ const TiptapToolbar = ({
             >
                 <Link2 width={20} height={20} />
             </button>
-
-            <div className="ml-auto text-sm text-gray-500">
-                {countdown !== null && countdown > 0
-                    ? `Sẽ lưu sau ${countdown}s...`
-                    : savedMessage || " "}
-            </div>
         </div>
     );
 };
@@ -238,16 +233,12 @@ const TiptapToolbar = ({
 const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
     const editorRef = useRef<Editor | null>(null);
     const { setValue } = useFormContext();
-    const [countdown, setCountdown] = useState<number | null>(null);
     const [savedMessage, setSavedMessage] = useState<string>("");
 
     const latestDataRef = useRef({
         contentText: "",
         contentHtml: "",
     });
-
-    // Lưu nội dung trước đó để so sánh
-    const previousContentRef = useRef<string>("");
 
     // Cập nhật nội dung HTML và các thông tin liên quan
     const updateContentHtml = useCallback(
@@ -260,7 +251,6 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
 
             const textContent = extractTextContent(editorContent);
 
-            // Chỉ cập nhật nếu nội dung HTML thay đổi
             if (editorContent !== latestDataRef.current.contentHtml) {
                 setValue("contentHtml", editorContent, {
                     shouldValidate: true,
@@ -313,7 +303,7 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
                 },
                 paragraph: {
                     HTMLAttributes: {
-                        class: "m-0",
+                        class: "min-h-[1em]",
                     },
                 },
                 bulletList: false,
@@ -360,27 +350,7 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
             attributes: {
                 class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4 overflow-wrap-anywhere word-break-break-word",
             },
-            // handleDOMEvents: {
-            //     paste: (view, event) => {
-            //         const html = event.clipboardData?.getData("text/html");
-            //         if (html) {
-            //             const parser = new DOMParser();
-            //             const doc = parser.parseFromString(html, "text/html");
-            //             const images = doc.querySelectorAll("img");
-            //             for (const img of images) {
-            //                 const imageId = img.getAttribute("title");
-            //                 if (
-            //                     imageId &&
-            //                 ) {
-            //                     event.preventDefault();
-            //                     return true;
-            //                 }
-            //             }
-            //         }
-            //         console.log(view);
-            //         return false;
-            //     },
-            // },
+            // handleDOMEvents: {},
         },
     });
 
@@ -394,23 +364,21 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
         if (editor) {
             editorRef.current = editor;
             editorInstance = editor;
-            const editorContainer = editor.view.dom;
         }
     }, [editor]);
 
     if (!editor) return null;
 
     return (
-        <div className="border-gray-200 focus-within:border-[#248fca] ">
+        <div className="border-gray-200 focus-within:border-[#248fca]">
             <TiptapToolbar
                 editor={editor}
-                countdown={countdown}
                 savedMessage={savedMessage}
                 // handleFormSubmit={handleFormSubmit}
             />
             <EditorContent
                 editor={editor}
-                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl  max-h-[660px] overflow-y-auto border rounded-b-3xl max-w-none wrap-break-word whitespace-pre-wrap w-full"
+                className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl max-h-[700px] min-h-[700px] w-[740px] overflow-y-auto border rounded-b-3xl max-w-none wrap-break-word whitespace-pre-wrap"
             />
         </div>
     );

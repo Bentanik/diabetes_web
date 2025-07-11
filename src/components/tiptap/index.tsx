@@ -43,7 +43,7 @@ export const CustomEnter = Extension.create({
                     return editor.commands.splitListItem("listItem");
                 }
                 // Ngoài danh sách → chèn <br>
-                return editor.commands.insertContent("<p>&nbsp;</p>");
+                return editor.commands.splitBlock();
             },
         };
     },
@@ -258,7 +258,7 @@ const TiptapToolbar = ({
         <div className="border-b border-gray-200 p-2 flex flex-wrap gap-1 bg-gray-50 items-center">
             <select
                 value={
-                    editor.isActive("headingss")
+                    editor.isActive("headings")
                         ? editor.getAttributes("heading").level
                         : 0
                 }
@@ -269,7 +269,7 @@ const TiptapToolbar = ({
                     if (level === 0) {
                         if (from !== to) {
                             const text = editor.state.doc.textBetween(from, to);
-                            // editor.chain().focus().setParagraph().run();
+                            editor.chain().focus().setParagraph().run();
                             editor
                                 .chain()
                                 .focus()
@@ -386,8 +386,8 @@ const TiptapToolbar = ({
             <button
                 type="button"
                 onClick={() => {
-                    const { state, view } = editor;
-                    const { empty, from, to } = state.selection;
+                    const { state } = editor;
+                    const { empty } = state.selection;
 
                     // Nếu đang ở trong link
                     if (editor.isActive("link")) {
@@ -593,7 +593,7 @@ const TiptapEditorComponent = ({
                 },
                 paragraph: {
                     HTMLAttributes: {
-                        class: "m-0",
+                        class: "min-h-[1em]",
                     },
                 },
                 bulletList: false,

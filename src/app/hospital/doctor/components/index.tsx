@@ -332,109 +332,88 @@ export default function EmployeeHospitalComponent() {
                             transition={{ delay: index * 0.1 }}
                             className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                         >
-                            {/* Header */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="w-12 h-12">
-                                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold">
-                                            {staff.avatar}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-800">
-                                            {staff.name}
-                                        </h3>
-                                        <p className="text-sm text-gray-500">
-                                            {staff.role}
-                                        </p>
+                            <Link
+                                href={`/hospital/doctor/doctor-detail/${staff.id}`}
+                            >
+                                {/* Header */}
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="w-12 h-12">
+                                            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold">
+                                                {staff.avatar}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <h3 className="font-semibold text-[1.5rem]">
+                                                {staff.name}
+                                            </h3>
+                                            <p className="text-sm text-gray-500">
+                                                {staff.role}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <BadgeIcon
+                                            className={`${getStatusColor(
+                                                staff.status
+                                            )} flex items-center gap-1`}
+                                        >
+                                            {getStatusIcon(staff.status)}
+                                            {getStatusText(staff.status)}
+                                        </BadgeIcon>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <BadgeIcon
-                                        className={`${getStatusColor(
-                                            staff.status
-                                        )} flex items-center gap-1`}
-                                    >
-                                        {getStatusIcon(staff.status)}
-                                        {getStatusText(staff.status)}
-                                    </BadgeIcon>
-                                </div>
-                            </div>
 
-                            {/* Info */}
-                            <div className="space-y-3 mb-4">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <MapPinIcon className="w-4 h-4" />
-                                    <span>{staff.department}</span>
+                                {/* Info */}
+                                <div className="space-y-3 mb-4">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <MapPinIcon className="w-4 h-4" />
+                                        <span>{staff.department}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <MailIcon className="w-4 h-4" />
+                                        <span>{staff.email}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <PhoneIcon className="w-4 h-4" />
+                                        <span>{staff.phone}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                        <ClockIcon className="w-4 h-4" />
+                                        <span>
+                                            Hoạt động: {staff.lastActive}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <MailIcon className="w-4 h-4" />
-                                    <span>{staff.email}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <PhoneIcon className="w-4 h-4" />
-                                    <span>{staff.phone}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <ClockIcon className="w-4 h-4" />
-                                    <span>Hoạt động: {staff.lastActive}</span>
-                                </div>
-                            </div>
 
-                            {/* Stats */}
-                            <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
-                                <div className="text-center">
-                                    <div className="text-lg font-bold text-gray-800">
-                                        {staff.patientsCount}
+                                {/* Stats */}
+                                <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                                    <div className="text-center">
+                                        <div className="text-lg font-bold text-gray-800">
+                                            {staff.patientsCount}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            Bệnh nhân
+                                        </div>
                                     </div>
-                                    <div className="text-xs text-gray-500">
-                                        Bệnh nhân
+                                    <div className="text-center">
+                                        <div className="text-lg font-bold text-gray-800">
+                                            {staff.messagesCount}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            Tin nhắn
+                                        </div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-lg font-bold text-gray-800">
+                                            {staff.rating}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            Đánh giá
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="text-center">
-                                    <div className="text-lg font-bold text-gray-800">
-                                        {staff.messagesCount}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                        Tin nhắn
-                                    </div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-lg font-bold text-gray-800">
-                                        {staff.rating}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                        Đánh giá
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1 gap-2"
-                                >
-                                    <EyeIcon className="w-4 h-4" />
-                                    Xem
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1 gap-2"
-                                >
-                                    <EditIcon className="w-4 h-4" />
-                                    Sửa
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2"
-                                >
-                                    <MoreHorizontalIcon className="w-4 h-4" />
-                                </Button>
-                            </div>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>
