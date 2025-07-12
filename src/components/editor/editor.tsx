@@ -264,36 +264,6 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
         [setValue]
     );
 
-    // Xử lý submit form
-    // const handleFormSubmit = useCallback(async () => {
-    //     if (!onSubmitDraft || typeof onSubmitDraft !== "function") {
-    //         console.error("onSubmit is not a function");
-    //         setSavedMessage("Lỗi: Không thể lưu bài viết.");
-    //         setTimeout(() => setSavedMessage(""), 3000);
-    //         return;
-    //     }
-
-    //     try {
-    //         const formData: REQUEST.TUpdateBlog = {
-    //             title: null,
-    //             content: latestDataRef.current.contentText,
-    //             contentHtml: latestDataRef.current.contentHtml,
-    //             thumbnail: null,
-    //             categoryIds: null,
-    //             doctorId: null,
-    //             isDraft: true,
-    //         };
-
-    //         await onSubmitDraft(formData);
-    //         setSavedMessage("Đã lưu thành công!");
-    //         setTimeout(() => setSavedMessage(""), 2000);
-    //     } catch (error) {
-    //         console.error("Error updating blog draft:", error);
-    //         setSavedMessage("Lỗi: Không thể lưu bài viết.");
-    //         setTimeout(() => setSavedMessage(""), 3000);
-    //     }
-    // }, [onSubmitDraft]);
-
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -371,11 +341,7 @@ const TiptapEditorComponent = ({ content, onUpdate }: TiptapEditorProps) => {
 
     return (
         <div className="border-gray-200 focus-within:border-[#248fca]">
-            <TiptapToolbar
-                editor={editor}
-                savedMessage={savedMessage}
-                // handleFormSubmit={handleFormSubmit}
-            />
+            <TiptapToolbar editor={editor} savedMessage={savedMessage} />
             <EditorContent
                 editor={editor}
                 className="prose prose-sm sm:prose lg:prose-lg xl:prose-2xl max-h-[700px] min-h-[700px] w-[740px] overflow-y-auto border rounded-b-3xl max-w-none wrap-break-word whitespace-pre-wrap"

@@ -8,6 +8,10 @@ declare namespace REQUEST {
         establishedDate: Date;
         logo: File;
     };
+
+    export type HospitalId = {
+        hospitalId: string;
+    };
 }
 
 declare namespace API {}

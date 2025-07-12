@@ -45,7 +45,9 @@ const Header = () => {
     );
 };
 
-export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
+export default function HospitalDetailComponent({
+    hospitalId,
+}: REQUEST.HospitalId) {
     const [isOpenDialog, setIsDialogOpen] = useState(false);
 
     return (

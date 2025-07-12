@@ -58,7 +58,7 @@ import useUpdateBlog, {
 } from "@/app/admin/blogs/update-blog/hooks/use-update-blog";
 import { useRouter } from "next/navigation";
 
-export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
+export default function CreateHospitalForm({ blogId }: REQUEST.BlogId) {
     const { form, onSubmit } = useUpdateBlog({ blogId });
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
