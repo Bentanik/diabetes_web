@@ -25,17 +25,6 @@ export const getKnowledgeBaseListAsync = async (
   return response.data;
 };
 
-export const getKnowledgeBaseStatAsync = async (name: string) => {
-  const response = await request<TResponse<API.TKnowledgeBaseStats>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE_STATS(name),
-    {
-      method: "GET",
-    }
-  );
-
-  return response.data;
-};
-
 export const createKnowledgeBaseAsync = async (
   data: REQUEST.TCreateKnowledgeBaseRequest
 ) => {
@@ -58,5 +47,51 @@ export const deleteKnowledgeBaseAsync = async (name: string) => {
     }
   );
 
+  return response.data;
+};
+
+export const uploadDocumentAsync = async (data: FormData) => {
+  const response = await request<TResponse>(
+    API_ENDPOINTS.KNOWLEDGE_BASE_UPLOAD_DOCUMENT,
+    {
+      method: "POST",
+      data,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const getKnowledgeBaseDocumentsAsync = async (
+  params: {
+    kb_name?: string;
+    file_name?: string;
+    job_id?: string;
+    created_from?: string;
+    created_to?: string;
+    sort_by?: string;
+    sort_order?: string;
+    page?: number;
+    limit?: number;
+  } = {}
+) => {
+  const queryParams = {
+    sort_by: "created_at",
+    sort_order: "desc",
+    page: 1,
+    limit: 10,
+    ...params,
+  };
+
+  const response = await request<TResponse<API.TKnowledgeBaseDocument[]>>(
+    API_ENDPOINTS.KNOWLEDGE_BASE_DOCUMENTS,
+    {
+      method: "GET",
+      params: queryParams,
+    }
+  );
   return response.data;
 };

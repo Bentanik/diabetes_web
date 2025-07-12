@@ -33,7 +33,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
         if ((e.target as HTMLElement).closest(".dropdown-trigger")) {
             return
         }
-        router.push(`/admin/train-ai/${folder.name}`)
+        router.push(`/admin/train-ai/${folder.id}`)
     }
 
     /**

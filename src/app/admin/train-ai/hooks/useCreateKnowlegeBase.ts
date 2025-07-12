@@ -27,7 +27,6 @@ export default function useCreateKnowlegeBase() {
     defaultValues: {
       name: "",
       description: "",
-      useDescriptionForLLMCheck: true,
     },
   });
 
@@ -47,9 +46,6 @@ export default function useCreateKnowlegeBase() {
       const request: REQUEST.TCreateKnowledgeBaseRequest = {
         name: data?.name,
         description: data?.description,
-        metadata: {
-          useDescriptionForLLMCheck: data?.useDescriptionForLLMCheck,
-        },
       };
 
       // Make API call
