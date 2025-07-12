@@ -518,10 +518,10 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                             </div>
                             <Button
                                 type="submit"
-                                className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10"
+                                className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                             >
                                 {isSubmitting ? (
-                                    <div className="flex items-center gap-2 cursor-pointer">
+                                    <div className="flex items-center gap-2 ">
                                         <motion.div
                                             animate={{ rotate: 360 }}
                                             transition={{
@@ -534,7 +534,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                         Đang tải lên...
                                     </div>
                                 ) : (
-                                    "Tải lên"
+                                    "Tạo bác sĩ"
                                 )}
                             </Button>
                         </div>

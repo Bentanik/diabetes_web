@@ -17,11 +17,11 @@ export default function CreateDoctorComponent() {
                         </Link>
 
                         <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                            Quản lí người dùng trong nhóm
+                            Thêm bác sĩ
                         </h1>
                     </div>
                     <p className="text-gray-600 mt-1 text-sm ml-11">
-                        Hiện có 6 kết quả được hiển thị
+                        Thêm thông tin tạo bác sĩ mới
                     </p>
                 </div>
             </div>
