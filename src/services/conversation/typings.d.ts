@@ -6,12 +6,16 @@ declare namespace REQUEST {
 
     type UserAvailableRequestParam = {
         conversationId: string;
-        role: number;
+        role: string;
         pageIndex?: number;
         pageSize?: number;
         sortType?: string;
         isSortDesc?: boolean;
         search?: string;
+    };
+
+    type AddMembers = {
+        userIds: [];
     };
 }
 

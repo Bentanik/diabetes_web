@@ -27,6 +27,23 @@ export const createConversationAsync = async (
     return response.data;
 };
 
+export const addMembersAsync = async (
+    groupId: string,
+    body: REQUEST.AddMembers
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.ADD_MEMBERS(groupId),
+        {
+            method: "POST",
+            data: body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const getUserAvailable = async ({
     conversationId = " ",
     role,

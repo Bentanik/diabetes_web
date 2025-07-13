@@ -26,6 +26,7 @@ import InfiniteScroll from "@/components/scroll-paginated";
 
 interface GroupUserDialogProps {
     handleSubmit: () => void;
+    groupId: string;
 }
 
 interface UserAvailable {
@@ -37,6 +38,7 @@ interface UserAvailable {
 
 export default function GroupUserDialog({
     handleSubmit,
+    groupId,
 }: GroupUserDialogProps) {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [selectSortType, setSelectSortType] = useState<string>("");
@@ -48,6 +50,8 @@ export default function GroupUserDialog({
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
 
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
     const pageSize = 10;
 
     const handleGetData = async (
@@ -55,28 +59,20 @@ export default function GroupUserDialog({
         isLoadMore: boolean = false
     ) => {
         if (isLoading) {
-            console.log("Blocked handleGetData: isLoading=", isLoading);
             return;
         }
-        console.log(
-            "Fetching data with pageIndex:",
-            pageIndex,
-            "isLoadMore:",
-            isLoadMore
-        );
         setIsLoading(true);
         try {
             const res = await getUserAvailableApi({
-                conversationId: "6872abf51c3a3fc79f048e0e",
+                conversationId: groupId,
                 search: searchTerm,
-                role: 3,
+                role: "Doctor",
                 pageIndex: pageIndex,
                 pageSize: pageSize,
                 sortType: selectSortType,
                 isSortDesc: isSortDesc,
             });
             const newItems = res?.users?.items || [];
-            console.log("API response:", { pageIndex, newItems });
 
             if (isLoadMore) {
                 setData((prev) => {
@@ -87,7 +83,6 @@ export default function GroupUserDialog({
                                 (existingItem) => existingItem.id === newItem.id
                             )
                     );
-                    console.log("Appending unique data:", uniqueItems);
                     return [...prev, ...uniqueItems];
                 });
             } else {
@@ -95,7 +90,6 @@ export default function GroupUserDialog({
             }
             setHasMore(newItems.length === pageSize);
         } catch (err) {
-            console.log("Error fetching data:", err);
             if (!isLoadMore) {
                 setData([]);
             }
@@ -107,12 +101,6 @@ export default function GroupUserDialog({
 
     const handleLoadMore = useCallback(() => {
         if (isLoading || !hasMore) {
-            console.log(
-                "Blocked handleLoadMore: isLoading=",
-                isLoading,
-                "hasMore=",
-                hasMore
-            );
             return;
         }
         setCurrentPage((prevPage) => {
@@ -137,8 +125,6 @@ export default function GroupUserDialog({
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("vi-VN");
     };
-
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     const toggleUser = (id: string) => {
         setSelectedIds((prev) => {
@@ -345,10 +331,8 @@ export default function GroupUserDialog({
                                                         checked={selectedIds.includes(
                                                             user.id
                                                         )}
-                                                        onChange={() =>
-                                                            toggleUser(user.id)
-                                                        }
-                                                        className="h-4 w-4 text-blue-600 border-gray300 rounded focus:ring-blue-500"
+                                                        disabled
+                                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                                     />
                                                 </TableCell>
                                             </TableRow>

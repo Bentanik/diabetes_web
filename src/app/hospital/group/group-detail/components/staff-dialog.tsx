@@ -47,6 +47,7 @@ export default function GroupUserDialog({
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const pageSize = 10;
 
     const handleGetData = async (
@@ -61,7 +62,7 @@ export default function GroupUserDialog({
             const res = await getUserAvailableApi({
                 conversationId: "6872abf51c3a3fc79f048e0e",
                 search: searchTerm,
-                role: "Patient",
+                role: "HospitalStaff",
                 pageIndex: pageIndex,
                 pageSize: pageSize,
                 sortType: selectSortType,
@@ -71,6 +72,7 @@ export default function GroupUserDialog({
 
             if (isLoadMore) {
                 setData((prev) => {
+                    // Lọc bỏ các item trùng lặp dựa trên id
                     const uniqueItems = newItems.filter(
                         (newItem) =>
                             !prev.some(
@@ -119,13 +121,12 @@ export default function GroupUserDialog({
         return new Date(dateString).toLocaleDateString("vi-VN");
     };
 
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
     const toggleUser = (id: string) => {
         setSelectedIds((prev) => {
             const updated = prev.includes(id)
                 ? prev.filter((u) => u !== id)
                 : [...prev, id];
+            console.log("Updated selectedIds:", updated);
             return updated;
         });
     };
@@ -261,16 +262,10 @@ export default function GroupUserDialog({
                                         {filteredUsers.map((user) => (
                                             <TableRow
                                                 key={user.id}
-                                                className={`h-16 ${
-                                                    user.status === 1
-                                                        ? "cursor-not-allowed opacity-50"
-                                                        : "hover:bg-gray-50 cursor-pointer"
-                                                }`}
-                                                onClick={() => {
-                                                    if (user.status !== 1) {
-                                                        toggleUser(user.id);
-                                                    }
-                                                }}
+                                                className="h-16 hover:bg-gray-50 cursor-pointer"
+                                                onClick={() =>
+                                                    toggleUser(user.id)
+                                                }
                                             >
                                                 <TableCell className="py-2">
                                                     <div className="flex items-center space-x-3">
@@ -290,7 +285,7 @@ export default function GroupUserDialog({
                                                             <div
                                                                 className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
                                                                     user.status ===
-                                                                    1
+                                                                    0
                                                                         ? "bg-green-500"
                                                                         : "bg-gray-400"
                                                                 }`}
@@ -315,14 +310,14 @@ export default function GroupUserDialog({
                                                 <TableCell className="py-2">
                                                     <span
                                                         className={`px-2 py-1 rounded-full text-xs ${
-                                                            user.status === 1
+                                                            user.status === 0
                                                                 ? "bg-green-100 text-green-700"
                                                                 : "bg-gray-100 text-gray-700"
                                                         }`}
                                                     >
                                                         {user.status === 0
-                                                            ? "Chưa vào nhóm"
-                                                            : "Đã vào nhóm"}
+                                                            ? "Hoạt động"
+                                                            : "Không hoạt động"}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell>
@@ -331,7 +326,9 @@ export default function GroupUserDialog({
                                                         checked={selectedIds.includes(
                                                             user.id
                                                         )}
-                                                        disabled
+                                                        onChange={() =>
+                                                            toggleUser(user.id)
+                                                        }
                                                         className="h-4 w-4 text-blue-600 border-gray300 rounded focus:ring-blue-500"
                                                     />
                                                 </TableCell>

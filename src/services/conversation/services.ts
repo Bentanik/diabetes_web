@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { createConversationAsync } from "./api-services";
+import { createConversationAsync, addMembersAsync } from "./api-services";
 import useToast from "@/hooks/use-toast";
 
 export const useServiceCreateConversation = () => {
@@ -10,6 +10,33 @@ export const useServiceCreateConversation = () => {
             const response = await createConversationAsync({
                 name: data.name,
                 members: data.members,
+            });
+            return response as TResponse;
+        },
+        onSuccess: () => {
+            addToast({
+                type: "success",
+                description: "Tạo nhóm thành công",
+                duration: 5000,
+            });
+        },
+        onError: () => {
+            addToast({
+                type: "error",
+                description: "Tạo nhóm thất bại",
+                duration: 5000,
+            });
+        },
+    });
+};
+
+export const useServiceAddMembers = (groupId: string) => {
+    const { addToast } = useToast();
+
+    return useMutation<TResponse, TMeta, REQUEST.AddMembers>({
+        mutationFn: async (data: REQUEST.AddMembers) => {
+            const response = await addMembersAsync(groupId, {
+                userIds: data.userIds,
             });
             return response as TResponse;
         },
