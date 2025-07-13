@@ -17,7 +17,6 @@ export default function useDeleteKnowlegeBase() {
     try {
       setIsDeleting(true);
 
-      // Make API call
       mutate(name, {
         onSuccess: async (responseData) => {
           if (responseData) {

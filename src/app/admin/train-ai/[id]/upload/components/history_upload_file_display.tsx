@@ -8,6 +8,9 @@ import { Clock, CheckCircle, AlertCircle, PlusCircle, MoreHorizontal, HistoryIco
 import { useGetJobsService } from "@/services/job/services"
 import { getFileIcon } from "@/utils/file"
 import Link from "next/link"
+import DeleteDocumentModal from "@/app/admin/train-ai/[id]/upload/components/delete_document"
+import { useState } from "react"
+import { downloadDocumentAsync } from "@/services/train-ai/api-services"
 
 
 const getStatusBadge = (status: string) => {
@@ -79,6 +82,23 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
         kb_name: kb_name,
     })
 
+    const [isDeleteDocumentOpen, setIsDeleteDocumentOpen] = useState(false)
+    const [document, setDocument] = useState<API.TJob | null>(null)
+
+    const handleDeleteDocument = (document: API.TJob) => {
+        setIsDeleteDocumentOpen(true)
+        setDocument(document)
+    }
+
+    const handleCloseDeleteDocument = () => {
+        setIsDeleteDocumentOpen(false)
+        setDocument(null)
+    }
+
+    const handleDownloadDocument = async (document: API.TJob) => {
+        await downloadDocumentAsync(document.document_id || "");
+    }
+
     return (
         <Card className="overflow-hidden border-2 border-gray-200 shadow-sm bg-gradient-to-br from-white to-gray-50/50">
             <CardHeader className="pb-4">
@@ -145,7 +165,7 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                                         </div>
                                     </div>
                                     {/* Action Buttons */}
-                                    <div className="flex items-center gap-2 pt-1 flex-shrink-0">
+                                    {file.status === "completed" && file.is_deleted === false && file.is_duplicate === false && <div className="flex items-center gap-2 pt-1 flex-shrink-0">
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -159,7 +179,9 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                                             variant="outline"
                                             size="sm"
                                             className="h-9 px-4 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 bg-white font-medium"
-                                        // onClick={() => onDownload?.(file)} // Add actual download logic
+                                            onClick={() => {
+                                                handleDeleteDocument(file)
+                                            }}
                                         >
                                             <Trash2Icon className="w-4 h-4 mr-2" />
                                             Xóa
@@ -184,13 +206,24 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     className="text-green-600 cursor-pointer hover:text-green-600! group"
-                                                // onClick={() => onDelete?.(file)} // Add actual delete logic
+                                                    onClick={() => handleDownloadDocument(file)}
                                                 >
                                                     <DownloadIcon className="w-4 h-4 mr-2 group-hover:text-green-600!" /> Tải xuống
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
-                                    </div>
+                                    </div>}
+                                    {file.is_deleted === true && <div className="flex items-center gap-2 pt-1 flex-shrink-0">
+                                        <Badge variant="outline" className="bg-gray-50 text-red-600 border-red-200">
+                                            Đã xóa
+                                        </Badge>
+                                    </div>}
+
+                                    {file.is_duplicate === true && <div className="flex items-center gap-2 pt-1 flex-shrink-0">
+                                        <Badge variant="outline" className="bg-gray-50 text-red-600 border-red-200">
+                                            Tài liệu đã tồn tại
+                                        </Badge>
+                                    </div>}
                                 </div>
                             ))}
                         </div>
@@ -210,6 +243,7 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                     </div>
                 )}
             </CardContent>
+            {document && <DeleteDocumentModal isOpen={isDeleteDocumentOpen} onClose={handleCloseDeleteDocument} document={document} />}
         </Card>
     )
 }

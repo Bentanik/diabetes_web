@@ -1,6 +1,8 @@
 import {
   createKnowledgeBaseAsync,
+  deleteDocumentAsync,
   deleteKnowledgeBaseAsync,
+  getKnowledgeBaseByIdAsync,
   getKnowledgeBaseDocumentsAsync,
   getKnowledgeBaseListAsync,
   uploadDocumentAsync,
@@ -55,6 +57,16 @@ export const useGetKnowledgeBaseListService = ({
   return { knowledge_bases, isPending, isError, error };
 };
 
+export const useGetKnowledgeBaseByIdService = (id: string) => {
+  return useQuery({
+    queryKey: [KNOWLEDGE_BASE_QUERY_KEY, id],
+    queryFn: () => getKnowledgeBaseByIdAsync(id),
+    select: (data) => data.value.data,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+  });
+};
+
 export const useCreateKnowledgeBaseService = () => {
   return useMutation<
     TResponse<API.TKnowledgeBase>,
@@ -100,5 +112,11 @@ export const useGetKnowledgeBaseDocumentsService = (
     select: (data) => data.value.data || [],
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
+  });
+};
+
+export const useDeleteDocumentService = () => {
+  return useMutation<TResponse, TMeta, string>({
+    mutationFn: (id) => deleteDocumentAsync(id),
   });
 };

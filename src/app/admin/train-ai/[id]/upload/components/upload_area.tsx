@@ -53,6 +53,13 @@ export default function UploadArea({
                     >
                         Chọn tài liệu
                     </Button>
+
+                    {/* Improved file types display */}
+                    <div className="mt-4 space-y-1">
+                        <p className="text-sm text-gray-600 font-medium">
+                            Định dạng hỗ trợ: PDF, DOCX
+                        </p>
+                    </div>
                 </div>
             </CardContent>
         </Card>

@@ -21,5 +21,7 @@ declare namespace API {
     matched_keywords?: string[];
     total_documents?: number;
     rejection_reason?: string;
+    is_deleted?: boolean;
+    is_duplicate?: boolean;
   };
 }
