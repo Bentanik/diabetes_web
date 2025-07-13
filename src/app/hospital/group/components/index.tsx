@@ -20,6 +20,7 @@ import {
     Shield,
     Clock,
     AlertCircle,
+    SquareMousePointer,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
@@ -453,7 +454,7 @@ export default function GroupHospitalComponent() {
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[800px] h-[700px] flex flex-col">
                                         <DialogHeader className="flex-shrink-0">
-                                            <DialogTitle className="text-[1.5rem]">
+                                            <DialogTitle className="text-[1.5rem] text-[#248FCA]">
                                                 Tạo nhóm chat
                                             </DialogTitle>
                                             <DialogDescription>
@@ -470,14 +471,11 @@ export default function GroupHospitalComponent() {
                                                     name="name"
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                                                Tiêu đề *
-                                                            </FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     {...field}
-                                                                    placeholder="Nhập tiêu đề bài post"
-                                                                    className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
+                                                                    placeholder="Nhập tên nhóm"
+                                                                    className="h-10 w-70 text-base border-2 focus:border-[#248fca] transition-colors"
                                                                     onChange={
                                                                         field.onChange
                                                                     }
@@ -490,7 +488,7 @@ export default function GroupHospitalComponent() {
                                                     )}
                                                 />
                                                 <div className="relative flex-1">
-                                                    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                                    <SearchIcon className="absolute left-3 top-5 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                                     <Input
                                                         placeholder="Tìm kiếm theo tên, email, khoa..."
                                                         value={searchTerm}
@@ -499,13 +497,13 @@ export default function GroupHospitalComponent() {
                                                                 e.target.value
                                                             )
                                                         }
-                                                        className="pl-10"
+                                                        className="pl-10 h-10"
                                                     />
                                                 </div>
 
                                                 <Button
                                                     type="button" // Thay type="submit" thành type="button"
-                                                    className="bg-[#248fca] hover:bg-[#2490cacb] cursor-pointer"
+                                                    className="bg-[#248fca] hover:bg-[#2490cacb] cursor-pointer h-10"
                                                     onClick={() =>
                                                         form.handleSubmit(
                                                             handleSubmit
@@ -514,6 +512,17 @@ export default function GroupHospitalComponent() {
                                                 >
                                                     Thêm nhóm chat
                                                 </Button>
+                                            </div>
+
+                                            {/* Label */}
+                                            <div className=" flex gap-2">
+                                                <SquareMousePointer
+                                                    width={20}
+                                                    color="#248FCA"
+                                                />
+                                                <span className="font-semibold text-[#248FCA]">
+                                                    Chọn thành viên
+                                                </span>
                                             </div>
                                             {/* Danh sách đã chọn */}
                                             <div className="flex items-center gap-2 flex-wrap">

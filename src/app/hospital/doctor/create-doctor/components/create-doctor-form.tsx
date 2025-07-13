@@ -62,9 +62,8 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const { form, onSubmit } = useUpdateBlog({ blogId });
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
-    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
-        null
-    );
+    const [thumbnailPreviews, setThumbnailPreviews] = useState<[] | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // ✅ Thêm state để lưu contentHtml và trigger re-render
@@ -134,64 +133,141 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 <form onSubmit={form.handleSubmit(handleSubmit)}>
                     <div className="flex gap-10">
                         <div className="flex-2">
-                            {/* Thumbnail Upload */}
-                            <div>
-                                <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                    <ImageIcon className="h-5 w-5 text-[#248fca]" />
-                                    Chọn ảnh đại diện
-                                </Label>
-                                <div className="flex items-center gap-6 mt-2">
-                                    <div className="relative">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleImageChange}
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            id="logo-upload"
-                                        />
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white transition-all duration-300"
-                                            asChild
-                                        >
-                                            <label
-                                                htmlFor="logo-upload"
-                                                className="cursor-pointer"
-                                            >
-                                                <Upload className="h-5 w-5" />
-                                                Chọn ảnh
-                                            </label>
-                                        </Button>
-                                    </div>
-                                    {thumbnailPreview && (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
-                                        >
-                                            <Image
-                                                src={
-                                                    thumbnailPreview ||
-                                                    "/placeholder.svg"
-                                                }
-                                                width={20}
-                                                height={20}
-                                                alt="Logo preview"
-                                                className="w-full h-full"
+                            <div className="flex gap-[10%]">
+                                {/* avatar Upload */}
+                                <div className="flex-1">
+                                    <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                        <ImageIcon className="h-5 w-5 text-[#248fca]" />
+                                        Chọn ảnh đại diện
+                                    </Label>
+                                    <div className="flex items-center gap-6 mt-2">
+                                        <div className="relative">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageChange}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                id="logo-upload"
                                             />
-                                        </motion.div>
-                                    )}
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white transition-all duration-300"
+                                                asChild
+                                            >
+                                                <label
+                                                    htmlFor="logo-upload"
+                                                    className="cursor-pointer"
+                                                >
+                                                    <Upload className="h-5 w-5" />
+                                                    Chọn ảnh
+                                                </label>
+                                            </Button>
+                                        </div>
+                                        {avatarPreview && (
+                                            <motion.div
+                                                initial={{
+                                                    opacity: 0,
+                                                    scale: 0.8,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    scale: 1,
+                                                }}
+                                                className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
+                                            >
+                                                <Image
+                                                    src={
+                                                        avatarPreview ||
+                                                        "/placeholder.svg"
+                                                    }
+                                                    width={20}
+                                                    height={20}
+                                                    alt="Logo preview"
+                                                    className="w-full h-full"
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-gray-500 mt-2">
+                                        Chấp nhận file JPG, PNG. Kích thước tối
+                                        đa 5MB.
+                                    </p>
                                 </div>
-                                <p className="text-sm text-gray-500 mt-2">
-                                    Chấp nhận file JPG, PNG. Kích thước tối đa
-                                    5MB.
-                                </p>
+                                <div className="flex-1">
+                                    <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                        <ImageIcon className="h-5 w-5 text-[#248fca]" />
+                                        Chọn ảnh giới thiệu
+                                    </Label>
+                                    <div className="flex items-center gap-6 mt-2">
+                                        <div className="relative">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={handleImageChange}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                id="logo-upload"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white transition-all duration-300"
+                                                asChild
+                                            >
+                                                <label
+                                                    htmlFor="logo-upload"
+                                                    className="cursor-pointer"
+                                                >
+                                                    <Upload className="h-5 w-5" />
+                                                    Chọn ảnh
+                                                </label>
+                                            </Button>
+                                        </div>
+                                        <div className="flex gap-4 flex-wrap">
+                                            {thumbnailPreviews &&
+                                                thumbnailPreviews.length > 0 &&
+                                                thumbnailPreviews.map(
+                                                    (preview, index) => (
+                                                        <motion.div
+                                                            key={index}
+                                                            initial={{
+                                                                opacity: 0,
+                                                                scale: 0.8,
+                                                            }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                                scale: 1,
+                                                            }}
+                                                            className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
+                                                        >
+                                                            <Image
+                                                                src={
+                                                                    preview ||
+                                                                    "/placeholder.svg"
+                                                                }
+                                                                width={80}
+                                                                height={80}
+                                                                alt={`Preview ${
+                                                                    index + 1
+                                                                }`}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </motion.div>
+                                                    )
+                                                )}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-gray-500 mt-2">
+                                        Chấp nhận file JPG, PNG. Kích thước tối
+                                        đa 5MB mỗi ảnh.
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="flex gap-[10%] mt-10">
                                 {/* Họ và tên */}
-                                <div className="flex-1">
+                                <div className="flex-1 flex gap-2">
                                     <FormField
                                         control={form.control}
                                         name="title"
@@ -199,12 +275,62 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                                     <UserPen className="h-5 w-5 text-[#248fca]" />
-                                                    Họ và tên
+                                                    Họ
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         {...field}
-                                                        placeholder="Nhập họ và tên bác sĩ"
+                                                        placeholder="Nhập họ của bác sĩ"
+                                                        className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
+                                                        onChange={
+                                                            field.onChange
+                                                        }
+                                                    />
+                                                </FormControl>
+                                                <FormMessage className="flex items-center gap-1">
+                                                    <AlertCircle className="h-4 w-4" />
+                                                </FormMessage>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="title"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                                    <UserPen className="h-5 w-5 text-[#248fca]" />
+                                                    Tên đệm
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        placeholder="Nhập tên đệm bác sĩ"
+                                                        className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
+                                                        onChange={
+                                                            field.onChange
+                                                        }
+                                                    />
+                                                </FormControl>
+                                                <FormMessage className="flex items-center gap-1">
+                                                    <AlertCircle className="h-4 w-4" />
+                                                </FormMessage>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="title"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                                    <UserPen className="h-5 w-5 text-[#248fca]" />
+                                                    Tên
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        placeholder="Nhập tên bác sĩ"
                                                         className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
                                                         onChange={
                                                             field.onChange

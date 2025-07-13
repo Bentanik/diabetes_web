@@ -7,7 +7,7 @@ import { z } from "zod";
 export const createConversationSchema = z.object({
     name: z
         .string()
-        .min(1, "phải nhập tên nhóm")
+        .min(1, "Phải nhập tên nhóm")
         .max(100, "Tên nhóm không được quá 100 kí tự"),
 });
 
