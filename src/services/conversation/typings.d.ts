@@ -1,15 +1,17 @@
 declare namespace REQUEST {
-    type ConversationsRequestParam = {
-        cursor?: string;
-        pageSize?: number;
-        sort?: string;
-        direction?: "asc" | "desc";
-        search?: string;
-    };
-
     type TCreateConversation = {
         name: string;
         members: string[];
+    };
+
+    type UserAvailableRequestParam = {
+        conversationId: string;
+        role: number;
+        pageIndex?: number;
+        pageSize?: number;
+        sortType?: string;
+        isSortDesc?: boolean;
+        search?: string;
     };
 }
 
@@ -24,4 +26,36 @@ declare namespace API {
     };
 
     type TGetConversations = Conversation[];
+
+    type TGetUserAvailable = {
+        items: UserAvailable[];
+        pageIndex: number;
+        pageSize: number;
+        totalCount: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+
+    type UserAvailable = {
+        id: string;
+        avatar: string;
+        fullName: string;
+        status: UserStatus;
+        role: UserRole;
+    };
+
+    enum UserRole {
+        SystemAdmin = 0,
+        Moderator = 1,
+        HospitalStaff = 2,
+        Doctor = 3,
+        Patient = 4,
+    }
+
+    enum UserStatus {
+        Available = 0,
+        AlreadyInGroup = 1,
+        Banned = 2,
+        SystemBanned = 3,
+    }
 }

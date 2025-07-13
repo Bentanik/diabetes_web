@@ -30,3 +30,15 @@ declare type TResponseData<T = object | null> = {
         message: string;
     };
 };
+
+declare type TResponseDataUser<T = object | null> = {
+    code: string;
+    message: string;
+    users: T | null;
+    isSuccess: boolean;
+    isFailure: boolean;
+    error: {
+        code: string;
+        message: string;
+    };
+};
