@@ -1,6 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { fileForTrainAI } from '@/lib/validations/file_train_ai'
 import { InfoIcon } from 'lucide-react'
 
 export default function ValidationInfo() {
@@ -24,7 +25,7 @@ export default function ValidationInfo() {
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0"></span>
-                            <span>Dung lượng tài liệu tối đa 10MB</span>
+                            <span>Dung lượng tài liệu tối đa {fileForTrainAI.maxSizeMB} MB</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0"></span>
@@ -39,12 +40,6 @@ export default function ValidationInfo() {
                             <span>Kiểm tra không trùng lặp với tài liệu đã có trong hệ thống</span>
                         </li>
                     </ul>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-                        <p className="text-xs text-blue-800 font-medium mb-1">Lưu ý cho Admin:</p>
-                        <p className="text-xs text-blue-700">
-                            Bạn vẫn có quyền thêm tài liệu hoặc thư mục mới vào thư mục ngay cả khi một số tiêu chí kiểm tra chưa đạt.
-                        </p>
-                    </div>
                 </div>
             </CardContent>
         </Card>

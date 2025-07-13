@@ -17,9 +17,7 @@ declare namespace API {
     minio_object_name?: string;
     minio_bucket_name?: string;
     kb_name?: string;
-    diabetes_score?: number;
-    matched_keywords?: string[];
-    total_documents?: number;
+    diabetes_score_avg?: number;
     rejection_reason?: string;
     is_deleted?: boolean;
     is_duplicate?: boolean;

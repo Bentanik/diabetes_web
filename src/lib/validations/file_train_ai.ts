@@ -5,7 +5,7 @@ export interface FileValidationResult {
 }
 
 export const fileForTrainAI = {
-  maxSizeMB: 5,
+  maxSizeMB: 10,
   allowedTypes: [
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

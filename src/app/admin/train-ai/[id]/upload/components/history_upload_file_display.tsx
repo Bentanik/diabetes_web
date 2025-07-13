@@ -1,17 +1,96 @@
 "use client"
 
+import Link from "next/link"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu" // Added DropdownMenu components
-import { Clock, CheckCircle, AlertCircle, PlusCircle, MoreHorizontal, HistoryIcon, Trash2Icon, EyeIcon, DownloadIcon } from "lucide-react" // Added MoreHorizontal
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+    Clock,
+    CheckCircle,
+    AlertCircle,
+    PlusCircle,
+    MoreHorizontal,
+    HistoryIcon,
+    Trash2Icon,
+    EyeIcon,
+    DownloadIcon,
+    Activity,
+} from "lucide-react"
+import { useState } from "react"
 import { useGetJobsService } from "@/services/job/services"
 import { getFileIcon } from "@/utils/file"
-import Link from "next/link"
-import DeleteDocumentModal from "@/app/admin/train-ai/[id]/upload/components/delete_document"
-import { useState } from "react"
-import { downloadDocumentAsync } from "@/services/train-ai/api-services"
 
+const downloadDocumentAsync = async (documentId: string) => {
+    console.log(`Downloading document with ID: ${documentId}`)
+    // In a real app, this would trigger an actual download
+    alert(`Simulating download for document ID: ${documentId}`)
+}
+
+// Mock DeleteDocumentModal component
+const DeleteDocumentModal = ({
+    isOpen,
+    onClose,
+    document,
+}: { isOpen: boolean; onClose: () => void; document: API.TJob | null }) => {
+    if (!isOpen) return null
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h2 className="text-lg font-semibold mb-4">Xác nhận xóa tài liệu</h2>
+                <p>Bạn có chắc chắn muốn xóa tài liệu &quot;{document?.file_name}?&quot;</p>
+                <div className="mt-6 flex justify-end space-x-2">
+                    <Button variant="outline" onClick={onClose}>
+                        Hủy
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        onClick={() => {
+                            alert(`Deleting document: ${document?.file_name}`)
+                            onClose()
+                        }}
+                    >
+                        Xóa
+                    </Button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// **MODIFIED**: Function to get topic relevance badge and color
+const getTopicRelevanceBadge = (score: number | null | undefined, topic: string | null | undefined) => {
+    if (score === null || score === undefined || !topic) {
+        return (
+            <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200 text-xs">
+                <Activity className="w-3 h-3 mr-1" />
+                Liên quan: N/A
+            </Badge>
+        )
+    }
+    const percentage = Math.round(score * 100)
+    let relevanceLevel = ""
+    let badgeClass = ""
+
+    if (score >= 0.7) {
+        relevanceLevel = "Cao"
+        badgeClass = "bg-green-50 text-green-700 border-green-200"
+    } else if (score >= 0.4) {
+        relevanceLevel = "Trung bình"
+        badgeClass = "bg-amber-50 text-amber-700 border-amber-200"
+    } else {
+        relevanceLevel = "Thấp"
+        badgeClass = "bg-blue-50 text-blue-700 border-blue-200"
+    }
+
+    return (
+        <Badge variant="outline" className={`${badgeClass} text-xs font-medium`}>
+            <Activity className="w-3 h-3 mr-1" />
+            {`Liên quan: ${topic} (${percentage}% ${relevanceLevel})`}
+        </Badge>
+    )
+}
 
 const getStatusBadge = (status: string) => {
     switch (status) {
@@ -81,7 +160,6 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
         sort_order: "desc",
         kb_name: kb_name,
     })
-
     const [isDeleteDocumentOpen, setIsDeleteDocumentOpen] = useState(false)
     const [document, setDocument] = useState<API.TJob | null>(null)
 
@@ -96,7 +174,7 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
     }
 
     const handleDownloadDocument = async (document: API.TJob) => {
-        await downloadDocumentAsync(document.document_id || "");
+        await downloadDocumentAsync(document.document_id || "")
     }
 
     return (
@@ -108,7 +186,6 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                             <HistoryIcon className="w-5 h-5" />
                             <span className="text-lg font-medium">Lịch sử tải tài liệu</span>
                         </div>
-                        {/* "Xem tất cả" link can be re-added here if this is a summary card leading to a full history page */}
                         <Link href={`#`} className="text-sm text-[#248fca] hover:text-[#248fca]/80">
                             Xem tất cả
                         </Link>
@@ -145,7 +222,7 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                             {jobs.map((file, index) => (
                                 <div
                                     key={file.id || index}
-                                    className="group p-4 rounded-lg border border-gray-100 hover:border-[#248fca]/20 hover:bg-[#f8fcff] transition-all duration-200 flex justify-between items-center" // Added items-center
+                                    className="group p-4 rounded-lg border border-gray-100 hover:border-[#248fca]/20 hover:bg-[#f8fcff] transition-all duration-200 flex justify-between items-center"
                                 >
                                     <div className="flex items-start gap-3 flex-1 min-w-0">
                                         {/* File Icon */}
@@ -153,77 +230,85 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                                             {getFileIcon(file.file_type)}
                                         </div>
                                         {/* File Info */}
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1 min-w-0 flex flex-col gap-y-1">
                                             <h4 className="font-semibold text-gray-900 truncate text-base mb-1">{file.file_name}</h4>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                                                 {getStatusBadge(file.status)}
-                                                <span className="text-sm text-gray-500">{formatFileSize(file.file_size)}</span>
-                                                <span className="text-sm text-gray-500">
-                                                    {file.created_at ? `• ${formatDate(file.created_at)}` : ""}
-                                                </span>
+                                                {file.status === "completed" &&
+                                                    file.is_deleted === false &&
+                                                    file.is_duplicate === false &&
+                                                    getTopicRelevanceBadge(file.diabetes_score_avg, "Đái tháo đường")}
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 mt-1">
+                                                <span>{formatFileSize(file.file_size)}</span>
+                                                <span>{file.created_at ? `Ngày tải ${formatDate(file.created_at)}` : ""}</span>
                                             </div>
                                         </div>
                                     </div>
                                     {/* Action Buttons */}
-                                    {file.status === "completed" && file.is_deleted === false && file.is_duplicate === false && <div className="flex items-center gap-2 pt-1 flex-shrink-0">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-9 px-4 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 bg-white font-medium"
-                                        // onClick={() => onView?.(file)} // Add actual view logic
-                                        >
-                                            <PlusCircle className="w-4 h-4 mr-2" />
-                                            Thêm
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-9 px-4 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 bg-white font-medium"
-                                            onClick={() => {
-                                                handleDeleteDocument(file)
-                                            }}
-                                        >
-                                            <Trash2Icon className="w-4 h-4 mr-2" />
-                                            Xóa
-                                        </Button>
-
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="h-9 w-9 text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300 bg-transparent"
-                                                >
-                                                    <MoreHorizontal className="w-4 h-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem
-                                                    className="text-blue-600 cursor-pointer hover:text-blue-600! group"
-                                                // onClick={() => onAdd?.(file)} // Add actual add logic
-                                                >
-                                                    <EyeIcon className="w-4 h-4 mr-2 group-hover:text-blue-600!" /> Xem chi tiết
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    className="text-green-600 cursor-pointer hover:text-green-600! group"
-                                                    onClick={() => handleDownloadDocument(file)}
-                                                >
-                                                    <DownloadIcon className="w-4 h-4 mr-2 group-hover:text-green-600!" /> Tải xuống
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>}
-                                    {file.is_deleted === true && <div className="flex items-center gap-2 pt-1 flex-shrink-0">
-                                        <Badge variant="outline" className="bg-gray-50 text-red-600 border-red-200">
-                                            Đã xóa
-                                        </Badge>
-                                    </div>}
-
-                                    {file.is_duplicate === true && <div className="flex items-center gap-2 pt-1 flex-shrink-0">
-                                        <Badge variant="outline" className="bg-gray-50 text-red-600 border-red-200">
-                                            Tài liệu đã tồn tại
-                                        </Badge>
-                                    </div>}
+                                    {file.status === "completed" && file.is_deleted === false && file.is_duplicate === false && (
+                                        <div className="flex items-center gap-2 pt-1 flex-shrink-0">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-9 px-4 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 bg-white font-medium"
+                                            // onClick={() => onView?.(file)} // Add actual view logic
+                                            >
+                                                <PlusCircle className="w-4 h-4 mr-2" />
+                                                Thêm
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-9 px-4 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 bg-white font-medium"
+                                                onClick={() => {
+                                                    handleDeleteDocument(file)
+                                                }}
+                                            >
+                                                <Trash2Icon className="w-4 h-4 mr-2" />
+                                                Xóa
+                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="h-9 w-9 text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300 bg-transparent"
+                                                    >
+                                                        <MoreHorizontal className="w-4 h-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem
+                                                        className="text-blue-600 cursor-pointer hover:text-blue-600! group"
+                                                    // onClick={() => onAdd?.(file)} // Add actual add logic
+                                                    >
+                                                        <EyeIcon className="w-4 h-4 mr-2 group-hover:text-blue-600!" /> Xem chi tiết
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="text-green-600 cursor-pointer hover:text-green-600! group"
+                                                        onClick={() => handleDownloadDocument(file)}
+                                                    >
+                                                        <DownloadIcon className="w-4 h-4 mr-2 group-hover:text-green-600!" /> Tải xuống
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    )}
+                                    {file.is_deleted === true && (
+                                        <div className="flex items-center gap-2 pt-1 flex-shrink-0">
+                                            <Badge variant="outline" className="bg-gray-50 text-red-600 border-red-200">
+                                                Đã xóa
+                                            </Badge>
+                                        </div>
+                                    )}
+                                    {file.is_duplicate === true && (
+                                        <div className="flex items-center gap-2 pt-1 flex-shrink-0">
+                                            <Badge variant="outline" className="bg-gray-50 text-red-600 border-red-200">
+                                                Tài liệu đã tồn tại
+                                            </Badge>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -243,7 +328,9 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                     </div>
                 )}
             </CardContent>
-            {document && <DeleteDocumentModal isOpen={isDeleteDocumentOpen} onClose={handleCloseDeleteDocument} document={document} />}
+            {document && (
+                <DeleteDocumentModal isOpen={isDeleteDocumentOpen} onClose={handleCloseDeleteDocument} document={document} />
+            )}
         </Card>
     )
 }
