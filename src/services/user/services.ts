@@ -1,23 +1,30 @@
 import useToast from "@/hooks/use-toast";
-import { uploadImageAsync } from "@/services/media/api-services";
+import { uploadImageUserAsync } from "@/services/user/api-services";
 import { useMutation } from "@tanstack/react-query";
 
 export default function useUploadImageService() {
     const { addToast } = useToast();
     return useMutation<
-        TResponseData<API.TUploadImageResponse>,
+        TResponseData<API.TUploadImageUserResponse>,
         TMeta,
-        REQUEST.TUploadImage
+        REQUEST.TUploadUserImage
     >({
-        mutationFn: async (data: REQUEST.TUploadImage) => {
+        mutationFn: async (data: REQUEST.TUploadUserImage) => {
             const formData = new FormData();
             formData.append("Image", data.image);
-            return await uploadImageAsync(formData);
+            return await uploadImageUserAsync(formData);
         },
         onSuccess: () => {
             addToast({
                 type: "success",
                 description: "Tải ảnh thành công ",
+                duration: 5000,
+            });
+        },
+        onError: () => {
+            addToast({
+                type: "error",
+                description: "Tải ảnh thất bại!",
                 duration: 5000,
             });
         },

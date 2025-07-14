@@ -46,7 +46,6 @@ interface GroupUser {
     messagesCount: number;
 }
 
-// Mock data - in real app, this would come from API based on group ID
 const groupUsers: GroupUser[] = [
     {
         id: "U001",

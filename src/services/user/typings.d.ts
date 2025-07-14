@@ -1,15 +1,15 @@
 declare namespace REQUEST {
-    type TUploadImage = {
+    type TUploadUserImage = {
         image: File;
     };
 }
 
 declare namespace API {
-    type UploadImageResponse = {
+    type UploadUserImageResponse = {
         imageId: string;
         publicId: string;
         publicUrl: string;
     };
 
-    type TUploadImageResponse = UploadImageResponse[];
+    type TUploadImageUserResponse = UploadImageUserResponse[];
 }

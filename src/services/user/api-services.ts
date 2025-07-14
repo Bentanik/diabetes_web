@@ -1,9 +1,9 @@
 import request from "@/services/interceptor";
-import API_ENDPOINTS from "@/services/media/api-path";
+import API_ENDPOINTS from "@/services/user/api-path";
 
-export const uploadImageAsync = async (body: FormData) => {
-    const response = await request<TResponseData<API.TUploadImageResponse>>(
-        API_ENDPOINTS.MEDIA,
+export const uploadImageUserAsync = async (body: FormData) => {
+    const response = await request<TResponseData<API.TUploadImageUserResponse>>(
+        API_ENDPOINTS.USER_MEDIA,
         {
             method: "POST",
             data: body,
