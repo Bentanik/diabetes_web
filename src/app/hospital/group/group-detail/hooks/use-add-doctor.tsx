@@ -1,27 +1,27 @@
 import { useBackdrop } from "@/context/backdrop_context";
-import { useServiceAddMembers } from "@/services/conversation/services";
+import { useServiceAddDoctor } from "@/services/conversation/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export const addMembersSchema = z.object({
-    userIds: z.array(z.string()).min(1, "Phải chọn ít nhất 1 thành viên"),
+export const addDoctorSchema = z.object({
+    doctorId: z.string().trim().min(1, "Phải chọn bác sĩ để thêm vào"),
 });
 
-export type AddMembersFormData = z.infer<typeof addMembersSchema>;
+export type AddDoctorFormData = z.infer<typeof addDoctorSchema>;
 
-export default function useAddMembers(groupId: string) {
-    const form = useForm<AddMembersFormData>({
-        resolver: zodResolver(addMembersSchema),
+export default function useAddDoctor(groupId: string) {
+    const form = useForm<AddDoctorFormData>({
+        resolver: zodResolver(addDoctorSchema),
         defaultValues: {
-            userIds: [],
+            doctorId: "",
         },
     });
 
-    const { mutate, isPending } = useServiceAddMembers(groupId);
+    const { mutate, isPending } = useServiceAddDoctor(groupId);
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
-    const onSubmit = (data: REQUEST.AddMembers) => {
+    const onSubmit = (data: REQUEST.AddDoctor) => {
         showBackdrop();
         mutate(data, {
             onSuccess: (res) => {

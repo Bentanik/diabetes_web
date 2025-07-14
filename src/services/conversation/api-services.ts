@@ -44,6 +44,23 @@ export const addMembersAsync = async (
     return response.data;
 };
 
+export const addDoctorAsync = async (
+    groupId: string,
+    body: REQUEST.AddDoctor
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.ADD_DOCTOR(groupId),
+        {
+            method: "POST",
+            data: body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const getUserAvailable = async ({
     conversationId = " ",
     role,

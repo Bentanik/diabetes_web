@@ -15,7 +15,11 @@ declare namespace REQUEST {
     };
 
     type AddMembers = {
-        userIds: [];
+        userIds: string[];
+    };
+
+    type AddDoctor = {
+        doctorId: string;
     };
 }
 

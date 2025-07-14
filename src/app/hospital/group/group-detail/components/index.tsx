@@ -346,11 +346,8 @@ export default function GroupDetailComponent({ groupId }: any) {
                                 </select>
                             </div>
                             <div className="flex gap-2">
-                                <GroupUserDialog handleSubmit={handleSubmit} />
-                                <GroupDoctorDialog
-                                    groupId="6872abf51c3a3fc79f048e0e"
-                                    handleSubmit={handleSubmit}
-                                />
+                                <GroupUserDialog groupId="6872abf51c3a3fc79f048e0e" />
+                                <GroupDoctorDialog groupId="6872abf51c3a3fc79f048e0e" />
                             </div>
                         </div>
                     </motion.div>

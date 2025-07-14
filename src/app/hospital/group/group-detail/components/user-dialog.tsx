@@ -23,30 +23,26 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import InfiniteScroll from "@/components/scroll-paginated";
+import useServiceAddMembers from "@/app/hospital/group/group-detail/hooks/use-add-members";
 
 interface GroupUserDialogProps {
-    handleSubmit: () => void;
+    groupId: string;
 }
 
-interface UserAvailable {
-    id: string;
-    fullName: string;
-    avatar: string;
-    status: number;
-}
-
-export default function GroupUserDialog({
-    handleSubmit,
-}: GroupUserDialogProps) {
+export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [selectSortType, setSelectSortType] = useState<string>("");
     const { getUserAvailableApi } = useGetUserAvailable();
     const [isSortDesc, setIsSortDesc] = useState<boolean>(true);
-    const [data, setData] = useState<UserAvailable[]>([]);
+    const [data, setData] = useState<API.UserAvailable[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
+    const { form, onSubmit } = useServiceAddMembers(groupId);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
     const pageSize = 10;
 
     const handleGetData = async (
@@ -115,11 +111,31 @@ export default function GroupUserDialog({
         user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const handleFormSubmit = async () => {
+        console.log("Bấm thành công");
+        if (!onSubmit || typeof onSubmit !== "function") {
+            console.error("onSubmit is not a function");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const formData: REQUEST.AddMembers = {
+                userIds: selectedIds,
+            };
+            await onSubmit(formData);
+        } catch (error) {
+            console.error("Error updating post:", error);
+            alert("Có lỗi xảy ra khi cập nhật bài viết.");
+        } finally {
+            setIsSubmitting(false);
+            handleGetData(1);
+        }
+    };
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("vi-VN");
     };
-
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     const toggleUser = (id: string) => {
         setSelectedIds((prev) => {
@@ -148,6 +164,7 @@ export default function GroupUserDialog({
             setCurrentPage(1);
             setHasMore(true);
             setSelectedIds([]);
+            setSearchTerm("");
         }
     }, [isOpenDialog]);
 
@@ -186,8 +203,8 @@ export default function GroupUserDialog({
                         <Button
                             type="submit"
                             className="bg-[#248fca] hover:bg-[#2490cacb] cursor-pointer"
-                            disabled={!selectedIds.length}
-                            onClick={handleSubmit}
+                            disabled={!selectedIds.length || isSubmitting}
+                            onClick={() => handleFormSubmit()}
                         >
                             Thêm vào nhóm
                         </Button>

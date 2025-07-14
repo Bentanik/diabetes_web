@@ -17,4 +17,5 @@ export default {
     GET_AVAILABLE_USERS,
     CREATE_CONVERSATION,
     ADD_MEMBERS,
+    ADD_DOCTOR,
 };
