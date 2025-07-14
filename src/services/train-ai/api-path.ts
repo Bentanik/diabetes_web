@@ -2,10 +2,10 @@
 const TRAIN_AI = "http://localhost:5023/api/v1/rag";
 const KNOWLEDGE_BASE = TRAIN_AI + "/knowledge-bases";
 
-// const KNOWLEDGE_BASE_UPLOAD_DOCUMENT = (name: string) =>
-//   `${KNOWLEDGE_BASE}/${name}/documents/upload`;
-
 const KNOWLEDGE_BASE_DOCUMENTS = `${KNOWLEDGE_BASE}/documents`;
+
+const KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID = (id: string) =>
+  `${KNOWLEDGE_BASE}/${id}/documents`;
 
 const KNOWLEDGE_BASE_UPLOAD_DOCUMENT = `${KNOWLEDGE_BASE_DOCUMENTS}/upload`;
 
@@ -17,4 +17,5 @@ export default {
   KNOWLEDGE_BASE_DOCUMENTS,
   KNOWLEDGE_BASE_UPLOAD_DOCUMENT,
   KNOWLEDGE_BASE_DOWNLOAD_DOCUMENT,
+  KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID,
 };

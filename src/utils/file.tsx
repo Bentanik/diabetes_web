@@ -14,3 +14,9 @@ export const getFileIcon = (type: string) => {
       return <FileTextIcon className={`${iconClass} text-gray-500`} />;
   }
 };
+
+export const formatFileSize = (bytes: number) => {
+  if (!bytes) return "0 KB"
+  const mb = bytes / (1024 * 1024)
+  return mb < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mb.toFixed(1)} MB`
+}

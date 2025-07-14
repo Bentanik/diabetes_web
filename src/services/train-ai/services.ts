@@ -90,12 +90,9 @@ export const useUploadDocumentService = () => {
 };
 
 export const useGetKnowledgeBaseDocumentsService = (
+  id: string,
   params: {
-    kb_name?: string;
-    file_name?: string;
-    job_id?: string;
-    created_from?: string;
-    created_to?: string;
+    search_name?: string;
     sort_by?: string;
     sort_order?: string;
     page?: number;
@@ -103,13 +100,20 @@ export const useGetKnowledgeBaseDocumentsService = (
   } = {}
 ) => {
   return useQuery<
-    TResponse<API.TKnowledgeBaseDocument[]>,
-    Error,
-    API.TKnowledgeBaseDocument[]
+    TResponse<API.TGetKnowledgeBaseDocumentsResponse>,
+    TMeta,
+    API.TGetKnowledgeBaseDocumentsResponse
   >({
     queryKey: [KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY, params],
-    queryFn: () => getKnowledgeBaseDocumentsAsync(params),
-    select: (data) => data.value.data || [],
+    queryFn: () => getKnowledgeBaseDocumentsAsync(id, params),
+    select: (data) =>
+      data.value.data || {
+        documents: [],
+        total: 0,
+        page: 0,
+        limit: 0,
+        total_pages: 0,
+      },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });

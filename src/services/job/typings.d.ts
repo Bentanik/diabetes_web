@@ -6,6 +6,8 @@ declare namespace API {
     file_name: string;
     file_size: number;
     file_type: string;
+    title: string;
+    description: string;
     status: "queued" | "processing" | "completed" | "failed";
     progress: number;
     current_step: string;

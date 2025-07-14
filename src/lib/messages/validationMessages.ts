@@ -30,4 +30,10 @@ export const validationMessages = {
   knowledge_description: {
     required: "Mô tả thư mục không được để trống",
   },
+  document_name: {
+    required: "Tiêu đề tài liệu không được để trống",
+  },
+  document_description: {
+    required: "Mô tả tài liệu không được để trống",
+  },
 };

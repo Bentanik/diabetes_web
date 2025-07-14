@@ -18,6 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import CreateDocumentModal from "@/app/admin/train-ai/[id]/upload/components/create-document";
+import { CreateDocumentFormData } from "@/lib/validations/document.schema";
 
 export default function UploadPageComponent({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -26,6 +28,9 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
     const [isDragOver, setIsDragOver] = useState(false);
     const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
     const [warningErrors, setWarningErrors] = useState<string[]>([]);
+
+    const [isCreateDocumentModalOpen, setIsCreateDocumentModalOpen] = useState(false);
+
     const [fileToUpload, setFileToUpload] = useState<File | null>(null);
 
     // Thêm state cho upload UI
@@ -63,6 +68,16 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
         refetchKB();
     }, [refetchKB]);
 
+    const handleOpenCreateDocumentModal = () => {
+        setIsCreateDocumentModalOpen(true);
+    };
+
+    const handleCloseCreateDocumentModal = () => {
+        setIsCreateDocumentModalOpen(false);
+        setFileToUpload(null);
+    };
+
+
     const handleOpenWarningModal = (errors: string[]) => {
         setWarningErrors(errors);
         setIsWarningModalOpen(true);
@@ -76,22 +91,23 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
 
     const handleConfirmWarningModal = () => {
         if (fileToUpload) {
-            processFileUpload(fileToUpload);
+            handleOpenCreateDocumentModal();
         }
         setIsWarningModalOpen(false);
         setWarningErrors([]);
         setFileToUpload(null);
     };
 
-    // Hàm upload có progress UI
-    const processFileUpload = useCallback(
-        async (file: File) => {
+    const handleUploadFile = useCallback(
+        async (data: CreateDocumentFormData, file: File) => {
             setUploadingFile(file);
             setUploadProgress(0);
 
             const formData = new FormData();
             formData.append("file", file);
             formData.append("kb_id", id);
+            formData.append("title", data.name);
+            formData.append("description", data.description);
 
             try {
                 handleUploadDocument(formData, {
@@ -142,15 +158,15 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
                     });
                     return;
                 }
+                setFileToUpload(file);
                 if (validationResult.warningErrors.length > 0) {
-                    setFileToUpload(file);
                     handleOpenWarningModal(validationResult.warningErrors);
                     return;
                 }
-                processFileUpload(file);
+                handleOpenCreateDocumentModal();
             }
         },
-        [processFileUpload, addNotification]
+        [addNotification]
     );
 
     const handleFileUpload = useCallback(() => {
@@ -193,15 +209,15 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
                     });
                     return;
                 }
+                setFileToUpload(file);
                 if (validationResult.warningErrors.length > 0) {
-                    setFileToUpload(file);
                     handleOpenWarningModal(validationResult.warningErrors);
                     return;
                 }
-                processFileUpload(file);
+                handleOpenCreateDocumentModal();
             }
         },
-        [processFileUpload, addNotification]
+        [addNotification]
     );
 
     const handleAddToKB = useCallback(() => {
@@ -396,6 +412,12 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
                 onClose={handleCloseWarningModal}
                 onConfirm={handleConfirmWarningModal}
                 errors={warningErrors}
+            />
+            <CreateDocumentModal
+                isOpen={isCreateDocumentModalOpen}
+                onClose={handleCloseCreateDocumentModal}
+                uploadedFile={fileToUpload}
+                handleUploadFile={handleUploadFile}
             />
         </div>
     );

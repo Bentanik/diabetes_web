@@ -60,12 +60,24 @@ declare namespace API {
   type TKnowledgeBaseDocument = {
     id: string;
     kb_name: string;
-    document_id: string;
     status: "completed | failed";
     file_name: string;
     file_type: string;
     file_size: number;
+    title: string;
+    description: string;
     created_at: string;
     updated_at: string;
+    metadata: {
+      diabetes_score_avg: number;
+    };
+  };
+
+  type TGetKnowledgeBaseDocumentsResponse = {
+    documents: TKnowledgeBaseDocument[];
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
   };
 }

@@ -89,12 +89,9 @@ export const deleteDocumentAsync = async (id: string) => {
 };
 
 export const getKnowledgeBaseDocumentsAsync = async (
+  id: string,
   params: {
-    kb_name?: string;
-    file_name?: string;
-    job_id?: string;
-    created_from?: string;
-    created_to?: string;
+    search_name?: string;
     sort_by?: string;
     sort_order?: string;
     page?: number;
@@ -109,13 +106,12 @@ export const getKnowledgeBaseDocumentsAsync = async (
     ...params,
   };
 
-  const response = await request<TResponse<API.TKnowledgeBaseDocument[]>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE_DOCUMENTS,
-    {
-      method: "GET",
-      params: queryParams,
-    }
-  );
+  const response = await request<
+    TResponse<API.TGetKnowledgeBaseDocumentsResponse>
+  >(API_ENDPOINTS.KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID(id), {
+    method: "GET",
+    params: queryParams,
+  });
   return response.data;
 };
 
