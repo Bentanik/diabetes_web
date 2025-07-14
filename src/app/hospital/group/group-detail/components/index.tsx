@@ -11,6 +11,7 @@ import {
     BellIcon,
     SearchIcon,
     ArrowLeft,
+    Delete,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +26,11 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
+import useDeleteConversation from "../hooks/use-delete-conversation";
 import GroupUserDialog from "@/app/hospital/group/group-detail/components/user-dialog";
 import GroupDoctorDialog from "@/app/hospital/group/group-detail/components/doctor-dialog";
+import { useRouter } from "next/navigation";
+import { Toaster } from "sonner";
 
 interface GroupUser {
     id: string;
@@ -186,7 +190,33 @@ const departmentStats = [
     { name: "Cấp cứu", count: 6, color: "bg-orange-500" },
 ];
 
-const Header = () => {
+interface HeaderProps {
+    groupId: string;
+}
+
+const Header = ({ groupId }: HeaderProps) => {
+    const { onSubmit, isPending } = useDeleteConversation(groupId);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const router = useRouter();
+
+    const handleFormSubmit = async () => {
+        if (!onSubmit || typeof onSubmit !== "function") {
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            await onSubmit(() => {
+                setTimeout(() => {
+                    router.push("/hospital/group");
+                }, 2000);
+            });
+        } catch (error) {
+            console.error("Error updating post:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -209,6 +239,15 @@ const Header = () => {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
+                    <Button
+                        type="submit"
+                        onClick={() => handleFormSubmit()}
+                        variant="outline"
+                        className="gap-2"
+                    >
+                        <Delete className="w-4 h-4" />
+                        Xóa nhóm chat
+                    </Button>
                     <Button variant="outline" className="gap-2">
                         <BarChartIcon className="w-4 h-4" />
                         Xuất báo cáo
@@ -283,8 +322,10 @@ export default function GroupDetailComponent({ groupId }: any) {
     return (
         <div>
             {/* Header */}
+            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
+
             <header>
-                <Header />
+                <Header groupId="687247a01c3a3fc79f048e08" />
             </header>
 
             <div className="min-h-screen bg-gray-50 flex">

@@ -44,6 +44,19 @@ export const addMembersAsync = async (
     return response.data;
 };
 
+export const deleteConversationAsync = async (groupId: string) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.DELETE_CONVERSATION(groupId),
+        {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const addDoctorAsync = async (
     groupId: string,
     body: REQUEST.AddDoctor

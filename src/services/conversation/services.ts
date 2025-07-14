@@ -3,6 +3,7 @@ import {
     createConversationAsync,
     addMembersAsync,
     addDoctorAsync,
+    deleteConversationAsync,
 } from "./api-services";
 import useToast from "@/hooks/use-toast";
 
@@ -28,6 +29,30 @@ export const useServiceCreateConversation = () => {
             addToast({
                 type: "error",
                 description: "Tạo nhóm thất bại",
+                duration: 5000,
+            });
+        },
+    });
+};
+
+export const useServiceDeleteConversation = (groupId: string) => {
+    const { addToast } = useToast();
+    return useMutation<TResponse<object | null>, TMeta, void>({
+        mutationFn: () => deleteConversationAsync(groupId),
+        onSuccess: (data) => {
+            addToast(
+                {
+                    type: "success",
+                    description: data.value.message,
+                    duration: 5000,
+                },
+                false
+            );
+        },
+        onError: () => {
+            addToast({
+                type: "error",
+                description: "Xóa nhóm thất bại, vui lòng thử lại!",
                 duration: 5000,
             });
         },

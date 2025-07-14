@@ -12,10 +12,14 @@ const ADD_MEMBERS = (conversationId: string) =>
 
 const ADD_DOCTOR = (conversationId: string) =>
     `${CONVERSATION}/${conversationId}/doctors`;
+
+const DELETE_CONVERSATION = (conversationId: string) =>
+    `${CONVERSATION}/${conversationId}`;
 export default {
     CONVERSATION,
     GET_AVAILABLE_USERS,
     CREATE_CONVERSATION,
     ADD_MEMBERS,
     ADD_DOCTOR,
+    DELETE_CONVERSATION,
 };
