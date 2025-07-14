@@ -11,7 +11,7 @@ import {
     BellIcon,
     SearchIcon,
     ArrowLeft,
-    Delete,
+    Trash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -243,9 +243,9 @@ const Header = ({ groupId }: HeaderProps) => {
                         type="submit"
                         onClick={() => handleFormSubmit()}
                         variant="outline"
-                        className="gap-2"
+                        className="gap-2 cursor-pointer hover:bg-red-200"
                     >
-                        <Delete className="w-4 h-4" />
+                        <Trash className="w-4 h-4" />
                         Xóa nhóm chat
                     </Button>
                     <Button variant="outline" className="gap-2">
@@ -323,9 +323,8 @@ export default function GroupDetailComponent({ groupId }: any) {
         <div>
             {/* Header */}
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-
             <header>
-                <Header groupId="687247a01c3a3fc79f048e08" />
+                <Header groupId="6874ceb93d4a2480f8a658c4" />
             </header>
 
             <div className="min-h-screen bg-gray-50 flex">

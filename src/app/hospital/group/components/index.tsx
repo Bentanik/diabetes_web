@@ -59,6 +59,7 @@ import {
 import Link from "next/link";
 import Router from "next/navigation";
 import { useRouter } from "next/navigation";
+import { Toaster } from "sonner";
 
 const staffData = [
     {
@@ -385,6 +386,8 @@ export default function GroupHospitalComponent() {
 
     return (
         <div>
+            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
+
             {/* Header */}
             <header>
                 <Header />

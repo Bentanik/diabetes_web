@@ -43,7 +43,7 @@ export const useServiceDeleteConversation = (groupId: string) => {
             addToast(
                 {
                     type: "success",
-                    description: data.value.message,
+                    description: "Xóa nhóm thành công",
                     duration: 5000,
                 },
                 false
@@ -72,14 +72,14 @@ export const useServiceAddMembers = (groupId: string) => {
         onSuccess: () => {
             addToast({
                 type: "success",
-                description: "Tạo nhóm thành công",
+                description: "Thêm bênh nhân vào nhóm thành công",
                 duration: 5000,
             });
         },
         onError: () => {
             addToast({
                 type: "error",
-                description: "Tạo nhóm thất bại",
+                description: "Thêm bênh nhân vào nhóm thất bại!",
                 duration: 5000,
             });
         },
@@ -99,14 +99,14 @@ export const useServiceAddDoctor = (groupId: string) => {
         onSuccess: () => {
             addToast({
                 type: "success",
-                description: "Tạo nhóm thành công",
+                description: "Thêm bác sĩ vào nhóm thành công",
                 duration: 5000,
             });
         },
         onError: () => {
             addToast({
                 type: "error",
-                description: "Tạo nhóm thất bại",
+                description: "Thêm bác sĩ vào nhóm thất bại",
                 duration: 5000,
             });
         },
