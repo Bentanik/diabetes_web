@@ -1,8 +1,11 @@
-declare namespace REQUEST {}
+declare namespace REQUEST {
+  type TJobType = "upload" | "training";
+}
 
 declare namespace API {
   type TJob = {
     id: string;
+    type: "upload" | "training";
     file_name: string;
     file_size: number;
     file_type: string;
@@ -23,5 +26,6 @@ declare namespace API {
     rejection_reason?: string;
     is_deleted?: boolean;
     is_duplicate?: boolean;
+    is_training?: boolean;
   };
 }

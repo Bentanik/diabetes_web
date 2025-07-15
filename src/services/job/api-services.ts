@@ -4,6 +4,7 @@ import request from "@/services/interceptor";
 export const getJobs = async (
   params: {
     kb_name?: string;
+    job_type?: REQUEST.TJobType | "upload";
     document_name?: string;
     job_id?: string;
     created_from?: string;
@@ -29,10 +30,24 @@ export const getJobs = async (
   return response.data;
 };
 
-export const getActiveJobAsync = async () => {
-  const response = await request<TResponse<API.TJob>>(API_ENDPOINTS.ACTIVE, {
-    method: "GET",
-  });
+export const getActiveUploadJobAsync = async () => {
+  const response = await request<TResponse<API.TJob>>(
+    API_ENDPOINTS.ACTIVE_UPLOAD,
+    {
+      method: "GET",
+    }
+  );
+
+  return response.data;
+};
+
+export const getActiveTrainingJobAsync = async () => {
+  const response = await request<TResponse<API.TJob[]>>(
+    API_ENDPOINTS.ACTIVE_TRAINING,
+    {
+      method: "GET",
+    }
+  );
 
   return response.data;
 };

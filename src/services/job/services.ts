@@ -1,4 +1,8 @@
-import { getActiveJobAsync, getJobs } from "@/services/job/api-services";
+import {
+  getActiveTrainingJobAsync,
+  getActiveUploadJobAsync,
+  getJobs,
+} from "@/services/job/api-services";
 import { useQuery } from "@tanstack/react-query";
 
 export const JOB = "jobs";
@@ -7,6 +11,7 @@ export const JOB_ACTIVE_QUERY_KEY = "job-active";
 export const useGetJobsService = (
   params: {
     kb_name?: string;
+    job_type?: REQUEST.TJobType;
     document_name?: string;
     job_id?: string;
     created_from?: string;
@@ -45,7 +50,7 @@ export const useGetJobsService = (
   };
 };
 
-export const useGetActiveJobService = () => {
+export const useGetActiveUploadJobService = () => {
   const {
     data: job,
     isPending,
@@ -56,7 +61,7 @@ export const useGetActiveJobService = () => {
     isFetching,
   } = useQuery({
     queryKey: [JOB_ACTIVE_QUERY_KEY],
-    queryFn: () => getActiveJobAsync(),
+    queryFn: () => getActiveUploadJobAsync(),
     select: (data) => data.value.data,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
@@ -65,6 +70,38 @@ export const useGetActiveJobService = () => {
 
   return {
     job,
+    isPending,
+    isJobError,
+    error,
+    refetch,
+    isRefetching,
+    isFetching,
+  };
+};
+
+export const useGetActiveTrainingJobService = (options?: {
+  enabled?: boolean;
+}) => {
+  const {
+    data: jobs,
+    isPending,
+    isError: isJobError,
+    error,
+    refetch,
+    isRefetching,
+    isFetching,
+  } = useQuery({
+    queryKey: [JOB_ACTIVE_QUERY_KEY],
+    queryFn: () => getActiveTrainingJobAsync(),
+    select: (data) => data.value.data,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000,
+    enabled: options?.enabled ?? true,
+  });
+
+  return {
+    jobs,
     isPending,
     isJobError,
     error,

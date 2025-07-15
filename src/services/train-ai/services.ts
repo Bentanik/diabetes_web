@@ -5,6 +5,7 @@ import {
   getKnowledgeBaseByIdAsync,
   getKnowledgeBaseDocumentsAsync,
   getKnowledgeBaseListAsync,
+  trainDocumentAsync,
   uploadDocumentAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -104,7 +105,7 @@ export const useGetKnowledgeBaseDocumentsService = (
     TMeta,
     API.TGetKnowledgeBaseDocumentsResponse
   >({
-    queryKey: [KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY, params],
+    queryKey: [KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY, id, params],
     queryFn: () => getKnowledgeBaseDocumentsAsync(id, params),
     select: (data) =>
       data.value.data || {
@@ -122,5 +123,11 @@ export const useGetKnowledgeBaseDocumentsService = (
 export const useDeleteDocumentService = () => {
   return useMutation<TResponse, TMeta, string>({
     mutationFn: (id) => deleteDocumentAsync(id),
+  });
+};
+
+export const useTrainDocumentService = () => {
+  return useMutation<TResponse, TMeta, string>({
+    mutationFn: (id) => trainDocumentAsync(id),
   });
 };

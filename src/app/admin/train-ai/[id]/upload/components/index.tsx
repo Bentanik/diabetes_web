@@ -11,7 +11,7 @@ import FileUploadCard from "@/app/admin/train-ai/[id]/upload/components/file_upl
 import { useNotification } from "@/context/notification_context";
 import { useUploadDocument } from "@/app/admin/train-ai/[id]/upload/hooks/useUploadDocument";
 import { fileForTrainAI } from "@/lib/validations/file_train_ai";
-import { useGetActiveJobService } from "@/services/job/services";
+import { useGetActiveUploadJobService } from "@/services/job/services";
 import HistoryUploadFileDisplay from "@/app/admin/train-ai/[id]/upload/components/history_upload_file_display";
 import { useGetKnowledgeBaseByIdService } from "@/services/train-ai/services";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,7 +47,7 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
     const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeBaseByIdService(id);
 
     // Lấy job active (polling)
-    const { job, refetch } = useGetActiveJobService();
+    const { job, refetch } = useGetActiveUploadJobService();
 
     // Timeout handler - 10 giây
     useEffect(() => {
@@ -220,12 +220,6 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
         [addNotification]
     );
 
-    const handleAddToKB = useCallback(() => {
-        setTimeout(() => {
-            router.push(`/admin/train-ai/knowledge-base/${id}`);
-        }, 1000);
-    }, []);
-
     // Loading Skeleton Component
     const LoadingSkeleton = () => (
         <div className="min-h-screen bg-gray-50">
@@ -380,7 +374,6 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
             <Header
                 knowledgeBase={knowledgeBase}
                 onGoBack={handleGoBack}
-                onAddToKB={handleAddToKB}
             />
             <div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

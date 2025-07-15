@@ -60,7 +60,7 @@ declare namespace API {
   type TKnowledgeBaseDocument = {
     id: string;
     kb_name: string;
-    status: "completed | failed";
+    status: "uploaded" | "training" | "trained";
     file_name: string;
     file_type: string;
     file_size: number;
@@ -70,6 +70,7 @@ declare namespace API {
     updated_at: string;
     metadata: {
       diabetes_score_avg: number;
+      is_training: boolean;
     };
   };
 

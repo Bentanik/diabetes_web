@@ -170,3 +170,13 @@ export const downloadDocumentAsync = async (id: string) => {
     throw error;
   }
 };
+
+export const trainDocumentAsync = async (id: string) => {
+  const response = await request<TResponse>(
+    API_ENDPOINTS.KNOWLEDGE_BASE_TRAIN_DOCUMENT(id),
+    {
+      method: "POST",
+    }
+  );
+  return response.data;
+};

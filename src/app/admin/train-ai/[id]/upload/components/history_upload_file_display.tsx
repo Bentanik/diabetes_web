@@ -20,11 +20,13 @@ import {
     CalendarIcon,
     ArchiveIcon,
     TrainIcon,
+    FileIcon,
 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import { useGetJobsService } from "@/services/job/services"
 import { formatFileSize, getFileIcon } from "@/utils/file"
 import { downloadDocumentAsync } from "@/services/train-ai/api-services"
+import DeleteDocumentModal from "@/app/admin/train-ai/[id]/upload/components/delete_document"
 
 // Component để handle description với tooltip thông minh
 const SmartDescription = ({ description }: { description: string }) => {
@@ -73,40 +75,6 @@ const SmartDescription = ({ description }: { description: string }) => {
     )
 }
 
-// Mock DeleteDocumentModal component
-const DeleteDocumentModal = ({
-    isOpen,
-    onClose,
-    document,
-}: { isOpen: boolean; onClose: () => void; document: API.TJob | null }) => {
-    if (!isOpen) return null
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-                <h2 className="text-lg font-semibold mb-4">Xác nhận xóa tài liệu</h2>
-                <p className="text-gray-600 mb-6">
-                    Bạn có chắc chắn muốn xóa tài liệu <span className="font-medium">&quot;{document?.title || document?.file_name}&quot;</span>?
-                </p>
-                <div className="flex justify-end space-x-3">
-                    <Button variant="outline" onClick={onClose}>
-                        Hủy
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        onClick={() => {
-                            alert(`Deleting document: ${document?.title || document?.file_name}`)
-                            onClose()
-                        }}
-                    >
-                        Xóa
-                    </Button>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// **MODIFIED**: Function to get topic relevance badge and color
 const getTopicRelevanceBadge = (score: number | null | undefined, topic: string | null | undefined) => {
     if (score === null || score === undefined || !topic) {
         return (
@@ -197,6 +165,7 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
     const { jobs, isPending, isJobError } = useGetJobsService({
         page: 1,
         limit: 3,
+        job_type: "upload",
         sort_by: "created_at",
         sort_order: "desc",
         kb_name: kb_name,
@@ -274,18 +243,18 @@ export default function HistoryUploadFileDisplay({ kb_name }: HistoryUploadFileD
                                         {/* Content Area */}
                                         <div className="flex-1 min-w-0 space-y-3">
                                             {/* Header: Title + Actions */}
-                                            <div className="flex items-start justify-between gap-4">
-                                                <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-4 mb-0">
+                                                <div className="flex-1 flex items-center gap-2">
                                                     {/* Title */}
-                                                    <h4 className="font-semibold text-gray-900 text-lg leading-tight mb-1 truncate">
+                                                    <h4 className="font-semibold text-gray-900 text-base leading-tight truncate">
                                                         {file.title || file.file_name}
                                                     </h4>
 
-                                                    {/* File name (nếu khác title) */}
                                                     {file.title && file.title !== file.file_name && (
-                                                        <p className="text-sm text-gray-500 truncate">
-                                                            <span className="font-medium">File:</span> {file.file_name}
-                                                        </p>
+                                                        <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
+                                                            <FileIcon className="w-3 h-3" />
+                                                            <span className="truncate">{file.file_name}</span>
+                                                        </div>
                                                     )}
                                                 </div>
 
