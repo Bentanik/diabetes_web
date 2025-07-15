@@ -1,16 +1,6 @@
 import API_ENDPOINTS from "@/services/conversation/api-path";
 import request from "@/services/interceptor";
 
-// export const getConversations = async () => {
-//     const response = await request<TResponseData<API.TGetConversations>>(
-//         API_ENDPOINTS.CONVERSATION,
-//         {
-//             method: "GET",
-//         }
-//     );
-//     return response.data;
-// };
-
 export const createConversationAsync = async (
     body: REQUEST.TCreateConversation
 ) => {
@@ -74,6 +64,23 @@ export const addDoctorAsync = async (
     return response.data;
 };
 
+export const addStaffAsync = async (
+    groupId: string,
+    body: REQUEST.AddStaff
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.ADD_STAFF(groupId),
+        {
+            method: "POST",
+            data: body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const getUserAvailable = async ({
     conversationId = " ",
     role,
@@ -105,8 +112,41 @@ export const getUserAvailable = async ({
     if (isSortDesc !== undefined) {
         params.isSortAsc = isSortDesc;
     }
-    const response = await request<TResponseDataUser<API.TGetUserAvailable>>(
+    const response = await request<TResponseData<API.TGetUserAvailable>>(
         API_ENDPOINTS.GET_AVAILABLE_USERS,
+        {
+            method: "GET",
+            params: Object.keys(params).length > 0 ? params : undefined,
+        }
+    );
+    return response.data;
+};
+
+export const getConversations = async ({
+    pageIndex = 1,
+    pageSize = 10,
+    sortBy = "date",
+    direction = 1,
+    search = "",
+}: REQUEST.ConversationsParams) => {
+    const params: Record<
+        string,
+        string | number | boolean | string[] | undefined
+    > = {};
+    params.pageIndex = pageIndex;
+    params.pageSize = pageSize;
+
+    if (search && search.trim() !== "") {
+        params.search = search.trim();
+    }
+    if (sortBy && sortBy.trim() !== "") {
+        params.sortBy = sortBy.trim();
+    }
+    if (direction !== undefined) {
+        params.direction = direction;
+    }
+    const response = await request<TResponseData<API.TGetConversations>>(
+        API_ENDPOINTS.GET_CONVERSATIONS,
         {
             method: "GET",
             params: Object.keys(params).length > 0 ? params : undefined,

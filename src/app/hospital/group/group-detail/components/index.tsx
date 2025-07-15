@@ -31,6 +31,7 @@ import GroupUserDialog from "@/app/hospital/group/group-detail/components/user-d
 import GroupDoctorDialog from "@/app/hospital/group/group-detail/components/doctor-dialog";
 import { useRouter } from "next/navigation";
 import { Toaster } from "sonner";
+import GroupStaffDialog from "./staff-dialog";
 
 interface GroupUser {
     id: string;
@@ -284,6 +285,8 @@ export default function GroupDetailComponent({ groupId }: any) {
         return matchesSearch && matchesRole && matchesStatus;
     });
 
+    console.log(groupId);
+
     const getRoleIcon = (role: string) => {
         switch (role) {
             case "doctor":
@@ -323,7 +326,7 @@ export default function GroupDetailComponent({ groupId }: any) {
             {/* Header */}
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <header>
-                <Header groupId="6874ceb93d4a2480f8a658c4" />
+                <Header groupId={groupId} />
             </header>
 
             <div className="min-h-screen bg-gray-50 flex">
@@ -385,8 +388,9 @@ export default function GroupDetailComponent({ groupId }: any) {
                                 </select>
                             </div>
                             <div className="flex gap-2">
-                                <GroupUserDialog groupId="6872abf51c3a3fc79f048e0e" />
-                                <GroupDoctorDialog groupId="6872abf51c3a3fc79f048e0e" />
+                                <GroupUserDialog groupId={groupId} />
+                                <GroupDoctorDialog groupId={groupId} />
+                                <GroupStaffDialog groupId={groupId} />
                             </div>
                         </div>
                     </motion.div>

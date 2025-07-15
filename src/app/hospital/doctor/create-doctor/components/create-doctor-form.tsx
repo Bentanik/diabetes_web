@@ -10,9 +10,6 @@ import {
     Smartphone,
     BadgeCheck,
     CircleUserRound,
-    Eye,
-    Trash2,
-    X,
 } from "lucide-react";
 import {
     Select,
@@ -51,16 +48,6 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogDescription,
-    DialogClose,
-} from "@/components/ui/dialog";
 import { useState, useEffect, useCallback } from "react";
 import useUploadUserImage from "@/app/hospital/doctor/create-doctor/hooks/use-upload-image";
 import useCreateDoctor, {
@@ -72,67 +59,34 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const { form, onSubmit } = useCreateDoctor();
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
-    const [thumbnailPreviews, setThumbnailPreviews] = useState<string[]>([]);
-    const [thumbnailIds, setThumbnailIds] = useState<string[]>([]);
     const [avatarPreview, setAvatarPreview] = useState<string>();
-    const [avatarId, setAvatarId] = useState<string>("");
+    // const [avatarId, setAvatarId] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadUserImage();
     const [currentContentHtml, setCurrentContentHtml] = useState("");
-    const [selectedImage, setSelectedImage] = useState("");
     const router = useRouter();
 
     const handleImageChange = async (
-        e: React.ChangeEvent<HTMLInputElement>,
-        isAvatar: boolean
+        e: React.ChangeEvent<HTMLInputElement>
     ) => {
-        const files = e.target.files;
-        if (files && files.length > 0) {
-            const imagesData = Array.from(files).map((file) => ({
-                image: file,
-            }));
+        const file = e.target.files?.[0];
+        if (file) {
+            const data = { image: file };
 
-            for (const data of imagesData) {
-                await onSubmitImage(
-                    data,
-                    handleClearImages,
-                    (imageId, publicId, publicUrl) => {
-                        if (isAvatar) {
-                            // Handle single avatar
-                            form.setValue("avatar", imageId);
-                            setAvatarPreview(publicUrl);
-                            setAvatarId(imageId);
-                            // setThumbnailPreviews([]);
-                            // setThumbnailIds([]);
-                        } else {
-                            // Handle multiple thumbnails
-                            form.setValue("images", [
-                                ...(form.getValues("images") || []),
-                                imageId,
-                            ]);
-                            setThumbnailPreviews((prev) => [
-                                ...prev,
-                                publicUrl,
-                            ]);
-                            setThumbnailIds((prev) => [...prev, imageId]);
-                        }
-                    }
-                );
-            }
+            onSubmitImage(
+                data,
+                handleClearImages,
+                (imageId, publicId, publicUrl) => {
+                    form.setValue("avatar", imageId);
+                    setAvatarPreview(publicUrl);
+                    // setAvatarId(imageId);
+                }
+            );
         }
     };
 
-    console.log("avatarURL" + avatarPreview);
-    console.log(form.watch("avatar"));
-    console.log(form.watch("images"));
-
-    const handleClearImages = () => {
-        // setThumbnailIds([]);
-        // setAvatarId("");
-        // setThumbnailPreviews([]);
-        // setAvatarPreview("");
-    };
+    const handleClearImages = () => {};
 
     const updateContentHtml = useCallback(
         (editorContent: string) => {
@@ -152,6 +106,8 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
         }
     }, [form.watch("introduction"), currentContentHtml]);
 
+    console.log("html intro" + currentContentHtml);
+
     const handleFormSubmit = async (data: DoctorFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
             console.error("onSubmit is not a function");
@@ -166,21 +122,20 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 middleName: data.middleName || "",
                 lastName: data.lastName || "",
                 dateOfBirth: data.dateOfBirth || "",
-                gender: typeof data.gender === "number" ? data.gender : 1,
+                gender: data.gender,
                 avatar: data.avatar || "",
                 numberOfExperiences:
                     typeof data.numberOfExperiences === "number"
                         ? data.numberOfExperiences
                         : 0,
-                position: typeof data.position === "number" ? data.position : 1,
-                introduction: data.introduction || "",
-                images: data.images?.length ? data.images : [],
+                position: data.position,
+                introduction: "Địt mẹ m",
             };
             onSubmit(formData, () => {
                 handleClearImages();
                 form.reset();
                 setTimeout(() => {
-                    router.push("/admin/blogs");
+                    router.push("/hospital/doctor");
                 }, 2000);
             });
         } catch (error) {
@@ -191,10 +146,6 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
         }
     };
 
-    const removeImage = (index: number) => {
-        setThumbnailPreviews((prev) => prev.filter((_, i) => i !== index));
-    };
-
     return (
         <div className="min-h-screen">
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
@@ -202,220 +153,58 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                     <div className="flex gap-10">
                         <div className="flex-2">
-                            <div className="flex gap-[10%]">
-                                {/* Avatar Upload */}
-                                <div className="flex-1">
-                                    <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                        <ImageIcon className="h-5 w-5 text-[#248fca]" />
-                                        Chọn ảnh đại diện
-                                    </Label>
-                                    <div className="flex items-center gap-6 mt-2">
-                                        <div className="relative">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) =>
-                                                    handleImageChange(e, true)
-                                                }
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                id="avatar-upload"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white transition-all duration-300"
-                                                asChild
-                                            >
-                                                <label
-                                                    htmlFor="avatar-upload"
-                                                    className="cursor-pointer"
-                                                >
-                                                    <Upload className="h-5 w-5" />
-                                                    Chọn ảnh
-                                                </label>
-                                            </Button>
-                                        </div>
-                                        {avatarPreview && (
-                                            <motion.div
-                                                initial={{
-                                                    opacity: 0,
-                                                    scale: 0.8,
-                                                }}
-                                                animate={{
-                                                    opacity: 1,
-                                                    scale: 1,
-                                                }}
-                                                className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
-                                            >
-                                                <Image
-                                                    src={
-                                                        avatarPreview ||
-                                                        "/placeholder.svg"
-                                                    }
-                                                    width={80}
-                                                    height={80}
-                                                    alt="Avatar preview"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </motion.div>
-                                        )}
-                                    </div>
-                                    <p className="text-sm text-gray-500 mt-2">
-                                        Chấp nhận file JPG, PNG. Kích thước tối
-                                        đa 5MB.
-                                    </p>
-                                </div>
-
-                                {/* Images */}
-                                <div className="flex items-center gap-6 mb-4">
-                                    {/* Nút upload */}
+                            <div>
+                                <Label className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                    <ImageIcon className="h-5 w-5 text-[#248fca]" />
+                                    Chọn ảnh đại diện
+                                </Label>
+                                <div className="flex items-center gap-6 mt-2">
                                     <div className="relative">
                                         <input
                                             type="file"
                                             accept="image/*"
-                                            multiple
-                                            onChange={(e) =>
-                                                handleImageChange(e, false)
-                                            }
+                                            onChange={handleImageChange}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            id="thumbnails-upload"
+                                            id="logo-upload"
                                         />
-                                        <button
+                                        <Button
                                             type="button"
-                                            className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white rounded-lg transition-colors duration-300"
+                                            variant="outline"
+                                            className="flex items-center gap-2 h-12 px-6 border-2 border-[#248fca] text-[#248fca] hover:bg-[#248fca] hover:text-white transition-all duration-300"
+                                            asChild
                                         >
-                                            <Upload className="h-5 w-5" />
-                                            Chọn ảnh
-                                        </button>
+                                            <label
+                                                htmlFor="logo-upload"
+                                                className="cursor-pointer"
+                                            >
+                                                <Upload className="h-5 w-5" />
+                                                Chọn ảnh
+                                            </label>
+                                        </Button>
                                     </div>
-
-                                    {/* Ô đếm ảnh và Dialog */}
-                                    {thumbnailPreviews.length > 0 && (
-                                        <Dialog>
-                                            {/* Ô đếm ảnh làm trigger mở dialog */}
-                                            <DialogTrigger asChild>
-                                                <div className="w-[100px] h-[100px] bg-gray-300 text-gray-800 flex items-center justify-center rounded-lg cursor-pointer">
-                                                    <span className="text-xl font-semibold">
-                                                        {
-                                                            thumbnailPreviews.length
-                                                        }
-                                                    </span>
-                                                </div>
-                                            </DialogTrigger>
-
-                                            {/* Nội dung dialog */}
-                                            <DialogContent className="sm:max-w-2xl h-[600px]">
-                                                <DialogHeader>
-                                                    <DialogTitle>
-                                                        Ảnh đã chọn (
-                                                        {
-                                                            thumbnailPreviews.length
-                                                        }
-                                                        )
-                                                    </DialogTitle>
-                                                    <DialogDescription>
-                                                        Bạn có thể xem, xóa hoặc
-                                                        đóng dialog.
-                                                    </DialogDescription>
-                                                </DialogHeader>
-
-                                                {/* Nút xóa tất cả */}
-                                                <div className="mb-4">
-                                                    <button
-                                                        onClick={() =>
-                                                            setThumbnailPreviews(
-                                                                []
-                                                            )
-                                                        }
-                                                        className="text-red-500 hover:text-red-600 text-sm"
-                                                    >
-                                                        Xóa tất cả ảnh
-                                                    </button>
-                                                </div>
-
-                                                {/* Hiển thị danh sách ảnh */}
-                                                <div className="grid grid-cols-3 gap-4  overflow-x-auto">
-                                                    {thumbnailPreviews.map(
-                                                        (preview, index) => (
-                                                            <div
-                                                                key={index}
-                                                                className="relative group"
-                                                            >
-                                                                <img
-                                                                    src={
-                                                                        preview
-                                                                    }
-                                                                    alt={`Ảnh ${
-                                                                        index +
-                                                                        1
-                                                                    }`}
-                                                                    className="w-full h-32 object-cover rounded-md cursor-pointer border border-gray-200"
-                                                                    onClick={() =>
-                                                                        setSelectedImage(
-                                                                            preview
-                                                                        )
-                                                                    }
-                                                                />
-                                                                <button
-                                                                    onClick={() =>
-                                                                        removeImage(
-                                                                            index
-                                                                        )
-                                                                    }
-                                                                    className="absolute top-1 right-1 bg-white p-1 rounded-full opacity-80 hover:opacity-100 transition"
-                                                                    title="Xóa ảnh"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                                                </button>
-                                                            </div>
-                                                        )
-                                                    )}
-                                                </div>
-
-                                                {/* Footer có nút đóng dialog */}
-                                                <DialogFooter className="mt-6">
-                                                    <DialogClose asChild>
-                                                        <Button variant="secondary">
-                                                            Đóng
-                                                        </Button>
-                                                    </DialogClose>
-                                                </DialogFooter>
-                                            </DialogContent>
-                                        </Dialog>
+                                    {avatarPreview && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.8 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
+                                        >
+                                            <Image
+                                                src={
+                                                    avatarPreview ||
+                                                    "/placeholder.svg"
+                                                }
+                                                width={20}
+                                                height={20}
+                                                alt="Logo preview"
+                                                className="w-full h-full"
+                                            />
+                                        </motion.div>
                                     )}
                                 </div>
-
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-500 mt-2">
                                     Chấp nhận file JPG, PNG. Kích thước tối đa
-                                    5MB mỗi ảnh.
+                                    5MB.
                                 </p>
-
-                                {/* Modal xem ảnh lớn */}
-                                {selectedImage && (
-                                    <div
-                                        className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
-                                        onClick={() => setSelectedImage("")}
-                                    >
-                                        <div className="relative max-w-4xl max-h-full">
-                                            <img
-                                                src={selectedImage}
-                                                alt="Preview"
-                                                className="max-w-full max-h-full object-contain rounded-lg"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            />
-                                            <button
-                                                onClick={() =>
-                                                    setSelectedImage("")
-                                                }
-                                                className="absolute -top-4 -right-4 bg-white hover:bg-gray-100 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-colors duration-200"
-                                            >
-                                                <X className="h-5 w-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
 
                             <div className="flex gap-[10%] mt-10">
@@ -529,32 +318,108 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
 
                             <div className="flex gap-[10%] mt-10">
                                 {/* Số năm kinh nghiệm */}
-                                <div className="flex-1">
-                                    <FormField
-                                        control={form.control}
-                                        name="numberOfExperiences"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                                    <Award className="h-5 w-5 text-[#248fca]" />
-                                                    Năm kinh nghiệm
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        {...field}
-                                                        placeholder="Nhập số năm kinh nghiệm của bác sĩ"
-                                                        className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
-                                                        onChange={
-                                                            field.onChange
-                                                        }
-                                                    />
-                                                </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
-                                                </FormMessage>
-                                            </FormItem>
-                                        )}
-                                    />
+                                <div className="flex-1 flex gap-[15%]">
+                                    <div className="flex-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="numberOfExperiences"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                                        <Award className="h-5 w-5 text-[#248fca]" />
+                                                        Năm kinh nghiệm
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            {...field}
+                                                            type="number"
+                                                            placeholder="Nhập số năm kinh nghiệm của bác sĩ"
+                                                            className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
+                                                            onChange={(e) =>
+                                                                field.onChange(
+                                                                    Number(
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                )
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage className="flex items-center gap-1">
+                                                        <AlertCircle className="h-4 w-4" />
+                                                    </FormMessage>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <FormField
+                                            control={form.control}
+                                            name="position"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <div>
+                                                            <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800 mb-2">
+                                                                <VenusAndMars className="h-5 w-5 text-[#248fca]" />
+                                                                Vị trí
+                                                            </FormLabel>
+                                                            <Select
+                                                                onValueChange={(
+                                                                    value
+                                                                ) =>
+                                                                    field.onChange(
+                                                                        Number(
+                                                                            value
+                                                                        )
+                                                                    )
+                                                                }
+                                                                value={field.value?.toString()}
+                                                            >
+                                                                <SelectTrigger className="w-[250px] min-h-[50px]">
+                                                                    <SelectValue placeholder="Chọn vị trí" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectGroup>
+                                                                        <SelectLabel>
+                                                                            Chọn
+                                                                            vị
+                                                                            trí
+                                                                        </SelectLabel>
+                                                                        <SelectItem value="0">
+                                                                            Giám
+                                                                            đốc
+                                                                        </SelectItem>
+                                                                        <SelectItem value="1">
+                                                                            Phó
+                                                                            giám
+                                                                            đốc
+                                                                        </SelectItem>
+                                                                        <SelectItem value="2">
+                                                                            Trưởng
+                                                                            khoa
+                                                                        </SelectItem>
+                                                                        <SelectItem value="3">
+                                                                            Phó
+                                                                            trưởng
+                                                                            khoa
+                                                                        </SelectItem>
+                                                                        <SelectItem value="4">
+                                                                            Bác
+                                                                            sĩ
+                                                                        </SelectItem>
+                                                                    </SelectGroup>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    </FormControl>
+                                                    <FormMessage className="flex items-center gap-1">
+                                                        <AlertCircle className="h-4 w-4" />
+                                                    </FormMessage>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                 </div>
                                 {/* Giới tính */}
                                 <div className="flex flex-1 gap-[5%]">
@@ -562,7 +427,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                         <FormField
                                             control={form.control}
                                             name="gender"
-                                            render={() => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormControl>
                                                         <div>
@@ -570,7 +435,18 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                 <VenusAndMars className="h-5 w-5 text-[#248fca]" />
                                                                 Giới tính
                                                             </FormLabel>
-                                                            <Select>
+                                                            <Select
+                                                                onValueChange={(
+                                                                    value
+                                                                ) =>
+                                                                    field.onChange(
+                                                                        Number(
+                                                                            value
+                                                                        )
+                                                                    )
+                                                                } // Convert string to number
+                                                                value={field.value?.toString()} // Ensure value is string for Select
+                                                            >
                                                                 <SelectTrigger className="w-[250px] min-h-[50px]">
                                                                     <SelectValue placeholder="Chọn giới tính" />
                                                                 </SelectTrigger>
@@ -581,14 +457,11 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                             giới
                                                                             tính
                                                                         </SelectLabel>
-                                                                        <SelectItem value="blueberry">
+                                                                        <SelectItem value="0">
                                                                             Nam
                                                                         </SelectItem>
-                                                                        <SelectItem value="apple">
+                                                                        <SelectItem value="1">
                                                                             Nữ
-                                                                        </SelectItem>
-                                                                        <SelectItem value="banana">
-                                                                            Khác
                                                                         </SelectItem>
                                                                     </SelectGroup>
                                                                 </SelectContent>
@@ -608,7 +481,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                         <FormField
                                             control={form.control}
                                             name="dateOfBirth"
-                                            render={() => (
+                                            render={({ field }) => (
                                                 <FormItem>
                                                     <FormControl>
                                                         <div>
@@ -653,11 +526,24 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                         }
                                                                         captionLayout="dropdown"
                                                                         onSelect={(
-                                                                            date
+                                                                            selectedDate
                                                                         ) => {
                                                                             setDate(
-                                                                                date
+                                                                                selectedDate
                                                                             );
+                                                                            if (
+                                                                                selectedDate
+                                                                            ) {
+                                                                                const isoDate =
+                                                                                    selectedDate.toISOString();
+                                                                                field.onChange(
+                                                                                    isoDate
+                                                                                ); // Update form value
+                                                                            } else {
+                                                                                field.onChange(
+                                                                                    null
+                                                                                ); // Handle undefined case
+                                                                            }
                                                                             setOpen(
                                                                                 false
                                                                             );
@@ -796,6 +682,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                             </div>
                             <Button
                                 type="submit"
+                                disabled={isSubmitting || !avatarPreview}
                                 className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                             >
                                 {isSubmitting ? (

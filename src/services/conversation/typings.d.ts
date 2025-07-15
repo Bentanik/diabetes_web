@@ -1,8 +1,21 @@
 declare namespace REQUEST {
     type TCreateConversation = {
         name: string;
-        members: string[];
+        avatarId?: string;
     };
+
+    type ConversationsParams = {
+        pageIndex?: number;
+        pageSize?: number;
+        search?: string;
+        sortBy?: string;
+        direction?: GenderType;
+    };
+
+    enum GenderType {
+        asc = 0,
+        desc = 1,
+    }
 
     type UserAvailableRequestParam = {
         conversationId: string;
@@ -21,6 +34,10 @@ declare namespace REQUEST {
     type AddDoctor = {
         doctorId: string;
     };
+
+    type AddStaff = {
+        adminId: string;
+    };
 }
 
 declare namespace API {
@@ -29,11 +46,19 @@ declare namespace API {
         name: string;
         avatar: string;
         conversationType: number;
-        members: [];
+        memberCount: number;
         modifiedDate: string;
     };
 
-    type TGetConversations = Conversation[];
+    type TGetConversations = {
+        items: Conversation[];
+        pageIndex: number;
+        pageSize: number;
+        totalCount: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
 
     type TGetUserAvailable = {
         items: UserAvailable[];

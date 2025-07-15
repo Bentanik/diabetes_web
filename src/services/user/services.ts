@@ -21,10 +21,15 @@ export default function useUploadImageService() {
                 duration: 5000,
             });
         },
-        onError: () => {
+        onError: (err) => {
+            const errorMessages = err.errors
+                .flat()
+                .map((e) => e.message)
+                .join(", ");
+
             addToast({
                 type: "error",
-                description: "Tải ảnh thất bại!",
+                description: errorMessages,
                 duration: 5000,
             });
         },

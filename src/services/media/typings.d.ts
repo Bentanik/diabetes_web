@@ -2,6 +2,10 @@ declare namespace REQUEST {
     type TUploadImage = {
         image: File;
     };
+
+    type TUploadConversationImage = {
+        files: File;
+    };
 }
 
 declare namespace API {
@@ -10,6 +14,9 @@ declare namespace API {
         publicId: string;
         publicUrl: string;
     };
-
     type TUploadImageResponse = UploadImageResponse[];
+
+    type TUploadConversationImageResponse = {
+        mediaIds: string[];
+    };
 }

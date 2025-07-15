@@ -1,8 +1,12 @@
 declare type TMeta = {
-    detail: string;
-    errorCode: string;
-    status: number;
+    type: string;
     title: string;
+    status: number;
+    errors: {
+        errorType: number;
+        code: string;
+        message: string;
+    }[][];
 };
 
 declare type TResponse<T = object | null> = {
@@ -23,18 +27,6 @@ declare type TResponseData<T = object | null> = {
     code: string;
     message: string;
     data: T | null;
-    isSuccess: boolean;
-    isFailure: boolean;
-    error: {
-        code: string;
-        message: string;
-    };
-};
-
-declare type TResponseDataUser<T = object | null> = {
-    code: string;
-    message: string;
-    users: T | null;
     isSuccess: boolean;
     isFailure: boolean;
     error: {

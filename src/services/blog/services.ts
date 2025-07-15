@@ -14,13 +14,23 @@ export const useServiceCreateBlog = () => {
             return await createBlogAsync();
         },
         onSuccess: () => {
-            console.log("onSuccess called, attempting to show toast");
             addToast({
                 type: "success",
                 description: "Tạo bài viết thành công",
                 duration: 5000,
             });
-            console.log("Toast dispatched");
+        },
+        onError: (err) => {
+            const errorMessages = err.errors
+                .flat()
+                .map((e) => e.message)
+                .join(", ");
+
+            addToast({
+                type: "error",
+                description: errorMessages,
+                duration: 5000,
+            });
         },
     });
 };
@@ -40,6 +50,18 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
                     duration: 5000,
                 });
             }
+        },
+        onError: (err) => {
+            const errorMessages = err.errors
+                .flat()
+                .map((e) => e.message)
+                .join(", ");
+
+            addToast({
+                type: "error",
+                description: errorMessages,
+                duration: 5000,
+            });
         },
     });
 };
@@ -67,10 +89,14 @@ export const useServiceReviewBlog = ({ blogId }: REQUEST.BlogId) => {
             });
         },
         onError: (err) => {
-            console.error("Lỗi API:", err);
+            const errorMessages = err.errors
+                .flat()
+                .map((e) => e.message)
+                .join(", ");
+
             addToast({
                 type: "error",
-                description: "Duyệt bài viết không thành công",
+                description: errorMessages,
                 duration: 5000,
             });
         },

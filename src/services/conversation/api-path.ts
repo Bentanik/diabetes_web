@@ -3,6 +3,8 @@
 const CONVERSATION =
     "https://chat-doctor-h5awemg3hcfacwdv.southeastasia-01.azurewebsites.net/api/v1/conversations";
 
+const GET_CONVERSATIONS = CONVERSATION + "/hospital";
+
 const USER =
     "https://chat-doctor-h5awemg3hcfacwdv.southeastasia-01.azurewebsites.net/api/v1/users";
 const GET_AVAILABLE_USERS = USER;
@@ -13,13 +15,18 @@ const ADD_MEMBERS = (conversationId: string) =>
 const ADD_DOCTOR = (conversationId: string) =>
     `${CONVERSATION}/${conversationId}/doctors`;
 
+const ADD_STAFF = (conversationId: string) =>
+    `${CONVERSATION}/${conversationId}/admins`;
+
 const DELETE_CONVERSATION = (conversationId: string) =>
     `${CONVERSATION}/${conversationId}`;
 export default {
     CONVERSATION,
+    GET_CONVERSATIONS,
     GET_AVAILABLE_USERS,
     CREATE_CONVERSATION,
     ADD_MEMBERS,
     ADD_DOCTOR,
+    ADD_STAFF,
     DELETE_CONVERSATION,
 };

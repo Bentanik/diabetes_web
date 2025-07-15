@@ -55,7 +55,7 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
         setIsLoading(true);
         try {
             const res = await getUserAvailableApi({
-                conversationId: "6872abf51c3a3fc79f048e0e",
+                conversationId: groupId,
                 search: searchTerm,
                 role: "Patient",
                 pageIndex: pageIndex,
@@ -63,7 +63,7 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
                 sortType: selectSortType,
                 isSortDesc: isSortDesc,
             });
-            const newItems = res?.users?.items || [];
+            const newItems = res?.data?.items || [];
 
             if (isLoadMore) {
                 setData((prev) => {

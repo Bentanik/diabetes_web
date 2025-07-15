@@ -9,13 +9,25 @@ declare namespace REQUEST {
         middleName: string;
         lastName: string;
         dateOfBirth: string;
-        gender: number;
+        gender: GenderType;
         avatar: string;
         numberOfExperiences: number;
-        position: number;
+        position: DoctorPositionType;
         introduction: string;
-        images: string[];
     };
+
+    enum GenderType {
+        Male = 0,
+        Female = 1,
+    }
+
+    enum DoctorPositionType {
+        Director = 0,
+        DeputyDir = 1,
+        HeadDept = 2,
+        DeputyHead = 3,
+        Doctor = 4,
+    }
 }
 
 declare namespace API {}

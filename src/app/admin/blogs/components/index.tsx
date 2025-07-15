@@ -145,6 +145,7 @@ export default function ModeratorManageBlogComponent() {
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [isSortAsc, setIsSortAsc] = useState(true);
 
     const formatDate = (dateString: string) => {
@@ -192,17 +193,26 @@ export default function ModeratorManageBlogComponent() {
     }, []);
 
     useEffect(() => {
-        if (currentPage == 1) {
-            handleGetData(1);
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
             setCurrentPage(1);
-        } else handleGetData(currentPage);
+        }, 500);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchTerm]);
+
+    useEffect(() => {
+        handleGetData(currentPage);
     }, [
+        debouncedSearchTerm,
         selectedStatus,
         selectDoctor,
         selectedCategoryIds,
-        searchTerm,
         selectSortType,
         isSortAsc,
+        currentPage,
     ]);
 
     const getStatusIcon = (status: number) => {
@@ -239,18 +249,6 @@ export default function ModeratorManageBlogComponent() {
         setCurrentPage(page);
         handleGetData(page);
     };
-
-    const blogData = data.filter((item) => {
-        const matchesSearch =
-            !searchTerm ||
-            (item.title &&
-                item.title.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        const matchesStatus =
-            selectedStatus === 1 ? true : item.status === selectedStatus;
-
-        return matchesSearch && matchesStatus;
-    });
 
     return (
         <div>
@@ -301,7 +299,7 @@ export default function ModeratorManageBlogComponent() {
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {blogData.map((data, index) => (
+                {data.map((data, index) => (
                     <Link
                         href={`/admin/blogs/blog-detail/${data.id}`}
                         key={data.id}
@@ -386,7 +384,7 @@ export default function ModeratorManageBlogComponent() {
             )}
 
             {/* Empty State */}
-            {blogData.length === 0 && (
+            {data.length === 0 && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

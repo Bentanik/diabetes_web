@@ -23,31 +23,26 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import InfiniteScroll from "@/components/scroll-paginated";
+import useServiceAddStaff from "@/app/hospital/group/group-detail/hooks/use-add-staff";
 
 interface GroupUserDialogProps {
-    handleSubmit: () => void;
+    groupId: string;
 }
 
-interface UserAvailable {
-    id: string;
-    fullName: string;
-    avatar: string;
-    status: number;
-}
-
-export default function GroupUserDialog({
-    handleSubmit,
-}: GroupUserDialogProps) {
+export default function GroupStaffDialog({ groupId }: GroupUserDialogProps) {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [selectSortType, setSelectSortType] = useState<string>("");
     const { getUserAvailableApi } = useGetUserAvailable();
     const [isSortDesc, setIsSortDesc] = useState<boolean>(true);
-    const [data, setData] = useState<UserAvailable[]>([]);
+    const [data, setData] = useState<API.UserAvailable[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const { form, onSubmit } = useServiceAddStaff(groupId);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedId, setSelectedId] = useState<string>("");
+
     const pageSize = 10;
 
     const handleGetData = async (
@@ -60,7 +55,7 @@ export default function GroupUserDialog({
         setIsLoading(true);
         try {
             const res = await getUserAvailableApi({
-                conversationId: "6872abf51c3a3fc79f048e0e",
+                conversationId: groupId,
                 search: searchTerm,
                 role: "HospitalStaff",
                 pageIndex: pageIndex,
@@ -68,7 +63,7 @@ export default function GroupUserDialog({
                 sortType: selectSortType,
                 isSortDesc: isSortDesc,
             });
-            const newItems = res?.users?.items || [];
+            const newItems = res?.data?.items || [];
 
             if (isLoadMore) {
                 setData((prev) => {
@@ -101,6 +96,7 @@ export default function GroupUserDialog({
         }
         setCurrentPage((prevPage) => {
             const nextPage = prevPage + 1;
+            console.log("Setting nextPage:", nextPage);
             handleGetData(nextPage, true);
             return nextPage;
         });
@@ -113,6 +109,27 @@ export default function GroupUserDialog({
         handleGetData(1, false);
     }, [searchTerm, selectSortType, isSortDesc]);
 
+    const handleFormSubmit = async () => {
+        if (!onSubmit || typeof onSubmit !== "function") {
+            console.error("onSubmit is not a function");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const formData: REQUEST.AddStaff = {
+                adminId: selectedId,
+            };
+            await onSubmit(formData);
+        } catch (error) {
+            console.error("Error updating post:", error);
+            alert("Có lỗi xảy ra khi cập nhật bài viết.");
+        } finally {
+            setIsSubmitting(false);
+            handleGetData(1);
+        }
+    };
+
     const filteredUsers = data.filter((user) =>
         user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -121,14 +138,9 @@ export default function GroupUserDialog({
         return new Date(dateString).toLocaleDateString("vi-VN");
     };
 
-    const toggleUser = (id: string) => {
-        setSelectedIds((prev) => {
-            const updated = prev.includes(id)
-                ? prev.filter((u) => u !== id)
-                : [...prev, id];
-            console.log("Updated selectedIds:", updated);
-            return updated;
-        });
+    const selectUser = (id: string) => {
+        setSelectedId(id);
+        console.log("Selected user ID:", id);
     };
 
     useEffect(() => {
@@ -148,9 +160,11 @@ export default function GroupUserDialog({
             setData([]);
             setCurrentPage(1);
             setHasMore(true);
-            setSelectedIds([]);
+            setSelectedId("");
         }
     }, [isOpenDialog]);
+
+    const selectedUser = data.find((u) => u.id === selectedId);
 
     return (
         <Dialog open={isOpenDialog} onOpenChange={setIsDialogOpen}>
@@ -160,16 +174,16 @@ export default function GroupUserDialog({
                     className="px-6 py-5 bg-[#248FCA] hover:bg-[#2490cada] cursor-pointer"
                 >
                     <Plus width={20} height={20} color="white" />
-                    Thêm bệnh nhân
+                    Thêm nhân viên
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[800px] h-[700px] flex flex-col">
                 <DialogHeader className="flex-shrink-0">
                     <DialogTitle className="text-[1.5rem] text-[#248FCA]">
-                        Thêm bệnh nhân vào nhóm
+                        Thêm nhân viên vào nhóm
                     </DialogTitle>
                     <DialogDescription>
-                        Hãy tìm kiếm bệnh nhân để thêm vào nhóm chat
+                        Hãy tìm kiếm và chọn một nhân viên để thêm vào nhóm chat
                     </DialogDescription>
                 </DialogHeader>
 
@@ -178,7 +192,7 @@ export default function GroupUserDialog({
                         <div className="relative flex-1">
                             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input
-                                placeholder="Tìm kiếm theo tên, email, khoa..."
+                                placeholder="Tìm kiếm theo tên, số điện thoại..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
@@ -187,42 +201,32 @@ export default function GroupUserDialog({
                         <Button
                             type="submit"
                             className="bg-[#248fca] hover:bg-[#2490cacb] cursor-pointer"
-                            disabled={!selectedIds.length}
-                            onClick={handleSubmit}
+                            disabled={!selectedId || isSubmitting}
+                            onClick={handleFormSubmit}
                         >
                             Thêm vào nhóm
                         </Button>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                        {selectedIds.slice(0, 3).map((id) => {
-                            const user = data.find((u) => u.id === id);
-                            if (!user) return null;
-                            return (
-                                <div
-                                    key={id}
-                                    className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm"
-                                >
-                                    <Avatar className="h-5 w-5 mr-1">
-                                        <AvatarImage src={user.avatar} />
-                                        <AvatarFallback>
-                                            {user.fullName.charAt(0)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    {user.fullName}
-                                    <X
-                                        className="ml-1 w-4 h-4 cursor-pointer"
-                                        onClick={() => toggleUser(id)}
-                                    />
-                                </div>
-                            );
-                        })}
-                        {selectedIds.length > 3 && (
-                            <span className="text-sm text-gray-500">
-                                +{selectedIds.length - 3} thành viên khác
-                            </span>
-                        )}
-                    </div>
+                    {selectedUser && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-sm">
+                                <Avatar className="h-6 w-6 mr-2">
+                                    <AvatarImage src={selectedUser.avatar} />
+                                    <AvatarFallback>
+                                        {selectedUser.fullName.charAt(0)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium">
+                                    {selectedUser.fullName}
+                                </span>
+                                <X
+                                    className="ml-2 w-4 h-4 cursor-pointer hover:text-red-500"
+                                    onClick={() => setSelectedId("")}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {filteredUsers.length === 0 && !isLoading ? (
                         <div className="flex-1 flex items-center justify-center">
@@ -245,14 +249,14 @@ export default function GroupUserDialog({
                                 hasMore={hasMore}
                                 isLoading={isLoading}
                                 onLoadMore={handleLoadMore}
-                                loadingText="Đang tải thêm bệnh nhân..."
-                                endText="Đã tải hết tất cả bệnh nhân"
-                                threshold={200} // Tăng threshold để tránh gọi onLoadMore quá sớm
+                                loadingText="Đang tải thêm nhân viên..."
+                                endText="Đã tải hết tất cả nhân viên"
+                                threshold={200}
                             >
                                 <Table>
                                     <TableHeader className="sticky top-0 bg-white z-10">
                                         <TableRow className="h-12">
-                                            <TableHead>Bệnh nhân</TableHead>
+                                            <TableHead>Thành viên</TableHead>
                                             <TableHead>Vai trò</TableHead>
                                             <TableHead>Trạng thái</TableHead>
                                             <TableHead>Chọn</TableHead>
@@ -262,10 +266,16 @@ export default function GroupUserDialog({
                                         {filteredUsers.map((user) => (
                                             <TableRow
                                                 key={user.id}
-                                                className="h-16 hover:bg-gray-50 cursor-pointer"
-                                                onClick={() =>
-                                                    toggleUser(user.id)
-                                                }
+                                                className={`h-16 hover:bg-gray-50 cursor-pointer ${
+                                                    selectedId === user.id
+                                                        ? "bg-blue-50"
+                                                        : ""
+                                                }`}
+                                                onClick={() => {
+                                                    if (user.status !== 1) {
+                                                        selectUser(user.id);
+                                                    }
+                                                }}
                                             >
                                                 <TableCell className="py-2">
                                                     <div className="flex items-center space-x-3">
@@ -310,26 +320,29 @@ export default function GroupUserDialog({
                                                 <TableCell className="py-2">
                                                     <span
                                                         className={`px-2 py-1 rounded-full text-xs ${
-                                                            user.status === 0
+                                                            user.status === 1
                                                                 ? "bg-green-100 text-green-700"
                                                                 : "bg-gray-100 text-gray-700"
                                                         }`}
                                                     >
-                                                        {user.status === 0
-                                                            ? "Hoạt động"
-                                                            : "Không hoạt động"}
+                                                        {user.status === 1
+                                                            ? "Đã vào nhóm"
+                                                            : "Chưa vào nhóm"}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell>
                                                     <input
-                                                        type="checkbox"
-                                                        checked={selectedIds.includes(
+                                                        type="radio"
+                                                        name="selectedUser"
+                                                        disabled
+                                                        checked={
+                                                            selectedId ===
                                                             user.id
-                                                        )}
-                                                        onChange={() =>
-                                                            toggleUser(user.id)
                                                         }
-                                                        className="h-4 w-4 text-blue-600 border-gray300 rounded focus:ring-blue-500"
+                                                        onChange={() =>
+                                                            selectUser(user.id)
+                                                        }
+                                                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                                     />
                                                 </TableCell>
                                             </TableRow>

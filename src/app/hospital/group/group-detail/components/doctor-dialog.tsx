@@ -29,7 +29,7 @@ interface GroupUserDialogProps {
     groupId: string;
 }
 
-export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
+export default function GroupDoctorDialog({ groupId }: GroupUserDialogProps) {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [selectSortType, setSelectSortType] = useState<string>("");
     const { getUserAvailableApi } = useGetUserAvailable();
@@ -63,7 +63,7 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
                 sortType: selectSortType,
                 isSortDesc: isSortDesc,
             });
-            const newItems = res?.users?.items || [];
+            const newItems = res?.data?.items || [];
 
             if (isLoadMore) {
                 setData((prev) => {
@@ -250,14 +250,14 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
                                 hasMore={hasMore}
                                 isLoading={isLoading}
                                 onLoadMore={handleLoadMore}
-                                loadingText="Đang tải thêm bệnh nhân..."
-                                endText="Đã tải hết tất cả bệnh nhân"
+                                loadingText="Đang tải thêm bác sĩ..."
+                                endText="Đã tải hết tất cả bác sĩ"
                                 threshold={200}
                             >
                                 <Table>
                                     <TableHeader className="sticky top-0 bg-white z-10">
                                         <TableRow className="h-12">
-                                            <TableHead>Bệnh nhân</TableHead>
+                                            <TableHead>Thành viên</TableHead>
                                             <TableHead>Vai trò</TableHead>
                                             <TableHead>Trạng thái</TableHead>
                                             <TableHead>Chọn</TableHead>
@@ -272,9 +272,11 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
                                                         ? "bg-blue-50"
                                                         : ""
                                                 }`}
-                                                onClick={() =>
-                                                    selectUser(user.id)
-                                                }
+                                                onClick={() => {
+                                                    if (user.status !== 1) {
+                                                        selectUser(user.id);
+                                                    }
+                                                }}
                                             >
                                                 <TableCell className="py-2">
                                                     <div className="flex items-center space-x-3">
@@ -313,26 +315,27 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
                                                 <TableCell className="py-2">
                                                     <div className="flex items-center gap-2">
                                                         <User className="h-4 w-4" />
-                                                        <span>Bệnh nhân</span>
+                                                        <span>Bác sĩ</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="py-2">
                                                     <span
                                                         className={`px-2 py-1 rounded-full text-xs ${
-                                                            user.status === 0
+                                                            user.status === 1
                                                                 ? "bg-green-100 text-green-700"
                                                                 : "bg-gray-100 text-gray-700"
                                                         }`}
                                                     >
-                                                        {user.status === 0
-                                                            ? "Hoạt động"
-                                                            : "Không hoạt động"}
+                                                        {user.status === 1
+                                                            ? "Đã vào nhóm"
+                                                            : "Chưa vào nhóm"}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell>
                                                     <input
                                                         type="radio"
                                                         name="selectedUser"
+                                                        disabled
                                                         checked={
                                                             selectedId ===
                                                             user.id

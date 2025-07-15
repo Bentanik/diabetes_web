@@ -1,22 +1,20 @@
 import useToast from "@/hooks/use-toast";
 import { useState } from "react";
-import { getUserAvailable } from "@/services/conversation/api-services";
+import { getConversations } from "@/services/conversation/api-services";
 import { useBackdrop } from "@/context/backdrop_context";
 
-export default function useGetUserAvailable() {
+export default function useGetConversations() {
     const { addToast } = useToast();
     const [isPending, setPending] = useState(false);
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
-    const getUserAvailableApi = async (
-        params: REQUEST.UserAvailableRequestParam
-    ) => {
+    const getConversationsApi = async (params: REQUEST.ConversationsParams) => {
         setPending(true);
         showBackdrop();
         try {
-            const res = await getUserAvailable(params);
+            const res = await getConversations(params);
             if (res.data != null) {
-                return res as TResponseData<API.TGetUserAvailable>;
+                return res as TResponseData<API.TGetConversations>;
             } else {
                 addToast({
                     type: "error",
@@ -32,5 +30,5 @@ export default function useGetUserAvailable() {
             hideBackdrop();
         }
     };
-    return { getUserAvailableApi, isPending };
+    return { getConversationsApi, isPending };
 }

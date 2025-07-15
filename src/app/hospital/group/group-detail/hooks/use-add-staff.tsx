@@ -1,33 +1,27 @@
 import { useBackdrop } from "@/context/backdrop_context";
-import { useServiceCreateConversation } from "@/services/conversation/services";
+import { useServiceAddStaff } from "@/services/conversation/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export const createConversationSchema = z.object({
-    name: z
-        .string()
-        .min(1, "Phải nhập tên nhóm")
-        .max(100, "Tên nhóm không được quá 100 kí tự"),
-
-    avatarId: z.string(),
+export const addStaffSchema = z.object({
+    adminId: z.string().trim().min(1, "Phải chọn nhân viên để thêm vào"),
 });
 
-export type ConversationFormData = z.infer<typeof createConversationSchema>;
+export type AddStaffFormData = z.infer<typeof addStaffSchema>;
 
-export default function useCreateConversation() {
-    const form = useForm<ConversationFormData>({
-        resolver: zodResolver(createConversationSchema),
+export default function useAddDoctor(groupId: string) {
+    const form = useForm<AddStaffFormData>({
+        resolver: zodResolver(addStaffSchema),
         defaultValues: {
-            name: "",
-            avatarId: "",
+            adminId: "",
         },
     });
 
-    const { mutate, isPending } = useServiceCreateConversation();
+    const { mutate, isPending } = useServiceAddStaff(groupId);
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
-    const onSubmit = (data: REQUEST.TCreateConversation) => {
+    const onSubmit = (data: REQUEST.AddStaff) => {
         showBackdrop();
         mutate(data, {
             onSuccess: (res) => {

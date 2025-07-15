@@ -7,12 +7,14 @@ type GroupDetailPageProps = {
     }>;
 };
 
-export default async function BlogDetailPage({ params }: GroupDetailPageProps) {
+export default async function GroupDetailPage({
+    params,
+}: GroupDetailPageProps) {
     const { groupId } = await params;
 
     return (
         <div>
-            <GroupDetailComponent blogId={groupId} />
+            <GroupDetailComponent groupId={groupId} />
         </div>
     );
 }

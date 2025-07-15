@@ -16,10 +16,15 @@ export const useServiceCreateDoctor = () => {
                 duration: 5000,
             });
         },
-        onError: () => {
+        onError: (err) => {
+            const errorMessages = err.errors
+                .flat()
+                .map((e) => e.message)
+                .join(", ");
+
             addToast({
                 type: "error",
-                description: "Tạo bác sĩ thất bại! Hãy thử lại",
+                description: errorMessages,
                 duration: 5000,
             });
         },

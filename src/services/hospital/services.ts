@@ -27,5 +27,17 @@ export const useServiceCreateHospital = () => {
                 duration: 5000,
             });
         },
+        onError: (err) => {
+            const errorMessages = err.errors
+                .flat()
+                .map((e) => e.message)
+                .join(", ");
+
+            addToast({
+                type: "error",
+                description: errorMessages,
+                duration: 5000,
+            });
+        },
     });
 };

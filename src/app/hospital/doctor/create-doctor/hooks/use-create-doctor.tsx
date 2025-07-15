@@ -9,15 +9,12 @@ export const doctorSchema = z.object({
     firstName: z.string().min(1, "Vui lòng nhập họ"),
     middleName: z.string().optional(),
     lastName: z.string().min(1, "Vui lòng nhập tên"),
-    dateOfBirth: z
-        .string()
-        .refine((val) => !isNaN(Date.parse(val)), "Ngày sinh không hợp lệ"),
-    gender: z.union([z.literal(0), z.literal(1)]),
+    dateOfBirth: z.string().min(1, "Vui lòng chọn ngày sinh cho bác sĩ"),
+    gender: z.number(),
     avatar: z.string().nonempty("Avatar là bắt buộc"),
-    numberOfExperiences: z.number().min(0, "Số năm kinh nghiệm không hợp lệ"),
+    numberOfExperiences: z.number(),
     position: z.number(),
     introduction: z.string().min(10, "Giới thiệu phải có ít nhất 10 ký tự"),
-    images: z.array(z.string()).min(1, "Phải có ít nhất 1 hình ảnh"),
 });
 
 export type DoctorFormData = z.infer<typeof doctorSchema>;
@@ -31,12 +28,11 @@ export default function useCreateDoctor() {
             middleName: "",
             lastName: "",
             dateOfBirth: "",
-            gender: 1,
+            gender: 0,
             avatar: "",
             numberOfExperiences: 0,
-            position: 1,
+            position: 4,
             introduction: "",
-            images: [],
         },
     });
 
