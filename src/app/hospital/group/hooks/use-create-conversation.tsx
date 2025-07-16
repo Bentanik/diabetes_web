@@ -3,6 +3,7 @@ import { useServiceCreateConversation } from "@/services/conversation/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 export const createConversationSchema = z.object({
     name: z
@@ -24,6 +25,8 @@ export default function useCreateConversation() {
         },
     });
 
+    const router = useRouter();
+
     const { mutate, isPending } = useServiceCreateConversation();
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
@@ -33,6 +36,12 @@ export default function useCreateConversation() {
             onSuccess: (res) => {
                 hideBackdrop();
                 console.log("API Success:", res);
+                const conversationId = res.data?.conversationId;
+                if (conversationId) {
+                    router.push(
+                        `/hospital/group/group-detail/${conversationId}`
+                    );
+                }
                 form.reset();
             },
             onError: (err) => {

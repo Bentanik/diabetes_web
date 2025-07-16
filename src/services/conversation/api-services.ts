@@ -4,7 +4,7 @@ import request from "@/services/interceptor";
 export const createConversationAsync = async (
     body: REQUEST.TCreateConversation
 ) => {
-    const response = await request<TResponse>(
+    const response = await request<TResponseData<API.ConversationId>>(
         API_ENDPOINTS.CREATE_CONVERSATION,
         {
             method: "POST",
@@ -147,6 +147,42 @@ export const getConversations = async ({
     }
     const response = await request<TResponseData<API.TGetConversations>>(
         API_ENDPOINTS.GET_CONVERSATIONS,
+        {
+            method: "GET",
+            params: Object.keys(params).length > 0 ? params : undefined,
+        }
+    );
+    return response.data;
+};
+
+export const getConversationDetail = async (
+    groupId: string,
+    {
+        pageIndex = 1,
+        pageSize = 10,
+        sortBy = "name",
+        direction = 1,
+        search = "",
+    }: REQUEST.ConversationsParams
+) => {
+    const params: Record<
+        string,
+        string | number | boolean | string[] | undefined
+    > = {};
+    params.pageIndex = pageIndex;
+    params.pageSize = pageSize;
+
+    if (search && search.trim() !== "") {
+        params.search = search.trim();
+    }
+    if (sortBy && sortBy.trim() !== "") {
+        params.sortBy = sortBy.trim();
+    }
+    if (direction !== undefined) {
+        params.direction = direction;
+    }
+    const response = await request<TResponseData<API.TGetConversationDetail>>(
+        API_ENDPOINTS.GET_CONVERSATION(groupId),
         {
             method: "GET",
             params: Object.keys(params).length > 0 ? params : undefined,

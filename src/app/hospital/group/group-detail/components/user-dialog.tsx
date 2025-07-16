@@ -133,10 +133,6 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("vi-VN");
-    };
-
     const toggleUser = (id: string) => {
         setSelectedIds((prev) => {
             const updated = prev.includes(id)
@@ -284,7 +280,7 @@ export default function GroupUserDialog({ groupId }: GroupUserDialogProps) {
                                                         : "hover:bg-gray-50 cursor-pointer"
                                                 }`}
                                                 onClick={() => {
-                                                    if (user.status !== 1) {
+                                                    if (user.status == 0) {
                                                         toggleUser(user.id);
                                                     }
                                                 }}

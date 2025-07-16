@@ -45,7 +45,7 @@ export default function useUploadConversationImage() {
             ) {
                 throw new Error("Không nhận được dữ liệu hợp lệ từ server");
             }
-            return res.data; // Trả về object { mediaIds: [...] }
+            return res.data;
         },
     });
 

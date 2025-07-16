@@ -20,6 +20,9 @@ const ADD_STAFF = (conversationId: string) =>
 
 const DELETE_CONVERSATION = (conversationId: string) =>
     `${CONVERSATION}/${conversationId}`;
+
+const GET_CONVERSATION = (conversationId: string) =>
+    `${CONVERSATION}/${conversationId}/participants`;
 export default {
     CONVERSATION,
     GET_CONVERSATIONS,
@@ -29,4 +32,5 @@ export default {
     ADD_DOCTOR,
     ADD_STAFF,
     DELETE_CONVERSATION,
+    GET_CONVERSATION,
 };

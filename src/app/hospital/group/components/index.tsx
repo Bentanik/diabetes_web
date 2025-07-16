@@ -9,28 +9,20 @@ import { FormProvider } from "react-hook-form";
 import {
     BarChartIcon,
     BellIcon,
-    PlusIcon,
     SearchIcon,
     UsersIcon,
     ClipboardType,
     CalendarClock,
     UserRound,
-    Info,
     Plus,
-    User,
-    X,
-    Crown,
-    Shield,
-    Clock,
     AlertCircle,
-    SquareMousePointer,
     ImageIcon,
     Upload,
+    ArrowUpDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import {
-    Form,
     FormControl,
     FormField,
     FormItem,
@@ -38,7 +30,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import useCreateConversation, {
     ConversationFormData,
@@ -59,6 +50,7 @@ import { Toaster } from "sonner";
 import Image from "next/image";
 import PaginatedComponent from "@/components/paginated";
 import useUploadConversationImage from "@/app/hospital/group/hooks/use-upload-conversation";
+import { Toggle } from "@radix-ui/react-toggle";
 
 const sortBy = [
     { name: "Tên nhóm", value: "name" },
@@ -108,15 +100,14 @@ export default function GroupHospitalComponent() {
     const [data, setData] = useState<API.Conversation[]>([]);
     const [totalPage, setTotalPage] = useState<number>(1);
     const [selectSortBy, setSelectSortBy] = useState<string>("all");
-    const [isSortAsc, setIsSortAsc] = useState(0);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSortAsc, setIsSortAsc] = useState(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
         null
     );
-    const [thumbnailId, setThumbnailId] = useState<string | null>(null);
 
     const router = useRouter();
-
     const handleGetData = async (pageIndex: number) => {
         try {
             const res = await getConversationsApi({
@@ -124,7 +115,7 @@ export default function GroupHospitalComponent() {
                 pageIndex: pageIndex,
                 pageSize: 6,
                 sortBy: selectSortBy,
-                direction: isSortAsc,
+                direction: isSortAsc === false ? 1 : 0,
             });
             setTotalPage(res?.data?.totalPages || 1);
             setData(res?.data?.items || []);
@@ -166,19 +157,14 @@ export default function GroupHospitalComponent() {
             const data = { files: file };
             onSubmitImage(data, handleClearImages, (imageId) => {
                 form.setValue("avatarId", imageId);
-                console.log("check ảnh" + imageId);
-                setThumbnailId(imageId);
             });
         }
     };
 
     const handleClearImages = () => {
-        // setThumbnailPreview(null);
-        // setThumbnailId(null);
-        // form.setValue("avatarId", "");
+        setThumbnailPreview(null);
     };
 
-    // Gọi API khi các giá trị liên quan thay đổi
     useEffect(() => {
         handleGetData(currentPage);
     }, [debouncedSearchTerm, selectSortBy, isSortAsc, currentPage]);
@@ -187,19 +173,22 @@ export default function GroupHospitalComponent() {
         return new Date(dateString).toLocaleDateString("vi-VN");
     };
 
-    const handleSubmit = (data: ConversationFormData) => {
+    const handleSubmit = async (data: ConversationFormData) => {
         try {
             const conversationData: REQUEST.TCreateConversation = {
                 name: data.name,
-                avatarId: data.avatarId,
+                avatarId: data.avatarId || null,
             };
-            onSubmit(conversationData);
-            setTimeout(() => {
-                router.push("/hospital/group");
-            }, 3000);
+            await onSubmit(conversationData);
         } catch (err) {
             console.log(err);
         }
+    };
+    const handleCancel = () => {
+        form.setValue("name", "");
+        form.setValue("avatarId", "");
+        setThumbnailPreview(null);
+        setIsDialogOpen(false);
     };
 
     return (
@@ -220,7 +209,7 @@ export default function GroupHospitalComponent() {
             >
                 <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
                     <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                        <div className="relative flex-1">
+                        <div className="relative w-[70%]">
                             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input
                                 placeholder="Tìm kiếm theo tên nhóm..."
@@ -232,18 +221,34 @@ export default function GroupHospitalComponent() {
                         <select
                             value={selectSortBy}
                             onChange={(e) => setSelectSortBy(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer w-[15%]"
                         >
-                            <option value="name">Mặc định</option>
+                            <option value="date">Mặc định</option>
                             {sortBy.map((sort) => (
                                 <option key={sort.name} value={sort.value}>
                                     {sort.name}
                                 </option>
                             ))}
                         </select>
+                        <Toggle
+                            pressed={isSortAsc}
+                            onPressedChange={setIsSortAsc}
+                            className="cursor-pointer flex items-center border px-3 rounded-[10px]"
+                        >
+                            <ArrowUpDown className="h-4 w-4 mr-2" />
+                            {isSortAsc ? "A → Z" : "Z → A"}
+                        </Toggle>
                     </div>
                     <div className="flex gap-2">
-                        <Dialog>
+                        <Dialog
+                            open={isDialogOpen}
+                            onOpenChange={(open) => {
+                                if (!open) {
+                                    handleCancel();
+                                }
+                                setIsDialogOpen(open);
+                            }}
+                        >
                             <DialogTrigger asChild>
                                 <Button
                                     size="sm"
@@ -268,7 +273,6 @@ export default function GroupHospitalComponent() {
                                     </DialogDescription>
                                 </DialogHeader>
 
-                                {/* Di chuyển FormProvider và form vào đây */}
                                 <FormProvider {...form}>
                                     <form
                                         onSubmit={form.handleSubmit(

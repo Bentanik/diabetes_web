@@ -1,7 +1,7 @@
 declare namespace REQUEST {
     type TCreateConversation = {
         name: string;
-        avatarId?: string;
+        avatarId?: string | null;
     };
 
     type ConversationsParams = {
@@ -77,6 +77,26 @@ declare namespace API {
         role: UserRole;
     };
 
+    type ConversationDetail = {
+        id: string;
+        conversationId: string;
+        fullName: string;
+        avatar: string;
+        phoneNumber: string;
+        role: UserRole;
+        invitedBy: string;
+    };
+
+    type TGetConversationDetail = {
+        items: ConversationDetail[];
+        pageIndex: number;
+        pageSize: number;
+        totalCount: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+
     enum UserRole {
         SystemAdmin = 0,
         Moderator = 1,
@@ -84,6 +104,10 @@ declare namespace API {
         Doctor = 3,
         Patient = 4,
     }
+
+    type ConversationId = {
+        conversationId: string;
+    };
 
     enum UserStatus {
         Available = 0,

@@ -11,13 +11,17 @@ import useToast from "@/hooks/use-toast";
 export const useServiceCreateConversation = () => {
     const { addToast } = useToast();
 
-    return useMutation<TResponse, TMeta, REQUEST.TCreateConversation>({
+    return useMutation<
+        TResponseData<API.ConversationId>,
+        TMeta,
+        REQUEST.TCreateConversation
+    >({
         mutationFn: async (data: REQUEST.TCreateConversation) => {
             const response = await createConversationAsync({
                 name: data.name,
                 avatarId: data.avatarId,
             });
-            return response as TResponse;
+            return response as TResponseData<API.ConversationId>;
         },
         onSuccess: () => {
             addToast({
