@@ -1,26 +1,17 @@
 'use client'
 
 import { useState } from "react"
-import { useNotificationHelpers } from "@/hooks/use-notification-helpers"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { PlusIcon, ChevronDownIcon, FolderPlusIcon, FileTextIcon, SettingsIcon } from "lucide-react"
+import { PlusIcon, ChevronDownIcon, FolderPlusIcon, FileTextIcon, SettingsIcon, SquarePercentIcon } from "lucide-react"
 import ProfileHospitalMenu from "@/components/profile_hospital_menu"
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege"
 import NotificationDropdown from "@/components/notification"
+import Link from "next/link"
 
 export default function Header() {
     const [createFolderModalOpen, setCreateFolderModalOpen] = useState(false)
-    const { showInfo, showWarning } = useNotificationHelpers()
-
-    const handleCreatePrompt = () => {
-        showInfo("Tính năng đang phát triển", "Chức năng tạo prompt sẽ sớm được cập nhật!")
-    }
-
-    const handleSettings = () => {
-        showWarning("Cài đặt", "Vui lòng liên hệ admin để thay đổi cài đặt hệ thống")
-    }
 
     return (
         <motion.div
@@ -55,7 +46,7 @@ export default function Header() {
                                 <FolderPlusIcon className="w-4 h-4" />
                                 <span className="text-sm text-gray-800">Tạo thư mục</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleCreatePrompt} className="gap-2 cursor-pointer">
+                            <DropdownMenuItem className="gap-2 cursor-pointer">
                                 <FileTextIcon className="w-4 h-4" />
                                 <span className="text-sm text-gray-800">Tạo prompt</span>
                             </DropdownMenuItem>
@@ -63,11 +54,23 @@ export default function Header() {
                     </DropdownMenu>
 
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Button onClick={handleSettings} variant="outline" className="gap-2 bg-transparent">
-                            <SettingsIcon className="w-4 h-4" />
-                            Cài đặt
-                        </Button>
+                        <Link href={"/admin/train-ai/check"}>
+                            <Button type="button" variant="outline" className="gap-2 bg-transparent">
+                                <SquarePercentIcon className="w-4 h-4" />
+                                Kiểm tra
+                            </Button>
+                        </Link>
                     </motion.div>
+
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Link href={"/admin/train-ai/setting"}>
+                            <Button type="button" variant="outline" className="gap-2 bg-transparent">
+                                <SettingsIcon className="w-4 h-4" />
+                                Cài đặt
+                            </Button>
+                        </Link>
+                    </motion.div>
+
 
                     <NotificationDropdown />
                     <div>

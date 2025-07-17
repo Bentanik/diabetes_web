@@ -1,5 +1,8 @@
 import { JOB } from "@/services/job/services";
-import { useDeleteDocumentService } from "@/services/train-ai/services";
+import {
+  KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY,
+  useDeleteDocumentService,
+} from "@/services/train-ai/services";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const useDeleteDocument = () => {
@@ -13,6 +16,9 @@ export const useDeleteDocument = () => {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [JOB],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: [KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY],
         });
         onClose();
       },

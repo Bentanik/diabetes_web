@@ -40,13 +40,11 @@ declare namespace API {
     id: string;
     name: string;
     description: string;
-    metadata: {
-      useDescriptionForLLMCheck: boolean;
-    };
     document_count: number;
     created_at: string;
     updated_at: string;
     total_size_mb: number;
+    select_training: boolean;
   };
 
   type TGetKnowledgeBaseListResponse = {
