@@ -1,37 +1,42 @@
-import useToast from "@/hooks/use-toast";
-import { useState } from "react";
 import { getUserAvailable } from "@/services/conversation/api-services";
-import { useBackdrop } from "@/context/backdrop_context";
-import { TResponseData } from "@/typings";
+import { TMeta, TResponseData } from "@/typings";
+import { useQuery } from "@tanstack/react-query";
 
-export default function useGetUserAvailable() {
-    const { addToast } = useToast();
-    const [isPending, setPending] = useState(false);
-    const { showBackdrop, hideBackdrop } = useBackdrop();
+export const USER_AVAILABLE_QUERY_KEY = "user_available";
 
-    const getUserAvailableApi = async (
-        params: REQUEST.UserAvailableRequestParam
-    ) => {
-        setPending(true);
-        showBackdrop();
-        try {
+export const useGetUserAvailable = (
+    params: REQUEST.UserAvailableRequestParam
+) => {
+    const {
+        data: user_available,
+        isPending,
+        isError,
+        error,
+    } = useQuery<
+        TResponseData<API.TGetUserAvailable>,
+        TMeta,
+        API.TGetUserAvailable
+    >({
+        queryKey: [USER_AVAILABLE_QUERY_KEY, params],
+        queryFn: async () => {
             const res = await getUserAvailable(params);
-            if (res.data != null) {
-                return res as TResponseData<API.TGetUserAvailable>;
-            } else {
-                addToast({
-                    type: "error",
-                    description: "Fail to fetch application",
-                });
-                return null;
+            if (res.data == null) {
+                throw new Error("No data returned from getConversations");
             }
-        } catch (err) {
-            console.log(err);
-            return null;
-        } finally {
-            setPending(false);
-            hideBackdrop();
-        }
-    };
-    return { getUserAvailableApi, isPending };
-}
+            return res as TResponseData<API.TGetUserAvailable>;
+        },
+        select: (data) =>
+            data.data ?? {
+                items: [],
+                pageIndex: 0,
+                pageSize: 0,
+                totalCount: 0,
+                hasNextPage: false,
+                hasPreviousPage: false,
+            },
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: true,
+    });
+
+    return { user_available, isPending, isError, error };
+};

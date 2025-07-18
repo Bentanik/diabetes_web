@@ -26,10 +26,10 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import useDeleteConversation from "../hooks/use-delete-conversation";
-import GroupUserDialog from "./user-dialog";
+// import GroupUserDialog from "./user-dialog";
 import GroupDoctorDialog from "./doctor-dialog";
 import { Toaster } from "sonner";
-import GroupStaffDialog from "./staff-dialog";
+// import GroupStaffDialog from "./staff-dialog";
 import { useGetConversationDetail } from "../hooks/use-get-conversation";
 import Image from "next/image";
 import useToast from "@/hooks/use-toast";
@@ -56,8 +56,8 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
         try {
             await onSubmit(() => {
                 setTimeout(() => {
-                    router.push("/hospital/group");
-                }, 2000);
+                    router.push("/hospital/conversation");
+                }, 1000);
             });
         } catch (error) {
             console.error("Error updating post:", error);
@@ -128,7 +128,7 @@ export default function GroupDetailComponent({
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     // Gọi hook useGetConversationDetail
-    const { conversationDetail, isPending, isError, error } =
+    const { conversation_detail, isPending, isError, error } =
         useGetConversationDetail(
             { conversationId },
             {
@@ -153,15 +153,11 @@ export default function GroupDetailComponent({
         setCurrentPage(page);
     };
 
-    const handleAddMember = () => {
-        setCurrentPage(1);
-    };
-
     useEffect(() => {
-        if (scrollRef.current && conversationDetail) {
+        if (scrollRef.current && conversation_detail) {
             scrollRef.current.scrollTop = 0;
         }
-    }, [conversationDetail]);
+    }, [conversation_detail]);
 
     const getRoleIcon = (role: number) => {
         switch (role) {
@@ -245,15 +241,15 @@ export default function GroupDetailComponent({
                                 </Toggle>
                             </div>
                             <div className="flex gap-2">
-                                <GroupUserDialog
+                                {/* <GroupUserDialog
                                     conversationId={conversationId}
-                                />
+                                /> */}
                                 <GroupDoctorDialog
                                     conversationId={conversationId}
                                 />
-                                <GroupStaffDialog
+                                {/* <GroupStaffDialog
                                     conversationId={conversationId}
-                                />
+                                /> */}
                             </div>
                         </div>
                     </motion.div>
@@ -281,7 +277,7 @@ export default function GroupDetailComponent({
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {conversationDetail?.items.map((user) => (
+                                {conversation_detail?.items.map((user) => (
                                     <TableRow
                                         key={user.id}
                                         className="hover:bg-gray-50"
@@ -340,12 +336,12 @@ export default function GroupDetailComponent({
                         </Table>
 
                         {!isPending &&
-                            conversationDetail?.items.length !== 0 && (
+                            conversation_detail?.items.length !== 0 && (
                                 <div className="my-10">
                                     <div className="mt-5">
                                         <PaginatedComponent
                                             totalPages={
-                                                conversationDetail?.totalPages ||
+                                                conversation_detail?.totalPages ||
                                                 0
                                             }
                                             currentPage={currentPage}
@@ -356,8 +352,8 @@ export default function GroupDetailComponent({
                             )}
 
                         {!isPending &&
-                            (!conversationDetail ||
-                                conversationDetail?.items.length === 0) && (
+                            (!conversation_detail ||
+                                conversation_detail?.items.length === 0) && (
                                 <div className="text-center py-12">
                                     <div className="text-gray-400 mb-4">
                                         <User className="h-12 w-12 mx-auto" />

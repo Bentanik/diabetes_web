@@ -2,12 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getConversationDetail } from "@/services/conversation/api-services";
 import { TMeta, TResponseData } from "@/typings";
 
+export const CONVERSATION_DETAIL_QUERY_KEY = "conversation_detail";
+
 export const useGetConversationDetail = (
     { conversationId }: REQUEST.ConversationId,
     params: REQUEST.ConversationsParams
 ) => {
     const {
-        data: conversationDetail,
+        data: conversation_detail,
         isPending,
         isError,
         error,
@@ -16,7 +18,7 @@ export const useGetConversationDetail = (
         TMeta,
         API.TGetConversationDetail
     >({
-        queryKey: ["GET_CONVERSATION", params, conversationId],
+        queryKey: [CONVERSATION_DETAIL_QUERY_KEY, params, conversationId],
         queryFn: async () => {
             const res = await getConversationDetail({ conversationId }, params);
             if (res.data == null) {
@@ -38,5 +40,5 @@ export const useGetConversationDetail = (
         refetchOnWindowFocus: true,
     });
 
-    return { conversationDetail, isPending, isError, error };
+    return { conversation_detail, isPending, isError, error };
 };
