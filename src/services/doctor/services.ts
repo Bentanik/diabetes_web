@@ -1,6 +1,7 @@
 import useToast from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { createDoctorAsync } from "./api-services";
+import { TMeta, TResponse } from "@/typings";
 
 export const useServiceCreateDoctor = () => {
     const { addToast } = useToast();
@@ -17,14 +18,14 @@ export const useServiceCreateDoctor = () => {
             });
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
+            // const errorMessages = err.errors
+            //     .flat()
+            //     .map((e) => e.message)
+            //     .join(", ");
 
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },

@@ -1,5 +1,6 @@
 import useToast from "@/hooks/use-toast";
 import { createHospitalAsync } from "@/services/hospital/api-services";
+import { TMeta, TResponse } from "@/typings";
 import { useMutation } from "@tanstack/react-query";
 
 export const useServiceCreateHospital = () => {
@@ -28,14 +29,9 @@ export const useServiceCreateHospital = () => {
             });
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
-
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },

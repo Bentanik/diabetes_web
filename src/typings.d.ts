@@ -1,12 +1,11 @@
+import { error } from "console";
+
 declare type TMeta = {
-    type: string;
+    type?: string;
     title: string;
     status: number;
-    errors: {
-        errorType: number;
-        code: string;
-        message: string;
-    }[][];
+    errorCode: string;
+    detail: string;
 };
 
 declare type TResponse<T = object | null> = {

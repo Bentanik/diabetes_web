@@ -1,5 +1,6 @@
 import API_ENDPOINTS from "@/services/blog/api-path";
 import request from "@/services/interceptor";
+import { TResponse, TResponseData } from "@/typings";
 
 export const createBlogAsync = async () => {
     const response = await request<TResponseData<API.TGetBlogId>>(

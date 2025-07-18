@@ -50,7 +50,7 @@ export default function useLogin() {
                 },
                 onError: (error) => {
                     hideBackdrop();
-                    if (error.errorCode === "auth13") {
+                    if (error.title === "auth13") {
                         setError("email", {
                             type: "manual",
                             message:

@@ -3,6 +3,7 @@ import {
     uploadImageAsync,
     uploadImageConversationAsync,
 } from "@/services/media/api-services";
+import { TMeta, TResponseData } from "@/typings";
 import { useMutation } from "@tanstack/react-query";
 
 export function useUploadImageService() {
@@ -25,14 +26,9 @@ export function useUploadImageService() {
             // });
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
-
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },

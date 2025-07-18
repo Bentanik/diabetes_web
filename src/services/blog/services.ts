@@ -5,6 +5,7 @@ import {
     updateBlogAsync,
     reviewBlogAsync,
 } from "./api-services";
+import { TMeta, TResponse, TResponseData } from "@/typings";
 
 export const useServiceCreateBlog = () => {
     const { addToast } = useToast();
@@ -21,14 +22,9 @@ export const useServiceCreateBlog = () => {
             });
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
-
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },
@@ -52,14 +48,14 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
             }
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
+            // const errorMessages = err.errors
+            //     .flat()
+            //     .map((e) => e.message)
+            //     .join(", ");
 
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },
@@ -89,14 +85,9 @@ export const useServiceReviewBlog = ({ blogId }: REQUEST.BlogId) => {
             });
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
-
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },

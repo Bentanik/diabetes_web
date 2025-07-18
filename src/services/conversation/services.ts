@@ -7,6 +7,8 @@ import {
     deleteConversationAsync,
 } from "./api-services";
 import useToast from "@/hooks/use-toast";
+import { error } from "console";
+import { TMeta, TResponse, TResponseData } from "@/typings";
 
 export const useServiceCreateConversation = () => {
     const { addToast } = useToast();
@@ -31,14 +33,13 @@ export const useServiceCreateConversation = () => {
             });
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
-
+            // const errorMessages = err.errors
+            //     .flat()
+            //     .map((e) => e.message)
+            //     .join(", ");
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },
@@ -63,14 +64,9 @@ export const useServiceDeleteConversation = ({
             );
         },
         onError: (err) => {
-            const errorMessages = err.errors
-                .flat()
-                .map((e) => e.message)
-                .join(", ");
-
             addToast({
                 type: "error",
-                description: errorMessages,
+                description: err.title,
                 duration: 5000,
             });
         },

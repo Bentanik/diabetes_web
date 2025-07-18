@@ -1,5 +1,6 @@
 import useToast from "@/hooks/use-toast";
 import { getConversations } from "@/services/conversation/api-services";
+import { TMeta, TResponseData } from "@/typings";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetConversations = (params: REQUEST.ConversationsParams) => {

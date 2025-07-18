@@ -107,10 +107,10 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                             // setThumbnailIds([]);
                         } else {
                             // Handle multiple thumbnails
-                            form.setValue("images", [
-                                ...(form.getValues("images") || []),
-                                imageId,
-                            ]);
+                            // form.setValue("images", [
+                            //     ...(form.getValues("images") || []),
+                            //     imageId,
+                            // ]);
                             setThumbnailPreviews((prev) => [
                                 ...prev,
                                 publicUrl,
@@ -125,7 +125,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
 
     console.log("avatarURL" + avatarPreview);
     console.log(form.watch("avatar"));
-    console.log(form.watch("images"));
+    // console.log(form.watch("images"));
 
     const handleClearImages = () => {
         // setThumbnailIds([]);
@@ -174,7 +174,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                         : 0,
                 position: typeof data.position === "number" ? data.position : 1,
                 introduction: data.introduction || "",
-                images: data.images?.length ? data.images : [],
+                // images: data.images?.length ? data.images : [],
             };
             onSubmit(formData, () => {
                 handleClearImages();

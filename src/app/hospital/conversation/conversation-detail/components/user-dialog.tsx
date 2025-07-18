@@ -66,7 +66,7 @@ export default function GroupUserDialog({
             if (isLoadMore) {
                 setData((prev) => {
                     const uniqueItems = newItems.filter(
-                        (newItem) =>
+                        (newItem: any) =>
                             !prev.some(
                                 (existingItem) => existingItem.id === newItem.id
                             )

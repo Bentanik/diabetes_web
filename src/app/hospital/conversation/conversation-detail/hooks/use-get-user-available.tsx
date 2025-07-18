@@ -2,6 +2,7 @@ import useToast from "@/hooks/use-toast";
 import { useState } from "react";
 import { getUserAvailable } from "@/services/conversation/api-services";
 import { useBackdrop } from "@/context/backdrop_context";
+import { TResponseData } from "@/typings";
 
 export default function useGetUserAvailable() {
     const { addToast } = useToast();

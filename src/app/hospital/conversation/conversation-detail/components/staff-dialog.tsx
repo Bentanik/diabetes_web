@@ -65,9 +65,8 @@ export default function GroupStaffDialog({
 
             if (isLoadMore) {
                 setData((prev) => {
-                    // Lọc bỏ các item trùng lặp dựa trên id
                     const uniqueItems = newItems.filter(
-                        (newItem) =>
+                        (newItem: any) =>
                             !prev.some(
                                 (existingItem) => existingItem.id === newItem.id
                             )
