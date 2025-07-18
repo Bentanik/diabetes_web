@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import {
     User,
     Crown,
-    Shield,
-    Clock,
     BarChartIcon,
     BellIcon,
     SearchIcon,
@@ -16,7 +14,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import {
     Table,
@@ -30,15 +27,16 @@ import Link from "next/link";
 import useDeleteConversation from "../hooks/use-delete-conversation";
 import GroupUserDialog from "@/app/hospital/group/group-detail/components/user-dialog";
 import GroupDoctorDialog from "@/app/hospital/group/group-detail/components/doctor-dialog";
-import { useRouter } from "next/navigation";
 import { Toaster } from "sonner";
 import GroupStaffDialog from "./staff-dialog";
 import useGetConversationDetail from "../hooks/use-get-conversation";
 import Image from "next/image";
+import useToast from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const sortBy = [
     { name: "Tên thành viên", value: "name" },
-    { name: "Chưa biết", count: 8, color: "name" },
+    { name: "Chưa biết", count: 8, color: "name" }, // Note: `count` and `color` seem unused; verify if needed
 ];
 
 interface HeaderProps {
@@ -80,7 +78,6 @@ const Header = ({ groupId }: HeaderProps) => {
                         <Link href="/hospital/group">
                             <ArrowLeft color="#248fca" />
                         </Link>
-
                         <h1 className="text-2xl font-bold text-[var(--primary-color)]">
                             Quản lí người dùng trong nhóm
                         </h1>
@@ -95,6 +92,7 @@ const Header = ({ groupId }: HeaderProps) => {
                         onClick={() => handleFormSubmit()}
                         variant="outline"
                         className="gap-2 cursor-pointer hover:bg-red-200"
+                        disabled={isSubmitting || isPending}
                     >
                         <Trash className="w-4 h-4" />
                         Xóa nhóm chat
@@ -106,59 +104,28 @@ const Header = ({ groupId }: HeaderProps) => {
                     <Button variant="ghost" size="icon">
                         <BellIcon className="w-5 h-5" />
                     </Button>
-                    <div>
-                        <ProfileHospitalMenu profile={1} />
-                    </div>
+                    <ProfileHospitalMenu profile={1} />
                 </div>
             </div>
         </motion.div>
     );
 };
 
-export default function GroupDetailComponent({ groupId }: any) {
+export default function GroupDetailComponent({ groupId }: { groupId: string }) {
+    const { addToast } = useToast();
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const { getConversationDetailApi } = useGetConversationDetail();
-    const [data, setData] = useState<API.ConversationDetail[]>([]);
     const [isSortAsc, setIsSortAsc] = useState(false);
     const [selectSortBy, setSelectSortBy] = useState<string>("all");
-    const [totalPage, setTotalPage] = useState<number>(1);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState<number>(1);
 
     const scrollRef = useRef<HTMLDivElement>(null);
-
     const pageSize = 6;
 
-    const handleGetData = async (pageIndex: number) => {
-        try {
-            const res = await getConversationDetailApi(groupId, {
-                search: searchTerm,
-                pageIndex: pageIndex,
-                pageSize: pageSize,
-                sortBy: selectSortBy,
-                direction: isSortAsc === false ? 1 : 0,
-            });
-            setTotalPage(res?.data?.totalPages || 1);
-            setData(res?.data?.items || []);
-        } catch (err) {
-            console.log(err);
-            setData([]);
-        }
-    };
-    const getRoleIcon = (role: number) => {
-        switch (role) {
-            case 3:
-                return <User className="h-4 w-4" />;
-            case 2:
-                return <Stethoscope className="h-4 w-4" />;
-            default:
-                return <Crown className="h-4 w-4" />;
-        }
-    };
-
+    // Debounce searchTerm
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedSearchTerm(searchTerm);
@@ -170,37 +137,50 @@ export default function GroupDetailComponent({ groupId }: any) {
         };
     }, [searchTerm]);
 
+    // Gọi hook useGetConversationDetail
+    const { conversationDetail, isPending, isError, error } =
+        useGetConversationDetail(groupId, {
+            search: debouncedSearchTerm,
+            pageIndex: currentPage,
+            pageSize: pageSize,
+            sortBy: selectSortBy,
+            direction: isSortAsc ? 0 : 1,
+        });
+
+    // Xử lý lỗi
     useEffect(() => {
-        if (scrollRef.current) {
+        if (isError && error) {
+            addToast({
+                type: "error",
+                description: "Fail to fetch application",
+            });
+        }
+    }, [isError, error, addToast]);
+
+    // Cuộn về đầu khi dữ liệu thay đổi
+    useEffect(() => {
+        if (scrollRef.current && conversationDetail) {
             scrollRef.current.scrollTop = 0;
         }
-    }, [data]);
+    }, [conversationDetail]);
 
-    const toggleUser = (id: string) => {
-        setSelectedIds((prev) => {
-            const updated = prev.includes(id)
-                ? prev.filter((u) => u !== id)
-                : [...prev, id];
-            console.log("Updated selectedIds:", updated);
-            return updated;
-        });
+    const getRoleIcon = (role: number) => {
+        switch (role) {
+            case 3:
+                return <User className="h-4 w-4" />;
+            case 2:
+                return <Stethoscope className="h-4 w-4" />;
+            default:
+                return <Crown className="h-4 w-4" />;
+        }
     };
 
     const handleDeleteMember = (userId: string) => {
         console.log("userId nè m" + userId);
     };
 
-    useEffect(() => {
-        handleGetData(currentPage);
-    }, [debouncedSearchTerm, selectSortBy, isSortAsc, currentPage]);
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("vi-VN");
-    };
-
     return (
         <div>
-            {/* Header */}
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <header>
                 <Header groupId={groupId} />
@@ -235,11 +215,11 @@ export default function GroupDetailComponent({ groupId }: any) {
                                     }
                                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
-                                    <option value="name">Mặc định</option>
+                                    <option value="all">Mặc định</option>
                                     {sortBy.map((dept) => (
                                         <option
                                             key={dept.name}
-                                            value={dept.name}
+                                            value={dept.value}
                                         >
                                             {dept.name}
                                         </option>
@@ -287,7 +267,7 @@ export default function GroupDetailComponent({ groupId }: any) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {data.map((user) => (
+                                {conversationDetail?.map((user) => (
                                     <TableRow
                                         key={user.id}
                                         className="hover:bg-gray-50"
@@ -319,7 +299,6 @@ export default function GroupDetailComponent({ groupId }: any) {
                                                 {user.role}
                                             </div>
                                         </TableCell>
-
                                         <TableCell>
                                             <div
                                                 className="max-w-48 truncate"
@@ -329,7 +308,6 @@ export default function GroupDetailComponent({ groupId }: any) {
                                                     "Chưa có số điện thoại"}
                                             </div>
                                         </TableCell>
-
                                         <TableCell>
                                             <div className="flex justify-center max-w-[100px]">
                                                 <Trash
@@ -338,7 +316,7 @@ export default function GroupDetailComponent({ groupId }: any) {
                                                             user.id
                                                         )
                                                     }
-                                                    className="cursor-pointer"
+                                                    className="cursor-pointer text-gray-500 hover:text-red-500 transition-colors duration-200"
                                                 />
                                             </div>
                                         </TableCell>
@@ -347,7 +325,8 @@ export default function GroupDetailComponent({ groupId }: any) {
                             </TableBody>
                         </Table>
 
-                        {data.length === 0 && (
+                        {(!conversationDetail ||
+                            conversationDetail.length === 0) && (
                             <div className="text-center py-12">
                                 <div className="text-gray-400 mb-4">
                                     <User className="h-12 w-12 mx-auto" />

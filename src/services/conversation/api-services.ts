@@ -149,7 +149,7 @@ export const getConversations = async ({
         API_ENDPOINTS.GET_CONVERSATIONS,
         {
             method: "GET",
-            params: Object.keys(params).length > 0 ? params : undefined,
+            params: Object.keys(params).length > 0 ? params : [],
         }
     );
     return response.data;

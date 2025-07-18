@@ -44,7 +44,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import useGetConversations from "../hooks/use-get-conversations";
+import { useGetConversations } from "../hooks/use-get-conversations";
 import { useRouter } from "next/navigation";
 import { Toaster } from "sonner";
 import Image from "next/image";
@@ -94,10 +94,12 @@ export default function GroupHospitalComponent() {
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadConversationImage();
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const { onSubmit, form, isPending } = useCreateConversation();
-    const { getConversationsApi } = useGetConversations();
+    const {
+        onSubmit,
+        form,
+        isPending: isPendingCreate,
+    } = useCreateConversation();
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [data, setData] = useState<API.Conversation[]>([]);
     const [totalPage, setTotalPage] = useState<number>(1);
     const [selectSortBy, setSelectSortBy] = useState<string>("all");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -108,26 +110,18 @@ export default function GroupHospitalComponent() {
     );
 
     const router = useRouter();
-    const handleGetData = async (pageIndex: number) => {
-        try {
-            const res = await getConversationsApi({
-                search: searchTerm,
-                pageIndex: pageIndex,
-                pageSize: 6,
-                sortBy: selectSortBy,
-                direction: isSortAsc === false ? 1 : 0,
-            });
-            setTotalPage(res?.data?.totalPages || 1);
-            setData(res?.data?.items || []);
-        } catch (err) {
-            console.log(err);
-            setData([]);
-        }
-    };
+    const pageSize = 6;
+
+    const { conversations, isPending, isError, error } = useGetConversations({
+        search: debouncedSearchTerm,
+        pageIndex: currentPage,
+        pageSize: pageSize,
+        sortBy: selectSortBy,
+        direction: isSortAsc ? 0 : 1,
+    });
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        handleGetData(page);
     };
 
     useEffect(() => {
@@ -164,10 +158,6 @@ export default function GroupHospitalComponent() {
     const handleClearImages = () => {
         setThumbnailPreview(null);
     };
-
-    useEffect(() => {
-        handleGetData(currentPage);
-    }, [debouncedSearchTerm, selectSortBy, isSortAsc, currentPage]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("vi-VN");
@@ -392,7 +382,7 @@ export default function GroupHospitalComponent() {
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.map((conversation, index) => (
+                {conversations?.map((conversation, index) => (
                     <motion.div
                         key={conversation.id}
                         initial={{ y: 20, opacity: 0 }}
@@ -458,7 +448,7 @@ export default function GroupHospitalComponent() {
                     </motion.div>
                 ))}
             </div>
-            {data?.length > 0 && (
+            {conversations?.length === 0 && (
                 <div className="my-10">
                     <div className="mt-5">
                         <PaginatedComponent
@@ -471,7 +461,7 @@ export default function GroupHospitalComponent() {
             )}
 
             {/* Empty State */}
-            {data.length === 0 && (
+            {conversations?.length === 0 && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
