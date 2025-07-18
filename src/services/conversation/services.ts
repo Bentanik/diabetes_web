@@ -45,10 +45,12 @@ export const useServiceCreateConversation = () => {
     });
 };
 
-export const useServiceDeleteConversation = (groupId: string) => {
+export const useServiceDeleteConversation = ({
+    conversationId,
+}: REQUEST.ConversationId) => {
     const { addToast } = useToast();
     return useMutation<TResponse<object | null>, TMeta, void>({
-        mutationFn: () => deleteConversationAsync(groupId),
+        mutationFn: () => deleteConversationAsync({ conversationId }),
         onSuccess: () => {
             addToast(
                 {
@@ -75,14 +77,19 @@ export const useServiceDeleteConversation = (groupId: string) => {
     });
 };
 
-export const useServiceAddMembers = (groupId: string) => {
+export const useServiceAddMembers = ({
+    conversationId,
+}: REQUEST.ConversationId) => {
     const { addToast } = useToast();
 
     return useMutation<TResponse, TMeta, REQUEST.AddMembers>({
         mutationFn: async (data: REQUEST.AddMembers) => {
-            const response = await addMembersAsync(groupId, {
-                userIds: data.userIds,
-            });
+            const response = await addMembersAsync(
+                { conversationId },
+                {
+                    userIds: data.userIds,
+                }
+            );
             return response as TResponse;
         },
         onSuccess: () => {
@@ -102,14 +109,19 @@ export const useServiceAddMembers = (groupId: string) => {
     });
 };
 
-export const useServiceAddDoctor = (groupId: string) => {
+export const useServiceAddDoctor = ({
+    conversationId,
+}: REQUEST.ConversationId) => {
     const { addToast } = useToast();
 
     return useMutation<TResponse, TMeta, REQUEST.AddDoctor>({
         mutationFn: async (data: REQUEST.AddDoctor) => {
-            const response = await addDoctorAsync(groupId, {
-                doctorId: data.doctorId,
-            });
+            const response = await addDoctorAsync(
+                { conversationId },
+                {
+                    doctorId: data.doctorId,
+                }
+            );
             return response as TResponse;
         },
         onSuccess: () => {
@@ -129,14 +141,19 @@ export const useServiceAddDoctor = (groupId: string) => {
     });
 };
 
-export const useServiceAddStaff = (groupId: string) => {
+export const useServiceAddStaff = ({
+    conversationId,
+}: REQUEST.ConversationId) => {
     const { addToast } = useToast();
 
     return useMutation<TResponse, TMeta, REQUEST.AddStaff>({
         mutationFn: async (data: REQUEST.AddStaff) => {
-            const response = await addStaffAsync(groupId, {
-                adminId: data.adminId,
-            });
+            const response = await addStaffAsync(
+                { conversationId },
+                {
+                    adminId: data.adminId,
+                }
+            );
             return response as TResponse;
         },
         onSuccess: () => {

@@ -23,13 +23,11 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import InfiniteScroll from "@/components/scroll-paginated";
-import useServiceAddStaff from "@/app/hospital/group/group-detail/hooks/use-add-staff";
+import useServiceAddStaff from "@/app/hospital/conversation/conversation-detail/hooks/use-add-staff";
 
-interface GroupUserDialogProps {
-    groupId: string;
-}
-
-export default function GroupStaffDialog({ groupId }: GroupUserDialogProps) {
+export default function GroupStaffDialog({
+    conversationId,
+}: REQUEST.ConversationId) {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [selectSortType, setSelectSortType] = useState<string>("");
     const { getUserAvailableApi } = useGetUserAvailable();
@@ -39,7 +37,7 @@ export default function GroupStaffDialog({ groupId }: GroupUserDialogProps) {
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasMore, setHasMore] = useState<boolean>(true);
-    const { form, onSubmit } = useServiceAddStaff(groupId);
+    const { form, onSubmit } = useServiceAddStaff({ conversationId });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedId, setSelectedId] = useState<string>("");
 
@@ -55,7 +53,7 @@ export default function GroupStaffDialog({ groupId }: GroupUserDialogProps) {
         setIsLoading(true);
         try {
             const res = await getUserAvailableApi({
-                conversationId: groupId,
+                conversationId: conversationId,
                 search: searchTerm,
                 role: "HospitalStaff",
                 pageIndex: pageIndex,

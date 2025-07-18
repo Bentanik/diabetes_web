@@ -3,18 +3,18 @@ import GroupDetailComponent from "../components";
 
 type GroupDetailPageProps = {
     params: Promise<{
-        groupId: string;
+        conversationId: string;
     }>;
 };
 
-export default async function GroupDetailPage({
+export default async function ConversationDetailPage({
     params,
 }: GroupDetailPageProps) {
-    const { groupId } = await params;
+    const { conversationId } = await params;
 
     return (
         <div>
-            <GroupDetailComponent groupId={groupId} />
+            <GroupDetailComponent conversationId={conversationId} />
         </div>
     );
 }

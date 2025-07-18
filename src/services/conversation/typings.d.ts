@@ -38,6 +38,10 @@ declare namespace REQUEST {
     type AddStaff = {
         adminId: string;
     };
+
+    export type ConversationId = {
+        conversationId: string;
+    };
 }
 
 declare namespace API {

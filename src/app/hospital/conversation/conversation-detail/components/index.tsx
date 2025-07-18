@@ -11,6 +11,7 @@ import {
     ArrowLeft,
     Trash,
     Stethoscope,
+    ArrowUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,26 +26,25 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import useDeleteConversation from "../hooks/use-delete-conversation";
-import GroupUserDialog from "@/app/hospital/group/group-detail/components/user-dialog";
-import GroupDoctorDialog from "@/app/hospital/group/group-detail/components/doctor-dialog";
+import GroupUserDialog from "./user-dialog";
+import GroupDoctorDialog from "./doctor-dialog";
 import { Toaster } from "sonner";
 import GroupStaffDialog from "./staff-dialog";
-import useGetConversationDetail from "../hooks/use-get-conversation";
+import { useGetConversationDetail } from "../hooks/use-get-conversation";
 import Image from "next/image";
 import useToast from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Toggle } from "@radix-ui/react-toggle";
+import { useDebounce } from "@/hooks/use-debounce";
+import PaginatedComponent from "@/components/paginated";
 
 const sortBy = [
     { name: "Tên thành viên", value: "name" },
-    { name: "Chưa biết", count: 8, color: "name" }, // Note: `count` and `color` seem unused; verify if needed
+    { name: "Chưa biết", count: 8, color: "name" },
 ];
 
-interface HeaderProps {
-    groupId: string;
-}
-
-const Header = ({ groupId }: HeaderProps) => {
-    const { onSubmit, isPending } = useDeleteConversation(groupId);
+const Header = ({ conversationId }: REQUEST.ConversationId) => {
+    const { onSubmit, isPending } = useDeleteConversation({ conversationId });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
 
@@ -75,7 +75,10 @@ const Header = ({ groupId }: HeaderProps) => {
             <div className="flex items-center justify-between">
                 <div>
                     <div className="flex items-center gap-5">
-                        <Link href="/hospital/group">
+                        <Link
+                            href="/hospital/conversation
+                        "
+                        >
                             <ArrowLeft color="#248fca" />
                         </Link>
                         <h1 className="text-2xl font-bold text-[var(--primary-color)]">
@@ -111,43 +114,32 @@ const Header = ({ groupId }: HeaderProps) => {
     );
 };
 
-export default function GroupDetailComponent({ groupId }: { groupId: string }) {
+export default function GroupDetailComponent({
+    conversationId,
+}: REQUEST.ConversationId) {
     const { addToast } = useToast();
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
-    const [selectedStatus, setSelectedStatus] = useState<string>("all");
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isSortAsc, setIsSortAsc] = useState(false);
     const [selectSortBy, setSelectSortBy] = useState<string>("all");
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState<number>(1);
 
     const scrollRef = useRef<HTMLDivElement>(null);
-    const pageSize = 6;
-
-    // Debounce searchTerm
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-            setCurrentPage(1);
-        }, 500);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [searchTerm]);
+    const pageSize = 10;
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     // Gọi hook useGetConversationDetail
     const { conversationDetail, isPending, isError, error } =
-        useGetConversationDetail(groupId, {
-            search: debouncedSearchTerm,
-            pageIndex: currentPage,
-            pageSize: pageSize,
-            sortBy: selectSortBy,
-            direction: isSortAsc ? 0 : 1,
-        });
+        useGetConversationDetail(
+            { conversationId },
+            {
+                search: debouncedSearchTerm,
+                pageIndex: currentPage,
+                pageSize: pageSize,
+                sortBy: selectSortBy,
+                direction: isSortAsc ? 0 : 1,
+            }
+        );
 
-    // Xử lý lỗi
     useEffect(() => {
         if (isError && error) {
             addToast({
@@ -157,7 +149,14 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
         }
     }, [isError, error, addToast]);
 
-    // Cuộn về đầu khi dữ liệu thay đổi
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleAddMember = () => {
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         if (scrollRef.current && conversationDetail) {
             scrollRef.current.scrollTop = 0;
@@ -175,6 +174,17 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
         }
     };
 
+    const getRoleName = (role: number) => {
+        switch (role) {
+            case 3:
+                return "Bệnh nhân";
+            case 2:
+                return "Bác sĩ";
+            default:
+                return "Nhân viên";
+        }
+    };
+
     const handleDeleteMember = (userId: string) => {
         console.log("userId nè m" + userId);
     };
@@ -183,7 +193,7 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
         <div>
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <header>
-                <Header groupId={groupId} />
+                <Header conversationId={conversationId} />
             </header>
 
             <div className="min-h-screen bg-gray-50 flex">
@@ -209,9 +219,9 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
                                     />
                                 </div>
                                 <select
-                                    value={selectedDepartment}
+                                    value={selectSortBy}
                                     onChange={(e) =>
-                                        setSelectedDepartment(e.target.value)
+                                        setSelectSortBy(e.target.value)
                                     }
                                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
@@ -225,29 +235,25 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
                                         </option>
                                     ))}
                                 </select>
-                                <select
-                                    value={selectedStatus}
-                                    onChange={(e) =>
-                                        setSelectedStatus(e.target.value)
-                                    }
-                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                <Toggle
+                                    pressed={isSortAsc}
+                                    onPressedChange={setIsSortAsc}
+                                    className="cursor-pointer flex items-center border px-3 rounded-[10px]"
                                 >
-                                    <option value="all">
-                                        Tất cả trạng thái
-                                    </option>
-                                    <option value="active">
-                                        Đang hoạt động
-                                    </option>
-                                    <option value="inactive">Tạm nghỉ</option>
-                                    <option value="pending">
-                                        Chờ xác thực
-                                    </option>
-                                </select>
+                                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                                    {isSortAsc ? "A → Z" : "Z → A"}
+                                </Toggle>
                             </div>
                             <div className="flex gap-2">
-                                <GroupUserDialog groupId={groupId} />
-                                <GroupDoctorDialog groupId={groupId} />
-                                <GroupStaffDialog groupId={groupId} />
+                                <GroupUserDialog
+                                    conversationId={conversationId}
+                                />
+                                <GroupDoctorDialog
+                                    conversationId={conversationId}
+                                />
+                                <GroupStaffDialog
+                                    conversationId={conversationId}
+                                />
                             </div>
                         </div>
                     </motion.div>
@@ -257,17 +263,25 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Thành viên</TableHead>
-                                    <TableHead>Họ và tên</TableHead>
-                                    <TableHead>Vai trò</TableHead>
-                                    <TableHead>Số điện thoại</TableHead>
-                                    <TableHead className="max-w-[40px]">
+                                    <TableHead className="w-[20%]">
+                                        Thành viên
+                                    </TableHead>
+                                    <TableHead className="w-[20%]">
+                                        Họ và tên
+                                    </TableHead>
+                                    <TableHead className="w-[20%]">
+                                        Vai trò
+                                    </TableHead>
+                                    <TableHead className="w-[20%]">
+                                        Số điện thoại
+                                    </TableHead>
+                                    <TableHead className="w-[10%]">
                                         Xóa thành viên
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {conversationDetail?.map((user) => (
+                                {conversationDetail?.items.map((user) => (
                                     <TableRow
                                         key={user.id}
                                         className="hover:bg-gray-50"
@@ -296,7 +310,7 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 {getRoleIcon(user.role)}
-                                                {user.role}
+                                                {getRoleName(user.role)}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -325,21 +339,38 @@ export default function GroupDetailComponent({ groupId }: { groupId: string }) {
                             </TableBody>
                         </Table>
 
-                        {(!conversationDetail ||
-                            conversationDetail.length === 0) && (
-                            <div className="text-center py-12">
-                                <div className="text-gray-400 mb-4">
-                                    <User className="h-12 w-12 mx-auto" />
+                        {!isPending &&
+                            conversationDetail?.items.length !== 0 && (
+                                <div className="my-10">
+                                    <div className="mt-5">
+                                        <PaginatedComponent
+                                            totalPages={
+                                                conversationDetail?.totalPages ||
+                                                0
+                                            }
+                                            currentPage={currentPage}
+                                            onPageChange={handlePageChange}
+                                        />
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                                    Không tìm thấy thành viên
-                                </h3>
-                                <p className="text-gray-500">
-                                    Thử điều chỉnh bộ lọc hoặc tìm kiếm với từ
-                                    khóa khác
-                                </p>
-                            </div>
-                        )}
+                            )}
+
+                        {!isPending &&
+                            (!conversationDetail ||
+                                conversationDetail?.items.length === 0) && (
+                                <div className="text-center py-12">
+                                    <div className="text-gray-400 mb-4">
+                                        <User className="h-12 w-12 mx-auto" />
+                                    </div>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                        Không tìm thấy thành viên
+                                    </h3>
+                                    <p className="text-gray-500">
+                                        Thử điều chỉnh bộ lọc hoặc tìm kiếm với
+                                        từ khóa khác
+                                    </p>
+                                </div>
+                            )}
                     </div>
                 </main>
             </div>

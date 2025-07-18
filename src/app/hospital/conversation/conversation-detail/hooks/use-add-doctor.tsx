@@ -10,7 +10,9 @@ export const addDoctorSchema = z.object({
 
 export type AddDoctorFormData = z.infer<typeof addDoctorSchema>;
 
-export default function useAddDoctor(groupId: string) {
+export default function useAddDoctor({
+    conversationId,
+}: REQUEST.ConversationId) {
     const form = useForm<AddDoctorFormData>({
         resolver: zodResolver(addDoctorSchema),
         defaultValues: {
@@ -18,7 +20,7 @@ export default function useAddDoctor(groupId: string) {
         },
     });
 
-    const { mutate, isPending } = useServiceAddDoctor(groupId);
+    const { mutate, isPending } = useServiceAddDoctor({ conversationId });
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
     const onSubmit = (data: REQUEST.AddDoctor) => {

@@ -1,8 +1,12 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceDeleteConversation } from "@/services/conversation/services";
 
-export default function useDeleteConversation(groupId: string) {
-    const { mutate, isPending } = useServiceDeleteConversation(groupId);
+export default function useDeleteConversation({
+    conversationId,
+}: REQUEST.ConversationId) {
+    const { mutate, isPending } = useServiceDeleteConversation({
+        conversationId,
+    });
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
     const onSubmit = (onLoadData: () => void) => {

@@ -45,11 +45,11 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import { useGetConversations } from "../hooks/use-get-conversations";
-import { useRouter } from "next/navigation";
 import { Toaster } from "sonner";
 import Image from "next/image";
 import PaginatedComponent from "@/components/paginated";
-import useUploadConversationImage from "@/app/hospital/group/hooks/use-upload-conversation";
+import useUploadConversationImage from "@/app/hospital/conversation/hooks/use-upload-conversation";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Toggle } from "@radix-ui/react-toggle";
 
 const sortBy = [
@@ -94,23 +94,17 @@ export default function GroupHospitalComponent() {
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadConversationImage();
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const {
-        onSubmit,
-        form,
-        isPending: isPendingCreate,
-    } = useCreateConversation();
+    const { onSubmit, form } = useCreateConversation();
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [totalPage, setTotalPage] = useState<number>(1);
     const [selectSortBy, setSelectSortBy] = useState<string>("all");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSortAsc, setIsSortAsc] = useState(false);
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
         null
     );
 
-    const router = useRouter();
     const pageSize = 6;
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const { conversations, isPending, isError, error } = useGetConversations({
         search: debouncedSearchTerm,
@@ -124,16 +118,7 @@ export default function GroupHospitalComponent() {
         setCurrentPage(page);
     };
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-            setCurrentPage(1); // Reset về page 1 khi search
-        }, 500);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [searchTerm]);
+    console.log(currentPage);
 
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
@@ -382,7 +367,7 @@ export default function GroupHospitalComponent() {
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {conversations?.map((conversation, index) => (
+                {conversations?.items.map((conversation, index) => (
                     <motion.div
                         key={conversation.id}
                         initial={{ y: 20, opacity: 0 }}
@@ -391,7 +376,7 @@ export default function GroupHospitalComponent() {
                         className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                     >
                         <Link
-                            href={`/hospital/group/group-detail/${conversation.id}`}
+                            href={`/hospital/conversation/conversation-detail/${conversation.id}`}
                             key={conversation.id}
                         >
                             {/* Header */}
@@ -448,11 +433,11 @@ export default function GroupHospitalComponent() {
                     </motion.div>
                 ))}
             </div>
-            {conversations?.length === 0 && (
+            {conversations?.items.length !== 0 && (
                 <div className="my-10">
                     <div className="mt-5">
                         <PaginatedComponent
-                            totalPages={totalPage}
+                            totalPages={conversations?.totalPages || 0}
                             currentPage={currentPage}
                             onPageChange={handlePageChange}
                         />
@@ -461,7 +446,7 @@ export default function GroupHospitalComponent() {
             )}
 
             {/* Empty State */}
-            {conversations?.length === 0 && (
+            {conversations?.items.length === 0 && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

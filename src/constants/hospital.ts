@@ -17,9 +17,9 @@ export const sidebar_items = [
         label: "Bác sĩ",
     },
     {
-        href: "/hospital/group",
+        href: "/hospital/conversation",
         icon: MessageSquareIcon,
-        label: "Group Chat",
+        label: "Nhóm Chat",
     },
     {
         href: "/mentor/setting",

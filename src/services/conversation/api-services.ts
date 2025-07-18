@@ -18,11 +18,11 @@ export const createConversationAsync = async (
 };
 
 export const addMembersAsync = async (
-    groupId: string,
+    { conversationId }: REQUEST.ConversationId,
     body: REQUEST.AddMembers
 ) => {
     const response = await request<TResponse>(
-        API_ENDPOINTS.ADD_MEMBERS(groupId),
+        API_ENDPOINTS.ADD_MEMBERS(conversationId),
         {
             method: "POST",
             data: body,
@@ -34,9 +34,11 @@ export const addMembersAsync = async (
     return response.data;
 };
 
-export const deleteConversationAsync = async (groupId: string) => {
+export const deleteConversationAsync = async ({
+    conversationId,
+}: REQUEST.ConversationId) => {
     const response = await request<TResponse>(
-        API_ENDPOINTS.DELETE_CONVERSATION(groupId),
+        API_ENDPOINTS.DELETE_CONVERSATION(conversationId),
         {
             method: "DELETE",
             headers: {
@@ -48,11 +50,11 @@ export const deleteConversationAsync = async (groupId: string) => {
 };
 
 export const addDoctorAsync = async (
-    groupId: string,
+    { conversationId }: REQUEST.ConversationId,
     body: REQUEST.AddDoctor
 ) => {
     const response = await request<TResponse>(
-        API_ENDPOINTS.ADD_DOCTOR(groupId),
+        API_ENDPOINTS.ADD_DOCTOR(conversationId),
         {
             method: "POST",
             data: body,
@@ -65,11 +67,11 @@ export const addDoctorAsync = async (
 };
 
 export const addStaffAsync = async (
-    groupId: string,
+    { conversationId }: REQUEST.ConversationId,
     body: REQUEST.AddStaff
 ) => {
     const response = await request<TResponse>(
-        API_ENDPOINTS.ADD_STAFF(groupId),
+        API_ENDPOINTS.ADD_STAFF(conversationId),
         {
             method: "POST",
             data: body,
@@ -82,7 +84,7 @@ export const addStaffAsync = async (
 };
 
 export const getUserAvailable = async ({
-    conversationId = " ",
+    conversationId = "",
     role,
     pageIndex = 1,
     pageSize = 10,
@@ -156,7 +158,7 @@ export const getConversations = async ({
 };
 
 export const getConversationDetail = async (
-    groupId: string,
+    { conversationId }: REQUEST.ConversationId,
     {
         pageIndex = 1,
         pageSize = 10,
@@ -182,10 +184,10 @@ export const getConversationDetail = async (
         params.direction = direction;
     }
     const response = await request<TResponseData<API.TGetConversationDetail>>(
-        API_ENDPOINTS.GET_CONVERSATION(groupId),
+        API_ENDPOINTS.GET_CONVERSATION(conversationId),
         {
             method: "GET",
-            params: Object.keys(params).length > 0 ? params : undefined,
+            params: Object.keys(params).length > 0 ? params : [],
         }
     );
     return response.data;
