@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { GET_CONVERSATIONS_QUERY_KEY } from "./use-get-conversations";
 
 export const createConversationSchema = z.object({
     name: z
@@ -29,17 +31,20 @@ export default function useCreateConversation() {
 
     const { mutate, isPending } = useServiceCreateConversation();
     const { showBackdrop, hideBackdrop } = useBackdrop();
+    const queryClient = useQueryClient();
 
     const onSubmit = (data: REQUEST.TCreateConversation) => {
         showBackdrop();
         mutate(data, {
-            onSuccess: (res) => {
+            onSuccess: async (res) => {
                 hideBackdrop();
-                console.log("API Success:", res);
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_CONVERSATIONS_QUERY_KEY],
+                });
                 const conversationId = res.data?.conversationId;
                 if (conversationId) {
                     router.push(
-                        `/hospital/group/group-detail/${conversationId}`
+                        `/hospital/conversation/conversation-detail/${conversationId}`
                     );
                 }
                 form.reset();

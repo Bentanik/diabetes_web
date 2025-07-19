@@ -51,7 +51,6 @@ export default function useUploadConversationImage() {
 
     const onSubmit = (
         data: ImageConversationFormData,
-        clearImage: () => void,
         onImageUploaded: (imageId: string) => void
     ) => {
         mutate(data, {
@@ -59,7 +58,6 @@ export default function useUploadConversationImage() {
                 if (res.mediaIds && res.mediaIds.length > 0) {
                     onImageUploaded(res.mediaIds[0]);
                     form.reset();
-                    clearImage();
                 } else {
                     addToast({
                         type: "error",

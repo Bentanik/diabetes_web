@@ -134,7 +134,7 @@ export default function GroupHospitalComponent() {
 
             // Upload image
             const data = { files: file };
-            onSubmitImage(data, handleClearImages, (imageId) => {
+            onSubmitImage(data, (imageId) => {
                 form.setValue("avatarId", imageId);
             });
         }
