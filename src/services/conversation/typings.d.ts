@@ -37,6 +37,10 @@ declare namespace REQUEST {
         adminId: string;
     };
 
+    type DeleteParticipant = {
+        participantId: string;
+    };
+
     export type ConversationId = {
         conversationId: string;
     };
@@ -75,6 +79,7 @@ declare namespace API {
         id: string;
         avatar: string;
         fullName: string;
+        phoneNumber: string;
         status: UserStatus;
         role: UserRole;
     };

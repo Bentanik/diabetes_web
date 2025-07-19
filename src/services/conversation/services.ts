@@ -5,6 +5,7 @@ import {
     addDoctorAsync,
     addStaffAsync,
     deleteConversationAsync,
+    deleteParticipantAsync,
 } from "./api-services";
 import useToast from "@/hooks/use-toast";
 import { error } from "console";
@@ -67,6 +68,39 @@ export const useServiceDeleteConversation = ({
             addToast({
                 type: "error",
                 description: err.title,
+                duration: 5000,
+            });
+        },
+    });
+};
+
+export const useServiceDeleteParticipant = ({
+    conversationId,
+}: REQUEST.ConversationId) => {
+    const { addToast } = useToast();
+
+    return useMutation<TResponse, TMeta, REQUEST.DeleteParticipant>({
+        mutationFn: async (data: REQUEST.DeleteParticipant) => {
+            const response = await deleteParticipantAsync(
+                { conversationId },
+                {
+                    participantId: data.participantId,
+                }
+            );
+
+            return response as TResponse;
+        },
+        onSuccess: () => {
+            addToast({
+                type: "success",
+                description: "Xóa người dùng khỏi nhóm thành công",
+                duration: 5000,
+            });
+        },
+        onError: () => {
+            addToast({
+                type: "error",
+                description: "Xóa người dùng khỏi nhóm thất bại!",
                 duration: 5000,
             });
         },

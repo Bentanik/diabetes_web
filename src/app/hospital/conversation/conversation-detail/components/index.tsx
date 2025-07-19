@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import useDeleteConversation from "../hooks/use-delete-conversation";
+import useDeleteParticipant from "../hooks/use-delete-participant";
+
 import GroupUserDialog from "./user-dialog";
 import GroupDoctorDialog from "./doctor-dialog";
 import { Toaster } from "sonner";
@@ -37,6 +39,14 @@ import { useRouter } from "next/navigation";
 import { Toggle } from "@radix-ui/react-toggle";
 import { useDebounce } from "@/hooks/use-debounce";
 import PaginatedComponent from "@/components/paginated";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 const sortBy = [
     { name: "Tên thành viên", value: "name" },
@@ -47,6 +57,7 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
     const { onSubmit, isPending } = useDeleteConversation({ conversationId });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
+    const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
 
     const handleFormSubmit = async () => {
         if (!onSubmit || typeof onSubmit !== "function") {
@@ -55,6 +66,7 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
         setIsSubmitting(true);
         try {
             await onSubmit(() => {
+                setIsDialogOpen(false);
                 setTimeout(() => {
                     router.push("/hospital/conversation");
                 }, 1000);
@@ -90,16 +102,50 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Button
-                        type="submit"
-                        onClick={() => handleFormSubmit()}
-                        variant="outline"
-                        className="gap-2 cursor-pointer hover:bg-red-200"
-                        disabled={isSubmitting || isPending}
-                    >
-                        <Trash className="w-4 h-4" />
-                        Xóa nhóm chat
-                    </Button>
+                    <Dialog open={isOpenDialog} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="gap-2 cursor-pointer hover:bg-red-200"
+                            >
+                                <Trash className="w-4 h-4" />
+                                Xóa nhóm chat
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle className="text-[1.5rem] font-medium">
+                                    Xóa nhóm chat
+                                </DialogTitle>
+                                <DialogDescription className="text-[1.1rem]">
+                                    Bạn có chắc chắn muốn xóa nhóm chat ra khỏi
+                                    danh sách nhóm chat của bệnh viện ?
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex justify-end gap-5">
+                                <div>
+                                    <Button
+                                        variant="outline"
+                                        className="gap-2 cursor-pointer hover:border-gray-300 min-w-[100px]"
+                                        onClick={() => setIsDialogOpen(false)}
+                                    >
+                                        Hủy
+                                    </Button>
+                                </div>
+                                <div>
+                                    <Button
+                                        type="submit"
+                                        onClick={() => handleFormSubmit()}
+                                        variant="outline"
+                                        className="gap-2 cursor-pointer hover:bg-red-200 hover:border-red-200"
+                                        disabled={isSubmitting || isPending}
+                                    >
+                                        Xóa nhóm chat
+                                    </Button>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                     <Button variant="outline" className="gap-2">
                         <BarChartIcon className="w-4 h-4" />
                         Xuất báo cáo
@@ -122,10 +168,14 @@ export default function GroupDetailComponent({
     const [isSortAsc, setIsSortAsc] = useState(false);
     const [selectSortBy, setSelectSortBy] = useState<string>("all");
     const [currentPage, setCurrentPage] = useState<number>(1);
-
+    const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const pageSize = 10;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
+    const { onSubmit, isPending: deletePending } = useDeleteParticipant({
+        conversationId,
+    });
 
     // Gọi hook useGetConversationDetail
     const { conversation_detail, isPending, isError, error } =
@@ -181,8 +231,24 @@ export default function GroupDetailComponent({
         }
     };
 
-    const handleDeleteMember = (userId: string) => {
-        console.log("userId nè m" + userId);
+    const handleDeleteMember = async (userId: string) => {
+        if (!onSubmit || typeof onSubmit !== "function") {
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const participantId: REQUEST.DeleteParticipant = {
+                participantId: userId,
+            };
+
+            await onSubmit(participantId, () => {
+                setIsDialogOpen(false);
+            });
+        } catch (error) {
+            console.error("Error updating post:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -320,14 +386,64 @@ export default function GroupDetailComponent({
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex justify-center max-w-[100px]">
-                                                <Trash
-                                                    onClick={() =>
-                                                        handleDeleteMember(
-                                                            user.id
-                                                        )
+                                                <Dialog
+                                                    open={isOpenDialog}
+                                                    onOpenChange={
+                                                        setIsDialogOpen
                                                     }
-                                                    className="cursor-pointer text-gray-500 hover:text-red-500 transition-colors duration-200"
-                                                />
+                                                >
+                                                    <DialogTrigger asChild>
+                                                        <Trash className="cursor-pointer text-gray-500 hover:text-red-500 transition-colors duration-200" />
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle className="text-[1.5rem] font-medium">
+                                                                Xóa người dùng
+                                                                khỏi nhóm chat
+                                                            </DialogTitle>
+                                                            <DialogDescription className="text-[1.1rem] my-5">
+                                                                Bạn có chắc chắn
+                                                                muốn xóa người
+                                                                dùng này ra khỏi
+                                                                nhóm chat ?
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <div className="flex justify-end gap-3">
+                                                            <div>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    className="gap-2 cursor-pointer hover:border-gray-300 min-w-[100px]"
+                                                                    onClick={() =>
+                                                                        setIsDialogOpen(
+                                                                            false
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Hủy
+                                                                </Button>
+                                                            </div>
+                                                            <div>
+                                                                <Button
+                                                                    type="submit"
+                                                                    onClick={() =>
+                                                                        handleDeleteMember(
+                                                                            user.id
+                                                                        )
+                                                                    }
+                                                                    variant="outline"
+                                                                    className="gap-2 cursor-pointer hover:bg-red-200 hover:border-red-200"
+                                                                    disabled={
+                                                                        isSubmitting ||
+                                                                        isPending
+                                                                    }
+                                                                >
+                                                                    Xóa người
+                                                                    dùng
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
                                             </div>
                                         </TableCell>
                                     </TableRow>

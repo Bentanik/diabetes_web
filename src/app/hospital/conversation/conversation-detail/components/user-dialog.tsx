@@ -278,6 +278,7 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                                     <TableHeader className="sticky top-0 bg-white z-10">
                                         <TableRow className="h-12">
                                             <TableHead>Thành viên</TableHead>
+                                            <TableHead>Số điện thoại</TableHead>
                                             <TableHead>Vai trò</TableHead>
                                             <TableHead>Trạng thái</TableHead>
                                             <TableHead>Chọn</TableHead>
@@ -326,10 +327,12 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                                                             <div className="font-medium text-gray-900">
                                                                 {user.fullName}
                                                             </div>
-                                                            <div className="text-sm text-gray-500">
-                                                                ID: {user.id}
-                                                            </div>
                                                         </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="py-2">
+                                                    <div className="flex items-center gap-2">
+                                                        {user.phoneNumber}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="py-2">
