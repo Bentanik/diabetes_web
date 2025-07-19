@@ -1,8 +1,10 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceAddDoctor } from "@/services/conversation/services";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { CONVERSATION_DETAIL_QUERY_KEY } from "./use-get-conversation";
 
 export const addDoctorSchema = z.object({
     doctorId: z.string().trim().min(1, "Phải chọn bác sĩ để thêm vào"),
@@ -20,15 +22,18 @@ export default function useAddDoctor({
         },
     });
 
+    const queryClient = useQueryClient();
     const { mutate, isPending } = useServiceAddDoctor({ conversationId });
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
     const onSubmit = (data: REQUEST.AddDoctor) => {
         showBackdrop();
         mutate(data, {
-            onSuccess: (res) => {
+            onSuccess: async (res) => {
                 hideBackdrop();
-                console.log("API Success:", res);
+                await queryClient.invalidateQueries({
+                    queryKey: [CONVERSATION_DETAIL_QUERY_KEY],
+                });
                 form.reset();
             },
             onError: (err) => {

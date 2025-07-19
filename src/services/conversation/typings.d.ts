@@ -22,8 +22,6 @@ declare namespace REQUEST {
         role: string;
         pageIndex?: number;
         pageSize?: number;
-        sortType?: string;
-        isSortDesc?: boolean;
         search?: string;
     };
 

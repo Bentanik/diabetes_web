@@ -34,6 +34,7 @@ export const useGetUserAvailable = (
                 hasNextPage: false,
                 hasPreviousPage: false,
             },
+        // enabled: !!params.conversationId,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: true,
     });

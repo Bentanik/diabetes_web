@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { SearchIcon, Plus, X, User, Stethoscope } from "lucide-react";
+import { SearchIcon, Plus, X, User, Crown, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -57,8 +57,6 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
         role: "Doctor",
         pageIndex: currentPage,
         pageSize: pageSize,
-        sortType: selectSortType,
-        isSortDesc: isSortDesc,
     };
 
     // Sử dụng hook useGetUserAvailable
@@ -177,7 +175,7 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
             <DialogTrigger asChild>
                 <Button
                     size="sm"
-                    className="px-6 py-5 bg-[#248FCA] hover:bg-[#2490cada] cursor-pointer"
+                    className="px-6 py-5 bg-[#248FCA] hover:bg-[#2490cada] cursor-pointer min-w-[180px]"
                 >
                     <Plus width={20} height={20} color="white" />
                     Thêm bác sĩ
@@ -198,7 +196,7 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                         <div className="relative flex-1">
                             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <Input
-                                placeholder="Tìm kiếm theo tên, email, khoa..."
+                                placeholder="Tìm kiếm theo tên, số điện thoại..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="pl-10"
@@ -261,8 +259,8 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                                 hasMore={hasMore}
                                 isLoading={isPending || isLoading}
                                 onLoadMore={handleLoadMore}
-                                loadingText="Đang tải thêm bác sĩ..."
-                                endText="Đã tải hết tất cả bác sĩ"
+                                loadingText="Đang tải thêm bác sĩ viên..."
+                                endText="Đã tải hết tất cả bác sĩ viên"
                                 threshold={200}
                             >
                                 <Table>

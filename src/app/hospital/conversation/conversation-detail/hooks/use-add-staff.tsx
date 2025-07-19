@@ -1,7 +1,10 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceAddStaff } from "@/services/conversation/services";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { CONVERSATION_DETAIL_QUERY_KEY } from "./use-get-conversation";
+
 import { z } from "zod";
 
 export const addStaffSchema = z.object({
@@ -20,15 +23,19 @@ export default function useAddStaff({
         },
     });
 
+    const queryClient = useQueryClient();
+
     const { mutate, isPending } = useServiceAddStaff({ conversationId });
     const { showBackdrop, hideBackdrop } = useBackdrop();
 
     const onSubmit = (data: REQUEST.AddStaff) => {
         showBackdrop();
         mutate(data, {
-            onSuccess: (res) => {
+            onSuccess: async (res) => {
                 hideBackdrop();
-                console.log("API Success:", res);
+                await queryClient.invalidateQueries({
+                    queryKey: [CONVERSATION_DETAIL_QUERY_KEY],
+                });
                 form.reset();
             },
             onError: (err) => {

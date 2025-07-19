@@ -57,8 +57,6 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
         role: "HospitalStaff",
         pageIndex: currentPage,
         pageSize: pageSize,
-        sortType: selectSortType,
-        isSortDesc: isSortDesc,
     };
 
     // Sử dụng hook useGetUserAvailable
@@ -177,7 +175,7 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
             <DialogTrigger asChild>
                 <Button
                     size="sm"
-                    className="px-6 py-5 bg-[#248FCA] hover:bg-[#2490cada] cursor-pointer"
+                    className="px-6 py-5 bg-[#248FCA] hover:bg-[#2490cada] cursor-pointer min-w-[180px]"
                 >
                     <Plus width={20} height={20} color="white" />
                     Thêm quản trị viên

@@ -89,8 +89,6 @@ export const getUserAvailable = async ({
     role,
     pageIndex = 1,
     pageSize = 10,
-    sortType = "",
-    isSortDesc,
     search = "",
 }: REQUEST.UserAvailableRequestParam) => {
     const params: Record<
@@ -101,19 +99,13 @@ export const getUserAvailable = async ({
     params.pageSize = pageSize;
 
     if (search && search.trim() !== "") {
-        params.searchContent = search.trim();
+        params.search = search.trim();
     }
     if (role !== undefined && role !== null) {
         params.role = role;
     }
     if (conversationId && conversationId.trim() !== "") {
         params.conversationId = conversationId.trim();
-    }
-    if (sortType && sortType.trim() !== "") {
-        params.sortType = sortType.trim();
-    }
-    if (isSortDesc !== undefined) {
-        params.isSortAsc = isSortDesc;
     }
     const response = await request<TResponseData<API.TGetUserAvailable>>(
         API_ENDPOINTS.GET_AVAILABLE_USERS,
