@@ -1,47 +1,58 @@
-"use client";
-
 import { useBackdrop } from "@/context/backdrop_context";
-import { useServiceAddMembers } from "@/services/conversation/services";
+import { useServiceUpdateConversation } from "@/services/conversation/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CONVERSATION_DETAIL_QUERY_KEY } from "./use-get-conversation";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_CONVERSATIONS_QUERY_KEY } from "../../hooks/use-get-conversations";
 
-export const addMembersSchema = z.object({
-    userIds: z.array(z.string()).min(1, "Phải chọn ít nhất 1 thành viên"),
+export const updateConversationSchema = z.object({
+    name: z
+        .string()
+        .min(1, "Phải nhập tên nhóm")
+        .max(100, "Tên nhóm không được quá 100 kí tự"),
+
+    avatarId: z.string(),
 });
 
-export type AddMembersFormData = z.infer<typeof addMembersSchema>;
+export type ConversationFormData = z.infer<typeof updateConversationSchema>;
 
-export default function useAddMembers({
+export default function useUpdateConversation({
     conversationId,
 }: REQUEST.ConversationId) {
-    const form = useForm<AddMembersFormData>({
-        resolver: zodResolver(addMembersSchema),
+    const form = useForm<ConversationFormData>({
+        resolver: zodResolver(updateConversationSchema),
         defaultValues: {
-            userIds: [],
+            name: "",
+            avatarId: "",
         },
     });
 
-    const { mutate, isPending } = useServiceAddMembers({ conversationId });
+    const router = useRouter();
+
+    const { mutate, isPending } = useServiceUpdateConversation({
+        conversationId,
+    });
     const { showBackdrop, hideBackdrop } = useBackdrop();
     const queryClient = useQueryClient();
 
-    const onSubmit = (data: REQUEST.AddMembers) => {
+    const onSubmit = (
+        data: REQUEST.TUpdateConversation,
+        onLoadData: () => void
+    ) => {
         showBackdrop();
         mutate(data, {
             onSuccess: async (res) => {
                 hideBackdrop();
-                console.log("API Success:", res);
-                await queryClient.invalidateQueries({
-                    queryKey: [CONVERSATION_DETAIL_QUERY_KEY],
-                });
+                onLoadData;
                 await queryClient.invalidateQueries({
                     queryKey: [GET_CONVERSATIONS_QUERY_KEY],
                 });
                 form.reset();
+                setTimeout(() => {
+                    router.push("/hospital/conversation");
+                }, 500);
             },
             onError: (err) => {
                 hideBackdrop();

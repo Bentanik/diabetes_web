@@ -4,6 +4,11 @@ declare namespace REQUEST {
         avatarId?: string | null;
     };
 
+    type TUpdateConversation = {
+        name?: string | null;
+        avatarId?: string | null;
+    };
+
     type ConversationsParams = {
         pageIndex?: number;
         pageSize?: number;

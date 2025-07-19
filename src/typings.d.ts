@@ -1,13 +1,11 @@
 import { error } from "console";
 
 declare type TMeta = {
-    type?: string;
-    title: string;
-    status: number;
-    errorCode: string;
     detail: string;
+    errorCode: string;
+    status: number;
+    title: string;
 };
-
 declare type TResponse<T = object | null> = {
     value: {
         code: string;

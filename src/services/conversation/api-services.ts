@@ -94,6 +94,23 @@ export const addDoctorAsync = async (
     return response.data;
 };
 
+export const updateConversationAsync = async (
+    { conversationId }: REQUEST.ConversationId,
+    body: REQUEST.TUpdateConversation
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.UPDATE_CONVERSATION(conversationId),
+        {
+            method: "PATCH",
+            data: body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const addStaffAsync = async (
     { conversationId }: REQUEST.ConversationId,
     body: REQUEST.AddStaff

@@ -25,6 +25,8 @@ const GET_CONVERSATION = (conversationId: string) =>
     `${CONVERSATION}/${conversationId}/participants`;
 
 const DELETE_PARTICIPANT = GET_CONVERSATION;
+
+const UPDATE_CONVERSATION = DELETE_CONVERSATION;
 export default {
     CONVERSATION,
     GET_CONVERSATIONS,
@@ -36,4 +38,5 @@ export default {
     DELETE_CONVERSATION,
     GET_CONVERSATION,
     DELETE_PARTICIPANT,
+    UPDATE_CONVERSATION,
 };

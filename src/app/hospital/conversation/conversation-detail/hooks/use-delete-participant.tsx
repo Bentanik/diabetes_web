@@ -4,6 +4,7 @@ import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceDeleteParticipant } from "@/services/conversation/services";
 import { useQueryClient } from "@tanstack/react-query";
 import { CONVERSATION_DETAIL_QUERY_KEY } from "./use-get-conversation";
+import { GET_CONVERSATIONS_QUERY_KEY } from "../../hooks/use-get-conversations";
 
 export default function useDeleteParticipant({
     conversationId,
@@ -26,6 +27,9 @@ export default function useDeleteParticipant({
                 console.log("API Success:", res);
                 await queryClient.invalidateQueries({
                     queryKey: [CONVERSATION_DETAIL_QUERY_KEY],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_CONVERSATIONS_QUERY_KEY],
                 });
             },
             onError: (err) => {

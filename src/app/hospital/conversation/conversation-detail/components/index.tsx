@@ -47,6 +47,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import UpdateConversationDialog from "./update-conversation";
 
 const sortBy = [
     { name: "Tên thành viên", value: "name" },
@@ -146,6 +147,7 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
                             </div>
                         </DialogContent>
                     </Dialog>
+                    <UpdateConversationDialog conversationId={conversationId} />
                     <Button variant="outline" className="gap-2">
                         <BarChartIcon className="w-4 h-4" />
                         Xuất báo cáo

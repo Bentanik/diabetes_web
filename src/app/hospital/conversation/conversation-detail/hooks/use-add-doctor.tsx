@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CONVERSATION_DETAIL_QUERY_KEY } from "./use-get-conversation";
+import { GET_CONVERSATIONS_QUERY_KEY } from "../../hooks/use-get-conversations";
 
 export const addDoctorSchema = z.object({
     doctorId: z.string().trim().min(1, "Phải chọn bác sĩ để thêm vào"),
@@ -33,6 +34,9 @@ export default function useAddDoctor({
                 hideBackdrop();
                 await queryClient.invalidateQueries({
                     queryKey: [CONVERSATION_DETAIL_QUERY_KEY],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_CONVERSATIONS_QUERY_KEY],
                 });
                 form.reset();
             },

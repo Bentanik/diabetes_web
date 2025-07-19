@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { CONVERSATION_DETAIL_QUERY_KEY } from "./use-get-conversation";
 
 import { z } from "zod";
+import { GET_CONVERSATIONS_QUERY_KEY } from "../../hooks/use-get-conversations";
 
 export const addStaffSchema = z.object({
     adminId: z.string().trim().min(1, "Phải chọn nhân viên để thêm vào"),
@@ -35,6 +36,9 @@ export default function useAddStaff({
                 hideBackdrop();
                 await queryClient.invalidateQueries({
                     queryKey: [CONVERSATION_DETAIL_QUERY_KEY],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_CONVERSATIONS_QUERY_KEY],
                 });
                 form.reset();
             },

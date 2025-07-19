@@ -6,9 +6,9 @@ import {
     addStaffAsync,
     deleteConversationAsync,
     deleteParticipantAsync,
+    updateConversationAsync,
 } from "./api-services";
 import useToast from "@/hooks/use-toast";
-import { error } from "console";
 import { TMeta, TResponse, TResponseData } from "@/typings";
 
 export const useServiceCreateConversation = () => {
@@ -34,10 +34,6 @@ export const useServiceCreateConversation = () => {
             });
         },
         onError: (err) => {
-            // const errorMessages = err.errors
-            //     .flat()
-            //     .map((e) => e.message)
-            //     .join(", ");
             addToast({
                 type: "error",
                 description: err.title,
@@ -165,6 +161,39 @@ export const useServiceAddDoctor = ({
             addToast({
                 type: "error",
                 description: "Thêm bác sĩ vào nhóm thất bại",
+                duration: 5000,
+            });
+        },
+    });
+};
+
+export const useServiceUpdateConversation = ({
+    conversationId,
+}: REQUEST.ConversationId) => {
+    const { addToast } = useToast();
+
+    return useMutation<TResponse, TMeta, REQUEST.TUpdateConversation>({
+        mutationFn: async (data: REQUEST.TUpdateConversation) => {
+            const response = await updateConversationAsync(
+                { conversationId },
+                {
+                    name: data.name,
+                    avatarId: data.avatarId,
+                }
+            );
+            return response as TResponse;
+        },
+        onSuccess: () => {
+            addToast({
+                type: "success",
+                description: "Cập nhật nhóm chat thành công",
+                duration: 5000,
+            });
+        },
+        onError: () => {
+            addToast({
+                type: "error",
+                description: "Cập nhật nhóm chat thất bại",
                 duration: 5000,
             });
         },
