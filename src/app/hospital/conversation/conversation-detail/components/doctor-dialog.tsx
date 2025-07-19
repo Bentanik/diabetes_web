@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { SearchIcon, Plus, X, User } from "lucide-react";
+import { SearchIcon, Plus, X, User, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -22,7 +22,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import InfiniteScroll from "@/components/scroll-paginated";
-import useServiceAddMembers from "@/app/hospital/conversation/conversation-detail/hooks/use-add-members";
+import useAddDoctor from "@/app/hospital/conversation/conversation-detail/hooks/use-add-doctor";
 import {
     useGetUserAvailable,
     USER_AVAILABLE_QUERY_KEY,
@@ -40,9 +40,9 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const { form, onSubmit } = useServiceAddMembers({ conversationId });
+    const { form, onSubmit } = useAddDoctor({ conversationId });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [selectedId, setSelectedId] = useState<string>("");
     const [allUsers, setAllUsers] = useState<any[]>([]);
     // Thêm state để track search/sort đã thay đổi
     const [isSearchOrSortChanged, setIsSearchOrSortChanged] = useState(false);
@@ -131,13 +131,12 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
 
         setIsSubmitting(true);
         try {
-            const formData: REQUEST.AddMembers = {
-                userIds: selectedIds,
+            const formData: REQUEST.AddDoctor = {
+                doctorId: selectedId,
             };
             await onSubmit(formData);
             setIsDialogOpen(false);
-            // Reset states sau khi thành công
-            setSelectedIds([]);
+            setSelectedId("");
             setAllUsers([]);
             setCurrentPage(1);
         } catch (error) {
@@ -148,15 +147,9 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
         }
     };
 
-    const toggleUser = (id: string) => {
-        setSelectedIds((prev) => {
-            const updated = prev.includes(id)
-                ? prev.filter((u) => u !== id)
-                : [...prev, id];
-            return updated;
-        });
+    const selectUser = (id: string) => {
+        setSelectedId((prev) => (prev === id ? "" : id));
     };
-
     // Debounce search để tránh gọi API quá nhiều
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -172,7 +165,7 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
     useEffect(() => {
         if (isOpenDialog) {
             setCurrentPage(1);
-            setSelectedIds([]);
+            setSelectedId("");
             setSearchTerm("");
             setAllUsers([]);
             setIsSearchOrSortChanged(false);
@@ -187,16 +180,16 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                     className="px-6 py-5 bg-[#248FCA] hover:bg-[#2490cada] cursor-pointer"
                 >
                     <Plus width={20} height={20} color="white" />
-                    Thêm bệnh nhân
+                    Thêm bác sĩ
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[800px] h-[700px] flex flex-col">
                 <DialogHeader className="flex-shrink-0">
                     <DialogTitle className="text-[1.5rem] text-[#248FCA]">
-                        Thêm bệnh nhân vào nhóm
+                        Thêm bác sĩ vào nhóm
                     </DialogTitle>
                     <DialogDescription>
-                        Hãy tìm kiếm bệnh nhân để thêm vào nhóm chat
+                        Hãy tìm kiếm bác sĩ để thêm vào nhóm chat
                     </DialogDescription>
                 </DialogHeader>
 
@@ -214,42 +207,38 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                         <Button
                             type="submit"
                             className="bg-[#248fca] hover:bg-[#2490cacb] cursor-pointer"
-                            disabled={!selectedIds.length || isSubmitting}
+                            disabled={!selectedId || isSubmitting}
                             onClick={() => handleFormSubmit()}
                         >
                             {isSubmitting ? "Đang thêm..." : "Thêm vào nhóm"}
                         </Button>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                        {selectedIds.slice(0, 3).map((id) => {
-                            const user = allUsers.find((u) => u.id === id);
-                            if (!user) return null;
-                            return (
-                                <div
-                                    key={id}
-                                    className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm"
-                                >
-                                    <Avatar className="h-5 w-5 mr-1">
-                                        <AvatarImage src={user.avatar} />
-                                        <AvatarFallback>
-                                            {user.fullName.charAt(0)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    {user.fullName}
-                                    <X
-                                        className="ml-1 w-4 h-4 cursor-pointer"
-                                        onClick={() => toggleUser(id)}
-                                    />
-                                </div>
-                            );
-                        })}
-                        {selectedIds.length > 3 && (
-                            <span className="text-sm text-gray-500">
-                                +{selectedIds.length - 3} thành viên khác
-                            </span>
-                        )}
-                    </div>
+                    {selectedId && (
+                        <div className="flex items-center gap-2">
+                            {(() => {
+                                const user = allUsers.find(
+                                    (u) => u.id === selectedId
+                                );
+                                if (!user) return null;
+                                return (
+                                    <div className="flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm">
+                                        <Avatar className="h-5 w-5 mr-1">
+                                            <AvatarImage src={user.avatar} />
+                                            <AvatarFallback>
+                                                {user.fullName.charAt(0)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        {user.fullName}
+                                        <X
+                                            className="ml-1 w-4 h-4 cursor-pointer"
+                                            onClick={() => setSelectedId("")}
+                                        />
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
 
                     {allUsers.length === 0 && !isPending && !isLoading ? (
                         <div className="flex-1 flex items-center justify-center">
@@ -272,14 +261,14 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                                 hasMore={hasMore}
                                 isLoading={isPending || isLoading}
                                 onLoadMore={handleLoadMore}
-                                loadingText="Đang tải thêm bệnh nhân..."
-                                endText="Đã tải hết tất cả bệnh nhân"
+                                loadingText="Đang tải thêm bác sĩ..."
+                                endText="Đã tải hết tất cả bác sĩ"
                                 threshold={200}
                             >
                                 <Table>
                                     <TableHeader className="sticky top-0 bg-white z-10">
                                         <TableRow className="h-12">
-                                            <TableHead>Bệnh nhân</TableHead>
+                                            <TableHead>Thành viên</TableHead>
                                             <TableHead>Vai trò</TableHead>
                                             <TableHead>Trạng thái</TableHead>
                                             <TableHead>Chọn</TableHead>
@@ -296,7 +285,7 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                                                 }`}
                                                 onClick={() => {
                                                     if (user.status == 0) {
-                                                        toggleUser(user.id);
+                                                        selectUser(user.id);
                                                     }
                                                 }}
                                             >
@@ -336,8 +325,8 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                                                 </TableCell>
                                                 <TableCell className="py-2">
                                                     <div className="flex items-center gap-2">
-                                                        <User className="h-4 w-4" />
-                                                        <span>Bệnh nhân</span>
+                                                        <Stethoscope className="h-4 w-4" />
+                                                        <span>Bác sĩ</span>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="py-2">
@@ -355,10 +344,11 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
                                                 </TableCell>
                                                 <TableCell>
                                                     <input
-                                                        type="checkbox"
-                                                        checked={selectedIds.includes(
+                                                        type="radio"
+                                                        checked={
+                                                            selectedId ===
                                                             user.id
-                                                        )}
+                                                        }
                                                         disabled
                                                         className="h-4 w-4 text-blue-600 border-gray300 rounded focus:ring-blue-500"
                                                     />

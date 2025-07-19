@@ -26,10 +26,10 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import useDeleteConversation from "../hooks/use-delete-conversation";
-// import GroupUserDialog from "./user-dialog";
+import GroupUserDialog from "./user-dialog";
 import GroupDoctorDialog from "./doctor-dialog";
 import { Toaster } from "sonner";
-// import GroupStaffDialog from "./staff-dialog";
+import GroupStaffDialog from "./staff-dialog";
 import { useGetConversationDetail } from "../hooks/use-get-conversation";
 import Image from "next/image";
 import useToast from "@/hooks/use-toast";
@@ -241,15 +241,15 @@ export default function GroupDetailComponent({
                                 </Toggle>
                             </div>
                             <div className="flex gap-2">
-                                {/* <GroupUserDialog
+                                <GroupUserDialog
                                     conversationId={conversationId}
-                                /> */}
+                                />
                                 <GroupDoctorDialog
                                     conversationId={conversationId}
                                 />
-                                {/* <GroupStaffDialog
+                                <GroupStaffDialog
                                     conversationId={conversationId}
-                                /> */}
+                                />
                             </div>
                         </div>
                     </motion.div>

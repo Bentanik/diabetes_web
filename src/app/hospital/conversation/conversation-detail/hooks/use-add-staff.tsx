@@ -10,7 +10,7 @@ export const addStaffSchema = z.object({
 
 export type AddStaffFormData = z.infer<typeof addStaffSchema>;
 
-export default function useAddDoctor({
+export default function useAddStaff({
     conversationId,
 }: REQUEST.ConversationId) {
     const form = useForm<AddStaffFormData>({
