@@ -3,21 +3,25 @@
 const CONVERSATION =
     "https://chat-doctor-h5awemg3hcfacwdv.southeastasia-01.azurewebsites.net/api/v1/conversations";
 const HOSPITAL_CONVERSATION =
-    "https://chat-doctor-h5awemg3hcfacwdv.southeastasia-01.azurewebsites.net/api/v1/hospitals";
+    "https://chat-doctor-h5awemg3hcfacwdv.southeastasia-01.azurewebsites.net/api/v1/hospitals/conversations";
 
-const GET_CONVERSATIONS = HOSPITAL_CONVERSATION + "/conversations";
+// Hospital
+const GET_CONVERSATIONS = HOSPITAL_CONVERSATION;
 
+const CREATE_CONVERSATION = HOSPITAL_CONVERSATION;
+
+// Conversation
 const GET_AVAILABLE_USERS = (conversationId: string) =>
     `${CONVERSATION}/${conversationId}/available-users`;
-const CREATE_CONVERSATION = HOSPITAL_CONVERSATION + "/conversations";
+
 const ADD_MEMBERS = (conversationId: string) =>
-    `${HOSPITAL_CONVERSATION}/${conversationId}/members`;
+    `${CONVERSATION}/${conversationId}/members`;
 
 const ADD_DOCTOR = (conversationId: string) =>
-    `${HOSPITAL_CONVERSATION}/${conversationId}/doctors`;
+    `${CONVERSATION}/${conversationId}/doctors`;
 
 const ADD_STAFF = (conversationId: string) =>
-    `${HOSPITAL_CONVERSATION}/${conversationId}/admins`;
+    `${CONVERSATION}/${conversationId}/admins`;
 
 const DELETE_CONVERSATION = (conversationId: string) =>
     `${CONVERSATION}/${conversationId}`;
