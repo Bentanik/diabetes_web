@@ -23,7 +23,6 @@ declare namespace REQUEST {
     }
 
     type UserAvailableRequestParam = {
-        conversationId: string;
         role: string;
         pageIndex?: number;
         pageSize?: number;

@@ -173,6 +173,9 @@ export default function GroupDetailComponent({
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedUserForDeletion, setSelectedUserForDeletion] = useState<
+        string | null
+    >(null);
     const pageSize = 10;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
     const { onSubmit, isPending: deletePending } = useDeleteParticipant({
@@ -244,7 +247,7 @@ export default function GroupDetailComponent({
             };
 
             await onSubmit(participantId, () => {
-                setIsDialogOpen(false);
+                setSelectedUserForDeletion(null);
             });
         } catch (error) {
             console.error("Error updating post:", error);
@@ -389,13 +392,27 @@ export default function GroupDetailComponent({
                                         <TableCell>
                                             <div className="flex justify-center max-w-[100px]">
                                                 <Dialog
-                                                    open={isOpenDialog}
-                                                    onOpenChange={
-                                                        setIsDialogOpen
+                                                    open={
+                                                        selectedUserForDeletion ===
+                                                        user.id
                                                     }
+                                                    onOpenChange={(open) => {
+                                                        if (!open) {
+                                                            setSelectedUserForDeletion(
+                                                                null
+                                                            );
+                                                        }
+                                                    }}
                                                 >
                                                     <DialogTrigger asChild>
-                                                        <Trash className="cursor-pointer text-gray-500 hover:text-red-500 transition-colors duration-200" />
+                                                        <Trash
+                                                            className="cursor-pointer text-gray-500 hover:text-red-500 transition-colors duration-200"
+                                                            onClick={() =>
+                                                                setSelectedUserForDeletion(
+                                                                    user.id
+                                                                )
+                                                            }
+                                                        />
                                                     </DialogTrigger>
                                                     <DialogContent>
                                                         <DialogHeader>
@@ -406,8 +423,10 @@ export default function GroupDetailComponent({
                                                             <DialogDescription className="text-[1.1rem] my-5">
                                                                 Bạn có chắc chắn
                                                                 muốn xóa người
-                                                                dùng này ra khỏi
-                                                                nhóm chat ?
+                                                                dùng{" "}
+                                                                {user.fullName}{" "}
+                                                                này ra khỏi nhóm
+                                                                chat ?
                                                             </DialogDescription>
                                                         </DialogHeader>
                                                         <div className="flex justify-end gap-3">
@@ -416,8 +435,8 @@ export default function GroupDetailComponent({
                                                                     variant="outline"
                                                                     className="gap-2 cursor-pointer hover:border-gray-300 min-w-[100px]"
                                                                     onClick={() =>
-                                                                        setIsDialogOpen(
-                                                                            false
+                                                                        setSelectedUserForDeletion(
+                                                                            null
                                                                         )
                                                                     }
                                                                 >

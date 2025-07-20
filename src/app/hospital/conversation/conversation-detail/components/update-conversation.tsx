@@ -39,16 +39,13 @@ export default function UpdateConversationDialog({
     conversationId,
 }: UpdateProp) {
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-    const { isPending: isUploading, onSubmit: onSubmitImage } =
-        useUploadConversationImage();
+    const { isPending, onSubmit: onSubmitImage } = useUploadConversationImage();
     const { form, onSubmit } = useUpdateConversation({ conversationId });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
     const handleCancel = () => {
         console.log("");
     };
-
-    const router = useRouter();
 
     const handleFormSubmit = async (data: ConversationFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
@@ -62,11 +59,7 @@ export default function UpdateConversationDialog({
                 name: data.name || null,
                 avatarId: data.avatarId || null,
             };
-            await onSubmit(formData, () => {
-                setIsDialogOpen(false);
-                form.reset();
-                console.log("ádasdas");
-            });
+            await onSubmit(formData, () => setIsDialogOpen(false));
         } catch (error) {
             console.error("Error updating post:", error);
             alert("Có lỗi xảy ra khi cập nhật bài viết.");
@@ -119,10 +112,10 @@ export default function UpdateConversationDialog({
                     <DialogContent className="sm:max-w-[800px] h-[700px] flex flex-col">
                         <DialogHeader className="flex-shrink-0">
                             <DialogTitle className="text-[1.5rem] text-[#248FCA]">
-                                Tạo nhóm chat
+                                Cập nhật nhóm chat
                             </DialogTitle>
                             <DialogDescription>
-                                Điền đầy đủ nội dung để tạo nhóm chat mới
+                                Chỉnh sửa thông tin của nhóm chat{" "}
                             </DialogDescription>
                         </DialogHeader>
 
@@ -223,13 +216,10 @@ export default function UpdateConversationDialog({
                                 <DialogFooter>
                                     <Button
                                         type="submit"
-                                        // disabled={isPending}
-                                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
+                                        disabled={isPending}
+                                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                                     >
-                                        {/* {isPending
-                                            ? "Đang tạo..."
-                                            : "Tạo nhóm mới"} */}
-                                        Tạo nhóm
+                                        Cập nhật nhóm chat
                                     </Button>
                                 </DialogFooter>
                             </form>

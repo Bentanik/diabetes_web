@@ -33,20 +33,24 @@ export default function useCreateConversation() {
     const { showBackdrop, hideBackdrop } = useBackdrop();
     const queryClient = useQueryClient();
 
-    const onSubmit = (data: REQUEST.TCreateConversation) => {
+    const onSubmit = (
+        data: REQUEST.TCreateConversation,
+        onLoadData: () => void
+    ) => {
         showBackdrop();
         mutate(data, {
             onSuccess: async (res) => {
                 hideBackdrop();
+                onLoadData();
                 await queryClient.invalidateQueries({
                     queryKey: [GET_CONVERSATIONS_QUERY_KEY],
                 });
-                const conversationId = res.data?.conversationId;
-                if (conversationId) {
-                    router.push(
-                        `/hospital/conversation/conversation-detail/${conversationId}`
-                    );
-                }
+                // const conversationId = res.data?.conversationId;
+                // if (conversationId) {
+                //     router.push(
+                //         `/hospital/conversation/conversation-detail/${conversationId}`
+                //     );
+                // }
                 form.reset();
             },
             onError: (err) => {

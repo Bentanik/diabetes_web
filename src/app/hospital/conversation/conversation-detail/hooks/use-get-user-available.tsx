@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 export const USER_AVAILABLE_QUERY_KEY = "user_available";
 
 export const useGetUserAvailable = (
+    { conversationId }: REQUEST.ConversationId,
     params: REQUEST.UserAvailableRequestParam
 ) => {
     const {
@@ -17,9 +18,9 @@ export const useGetUserAvailable = (
         TMeta,
         API.TGetUserAvailable
     >({
-        queryKey: [USER_AVAILABLE_QUERY_KEY, params],
+        queryKey: [USER_AVAILABLE_QUERY_KEY, params, conversationId],
         queryFn: async () => {
-            const res = await getUserAvailable(params);
+            const res = await getUserAvailable({ conversationId }, params);
             if (res.data == null) {
                 throw new Error("No data returned from getConversations");
             }
@@ -34,7 +35,6 @@ export const useGetUserAvailable = (
                 hasNextPage: false,
                 hasPreviousPage: false,
             },
-        // enabled: !!params.conversationId,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: true,
     });

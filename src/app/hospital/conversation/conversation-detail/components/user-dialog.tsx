@@ -52,7 +52,6 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
     const queryClient = useQueryClient();
 
     const params: REQUEST.UserAvailableRequestParam = {
-        conversationId: conversationId,
         search: searchTerm,
         role: "Patient",
         pageIndex: currentPage,
@@ -60,8 +59,10 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
     };
 
     // Sử dụng hook useGetUserAvailable
-    const { user_available, isPending, isError, error } =
-        useGetUserAvailable(params);
+    const { user_available, isPending, isError, error } = useGetUserAvailable(
+        { conversationId },
+        params
+    );
 
     // Dữ liệu người dùng từ API
     const data = user_available?.items || [];

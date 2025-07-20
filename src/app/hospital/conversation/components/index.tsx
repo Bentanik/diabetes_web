@@ -154,7 +154,7 @@ export default function GroupHospitalComponent() {
                 name: data.name,
                 avatarId: data.avatarId || null,
             };
-            await onSubmit(conversationData);
+            await onSubmit(conversationData, () => setIsDialogOpen(false));
         } catch (err) {
             console.log(err);
         }

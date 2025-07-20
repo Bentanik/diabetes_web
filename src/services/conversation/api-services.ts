@@ -128,13 +128,15 @@ export const addStaffAsync = async (
     return response.data;
 };
 
-export const getUserAvailable = async ({
-    conversationId = "",
-    role,
-    pageIndex = 1,
-    pageSize = 10,
-    search = "",
-}: REQUEST.UserAvailableRequestParam) => {
+export const getUserAvailable = async (
+    { conversationId }: REQUEST.ConversationId,
+    {
+        role,
+        pageIndex = 1,
+        pageSize = 10,
+        search = "",
+    }: REQUEST.UserAvailableRequestParam
+) => {
     const params: Record<
         string,
         string | number | boolean | string[] | undefined
@@ -148,11 +150,8 @@ export const getUserAvailable = async ({
     if (role !== undefined && role !== null) {
         params.role = role;
     }
-    if (conversationId && conversationId.trim() !== "") {
-        params.conversationId = conversationId.trim();
-    }
     const response = await request<TResponseData<API.TGetUserAvailable>>(
-        API_ENDPOINTS.GET_AVAILABLE_USERS,
+        API_ENDPOINTS.GET_AVAILABLE_USERS(conversationId),
         {
             method: "GET",
             params: Object.keys(params).length > 0 ? params : undefined,
