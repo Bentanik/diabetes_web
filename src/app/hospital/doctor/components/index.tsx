@@ -4,22 +4,19 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     AlertCircleIcon,
-    BadgeIcon,
     BarChartIcon,
     BellIcon,
     CheckCircleIcon,
-    ClockIcon,
-    EditIcon,
-    EyeIcon,
-    MailIcon,
-    MapPinIcon,
     PhoneIcon,
     PlusIcon,
     SearchIcon,
-    Trash2Icon,
     UsersIcon,
     XCircleIcon,
     Plus,
+    VenusAndMars,
+    Briefcase,
+    FileBadge,
+    Hospital,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
@@ -192,20 +189,6 @@ export default function EmployeeHospitalComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
     const [selectedStatus, setSelectedStatus] = useState<string>("all");
-    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "active":
-                return "bg-green-100 text-green-700 border-green-200";
-            case "inactive":
-                return "bg-gray-100 text-gray-700 border-gray-200";
-            case "pending":
-                return "bg-yellow-100 text-yellow-700 border-yellow-200";
-            default:
-                return "bg-gray-100 text-gray-700 border-gray-200";
-        }
-    };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -217,19 +200,6 @@ export default function EmployeeHospitalComponent() {
                 return <AlertCircleIcon className="w-4 h-4" />;
             default:
                 return <XCircleIcon className="w-4 h-4" />;
-        }
-    };
-
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case "active":
-                return "Đang hoạt động";
-            case "inactive":
-                return "Tạm nghỉ";
-            case "pending":
-                return "Chờ xác thực";
-            default:
-                return "Không xác định";
         }
     };
 
@@ -297,253 +267,67 @@ export default function EmployeeHospitalComponent() {
                             <option value="pending">Chờ xác thực</option>
                         </select>
                     </div>
-                    <div className="flex gap-2">
-                        <Button
-                            variant={
-                                viewMode === "grid" ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => setViewMode("grid")}
-                        >
-                            Grid
-                        </Button>
-                        <Button
-                            variant={
-                                viewMode === "list" ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => setViewMode("list")}
-                        >
-                            List
-                        </Button>
-                    </div>
                 </div>
             </motion.div>
 
-            {/* Staff Grid/List */}
-            {viewMode === "grid" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredStaff.map((staff, index) => (
-                        <motion.div
-                            key={staff.id}
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: index * 0.1 }}
-                            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredStaff.map((staff, index) => (
+                    <motion.div
+                        key={staff.id}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+                    >
+                        <Link
+                            href={`/hospital/doctor/doctor-detail/${staff.id}`}
                         >
-                            <Link
-                                href={`/hospital/doctor/doctor-detail/${staff.id}`}
-                            >
-                                {/* Header */}
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="w-12 h-12">
-                                            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold">
-                                                {staff.avatar}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <h3 className="font-semibold text-[1.5rem]">
-                                                {staff.name}
-                                            </h3>
-                                            <p className="text-sm text-gray-500">
-                                                {staff.role}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <BadgeIcon
-                                            className={`${getStatusColor(
-                                                staff.status
-                                            )} flex items-center gap-1`}
-                                        >
-                                            {getStatusIcon(staff.status)}
-                                            {getStatusText(staff.status)}
-                                        </BadgeIcon>
+                            {/* Header */}
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="w-12 h-12">
+                                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold">
+                                            {staff.avatar}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <h3 className="font-semibold text-[1.5rem]">
+                                            {staff.name}
+                                        </h3>
+                                        <p className="text-sm text-gray-500">
+                                            {staff.role}
+                                        </p>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Info */}
-                                <div className="space-y-3 mb-4">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <MapPinIcon className="w-4 h-4" />
-                                        <span>{staff.department}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <MailIcon className="w-4 h-4" />
-                                        <span>{staff.email}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <PhoneIcon className="w-4 h-4" />
-                                        <span>{staff.phone}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <ClockIcon className="w-4 h-4" />
-                                        <span>
-                                            Hoạt động: {staff.lastActive}
-                                        </span>
-                                    </div>
+                            {/* Info */}
+                            <div className="space-y-3 mb-4">
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <PhoneIcon className="w-4 h-4" />
+                                    <span>Số điện thoại:</span>
                                 </div>
-
-                                {/* Stats */}
-                                <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
-                                    <div className="text-center">
-                                        <div className="text-lg font-bold text-gray-800">
-                                            {staff.patientsCount}
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            Bệnh nhân
-                                        </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-lg font-bold text-gray-800">
-                                            {staff.messagesCount}
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            Tin nhắn
-                                        </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-lg font-bold text-gray-800">
-                                            {staff.rating}
-                                        </div>
-                                        <div className="text-xs text-gray-500">
-                                            Đánh giá
-                                        </div>
-                                    </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <VenusAndMars className="w-4 h-4" />
+                                    <span>Giới tính:</span>
                                 </div>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </div>
-            ) : (
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden"
-                >
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                                        Nhân viên
-                                    </th>
-                                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                                        Khoa
-                                    </th>
-                                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                                        Liên hệ
-                                    </th>
-                                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                                        Trạng thái
-                                    </th>
-                                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                                        Thống kê
-                                    </th>
-                                    <th className="text-left py-4 px-6 font-semibold text-gray-700">
-                                        Thao tác
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredStaff.map((staff, index) => (
-                                    <motion.tr
-                                        key={staff.id}
-                                        initial={{ y: 10, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        className="border-b border-gray-100 hover:bg-gray-50"
-                                    >
-                                        <td className="py-4 px-6">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="w-10 h-10">
-                                                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white">
-                                                        {staff.avatar}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <p className="font-semibold text-gray-800">
-                                                        {staff.name}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500">
-                                                        {staff.role}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <div>
-                                                <p className="font-medium text-gray-800">
-                                                    {staff.department}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {staff.location}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <div className="space-y-1">
-                                                <p className="text-sm text-gray-600">
-                                                    {staff.email}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    {staff.phone}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <BadgeIcon
-                                                className={`${getStatusColor(
-                                                    staff.status
-                                                )} flex items-center gap-1 w-fit`}
-                                            >
-                                                {getStatusIcon(staff.status)}
-                                                {getStatusText(staff.status)}
-                                            </BadgeIcon>
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <div className="flex gap-4 text-sm">
-                                                <span className="text-gray-600">
-                                                    {staff.patientsCount} BN
-                                                </span>
-                                                <span className="text-gray-600">
-                                                    {staff.messagesCount} TN
-                                                </span>
-                                                <span className="text-gray-600">
-                                                    ⭐ {staff.rating}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                >
-                                                    <EyeIcon className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                >
-                                                    <EditIcon className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                >
-                                                    <Trash2Icon className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </motion.tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </motion.div>
-            )}
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <Briefcase className="w-4 h-4" />
+                                    <span>Chức vụ:</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <FileBadge className="w-4 h-4" />
+                                    <span>Số năm kinh nghiệm</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <Hospital className="w-4 h-4" />
+                                    <span>Bác sĩ của bệnh viện:</span>
+                                </div>
+                            </div>
+                        </Link>
+                    </motion.div>
+                ))}
+            </div>
 
             {/* Empty State */}
             {filteredStaff.length === 0 && (

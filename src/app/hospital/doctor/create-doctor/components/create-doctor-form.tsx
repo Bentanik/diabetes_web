@@ -60,7 +60,6 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
     const [avatarPreview, setAvatarPreview] = useState<string>();
-    // const [avatarId, setAvatarId] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadUserImage();
@@ -78,9 +77,8 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 data,
                 handleClearImages,
                 (imageId, publicId, publicUrl) => {
-                    form.setValue("avatar", imageId);
+                    form.setValue("avatarId", imageId);
                     setAvatarPreview(publicUrl);
-                    // setAvatarId(imageId);
                 }
             );
         }
@@ -106,7 +104,26 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
         }
     }, [form.watch("introduction"), currentContentHtml]);
 
-    console.log("html intro" + currentContentHtml);
+    const firstName = form.watch("firstName");
+    const middleName = form.watch("middleName");
+    const lastName = form.watch("lastName");
+    const exp = form.watch("numberOfExperiences");
+    const getPosition = (position: number) => {
+        switch (position) {
+            case 0:
+                return "Giám đốc";
+            case 1:
+                return "Phó Giám đốc";
+            case 2:
+                return "Trưởng khoa";
+            case 3:
+                return "Phó trưởng khoa";
+            case 4:
+                return "Bác sĩ";
+            default:
+                return "Chức vụ không xác định";
+        }
+    };
 
     const handleFormSubmit = async (data: DoctorFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
@@ -123,7 +140,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 lastName: data.lastName || "",
                 dateOfBirth: data.dateOfBirth || "",
                 gender: data.gender,
-                avatar: data.avatar || "",
+                avatarId: data.avatarId || "",
                 numberOfExperiences:
                     typeof data.numberOfExperiences === "number"
                         ? data.numberOfExperiences
@@ -626,14 +643,21 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                 height={100}
                                                                 className="rounded-full"
                                                             />
-                                                            <div>
-                                                                <p className="text-[gray] font-thin text-[0.9rem]">
-                                                                    PGS. TS. BS
-                                                                </p>
-                                                                <h2 className="font-medium text-[1.2rem]">
-                                                                    Lâm Việt
-                                                                    Trung
-                                                                </h2>
+                                                            <div className="mt-3">
+                                                                <div className="font-medium text-[1.2rem] flex gap-1">
+                                                                    <span>
+                                                                        {firstName ||
+                                                                            "Họ"}
+                                                                    </span>
+                                                                    <span>
+                                                                        {middleName ||
+                                                                            "Tên Đệm"}
+                                                                    </span>
+                                                                    <span>
+                                                                        {lastName ||
+                                                                            "Tên"}
+                                                                    </span>
+                                                                </div>
                                                                 <div className="flex gap-1 items-center">
                                                                     <BadgeCheck
                                                                         width={
@@ -642,12 +666,16 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                         color="#0066ff"
                                                                     />
                                                                     <p className="text-[#0066ff] text-[0.9rem]">
-                                                                        Bác sĩ
+                                                                        {getPosition(
+                                                                            form.watch(
+                                                                                "position"
+                                                                            )
+                                                                        )}
                                                                     </p>
                                                                 </div>
                                                                 <p className=" text-[0.9rem]">
                                                                     <span className="font-medium">
-                                                                        25
+                                                                        {exp}
                                                                     </span>{" "}
                                                                     năm kinh
                                                                     nghiệm

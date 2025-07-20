@@ -10,7 +10,7 @@ declare namespace REQUEST {
         lastName: string;
         dateOfBirth: string;
         gender: GenderType;
-        avatar: string;
+        avatarId: string;
         numberOfExperiences: number;
         position: DoctorPositionType;
         introduction: string;

@@ -1,6 +1,7 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceCreateDoctor } from "@/services/doctor/services";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -11,15 +12,14 @@ export const doctorSchema = z.object({
     lastName: z.string().min(1, "Vui lòng nhập tên"),
     dateOfBirth: z.string().min(1, "Vui lòng chọn ngày sinh cho bác sĩ"),
     gender: z.number(),
-    avatar: z.string().nonempty("Avatar là bắt buộc"),
+    avatarId: z.string().nonempty("Avatar là bắt buộc"),
     numberOfExperiences: z.number(),
     position: z.number(),
     introduction: z.string().min(10, "Giới thiệu phải có ít nhất 10 ký tự"),
 });
 
 export type DoctorFormData = z.infer<typeof doctorSchema>;
-
-export default function useCreateDoctor() {
+export default function useCreateConversation() {
     const form = useForm<DoctorFormData>({
         resolver: zodResolver(doctorSchema),
         defaultValues: {
@@ -29,26 +29,27 @@ export default function useCreateDoctor() {
             lastName: "",
             dateOfBirth: "",
             gender: 0,
-            avatar: "",
-            numberOfExperiences: 0,
-            position: 4,
+            avatarId: "",
+            numberOfExperiences: 1,
+            position: 0,
             introduction: "",
         },
     });
 
     const { mutate, isPending } = useServiceCreateDoctor();
-
-    const isPendingUpdate = isPending;
     const { showBackdrop, hideBackdrop } = useBackdrop();
+    const queryClient = useQueryClient();
 
-    const onSubmit = (data: REQUEST.TCreateDoctor, clearImages: () => void) => {
+    const onSubmit = (data: REQUEST.TCreateDoctor, onLoadData: () => void) => {
         showBackdrop();
         mutate(data, {
-            onSuccess: (res) => {
+            onSuccess: async () => {
                 hideBackdrop();
-                console.log("API Success:", res);
+                onLoadData();
+                // await queryClient.invalidateQueries({
+                //     queryKey: [GET_CONVERSATIONS_QUERY_KEY],
+                // });
                 form.reset();
-                clearImages();
             },
             onError: (err) => {
                 hideBackdrop();
@@ -59,6 +60,6 @@ export default function useCreateDoctor() {
     return {
         onSubmit,
         form,
-        isPendingUpdate,
+        isPending,
     };
 }

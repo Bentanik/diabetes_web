@@ -45,12 +45,6 @@ export default function useCreateConversation() {
                 await queryClient.invalidateQueries({
                     queryKey: [GET_CONVERSATIONS_QUERY_KEY],
                 });
-                // const conversationId = res.data?.conversationId;
-                // if (conversationId) {
-                //     router.push(
-                //         `/hospital/conversation/conversation-detail/${conversationId}`
-                //     );
-                // }
                 form.reset();
             },
             onError: (err) => {

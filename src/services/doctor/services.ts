@@ -8,24 +8,31 @@ export const useServiceCreateDoctor = () => {
 
     return useMutation<TResponse, TMeta, REQUEST.TCreateDoctor>({
         mutationFn: async (data: REQUEST.TCreateDoctor) => {
-            return await createDoctorAsync(data);
+            const response = await createDoctorAsync({
+                phoneNumber: data.phoneNumber,
+                firstName: data.firstName,
+                middleName: data.middleName,
+                lastName: data.lastName,
+                dateOfBirth: data.dateOfBirth,
+                gender: data.gender,
+                avatarId: data.avatarId,
+                numberOfExperiences: data.numberOfExperiences,
+                position: data.position,
+                introduction: data.introduction,
+            });
+            return response as TResponse;
         },
         onSuccess: () => {
             addToast({
                 type: "success",
-                description: "Tạo bác sĩ thành công",
+                description: "Thêm bác sĩ thành công thành công",
                 duration: 5000,
             });
         },
-        onError: (err) => {
-            // const errorMessages = err.errors
-            //     .flat()
-            //     .map((e) => e.message)
-            //     .join(", ");
-
+        onError: () => {
             addToast({
                 type: "error",
-                description: err.title,
+                description: "Thêm bác sĩ thất bại!",
                 duration: 5000,
             });
         },
