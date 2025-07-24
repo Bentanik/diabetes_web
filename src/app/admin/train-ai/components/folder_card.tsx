@@ -12,7 +12,7 @@ import { useClickOutside } from "@/hooks/use-click-outside"
 import DeleteKnowledgeModal from "@/app/admin/train-ai/components/delete_knowlege"
 
 interface FolderCardProps {
-    folder: API.TKnowledgeBase
+    folder: API.TKnowledge
 }
 
 export default function FolderCard({ folder }: FolderCardProps) {
@@ -33,12 +33,9 @@ export default function FolderCard({ folder }: FolderCardProps) {
         if ((e.target as HTMLElement).closest(".dropdown-trigger")) {
             return
         }
-        router.push(`/admin/train-ai/${folder.name}`)
+        router.push(`/admin/train-ai/${folder.id}`)
     }
 
-    /**
-     * Xử lý mở modal xóa
-     */
     const handleDeleteClick = (e: React.MouseEvent) => {
         e.stopPropagation()
         setDeleteModalOpen(true)
@@ -46,7 +43,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
     }
 
     return (
-        <>
+        <div>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -144,11 +141,12 @@ export default function FolderCard({ folder }: FolderCardProps) {
                 isOpen={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 folder={{
+                    id: folder.id,
                     name: folder.name,
                     description: folder.description,
                     document_count: folder.document_count,
                 }}
             />
-        </>
+        </div>
     )
 }

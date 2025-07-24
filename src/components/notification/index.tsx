@@ -6,19 +6,9 @@ import { BellIcon, CheckCircle, XCircle, AlertCircle, Info, X, MoreHorizontal } 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useClickOutside } from "@/hooks/use-click-outside"
+import { useNotifications, type NotificationItem } from "@/hooks/use-notification"
 
-export type NotificationType = "success" | "error" | "warning" | "info"
-
-export interface NotificationItem {
-    id: string
-    type: NotificationType
-    title: string
-    message: string
-    time: string
-    isRead: boolean
-}
-
-function NotificationItem({
+function NotificationItemComponent({
     notification,
     onMarkAsRead,
     onRemove,
@@ -85,29 +75,14 @@ function NotificationItem({
 
 export default function NotificationDropdown() {
     const [isOpen, setIsOpen] = useState(false)
-    const [notifications, setNotifications] = useState<NotificationItem[]>([])
+    const { notifications, unreadCount, markAsRead, removeNotification, markAllAsRead, clearAll } = useNotifications({
+        maxNotifications: 50,
+        persistKey: "app-notifications",
+    })
 
     const dropdownRef = useClickOutside<HTMLDivElement>(() => {
         setIsOpen(false)
     }, isOpen)
-
-    const unreadCount = notifications.filter((n) => !n.isRead).length
-
-    const handleMarkAsRead = (id: string) => {
-        setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)))
-    }
-
-    const handleRemove = (id: string) => {
-        setNotifications((prev) => prev.filter((n) => n.id !== id))
-    }
-
-    const handleMarkAllAsRead = () => {
-        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-    }
-
-    const handleClearAll = () => {
-        setNotifications([])
-    }
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -143,13 +118,13 @@ export default function NotificationDropdown() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={handleMarkAllAsRead}
+                                                onClick={markAllAsRead}
                                                 className="text-xs text-[#248fca] hover:text-[#1e7bb8] hover:bg-[#248fca]/10 h-8 px-3 font-medium"
                                             >
                                                 Đánh dấu đã đọc
                                             </Button>
                                         )}
-                                        <Button variant="ghost" size="icon" onClick={handleClearAll} className="h-8 w-8 hover:bg-gray-200">
+                                        <Button variant="ghost" size="icon" onClick={clearAll} className="h-8 w-8 hover:bg-gray-200">
                                             <MoreHorizontal className="w-4 h-4" />
                                         </Button>
                                     </div>
@@ -164,11 +139,11 @@ export default function NotificationDropdown() {
                                 {notifications.length > 0 ? (
                                     <div className="divide-y divide-gray-100">
                                         {notifications.map((notification) => (
-                                            <NotificationItem
+                                            <NotificationItemComponent
                                                 key={notification.id}
                                                 notification={notification}
-                                                onMarkAsRead={handleMarkAsRead}
-                                                onRemove={handleRemove}
+                                                onMarkAsRead={markAsRead}
+                                                onRemove={removeNotification}
                                             />
                                         ))}
                                     </div>
@@ -186,7 +161,7 @@ export default function NotificationDropdown() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={handleClearAll}
+                                        onClick={clearAll}
                                         className="w-full text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 h-9 font-medium"
                                     >
                                         Xóa tất cả thông báo

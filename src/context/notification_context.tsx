@@ -8,6 +8,15 @@ import { Button } from "@/components/ui/button"
 
 export type NotificationType = "success" | "error" | "warning" | "info" | "progress"
 
+export type NotificationPosition =
+    | "top-left"
+    | "top-center"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-center"
+    | "bottom-right"
+    | "center"
+
 export interface NotificationData {
     id: string
     type: NotificationType
@@ -16,6 +25,7 @@ export interface NotificationData {
     progress?: number
     duration?: number // Auto dismiss after duration (ms), 0 = no auto dismiss
     progressId?: string // Unique ID for progress notifications
+    position?: NotificationPosition // Custom position for individual notification
     actions?: Array<{
         label: string
         onClick: () => void
@@ -26,6 +36,8 @@ export interface NotificationData {
 
 interface NotificationContextType {
     notifications: NotificationData[]
+    defaultPosition: NotificationPosition
+    setDefaultPosition: (position: NotificationPosition) => void
     addNotification: (notification: Omit<NotificationData, "id">) => string
     removeNotification: (id: string) => void
     updateNotification: (id: string, updates: Partial<NotificationData>) => void
@@ -42,6 +54,57 @@ export function useNotification() {
         throw new Error("useNotification must be used within NotificationProvider")
     }
     return context
+}
+
+// Helper function để get position classes
+const getPositionClasses = (position: NotificationPosition) => {
+    switch (position) {
+        case "top-left":
+            return "top-6 left-6"
+        case "top-center":
+            return "top-6 left-1/2 transform -translate-x-1/2"
+        case "top-right":
+            return "top-6 right-6"
+        case "bottom-left":
+            return "bottom-6 left-6"
+        case "bottom-center":
+            return "bottom-6 left-1/2 transform -translate-x-1/2"
+        case "bottom-right":
+            return "bottom-6 right-6"
+        case "center":
+            return "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+        default:
+            return "bottom-6 right-6"
+    }
+}
+
+// Helper function để get animation direction - Fixed version
+const getAnimationProps = (position: NotificationPosition) => {
+    let x = 0, y = 0
+
+    // Xác định hướng animation dựa trên position
+    if (position.includes("top")) {
+        y = -50
+    } else if (position.includes("bottom")) {
+        y = 50
+    }
+
+    if (position.includes("left")) {
+        x = -50
+    } else if (position.includes("right")) {
+        x = 50
+    }
+
+    // Đặc biệt cho center position
+    if (position === "center") {
+        y = -20 // Nhẹ nhàng từ trên xuống
+    }
+
+    return {
+        initial: { opacity: 0, x, y, scale: 0.9 },
+        animate: { opacity: 1, x: 0, y: 0, scale: 1 },
+        exit: { opacity: 0, x, y, scale: 0.9 }
+    }
 }
 
 // Component hiển thị một notification
@@ -92,11 +155,10 @@ function NotificationItem({
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            {...getAnimationProps(notification.position || "bottom-right")}
             className={`w-full ${notification.type === "progress" ? "max-w-md" : "max-w-sm"}`}
-            layout // Thêm layout animation để smooth khi update
+            layout
+            transition={{ duration: 0.3, ease: "easeOut" }}
         >
             <div className={`p-4 rounded-lg shadow-lg border-2 ${getColorClasses()} bg-white`}>
                 <div className="flex items-start gap-3">
@@ -152,15 +214,52 @@ function NotificationItem({
     )
 }
 
+// Component hiển thị notifications theo position
+function NotificationContainer({
+    position,
+    notifications,
+    onRemove
+}: {
+    position: NotificationPosition;
+    notifications: NotificationData[];
+    onRemove: (id: string) => void
+}) {
+    const positionedNotifications = notifications.filter(
+        n => (n.position || "bottom-right") === position
+    )
+
+    if (positionedNotifications.length === 0) return null
+
+    return (
+        <div className={`fixed z-50 space-y-3 pointer-events-none ${getPositionClasses(position)}`}>
+            <AnimatePresence mode="popLayout">
+                {positionedNotifications.map((notification) => (
+                    <div key={notification.id} className="pointer-events-auto">
+                        <NotificationItem notification={notification} onRemove={onRemove} />
+                    </div>
+                ))}
+            </AnimatePresence>
+        </div>
+    )
+}
+
 // Provider component
-export function NotificationProvider({ children }: { children: ReactNode }) {
+export function NotificationProvider({
+    children,
+    defaultPosition = "bottom-right"
+}: {
+    children: ReactNode;
+    defaultPosition?: NotificationPosition
+}) {
     const [notifications, setNotifications] = useState<NotificationData[]>([])
+    const [currentDefaultPosition, setCurrentDefaultPosition] = useState<NotificationPosition>(defaultPosition)
 
     const addNotification = useCallback((notification: Omit<NotificationData, "id">) => {
         const id = Math.random().toString(36).substr(2, 9)
         const newNotification: NotificationData = {
             ...notification,
             id,
+            position: notification.position || currentDefaultPosition,
             duration: notification.duration ?? (notification.type === "success" ? 5000 : 0),
         }
 
@@ -174,7 +273,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
 
         return id
-    }, [])
+    }, [currentDefaultPosition])
 
     const removeNotification = useCallback((id: string) => {
         setNotifications((prev) => prev.filter((n) => n.id !== id))
@@ -184,20 +283,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, ...updates } : n)))
     }, [])
 
-    // Method để update progress cho notification đã tồn tại
     const updateProgress = useCallback((progressId: string, progress: number, message?: string) => {
         setNotifications((prev) =>
             prev.map((n) => (n.progressId === progressId ? { ...n, progress, ...(message && { message }) } : n)),
         )
     }, [])
 
-    // Method để add hoặc update progress notification
     const addOrUpdateProgress = useCallback(
         (notification: Omit<NotificationData, "id"> & { progressId: string }) => {
             const existingNotification = notifications.find((n) => n.progressId === notification.progressId)
 
             if (existingNotification) {
-                // Update existing progress notification
                 updateNotification(existingNotification.id, {
                     progress: notification.progress,
                     message: notification.message,
@@ -205,7 +301,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 })
                 return existingNotification.id
             } else {
-                // Create new progress notification
                 return addNotification(notification)
             }
         },
@@ -216,10 +311,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         setNotifications([])
     }, [])
 
+    const setDefaultPosition = useCallback((position: NotificationPosition) => {
+        setCurrentDefaultPosition(position)
+    }, [])
+
+    // Get all unique positions being used
+    const usedPositions = Array.from(
+        new Set(notifications.map(n => n.position || currentDefaultPosition))
+    ) as NotificationPosition[]
+
     return (
         <NotificationContext.Provider
             value={{
                 notifications,
+                defaultPosition: currentDefaultPosition,
+                setDefaultPosition,
                 addNotification,
                 removeNotification,
                 updateNotification,
@@ -229,16 +335,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             }}
         >
             {children}
-            {/* Notification Container - Hiển thị ở bottom-right */}
-            <div className="fixed bottom-6 right-6 z-50 space-y-3 pointer-events-none">
-                <AnimatePresence mode="popLayout">
-                    {notifications.map((notification) => (
-                        <div key={notification.id} className="pointer-events-auto">
-                            <NotificationItem notification={notification} onRemove={removeNotification} />
-                        </div>
-                    ))}
-                </AnimatePresence>
-            </div>
+            {/* Render notification containers for each position */}
+            {usedPositions.map(position => (
+                <NotificationContainer
+                    key={position}
+                    position={position}
+                    notifications={notifications}
+                    onRemove={removeNotification}
+                />
+            ))}
         </NotificationContext.Provider>
     )
 }

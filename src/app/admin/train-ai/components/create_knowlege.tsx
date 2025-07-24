@@ -5,11 +5,9 @@ import { Modal } from "@/components/shared/Modal"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import TextAreaComponent from "@/components/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { FolderPlus, Loader2 } from "lucide-react"
 import InputTrainAI from "@/components/input_train_ai"
-import { useState, useCallback } from "react"
 
 interface CreateKnowlegeModalProps {
     isOpen: boolean
@@ -21,21 +19,10 @@ interface CreateKnowlegeModalProps {
  * Bao gồm tên, mô tả, checkbox sử dụng mô tả để kiểm tra
  */
 export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeModalProps) {
-    const { register, handleSubmit, errors, onSubmit, setValue, isCreating, reset } = useCreateKnowlegeBase()
-    const [isChecked, setIsChecked] = useState(true)
-
-    // Optimize callback để tránh re-render
-    const handleCheckboxChange = useCallback(
-        (checked: boolean) => {
-            setIsChecked(checked)
-            setValue("useDescriptionForLLMCheck", checked, { shouldDirty: true })
-        },
-        [setValue],
-    )
+    const { register, handleSubmit, errors, onSubmit, isCreating, reset } = useCreateKnowlegeBase()
 
     const handleClose = () => {
         reset()
-        setIsChecked(true)
         onClose()
     }
 
@@ -149,7 +136,7 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                                 title=""
                                 register={register("description")}
                                 error={errors.description?.message}
-                                className="resize-none! border-gray-200 focus:border-[#248fca] focus:ring-[#248fca]/20 min-h-[120px] transition-all duration-200"
+                                className="resize-none! border-gray-200 focus-visible:border-[#248fca] focus:ring-[#248fca]/20 min-h-[120px] transition-all duration-200"
                                 placeholder="Nhập mô tả cho thư mục..."
                                 disabled={isCreating}
                             />
@@ -163,24 +150,24 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                             className="bg-gradient-to-r from-[#248fca]/5 to-blue-50 p-5 rounded-xl border border-[#248fca]/20"
                         >
                             <div className="flex items-start gap-4">
-                                <Checkbox
-                                    id="useDescriptionForLLMCheck"
-                                    checked={isChecked}
-                                    onCheckedChange={!isCreating ? handleCheckboxChange : undefined}
-                                    disabled={isCreating}
-                                    className="data-[state=checked]:bg-[#248fca] data-[state=checked]:border-[#248fca] data-[state=checked]:text-white mt-1 w-5 h-5 transition-all duration-150 ease-in-out disabled:opacity-50"
-                                />
                                 <div className="space-y-2">
                                     <Label
                                         htmlFor="useDescriptionForLLMCheck"
                                         className={`text-sm font-semibold text-gray-800 flex items-center gap-2 ${!isCreating ? "cursor-pointer" : "cursor-not-allowed opacity-50"
                                             }`}
                                     >
-                                        Sử dụng mô tả để kiểm tra
+                                        Chú ý
                                     </Label>
-                                    <p className={`text-xs text-gray-600 leading-relaxed ${isCreating ? "opacity-50" : ""}`}>
-                                        Cho phép hệ thống AI sử dụng mô tả này để kiểm tra, xác thực và tối ưu hóa nội dung kiến thức
-                                    </p>
+                                    <ul className="space-y-2">
+                                        <li className="text-xs text-gray-600 leading-relaxed flex items-start gap-2">
+                                            <span className="text-[#248fca] mt-0.5">•</span>
+                                            Tên thư mục không được trùng với các thư mục khác trong hệ thống.
+                                        </li>
+                                        <li className="text-xs text-gray-600 leading-relaxed flex items-start gap-2">
+                                            <span className="text-[#248fca] mt-0.5">•</span>
+                                            Đặt tên thư mục và mô tả rõ ràng, phù hợp với mục đích sử dụng.
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </motion.div>

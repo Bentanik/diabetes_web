@@ -4,7 +4,7 @@ import {
 } from "@/lib/validations/knowledge_base.schema";
 import {
   KNOWLEDGE_BASE_QUERY_KEY,
-  useCreateKnowledgeBaseService,
+  useCreateKnowledgeService,
 } from "@/services/train-ai/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,11 +27,10 @@ export default function useCreateKnowlegeBase() {
     defaultValues: {
       name: "",
       description: "",
-      useDescriptionForLLMCheck: true,
     },
   });
 
-  const { mutate } = useCreateKnowledgeBaseService();
+  const { mutate } = useCreateKnowledgeService();
   const queryClient = useQueryClient();
 
   const onSubmit = async (
@@ -44,12 +43,9 @@ export default function useCreateKnowlegeBase() {
       setIsCreating(true);
 
       // Prepare request
-      const request: REQUEST.TCreateKnowledgeBaseRequest = {
+      const request: REQUEST.TCreateKnowledgeRequest = {
         name: data?.name,
         description: data?.description,
-        metadata: {
-          useDescriptionForLLMCheck: data?.useDescriptionForLLMCheck,
-        },
       };
 
       // Make API call

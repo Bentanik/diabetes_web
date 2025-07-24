@@ -1,5 +1,6 @@
 "use client"
 
+import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
 import type { UseFormRegisterReturn } from "react-hook-form"
 
@@ -43,7 +44,7 @@ export default function TextAreaComponent({
         >
           {title}
         </label>
-        <textarea
+        <Textarea
           rows={rows}
           className={`
             w-full px-[20px] py-[14px] rounded-xl border-2 bg-gray-50

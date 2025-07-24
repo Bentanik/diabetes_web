@@ -1,16 +1,27 @@
 declare namespace REQUEST {
-  type TCreateKnowledgeBaseRequest = {
+  type TCreateKnowledgeRequest = {
     name: string;
     description: string;
-    metadata: {
-      useDescriptionForLLMCheck: boolean;
-    };
+  };
+
+  type TValidationResults = {
+    isValid: boolean;
+    confidence: number;
+    reasons: string[];
+    suggestions?: string[];
+    keyTopics?: string[];
+    error?: string;
+    errorCode?: string;
   };
 
   type TCreateDocumentRequest = {
-    file: File;
-    chunk_size: 1000;
-    chunk_overlap: 200;
+    id: number;
+    name: string;
+    size: string;
+    type: string;
+    status: "uploading" | "validating" | "valid" | "invalid" | "error";
+    progress: number;
+    validationResults: API.TValidationResults | null;
   };
 
   type TSuggestPromptRequest = {
@@ -25,31 +36,19 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
-  type TTask = {
-    task_id: string;
-    status: "PENDING" | "PROGRESS" | "SUCCESS" | "FAILURE" | string;
-    step?: number;
-    total?: number;
-    message?: string;
-    percentage?: number;
-    result?: unknown;
-    error?: string;
-  };
-
-  type TKnowledgeBase = {
+  type TKnowledge = {
+    id: string;
     name: string;
     description: string;
-    metadata: {
-      useDescriptionForLLMCheck: boolean;
-    };
     document_count: number;
     created_at: string;
     updated_at: string;
-    total_size_mb: number;
+    total_size_bytes: number;
+    select_training: boolean;
   };
 
-  type TGetKnowledgeBaseListResponse = {
-    knowledge_bases: TKnowledgeBase[];
+  type TGetKnowledgesResponse = {
+    items: TKnowledge[];
     total: number;
     page: number;
     limit: number;
@@ -57,52 +56,27 @@ declare namespace API {
   };
 
   type TKnowledgeBaseDocument = {
-    filename: string;
-    size: number;
-    last_modified: string;
-    content_type: string;
-  };
-
-  type TKnowledgeBaseStats = {
-    total_documents: number;
-    total_size_bytes: number;
-    file_types: Record<string, number>;
-    documents: TKnowledgeBaseDocument[];
-    collection_name: string;
-    last_updated: string;
-  };
-
-  type TFileInfo = {
-    filename: string;
-    file_size: number;
-    file_extension: string;
-    content_type: string;
-    upload_time: string;
-    storage_path: string;
-    storage_time: string;
-  };
-
-  type TProcessedFileResponse = {
-    success: boolean;
-    message: string;
-    file_info: FileInfo;
-    document_ids: string[];
-  };
-
-  type TSuggestPromptResponse = {
-    suggested_template: string;
-  };
-
-  type TSettings = {
     id: string;
-    system_prompt: string;
-    available_collections: string[];
-    default_language: string;
-    search_settings: {
-      k: number;
-      score_threshold: number;
-    };
+    kb_name: string;
+    status: "uploaded" | "training" | "trained";
+    file_name: string;
+    file_type: string;
+    file_size: number;
+    title: string;
+    description: string;
     created_at: string;
     updated_at: string;
+    metadata: {
+      diabetes_score_avg: number;
+      is_training: boolean;
+    };
+  };
+
+  type TGetKnowledgeBaseDocumentsResponse = {
+    documents: TKnowledgeBaseDocument[];
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
   };
 }
