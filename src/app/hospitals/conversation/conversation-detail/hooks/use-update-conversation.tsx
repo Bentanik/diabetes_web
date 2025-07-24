@@ -43,7 +43,7 @@ export default function useUpdateConversation({
     ) => {
         showBackdrop();
         mutate(data, {
-            onSuccess: async (res) => {
+            onSuccess: async () => {
                 hideBackdrop();
                 onLoadData;
                 await queryClient.invalidateQueries({
