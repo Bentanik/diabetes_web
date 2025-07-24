@@ -40,14 +40,13 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const { form, onSubmit } = useAddStaff({ conversationId });
+    const { onSubmit } = useAddStaff({ conversationId });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedId, setSelectedId] = useState<string>("");
     const [allUsers, setAllUsers] = useState<any[]>([]);
-    // Thêm state để track search/sort đã thay đổi
     const [isSearchOrSortChanged, setIsSearchOrSortChanged] = useState(false);
 
-    const pageSize = 10; // Tăng page size để hiệu quả hơn
+    const pageSize = 10;
 
     const queryClient = useQueryClient();
 
@@ -72,19 +71,16 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
     useEffect(() => {
         if (data.length > 0) {
             setAllUsers((prevUsers) => {
-                // Nếu là trang đầu tiên HOẶC search/sort đã thay đổi, reset danh sách
                 if (currentPage === 1 || isSearchOrSortChanged) {
                     setIsSearchOrSortChanged(false); // Reset flag
                     return data;
                 }
-
                 // Kiểm tra xem có dữ liệu trùng lặp không
                 const existingIds = new Set(prevUsers.map((user) => user.id));
                 const newUsers = data.filter(
                     (newUser) => !existingIds.has(newUser.id)
                 );
 
-                // Chỉ thêm dữ liệu mới nếu có
                 if (newUsers.length > 0) {
                     return [...prevUsers, ...newUsers];
                 }
@@ -94,7 +90,6 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
         }
     }, [data, currentPage, isSearchOrSortChanged]);
 
-    // Hàm xử lý load more
     const handleLoadMore = useCallback(() => {
         if (isPending || !hasMore || isLoading) {
             return;
@@ -115,7 +110,6 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
         setCurrentPage(1);
         setAllUsers([]); // Reset danh sách khi tìm kiếm hoặc sắp xếp thay đổi
 
-        // Invalidate queries để fetch lại dữ liệu
         queryClient.invalidateQueries({
             queryKey: [USER_AVAILABLE_QUERY_KEY],
         });
