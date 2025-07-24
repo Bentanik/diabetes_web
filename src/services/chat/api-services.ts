@@ -1,6 +1,5 @@
 import API_ENDPOINTS from "@/services/chat/api-path";
 import request from "@/services/interceptor";
-import { TResponse } from "@/typings";
 
 export const getChatHistoryAsync = async (
     session_id: string,

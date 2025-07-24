@@ -1,6 +1,5 @@
 import useToast from "@/hooks/use-toast";
 import { createHospitalAsync } from "@/services/hospital/api-services";
-import { TMeta, TResponse } from "@/typings";
 import { useMutation } from "@tanstack/react-query";
 
 export const useServiceCreateHospital = () => {

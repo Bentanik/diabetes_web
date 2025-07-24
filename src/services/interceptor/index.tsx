@@ -9,7 +9,6 @@ import axios, { AxiosError } from "axios";
 //   import { refreshToken } from "@/services/auth/api-services";
 import useToast from "@/hooks/use-toast";
 import { refreshTokenAsync } from "@/services/auth/api-services";
-import { TMeta } from "@/typings";
 //   import useLogout from "@/hooks/use-logout";
 
 const request = axios.create({

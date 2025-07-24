@@ -1,6 +1,5 @@
 import useToast from "@/hooks/use-toast";
 import { uploadImageUserAsync } from "@/services/user/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useMutation } from "@tanstack/react-query";
 
 export default function useUploadImageService() {

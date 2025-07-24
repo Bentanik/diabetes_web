@@ -1,6 +1,5 @@
 import useToast from "@/hooks/use-toast";
 import { getCategories } from "@/services/category/api-services";
-import { TResponseData } from "@/typings";
 import { useState } from "react";
 
 export default function useGetDataCategories() {

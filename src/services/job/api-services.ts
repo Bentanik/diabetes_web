@@ -1,6 +1,5 @@
 import API_ENDPOINTS from "@/services/job/api-path";
 import request from "@/services/interceptor";
-import { TResponse } from "@/typings";
 
 export const getJobs = async (
     params: {

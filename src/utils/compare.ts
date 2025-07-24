@@ -1,4 +1,3 @@
-import { TMeta, TResponse } from "@/typings";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isTMeta = (error: any): error is TMeta => {

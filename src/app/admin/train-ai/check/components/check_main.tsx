@@ -15,7 +15,6 @@ import {
     useGetChatHistoryService,
     useSendMessageService,
 } from "@/services/chat/services";
-import { TMeta } from "@/typings";
 
 const ChatItem = ({
     message,

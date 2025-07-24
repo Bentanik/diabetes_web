@@ -1,6 +1,5 @@
 import API_ENDPOINTS from "@/services/conversation/api-path";
 import request from "@/services/interceptor";
-import { TResponse, TResponseData } from "@/typings";
 
 export const createConversationAsync = async (
     body: REQUEST.TCreateConversation

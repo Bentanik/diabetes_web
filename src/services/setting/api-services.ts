@@ -1,6 +1,5 @@
 import API_ENDPOINTS from "@/services/setting/api-path";
 import request from "@/services/interceptor";
-import { TResponse } from "@/typings";
 
 export const getChatSettingAsync = async () => {
     const response = await request<TResponse<API.TChatSetting>>(

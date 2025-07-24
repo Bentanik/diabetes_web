@@ -1,7 +1,6 @@
 import API_ENDPOINTS from "@/services/train-ai/api-path";
 import request from "@/services/interceptor";
 import axios from "axios";
-import { TResponse } from "@/typings";
 
 export const getKnowledgesAsync = async (
     search: string,

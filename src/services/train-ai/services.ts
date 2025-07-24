@@ -8,7 +8,6 @@ import {
     trainDocumentAsync,
     uploadDocumentAsync,
 } from "@/services/train-ai/api-services";
-import { TMeta, TResponse } from "@/typings";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const KNOWLEDGE_BASE_QUERY_KEY = "knowledge-base";

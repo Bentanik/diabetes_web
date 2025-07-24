@@ -1,7 +1,6 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import useToast from "@/hooks/use-toast";
 import { getBlog } from "@/services/blog/api-services";
-import { TResponseData } from "@/typings";
 import { useState } from "react";
 
 export default function useGetBlog() {

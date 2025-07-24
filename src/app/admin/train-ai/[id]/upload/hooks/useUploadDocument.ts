@@ -1,5 +1,4 @@
 import { useUploadDocumentService } from "@/services/train-ai/services";
-import { TMeta, TResponse } from "@/typings";
 
 interface UploadOptions {
     onSuccess?: (response: TResponse) => void;
