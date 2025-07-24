@@ -59,7 +59,7 @@ export default function GroupUserDialog({ conversationId }: PropDialog) {
     };
 
     // Sử dụng hook useGetUserAvailable
-    const { user_available, isPending, isError, error } = useGetUserAvailable(
+    const { user_available, isPending } = useGetUserAvailable(
         { conversationId },
         params
     );
