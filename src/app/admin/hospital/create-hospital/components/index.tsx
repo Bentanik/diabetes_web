@@ -2,8 +2,7 @@
 
 import React from "react";
 import CreateHospitalForm from "./create-hospital-form";
-import { Button } from "@/components/ui/button";
-import { BarChartIcon, BellIcon, Plus, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function CreateHospitalComponent() {
@@ -21,7 +20,7 @@ export default function CreateHospitalComponent() {
                         </h1>
                     </div>
                     <p className="text-gray-600 mt-1 text-sm ml-11">
-                        Thêm thông tin tạo bác sĩ mới
+                        Thêm thông tin tạo bệnh viện mới
                     </p>
                 </div>
             </div>
