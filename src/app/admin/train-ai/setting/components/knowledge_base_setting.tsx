@@ -21,13 +21,13 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Pagination from "@/components/shared/pagination";
-import { useGetKnowledgesService } from "@/services/train-ai/services";
+import { useGetKnowledgeBaseListService } from "@/services/train-ai/services";
 import { useDebounce } from "@/hooks/use-debounce";
 import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting";
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
 
 interface KnowledgeBaseItemProps {
-    knowledgeBase: API.TKnowledge;
+    knowledgeBase: API.TKnowledgeBase;
     isSelected: boolean;
     onToggle: (id: string) => void;
     onSettings?: (id: string) => void;
@@ -82,7 +82,7 @@ const KnowledgeBaseItem = ({
                         </span>
                         <span className="flex items-center gap-1">
                             <HardDriveIcon className="w-3 h-3" />
-                            {formatSize(knowledgeBase.total_size_bytes)}
+                            {formatSize(knowledgeBase.total_size_mb)}
                         </span>
                         <span
                             className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
@@ -156,7 +156,7 @@ export default function KnowledgeBaseSetting() {
         knowledge_bases: data,
         isPending,
         error,
-    } = useGetKnowledgesService({
+    } = useGetKnowledgeBaseListService({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         search: debouncedSearchTerm,
@@ -165,7 +165,7 @@ export default function KnowledgeBaseSetting() {
     });
 
     // Extract data from API response
-    const knowledgeBases = data?.items || [];
+    const knowledgeBases = data?.knowledge_bases || [];
     const totalItems = data?.total || 0;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
@@ -181,8 +181,8 @@ export default function KnowledgeBaseSetting() {
     useEffect(() => {
         if (knowledgeBases.length > 0) {
             const preSelectedIds = knowledgeBases
-                .filter((kb: any) => kb.select_training)
-                .map((kb: any) => kb.id);
+                .filter((kb) => kb.select_training)
+                .map((kb) => kb.id);
 
             // Chỉ update nếu có sự khác biệt để tránh re-render không cần thiết
             setSelectedKnowledgeBases((prev) => {
@@ -253,7 +253,7 @@ export default function KnowledgeBaseSetting() {
     // Get selected knowledge bases info
     const selectedKnowledgeBasesInfo = useMemo(() => {
         return selectedKnowledgeBases
-            .map((id) => knowledgeBases.find((kb: any) => kb.id === id))
+            .map((id) => knowledgeBases.find((kb) => kb.id === id))
             .filter(Boolean);
     }, [selectedKnowledgeBases, knowledgeBases]);
 

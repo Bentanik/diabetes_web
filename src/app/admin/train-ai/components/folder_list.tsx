@@ -12,7 +12,7 @@ import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege"
-import { useGetKnowledgesService } from "@/services/train-ai/services"
+import { useGetKnowledgeBaseListService } from "@/services/train-ai/services"
 import { SkeletonFolderGrid } from "@/app/admin/train-ai/components/skeleton_folder_card"
 import Pagination from "@/components/shared/pagination"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -62,7 +62,7 @@ export default function FolderList() {
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-    const { knowledge_bases: data, isPending } = useGetKnowledgesService({
+    const { knowledge_bases: data, isPending } = useGetKnowledgeBaseListService({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         search: debouncedSearchTerm,
@@ -88,8 +88,8 @@ export default function FolderList() {
         setCurrentPage(page)
     }
 
-    const hasData = !isPending && data && data.items && data.items.length > 0
-    const isEmpty = !isPending && data && (!data.items || data.items.length === 0)
+    const hasData = !isPending && data && data.knowledge_bases && data.knowledge_bases.length > 0
+    const isEmpty = !isPending && data && (!data.knowledge_bases || data.knowledge_bases.length === 0)
     const isSearching = debouncedSearchTerm.length > 0
 
     return (
@@ -153,7 +153,7 @@ export default function FolderList() {
                             animate={{ opacity: 1 }}
                             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                         >
-                            {data.items.map((folder, index) => (
+                            {data.knowledge_bases.map((folder, index) => (
                                 <motion.div
                                     key={`${folder.name}-${currentPage}-${debouncedSearchTerm}`}
                                     initial={{ opacity: 0, y: 20 }}

@@ -12,7 +12,7 @@ import { useClickOutside } from "@/hooks/use-click-outside"
 import DeleteKnowledgeModal from "@/app/admin/train-ai/components/delete_knowlege"
 
 interface FolderCardProps {
-    folder: API.TKnowledge
+    folder: API.TKnowledgeBase
 }
 
 export default function FolderCard({ folder }: FolderCardProps) {
