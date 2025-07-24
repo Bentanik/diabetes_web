@@ -1,10 +1,10 @@
 import {
-  createKnowledgeBaseAsync,
+  createKnowledgeAsync,
   deleteDocumentAsync,
-  deleteKnowledgeBaseAsync,
-  getKnowledgeBaseByIdAsync,
+  deleteKnowledgeAsync,
+  getKnowledgeAsync,
   getKnowledgeBaseDocumentsAsync,
-  getKnowledgeBaseListAsync,
+  getKnowledgesAsync,
   trainDocumentAsync,
   uploadDocumentAsync,
 } from "@/services/train-ai/api-services";
@@ -21,7 +21,7 @@ interface IGetKnowledgeBaseListService {
   limit: number;
 }
 
-export const useGetKnowledgeBaseListService = ({
+export const useGetKnowledgesService = ({
   search = "",
   sort_by = "updated_at",
   sort_order = "desc",
@@ -43,14 +43,16 @@ export const useGetKnowledgeBaseListService = ({
       limit,
     ],
     queryFn: () =>
-      getKnowledgeBaseListAsync(
+      getKnowledgesAsync(
         search.trim(),
         sort_by,
         sort_order,
         page,
         limit
       ),
-    select: (data) => data.value.data,
+    select: (data) => {
+      return data.value.data
+    },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });
@@ -61,26 +63,26 @@ export const useGetKnowledgeBaseListService = ({
 export const useGetKnowledgeBaseByIdService = (id: string) => {
   return useQuery({
     queryKey: [KNOWLEDGE_BASE_QUERY_KEY, id],
-    queryFn: () => getKnowledgeBaseByIdAsync(id),
+    queryFn: () => getKnowledgeAsync(id),
     select: (data) => data.value.data,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });
 };
 
-export const useCreateKnowledgeBaseService = () => {
+export const useCreateKnowledgeService = () => {
   return useMutation<
-    TResponse<API.TKnowledgeBase>,
+    TResponse<API.TKnowledge>,
     TMeta,
-    REQUEST.TCreateKnowledgeBaseRequest
+    REQUEST.TCreateKnowledgeRequest
   >({
-    mutationFn: createKnowledgeBaseAsync,
+    mutationFn: createKnowledgeAsync,
   });
 };
 
-export const useDeleteKnowledgeBaseService = () => {
-  return useMutation<TResponse<API.TKnowledgeBase>, TMeta, string>({
-    mutationFn: (name) => deleteKnowledgeBaseAsync(name),
+export const useDeleteKnowledgeService = () => {
+  return useMutation<TResponse<API.TKnowledge>, TMeta, string>({
+    mutationFn: (name) => deleteKnowledgeAsync(name),
   });
 };
 

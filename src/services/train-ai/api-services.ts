@@ -2,15 +2,15 @@ import API_ENDPOINTS from "@/services/train-ai/api-path";
 import request from "@/services/interceptor";
 import axios from "axios";
 
-export const getKnowledgeBaseListAsync = async (
+export const getKnowledgesAsync = async (
   search: string,
   sort_by: "updated_at" | "created_at",
   sort_order: "asc" | "desc",
   page: number,
   limit: number
 ) => {
-  const response = await request<TResponse<API.TGetKnowledgeBaseListResponse>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE,
+  const response = await request<TResponse<API.TGetKnowledgesResponse>>(
+    API_ENDPOINTS.KNOWLEDGE,
     {
       method: "GET",
       params: {
@@ -26,9 +26,9 @@ export const getKnowledgeBaseListAsync = async (
   return response.data;
 };
 
-export const getKnowledgeBaseByIdAsync = async (id: string) => {
-  const response = await request<TResponse<API.TKnowledgeBase>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE + "/" + id,
+export const getKnowledgeAsync = async (id: string) => {
+  const response = await request<TResponse<API.TKnowledge>>(
+    API_ENDPOINTS.KNOWLEDGE + "/" + id,
     {
       method: "GET",
     }
@@ -37,11 +37,11 @@ export const getKnowledgeBaseByIdAsync = async (id: string) => {
   return response.data;
 };
 
-export const createKnowledgeBaseAsync = async (
-  data: REQUEST.TCreateKnowledgeBaseRequest
+export const createKnowledgeAsync = async (
+  data: REQUEST.TCreateKnowledgeRequest
 ) => {
-  const response = await request<TResponse<API.TKnowledgeBase>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE,
+  const response = await request<TResponse<API.TKnowledge>>(
+    API_ENDPOINTS.KNOWLEDGE,
     {
       method: "POST",
       data,
@@ -51,9 +51,9 @@ export const createKnowledgeBaseAsync = async (
   return response.data;
 };
 
-export const deleteKnowledgeBaseAsync = async (name: string) => {
-  const response = await request<TResponse<API.TKnowledgeBase>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE + "/" + name,
+export const deleteKnowledgeAsync = async (id: string) => {
+  const response = await request<TResponse<API.TKnowledge>>(
+    API_ENDPOINTS.KNOWLEDGE + "/" + id,
     {
       method: "DELETE",
     }

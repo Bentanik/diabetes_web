@@ -21,13 +21,13 @@ import {
 } from "lucide-react"
 import { useState, useMemo, useCallback, useEffect } from "react"
 import Pagination from "@/components/shared/pagination"
-import { useGetKnowledgeBaseListService } from "@/services/train-ai/services"
+import { useGetKnowledgesService } from "@/services/train-ai/services"
 import { useDebounce } from "@/hooks/use-debounce"
 import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting"
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege"
 
 interface KnowledgeBaseItemProps {
-    knowledgeBase: API.TKnowledgeBase;
+    knowledgeBase: API.TKnowledge;
     isSelected: boolean;
     onToggle: (id: string) => void;
     onSettings?: (id: string) => void;
@@ -140,7 +140,7 @@ export default function KnowledgeBaseSetting() {
     const { handleUpdateChatSetting } = useUpdateSetting()
 
     // API call with optimized parameters
-    const { knowledge_bases: data, isPending, error } = useGetKnowledgeBaseListService({
+    const { knowledge_bases: data, isPending, error } = useGetKnowledgesService({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         search: debouncedSearchTerm,

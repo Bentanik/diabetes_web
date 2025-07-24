@@ -4,12 +4,13 @@ import { Modal } from "@/components/shared/Modal"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Trash2, Loader2, AlertTriangle, FileText } from "lucide-react"
-import useDeleteKnowlegeBase from "@/app/admin/train-ai/hooks/useDeleteKnowlegeBase"
+import useDeleteKnowlege from "@/app/admin/train-ai/hooks/useDeleteKnowlegeBase"
 
 interface DeleteKnowledgeModalProps {
     isOpen: boolean
     onClose: () => void
     folder?: {
+        id: string
         name: string
         description: string
         document_count: number
@@ -21,11 +22,11 @@ interface DeleteKnowledgeModalProps {
  * Hiển thị thông tin thư mục và số lượng tài liệu sẽ bị xóa
  */
 export default function DeleteKnowledgeModal({ isOpen, onClose, folder }: DeleteKnowledgeModalProps) {
-    const { onSubmit, isDeleting } = useDeleteKnowlegeBase()
+    const { onSubmit, isDeleting } = useDeleteKnowlege()
 
     const handleDelete = () => {
         if (!folder) return
-        onSubmit(folder.name, onClose)
+        onSubmit(folder.id, onClose)
     }
 
     const handleClose = () => {

@@ -1,23 +1,23 @@
 import {
   KNOWLEDGE_BASE_QUERY_KEY,
-  useDeleteKnowledgeBaseService,
+  useDeleteKnowledgeService,
 } from "@/services/train-ai/services";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-export default function useDeleteKnowlegeBase() {
+export default function useDeleteKnowlege() {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { mutate } = useDeleteKnowledgeBaseService();
+  const { mutate } = useDeleteKnowledgeService();
   const queryClient = useQueryClient();
 
-  const onSubmit = async (name: string, onClose: () => void) => {
+  const onSubmit = async (id: string, onClose: () => void) => {
     if (isDeleting) return; // Prevent multiple submissions
 
     try {
       setIsDeleting(true);
 
-      mutate(name, {
+      mutate(id, {
         onSuccess: async (responseData) => {
           if (responseData) {
             setIsDeleting(false);

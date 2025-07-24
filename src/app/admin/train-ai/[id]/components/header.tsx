@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 interface HeaderProps {
-    knowledgeBase: API.TKnowledgeBase
+    knowledgeBase: API.TKnowledge
 }
 
 export default function Header({ knowledgeBase }: HeaderProps) {
