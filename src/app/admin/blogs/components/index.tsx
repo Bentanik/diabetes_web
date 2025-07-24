@@ -88,7 +88,7 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
                         Quản lý bài viết
                     </h1>
                     <p className="text-gray-600 mt-1 text-sm">
-                        Tổng cộng 6 bài viết - 6 kết quả hiển thị
+                        Hiện có 6 kết quả hiển thị
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -145,6 +145,7 @@ export default function ModeratorManageBlogComponent() {
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [isSortAsc, setIsSortAsc] = useState(true);
 
     const formatDate = (dateString: string) => {
@@ -166,15 +167,13 @@ export default function ModeratorManageBlogComponent() {
                 status: selectedStatus,
                 moderatorId: "",
                 doctorId: selectDoctor,
-                isAdmin: false,
                 pageIndex: pageIndex,
                 pageSize: 6,
                 sortType: selectSortType,
                 isSortAsc: isSortAsc,
             });
-            setTotalPage(res?.value.data?.totalPages || 1);
-            console.log(selectedStatus);
-            setData(res?.value.data?.items || []);
+            setTotalPage(res?.data?.totalPages || 1);
+            setData(res?.data?.items || []);
         } catch (err) {
             console.log(err);
             setData([]);
@@ -185,7 +184,7 @@ export default function ModeratorManageBlogComponent() {
         const handleGetData = async () => {
             try {
                 const res = await getCategoriesApi();
-                setCategoryData(res?.value.data as API.TGetCategories || []);
+                setCategoryData((res?.data as API.TGetCategories) || []);
             } catch (err) {
                 console.log(err);
             }
@@ -194,17 +193,26 @@ export default function ModeratorManageBlogComponent() {
     }, []);
 
     useEffect(() => {
-        if (currentPage == 1) {
-            handleGetData(1);
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
             setCurrentPage(1);
-        } else handleGetData(currentPage);
+        }, 500);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchTerm]);
+
+    useEffect(() => {
+        handleGetData(currentPage);
     }, [
+        debouncedSearchTerm,
         selectedStatus,
         selectDoctor,
         selectedCategoryIds,
-        searchTerm,
         selectSortType,
         isSortAsc,
+        currentPage,
     ]);
 
     const getStatusIcon = (status: number) => {
@@ -242,18 +250,6 @@ export default function ModeratorManageBlogComponent() {
         handleGetData(page);
     };
 
-    const blogData = data.filter((item) => {
-        const matchesSearch =
-            !searchTerm ||
-            (item.title &&
-                item.title.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        const matchesStatus =
-            selectedStatus === 1 ? true : item.status === selectedStatus;
-
-        return matchesSearch && matchesStatus;
-    });
-
     return (
         <div>
             {/* Header */}
@@ -273,7 +269,7 @@ export default function ModeratorManageBlogComponent() {
                         {/*Select status*/}
                         <BlogStatusDropdown
                             selectedStatus={selectedStatus}
-                            onStatusChange={setSelectedStatus} // Truyền hàm setSelectedStatus
+                            onStatusChange={setSelectedStatus}
                         />
                         {/* Select Category*/}
                         <MultiSelectCategoriesFilter
@@ -303,7 +299,7 @@ export default function ModeratorManageBlogComponent() {
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {blogData.map((data, index) => (
+                {data.map((data, index) => (
                     <Link
                         href={`/admin/blogs/blog-detail/${data.id}`}
                         key={data.id}
@@ -388,7 +384,7 @@ export default function ModeratorManageBlogComponent() {
             )}
 
             {/* Empty State */}
-            {blogData.length === 0 && (
+            {data.length === 0 && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

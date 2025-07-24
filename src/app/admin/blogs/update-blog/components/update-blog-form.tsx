@@ -2,7 +2,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, AlertCircle, ImageIcon, Upload } from "lucide-react";
+import {
+    FileText,
+    AlertCircle,
+    ImageIcon,
+    Upload,
+    Smartphone,
+} from "lucide-react";
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +29,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import TiptapEditor from "@/components/tiptap";
 import useUploadImage from "@/app/admin/blogs/update-blog/hooks/use-upload-image";
 import MultiSelectCategories from "@/app/admin/blogs/update-blog/components/select-category";
@@ -33,6 +39,7 @@ import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
 import useUpdateBlog, {
     BlogFormData,
 } from "@/app/admin/blogs/update-blog/hooks/use-update-blog";
+import { useRouter } from "next/navigation";
 
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
@@ -87,28 +94,32 @@ const doctors = [
 ];
 
 export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
-    const { isPending: isUploading } = useUploadImage();
+    const { isPending: isUploading, onSubmit: onSubmitImage } =
+        useUploadImage();
     const { getCategoriesApi, isPending } = useGetDataCategories();
-    const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [data, setData] = useState<API.TGetCategories>([]);
-    const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const { getBlogApi, isBlogPending } = useGetBlog();
+    const { getBlogApi } = useGetBlog();
     const [blogData, setBlogData] = useState<API.TGetBlog>();
     const { form, onSubmit } = useUpdateBlog({ blogId });
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+        null
+    );
+    const [thumbnailId, setThumbnailId] = useState<string | null>(null);
+    const router = useRouter();
 
-    console.log(thumbnailUrl);
-    console.log(blogData);
+    const categoryIds = form.watch("categoryIds");
+    const doctorId = form.watch("doctorId");
+    const title = form.watch("title");
 
     useEffect(() => {
         const handleGetData = async () => {
             try {
                 const res = await getCategoriesApi();
-                setData(res?.value.data as API.TGetCategories || []);
+                setData((res?.data as API.TGetCategories) || []);
             } catch (err) {
                 console.log(err);
             }
@@ -116,17 +127,44 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         handleGetData();
     }, []);
 
+    const handleImageChange = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const data = { image: file };
+
+            onSubmitImage(
+                data,
+                handleClearImages,
+                (imageId, publicId, publicUrl) => {
+                    form.setValue("thumbnail", imageId);
+                    setThumbnailPreview(publicUrl);
+                    setThumbnailId(imageId);
+                }
+            );
+        }
+    };
+
     useEffect(() => {
         const handleGetBlogData = async (id: string) => {
             try {
                 const res = await getBlogApi({ blogId: id });
-                setBlogData(res?.value.data as API.TGetBlog);
+                setBlogData(res?.data as API.TGetBlog);
             } catch (err) {
                 console.log(err);
             }
         };
         handleGetBlogData(blogId);
     }, []);
+
+    useEffect(() => {
+        if (blogData?.contentHtml) {
+            form.setValue("contentHtml", blogData.contentHtml);
+            setContent(extractTextContent(blogData.contentHtml));
+            setImageIds(extractImageIds(blogData.contentHtml));
+        }
+    }, [blogData, form]);
 
     const extractImageIds = (html: string): string[] => {
         const parser = new DOMParser();
@@ -146,73 +184,53 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         form.setValue("contentHtml", editorContent);
         const textContent = extractTextContent(editorContent);
         setContent(textContent);
+
         const newImageIds = extractImageIds(editorContent);
         setImageIds(newImageIds);
     };
-
     const handleClearImages = () => {
-        setThumbnailUrl(null);
         setImageIds([]);
-        setLogoFile(null);
-        setLogoPreview(null);
     };
 
-    const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Kích thước file không được vượt quá 5MB");
-                event.target.value = ""; // Reset input
-                return;
+    const handleSubmitDraft = useCallback(
+        async (formData: REQUEST.TUpdateBlog) => {
+            try {
+                onSubmit(formData, () => {
+                    console.log("Draft saved successfully");
+                });
+            } catch (error) {
+                console.error("Error saving draft:", error);
+                throw error;
             }
-            if (!file.type.startsWith("image/")) {
-                alert("Vui lòng chọn file hình ảnh");
-                event.target.value = ""; // Reset input
-                return;
-            }
-            console.log("Selected file:", {
-                name: file.name,
-                size: file.size,
-                type: file.type,
-            });
-            setLogoFile(file);
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setLogoPreview(e.target?.result as string);
-            };
-            reader.onerror = () => {
-                console.error("Lỗi khi đọc file ảnh");
-                alert("Không thể đọc file ảnh, vui lòng thử lại.");
-                setLogoFile(null); // Reset nếu lỗi
-                event.target.value = "";
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+        },
+        [onSubmit]
+    );
 
     const handleFormSubmit = async (data: BlogFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
             console.error("onSubmit is not a function");
             return;
         }
+
         setIsSubmitting(true);
         try {
             const formData: REQUEST.TUpdateBlog = {
-                title: data.title,
-                content: content,
-                contentHtml: data.contentHtml,
-                thumbnail: logoFile || null,
-                categoryIds: data.categoryIds,
-                images: imageIds,
-                doctorId: data.doctorId,
+                title: data.title || null,
+                content: content || null,
+                contentHtml: data.contentHtml || null,
+                thumbnail: thumbnailId || null,
+                categoryIds: data.categoryIds || null,
+                images: imageIds || null,
+                doctorId: data.doctorId || null,
                 isDraft: false,
             };
             onSubmit(formData, () => {
                 handleClearImages();
                 setIsDialogOpen(false);
                 form.reset();
-                alert("Cập nhật bài viết thành công!"); // Thông báo thành công
+                setTimeout(() => {
+                    router.push("/admin/blogs");
+                }, 2000);
             });
         } catch (error) {
             console.error("Error updating post:", error);
@@ -223,80 +241,114 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     };
 
     const handleCancel = () => {
-        try {
-            const formData: REQUEST.TUpdateBlog = {
-                title: form.getValues("title") || "Draft Blog",
-                content: content,
-                contentHtml: form.getValues("contentHtml"),
-                thumbnail: logoFile, // Allow null
-                categoryIds: form.getValues("categoryIds") || [],
-                images: imageIds,
-                doctorId: form.getValues("doctorId"),
-                isDraft: true,
-            };
-            onSubmit(formData, handleClearImages);
-            setIsDialogOpen(false);
-            form.reset();
-        } catch (error) {
-            console.error("Error saving draft:", error);
-        }
-    };
+        form.setValue("title", "");
+        form.setValue("categoryIds", []);
+        form.setValue("doctorId", "");
+        setThumbnailPreview(null);
+        setThumbnailId(null);
+        setImageIds([]);
 
-    // const itemVariants = {
-    //     hidden: { opacity: 0, y: 20 },
-    //     visible: {
-    //         opacity: 1,
-    //         y: 0,
-    //         transition: { duration: 0.5, ease: "easeOut" },
-    //     },
-    // };
+        setIsDialogOpen(false);
+    };
 
     return (
         <div className="min-h-screen">
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-            {isBlogPending && <div>...Loading</div>}
             <Form {...form}>
                 <motion.div className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="contentHtml"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                    <FileText className="h-5 w-5 text-[#248fca]" />
-                                    Nội dung bài viết
-                                </FormLabel>
-                                <FormControl>
-                                    <TiptapEditor
-                                        content={field.value}
-                                        onUpdate={(html) => {
-                                            updateContentHtml(html);
-                                            form.trigger("contentHtml");
-                                        }}
-                                        name="contentHtml"
-                                        blogId={blogId}
+                    <div className="flex gap-10">
+                        <div className="flex-2 h-[600px]">
+                            <FormField
+                                control={form.control}
+                                name="contentHtml"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
+                                            <FileText className="h-5 w-5 text-[#248fca]" />
+                                            Nội dung bài viết
+                                        </FormLabel>
+                                        <FormControl>
+                                            <TiptapEditor
+                                                content={field.value}
+                                                onUpdate={(html) => {
+                                                    updateContentHtml(html);
+                                                    form.trigger("contentHtml");
+                                                }}
+                                                name="contentHtml"
+                                                blogId={blogId}
+                                                onSubmitDraft={
+                                                    handleSubmitDraft
+                                                }
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="flex items-center gap-1">
+                                            <AlertCircle className="h-4 w-4" />
+                                        </FormMessage>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        <div className="flex-1 relative flex justify-center">
+                            <div className="">
+                                <div className="flex justify-center font-semibold text-lg items-center gap-2">
+                                    <Smartphone className="h-5 w-5 text-[#248fca]" />
+                                    Xem trước trên mobile
+                                </div>
+                                <div className="relative inline-block mt-10">
+                                    {/* Phone Frame Image */}
+                                    <Image
+                                        src="/images/phone.png"
+                                        alt="phone frame"
+                                        width={385}
+                                        height={667}
+                                        className="mx-auto"
                                     />
-                                </FormControl>
-                                <FormMessage className="flex items-center gap-1">
-                                    <AlertCircle className="h-4 w-4" />
-                                </FormMessage>
-                            </FormItem>
-                        )}
-                    />
+                                    {/* Screen Content */}
+                                    <div
+                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-white rounded-lg overflow-auto wrap-break-word"
+                                        style={{
+                                            width: "340px",
+                                            height: "600px",
+                                        }}
+                                    >
+                                        <div
+                                            className="prose prose-sm max-w-none"
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    form.getValues(
+                                                        "contentHtml"
+                                                    ) || "",
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <Button
                         type="button"
-                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
+                        className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                         onClick={() => setIsDialogOpen(true)}
+                        disabled={!content}
                     >
                         Hoàn tất nội dung
                     </Button>
                 </motion.div>
 
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent className="sm:max-w-[600px]">
+                <Dialog
+                    open={isDialogOpen}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            handleCancel();
+                        }
+                        setIsDialogOpen(open);
+                    }}
+                >
+                    <DialogContent className="sm:max-w-[600px] h-[700px] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>
-                                Cập nhật thông tin bài viết
+                                Hoàn thiện thông tin bài viết
                             </DialogTitle>
                         </DialogHeader>
                         <form
@@ -338,7 +390,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         <input
                                             type="file"
                                             accept="image/*"
-                                            onChange={handleLogoUpload}
+                                            onChange={handleImageChange}
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                             id="logo-upload"
                                         />
@@ -357,7 +409,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                             </label>
                                         </Button>
                                     </div>
-                                    {logoPreview && (
+                                    {thumbnailPreview && (
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.8 }}
                                             animate={{ opacity: 1, scale: 1 }}
@@ -365,13 +417,13 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         >
                                             <Image
                                                 src={
-                                                    logoPreview ||
+                                                    thumbnailPreview ||
                                                     "/placeholder.svg"
                                                 }
                                                 width={20}
                                                 height={20}
                                                 alt="Logo preview"
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full"
                                             />
                                         </motion.div>
                                     )}
@@ -425,18 +477,25 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors"
+                                    className="px-8 h-12 text-base border-2 hover:bg-gray-50 transition-colors cursor-pointer"
                                     onClick={handleCancel}
                                 >
                                     Hủy
                                 </Button>
                                 <Button
                                     type="submit"
-                                    disabled={isSubmitting || isUploading}
+                                    disabled={
+                                        isSubmitting ||
+                                        isUploading ||
+                                        !thumbnailId ||
+                                        !categoryIds ||
+                                        !doctorId ||
+                                        !title
+                                    }
                                     className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
                                 >
                                     {isSubmitting ? (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 cursor-pointer">
                                             <motion.div
                                                 animate={{ rotate: 360 }}
                                                 transition={{
@@ -444,7 +503,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                                     repeat: Infinity,
                                                     ease: "linear",
                                                 }}
-                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full "
                                             />
                                             Đang tải lên...
                                         </div>

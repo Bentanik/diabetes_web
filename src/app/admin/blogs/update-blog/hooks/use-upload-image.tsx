@@ -5,16 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadImageAsync } from "@/services/media/api-services";
 import useToast from "@/hooks/use-toast";
 
+// Define schema for image validation
 export const imageSchema = z.object({
     image: z
-        .any()
-        .refine((file) => file instanceof File, {
-            message: "Vui lòng chọn một ảnh",
-        })
-        .refine((file) => file?.size <= 5 * 1024 * 1024, {
+        .instanceof(File)
+        .refine((file) => file.size <= 5 * 1024 * 1024, {
             message: "Ảnh không được lớn hơn 5MB",
         })
-        .refine((file) => file?.type?.startsWith("image/"), {
+        .refine((file) => file.type.startsWith("image/"), {
             message: "Chỉ chấp nhận định dạng ảnh",
         }),
 });
@@ -32,28 +30,35 @@ export default function useUploadImage() {
     });
 
     const { mutate, isPending } = useMutation({
-        mutationFn: async (data: ImageFormData) => {
+        mutationFn: async (
+            data: ImageFormData
+        ): Promise<API.TUploadImageResponse[number]> => {
             const formData = new FormData();
-            formData.append("Image", data.image);
+            formData.append("image", data.image);
             const response = await uploadImageAsync(formData);
-            console.log("Raw response from UploadImageAsync:", response); // Log raw response
-            return response;
+            if (
+                !response.data ||
+                !Array.isArray(response.data) ||
+                response.data.length === 0
+            ) {
+                throw new Error("Không nhận được dữ liệu hợp lệ từ server");
+            }
+            return response.data[0];
         },
-        onSuccess: (res) => {
-            console.log("Upload image response in onSuccess:", res);
+        onSuccess: () => {
             addToast({
                 type: "success",
                 description: "Tải ảnh lên thành công",
                 duration: 5000,
             });
         },
-        onError: (error) => {
-            console.error("Upload error details:", error);
+        onError: (error: Error) => {
+            console.error("Upload error:", error);
             addToast({
                 type: "error",
                 description:
-                    "Failed to upload image: " +
-                    (error.message || "Unknown error"),
+                    "Tải ảnh thất bại: " +
+                    (error.message || "Lỗi không xác định"),
                 duration: 5000,
             });
         },
@@ -69,26 +74,13 @@ export default function useUploadImage() {
         ) => void
     ) => {
         mutate(data, {
-            onSuccess: (res) => {
+            onSuccess: (res: API.TUploadImageResponse[number]) => {
                 // Validate response data
-                if (
-                    res &&
-                    res.value.data &&
-                    res.value.data.imageId &&
-                    res.value.data.publicId &&
-                    res.value.data.publicUrl
-                ) {
-                    const { imageId, publicId, publicUrl } = res.value.data as API.TUploadImageResponse;
-                    console.log("Validated upload data:", {
-                        imageId,
-                        publicId,
-                        publicUrl,
-                    });
-                    onImageUploaded(imageId, publicId, publicUrl); // Call callback first
+                if (res?.imageId && res?.publicId && res?.publicUrl) {
+                    onImageUploaded(res.imageId, res.publicId, res.publicUrl);
                     form.reset();
                     clearImage();
                 } else {
-                    console.error("Invalid response data:", res);
                     addToast({
                         type: "error",
                         description: "Dữ liệu phản hồi không hợp lệ",
@@ -96,13 +88,13 @@ export default function useUploadImage() {
                     });
                 }
             },
-            onError: (error) => {
-                console.error("Mutation error details:", error);
+            onError: (error: Error) => {
+                console.error("Mutation error:", error);
                 addToast({
                     type: "error",
                     description:
-                        "Failed to upload image: " +
-                        (error.message || "Unknown error"),
+                        "Tải ảnh thất bại: " +
+                        (error.message || "Lỗi không xác định"),
                     duration: 5000,
                 });
             },

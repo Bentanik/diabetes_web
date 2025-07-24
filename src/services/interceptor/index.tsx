@@ -9,6 +9,7 @@ import axios, { AxiosError } from "axios";
 //   import { refreshToken } from "@/services/auth/api-services";
 import useToast from "@/hooks/use-toast";
 import { refreshTokenAsync } from "@/services/auth/api-services";
+import { TMeta } from "@/typings";
 //   import useLogout from "@/hooks/use-logout";
 
 const request = axios.create({
@@ -84,7 +85,7 @@ const errorHandler = async (error: AxiosError) => {
         const refreshToken = getStorageItem("refreshToken");
         if (!refreshTokenPromise) {
             refreshTokenPromise = refreshTokenAsync({
-                refreshToken: refreshToken || ""
+                refreshToken: refreshToken || "",
             })
                 .then((res: any) => {
                     setStorageItem("accessToken", res.value.data.accessToken);
@@ -101,7 +102,8 @@ const errorHandler = async (error: AxiosError) => {
         }
 
         return refreshTokenPromise.then(() => {
-            originalRequest.headers.Authorization = getStorageItem("accessToken");
+            originalRequest.headers.Authorization =
+                getStorageItem("accessToken");
             return request(originalRequest);
         });
     }
@@ -113,7 +115,7 @@ request.interceptors.request.use(
     (config) => {
         const token = getStorageItem("accessToken");
         if (token) {
-            config.headers.Authorization = token;
+            config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },

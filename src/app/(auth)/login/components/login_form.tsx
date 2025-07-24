@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 import InputAuth from "@/components/input_auth";
@@ -13,9 +13,9 @@ export default function LoginForm() {
     const handleForgotPassword = () => {
         addToast({
             type: "warning",
-            description: "Tính năng đang phát triển"
-        })
-    }
+            description: "Tính năng đang phát triển",
+        });
+    };
 
     return (
         <div className="flex items-center justify-center px-6 py-12">

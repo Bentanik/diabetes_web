@@ -44,10 +44,10 @@ export default function BlogStatusDropdown({
     const handleChange = (
         newValue: SingleValue<{ value: string; label: string }>
     ) => {
-        const statusValue = newValue?.value || "1"; // Mặc định về "0" nếu không chọn
+        const statusValue = newValue?.value || "1";
         setSelectedOption(newValue?.label || "Đã duyệt");
         const status = statusValue === "null" ? null : parseInt(statusValue);
-        onStatusChange(status || 0); // Gọi callback với giá trị status
+        onStatusChange(status || 0);
     };
 
     return (

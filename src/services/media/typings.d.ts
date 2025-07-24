@@ -3,13 +3,20 @@ declare namespace REQUEST {
         image: File;
     };
 
-    type TDeleteImage = string[];
+    type TUploadConversationImage = {
+        files: File;
+    };
 }
 
 declare namespace API {
-    type TUploadImageResponse = {
+    type UploadImageResponse = {
         imageId: string;
         publicId: string;
         publicUrl: string;
+    };
+    type TUploadImageResponse = UploadImageResponse[];
+
+    type TUploadConversationImageResponse = {
+        mediaIds: string[];
     };
 }

@@ -1,17 +1,22 @@
 import useToast from "@/hooks/use-toast";
 import { useState } from "react";
 import { getAllBlogs } from "@/services/blog/api-services";
+import { useBackdrop } from "@/context/backdrop_context";
+import { TResponseData } from "@/typings";
 
 export default function useGetBlogs() {
     const { addToast } = useToast();
     const [isPending, setPending] = useState(false);
+    const { showBackdrop, hideBackdrop } = useBackdrop();
 
     const getBlogsApi = async (params: REQUEST.BlogRequestParam) => {
         setPending(true);
+        showBackdrop();
         try {
             const res = await getAllBlogs(params);
-            if (res.value.data != null) {
-                return res as TResponse<API.TGetBlogs>;
+            console.log("Blogs Data nè:");
+            if (res.data != null) {
+                return res as TResponseData<API.TGetBlogs>;
             } else {
                 addToast({
                     type: "error",
@@ -24,6 +29,7 @@ export default function useGetBlogs() {
             return null;
         } finally {
             setPending(false);
+            hideBackdrop();
         }
     };
     return { getBlogsApi, isPending };
