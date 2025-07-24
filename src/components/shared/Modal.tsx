@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client"
+
 import React from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { XIcon } from "lucide-react"
 
 /**
  * Interface cho props của Modal component
@@ -8,43 +10,68 @@ import { XIcon } from "lucide-react"
 interface ModalProps {
     isOpen: boolean
     onClose: () => void
-    title: string
     children: React.ReactNode
     maxWidth?: string
     className?: string
+    closeOnBackdrop?: boolean
 }
 
 /**
- * Component Modal tái sử dụng với animation Framer Motion
- * Dùng để hiển thị các popup và dialog
+ * Component Modal
  */
 export const Modal: React.FC<ModalProps> = ({
     isOpen,
     onClose,
-    title,
     children,
-    maxWidth = "max-w-md",
-    className = ""
+    maxWidth = "max-w-lg",
+    className = "",
+    closeOnBackdrop = true,
 }) => {
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget && closeOnBackdrop) {
+            onClose()
+        }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+            onClose()
+        }
+    }
+
+    React.useEffect(() => {
+        if (isOpen) {
+            document.addEventListener("keydown", handleKeyDown)
+            document.body.style.overflow = "hidden"
+        } else {
+            document.body.style.overflow = "unset"
+        }
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown)
+            document.body.style.overflow = "unset"
+        }
+    }, [isOpen])
+
     return (
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    {/* Backdrop với blur effect */}
+                    {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="fixed inset-0 bg-white/20 backdrop-blur-sm"
-                        onClick={onClose}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+                        onClick={handleBackdropClick}
                         style={{
                             backdropFilter: "blur(8px)",
                             WebkitBackdropFilter: "blur(8px)",
                         }}
                     />
 
-                    {/* Nội dung Modal */}
+                    {/* Modal Box */}
                     <motion.div
                         initial={{
                             opacity: 0,
@@ -62,32 +89,29 @@ export const Modal: React.FC<ModalProps> = ({
                             y: 20,
                         }}
                         transition={{
-                            duration: 0.2,
-                            ease: "easeOut",
+                            duration: 0.3,
+                            ease: [0.25, 0.46, 0.45, 0.94],
                             type: "spring",
-                            stiffness: 300,
+                            stiffness: 400,
                             damping: 30,
                         }}
-                        className={`relative bg-white rounded-xl p-6 w-full ${maxWidth} mx-4 z-10 shadow-2xl border border-gray-100 ${className}`}
+                        className={`relative bg-white rounded-xl w-full ${maxWidth} mx-4 z-10 overflow-hidden ${className}`}
+                        style={{
+                            boxShadow: `
+                                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                                0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                                0 10px 10px -5px rgba(0, 0, 0, 0.04),
+                                0 0 0 1px rgba(255, 255, 255, 0.1)
+                            `,
+                        }}
                     >
-                        {/* Header Modal */}
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={onClose}
-                                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
-                            >
-                                <XIcon className="w-5 h-5" />
-                            </motion.button>
-                        </div>
-
-                        {/* Nội dung */}
                         {children}
                     </motion.div>
                 </div>
             )}
         </AnimatePresence>
     )
-} 
+}
+
+export default Modal

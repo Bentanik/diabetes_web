@@ -13,7 +13,7 @@ export const sidebar_items = [
         label: "Dashboard",
     },
     {
-        href: "/admin/hospital",
+        href: "/admin/hospitals",
         icon: HospitalIcon,
         label: "Quản lý bệnh viện",
     },
@@ -25,7 +25,7 @@ export const sidebar_items = [
     {
         href: "/admin/train-ai",
         icon: BrainIcon,
-        label: "Train AI",
+        label: "Huấn luyện AI",
     },
     {
         href: "/mentor/setting",

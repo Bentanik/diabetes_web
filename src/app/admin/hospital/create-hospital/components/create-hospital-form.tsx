@@ -62,10 +62,10 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { useState, useEffect, useCallback } from "react";
-import useUploadUserImage from "@/app/hospital/doctor/create-doctor/hooks/use-upload-image";
+import useUploadUserImage from "@/app/hospitals/doctor/create-doctor/hooks/use-upload-image";
 import useCreateDoctor, {
     DoctorFormData,
-} from "@/app/hospital/doctor/create-doctor/hooks/use-create-doctor";
+} from "@/app/hospitals/doctor/create-doctor/hooks/use-create-doctor";
 import { useRouter } from "next/navigation";
 
 export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {

@@ -71,7 +71,7 @@ const PaginatedComponent: React.FC<PaginatedComponentProps> = ({
                     <PaginationPrevious
                         className="cursor-pointer select-none"
                         onClick={() => handlePageChange(currentPage - 1)}
-                        // disabled={currentPage === 1}
+                    // disabled={currentPage === 1}
                     >
                         <span className="hidden sm:block">Trước</span>
                     </PaginationPrevious>
@@ -82,11 +82,10 @@ const PaginatedComponent: React.FC<PaginatedComponentProps> = ({
                         <PaginationLink
                             // href="#"
                             onClick={() => handlePageChange(page)}
-                            className={`${
-                                currentPage === page
+                            className={`${currentPage === page
                                     ? "bg-blue-500 text-white hover:!bg-blue-600 hover:!text-white"
                                     : ""
-                            } cursor-pointer`}
+                                } cursor-pointer`}
                         >
                             {page}
                         </PaginationLink>

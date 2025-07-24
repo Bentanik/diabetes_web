@@ -2,6 +2,7 @@
 
 
 import { Backdrop } from "@/components/backdrop";
+import { NotificationProvider } from "@/context/notification_context";
 import { BackdropProvider } from "@/context/backdrop_context";
 import { StoreProvider } from "@/providers/redux-provider";
 import dynamic from "next/dynamic";
@@ -18,12 +19,14 @@ export default function Provider({
 }>) {
     return (
         <StoreProvider>
-            <BackdropProvider>
-                <Backdrop />
-                <ReactQueryProvider>
-                    {children}
-                </ReactQueryProvider>
-            </BackdropProvider>
+            <NotificationProvider>
+                <BackdropProvider>
+                    <Backdrop />
+                    <ReactQueryProvider>
+                        {children}
+                    </ReactQueryProvider>
+                </BackdropProvider>
+            </NotificationProvider>
         </StoreProvider>
     );
 }
