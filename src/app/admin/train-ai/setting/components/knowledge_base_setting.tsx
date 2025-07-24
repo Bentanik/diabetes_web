@@ -76,7 +76,7 @@ const KnowledgeBaseItem = ({
                         </span>
                         <span className="flex items-center gap-1">
                             <HardDriveIcon className="w-3 h-3" />
-                            {formatSize(knowledgeBase.total_size_mb)}
+                            {formatSize(knowledgeBase.total_size_bytes)}
                         </span>
                         <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${knowledgeBase.select_training === true
                             ? 'bg-green-100 text-green-800'
@@ -149,7 +149,7 @@ export default function KnowledgeBaseSetting() {
     })
 
     // Extract data from API response
-    const knowledgeBases = data?.knowledge_bases || []
+    const knowledgeBases = data?.items || []
     const totalItems = data?.total || 0
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
 
