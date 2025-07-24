@@ -100,7 +100,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                     (imageId, publicId, publicUrl) => {
                         if (isAvatar) {
                             // Handle single avatar
-                            form.setValue("avatar", imageId);
+                            form.setValue("avatarId", imageId);
                             setAvatarPreview(publicUrl);
                             setAvatarId(imageId);
                             // setThumbnailPreviews([]);
@@ -124,7 +124,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     };
 
     console.log("avatarURL" + avatarPreview);
-    console.log(form.watch("avatar"));
+    console.log(form.watch("avatarId"));
     // console.log(form.watch("images"));
 
     const handleClearImages = () => {
@@ -167,7 +167,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 lastName: data.lastName || "",
                 dateOfBirth: data.dateOfBirth || "",
                 gender: typeof data.gender === "number" ? data.gender : 1,
-                avatar: data.avatar || "",
+                avatarId: data.avatarId || "",
                 numberOfExperiences:
                     typeof data.numberOfExperiences === "number"
                         ? data.numberOfExperiences
