@@ -29,7 +29,6 @@ import useUploadConversationImage from "@/app/hospitals/conversation/hooks/use-u
 import useUpdateConversation, {
     ConversationFormData,
 } from "../hooks/use-update-conversation";
-import { useRouter } from "next/navigation";
 
 type UpdateProp = {
     conversationId: string;

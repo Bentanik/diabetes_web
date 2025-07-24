@@ -51,7 +51,7 @@ export default function useUpdateConversation({
                 });
                 form.reset();
                 setTimeout(() => {
-                    router.push("/hospital/conversation");
+                    router.push("/hospitals/conversation");
                 }, 500);
             },
             onError: (err) => {

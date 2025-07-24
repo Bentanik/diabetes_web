@@ -9,7 +9,7 @@ import {
 } from "@/services/auth/api-services";
 import { useAppDispatch } from "@/stores";
 import { setInfoUser } from "@/stores/user-slice";
-import { TMeta, TResponse } from "@/typings";
+import { TMeta, TResponse, TResponseData } from "@/typings";
 import { removeAuthStorage, setAuthStorage } from "@/utils/local-storage";
 import { useMutation } from "@tanstack/react-query";
 
@@ -52,7 +52,7 @@ export const useServiceRegisterEmail = () => {
     const dispatch = useAppDispatch();
 
     return useMutation<
-        TResponse<API.TLoginResponseDto>,
+        TResponseData<API.TLoginResponseDto>,
         TMeta,
         REQUEST.TRegisterEmail
     >({
@@ -60,11 +60,11 @@ export const useServiceRegisterEmail = () => {
         onSuccess: (data) => {
             try {
                 if (data) {
-                    const { authToken, authUser } = data.value
-                        .data as API.TLoginResponseDto;
+                    const { authToken, authUser } =
+                        data.data as API.TLoginResponseDto;
                     addToast({
                         type: "success",
-                        description: data.value.message,
+                        description: data.message,
                         duration: 5000,
                     });
                     setAuthStorage(authToken);
@@ -81,26 +81,28 @@ export const useServiceLogin = () => {
     const { addToast } = useToast();
     const dispatch = useAppDispatch();
 
-    return useMutation<TResponse<API.TLoginResponseDto>, TMeta, REQUEST.TLogin>(
-        {
-            mutationFn: loginAsync,
-            onSuccess: (data) => {
-                try {
-                    if (data) {
-                        const { authToken, authUser } = data.value
-                            .data as API.TLoginResponseDto;
-                        addToast({
-                            type: "success",
-                            description: data.value.message,
-                            duration: 5000,
-                        });
-                        setAuthStorage(authToken);
-                        dispatch(setInfoUser(authUser));
-                    }
-                } catch (ex) {
-                    removeAuthStorage();
+    return useMutation<
+        TResponseData<API.TLoginResponseDto>,
+        TMeta,
+        REQUEST.TLogin
+    >({
+        mutationFn: loginAsync,
+        onSuccess: (data) => {
+            try {
+                if (data) {
+                    const { authToken, authUser } =
+                        data.data as API.TLoginResponseDto;
+                    addToast({
+                        type: "success",
+                        description: data.message,
+                        duration: 5000,
+                    });
+                    setAuthStorage(authToken);
+                    dispatch(setInfoUser(authUser));
                 }
-            },
-        }
-    );
+            } catch (ex) {
+                removeAuthStorage();
+            }
+        },
+    });
 };

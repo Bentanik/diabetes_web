@@ -69,7 +69,7 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
             await onSubmit(() => {
                 setIsDialogOpen(false);
                 setTimeout(() => {
-                    router.push("/hospital/conversation");
+                    router.push("/hospitals/conversation");
                 }, 1000);
             });
         } catch (error) {
@@ -89,7 +89,7 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
                 <div>
                     <div className="flex items-center gap-5">
                         <Link
-                            href="/hospital/conversation
+                            href="/hospitals/conversation
                         "
                         >
                             <ArrowLeft color="#248fca" />

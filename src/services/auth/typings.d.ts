@@ -1,46 +1,46 @@
 declare namespace REQUEST {
-  type TSendRegisterEmail = {
-    fullName: string;
-    email: string;
-  };
+    type TSendRegisterEmail = {
+        fullName: string;
+        email: string;
+    };
 
-  type TVerifyRegisterEmail = {
-    otp: string;
-  };
+    type TVerifyRegisterEmail = {
+        otp: string;
+    };
 
-  type TRegisterEmail = {
-    otp: string;
-    password: string;
-  };
+    type TRegisterEmail = {
+        otp: string;
+        password: string;
+    };
 
-  type TLogin = {
-    email: string;
-    password: string;
-  };
+    type TLogin = {
+        email: string;
+        password: string;
+    };
 
-  type TRereshToken = {
-    refreshToken: string;
-  };
+    type TRereshToken = {
+        refreshToken: string;
+    };
 }
 
 declare namespace API {
-  type TAuthTokenDto = {
-    accessToken?: string | null;
-    refreshToken?: string | null;
-    tokenType?: string | null;
-  };
+    type TAuthTokenDto = {
+        accessToken?: string | null;
+        refreshToken?: string | null;
+        tokenType?: string | null;
+    };
 
-  type TAuthUserDto = {
-    id?: string | null;
-    email?: string | null;
-    fullName?: string | null;
-    avatarUrl?: string | null;
-    roleName?: number | null;
-    roles?: string[];
-  };
+    type TAuthUserDto = {
+        id?: string | null;
+        email?: string | null;
+        fullName?: string | null;
+        avatarUrl?: string | null;
+        roleName?: number | null;
+        roles?: string[];
+    };
 
-  type TLoginResponseDto = {
-    authUser: TAuthUserDto;
-    authToken: TAuthTokenDto;
-  };
+    type TLoginResponseDto = {
+        authUser: TAuthUserDto;
+        authToken: TAuthTokenDto;
+    };
 }

@@ -376,7 +376,7 @@ export default function GroupHospitalComponent() {
                         className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                     >
                         <Link
-                            href={`/hospital/conversation/conversation-detail/${conversation.id}`}
+                            href={`/hospitals/conversation/conversation-detail/${conversation.id}`}
                             key={conversation.id}
                         >
                             {/* Header */}
