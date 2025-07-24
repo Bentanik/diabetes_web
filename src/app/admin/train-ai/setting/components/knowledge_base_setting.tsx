@@ -165,7 +165,7 @@ export default function KnowledgeBaseSetting() {
     });
 
     // Extract data from API response
-    const knowledgeBases = data?.knowledge_bases || [];
+    const knowledgeBases = data?.items || [];
     const totalItems = data?.total || 0;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
