@@ -6,6 +6,7 @@ declare type TMeta = {
     status: number;
     title: string;
 };
+
 declare type TResponse<T = object | null> = {
     value: {
         code: string;

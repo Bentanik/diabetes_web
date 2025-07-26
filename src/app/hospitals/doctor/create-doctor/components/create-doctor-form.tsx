@@ -56,7 +56,7 @@ import useCreateDoctor, {
 import { useRouter } from "next/navigation";
 
 export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
-    const { form, onSubmit } = useCreateDoctor();
+    const { form, onSubmit, errors } = useCreateDoctor();
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
     const [isSubmitting, setIsSubmitting] = useState(false);

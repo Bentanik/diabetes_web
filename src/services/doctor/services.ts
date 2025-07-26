@@ -29,12 +29,16 @@ export const useServiceCreateDoctor = () => {
                 duration: 5000,
             });
         },
-        onError: () => {
-            addToast({
-                type: "error",
-                description: "Thêm bác sĩ thất bại!",
-                duration: 5000,
-            });
+
+        onError: (data: TMeta) => {
+            if (data.status === 409) {
+                addToast({
+                    type: "error",
+                    description:
+                        "Số điện thoại không được trùng. Vui lòng nhập lại !",
+                    duration: 5000,
+                });
+            }
         },
     });
 };
