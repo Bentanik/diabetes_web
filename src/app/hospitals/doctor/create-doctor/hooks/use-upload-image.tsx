@@ -7,7 +7,7 @@ import useToast from "@/hooks/use-toast";
 
 // Define schema for image validation
 export const imageSchema = z.object({
-    image: z
+    images: z
         .instanceof(File)
         .refine((file) => file.size <= 5 * 1024 * 1024, {
             message: "Ảnh không được lớn hơn 5MB",
@@ -25,7 +25,7 @@ export default function useUploadUserImage() {
     const form = useForm<ImageUserFormData>({
         resolver: zodResolver(imageSchema),
         defaultValues: {
-            image: undefined,
+            images: undefined,
         },
     });
 
@@ -34,7 +34,7 @@ export default function useUploadUserImage() {
             data: ImageUserFormData
         ): Promise<API.TUploadImageUserResponse[number]> => {
             const formData = new FormData();
-            formData.append("image", data.image);
+            formData.append("Images", data.images);
             const response = await uploadImageUserAsync(formData);
             if (
                 !response.data ||
@@ -44,13 +44,6 @@ export default function useUploadUserImage() {
                 throw new Error("Không nhận được dữ liệu hợp lệ từ server");
             }
             return response.data[0];
-        },
-        onSuccess: () => {
-            addToast({
-                type: "success",
-                description: "Tải ảnh lên thành công",
-                duration: 5000,
-            });
         },
         onError: (error: Error) => {
             console.error("Upload error:", error);
@@ -66,20 +59,14 @@ export default function useUploadUserImage() {
 
     const onSubmit = (
         data: ImageUserFormData,
-        clearImage: () => void,
-        onImageUploaded: (
-            imageId: string,
-            publicId: string,
-            publicUrl: string
-        ) => void
+        onImageUploaded: (imageId: string) => void
     ) => {
         mutate(data, {
             onSuccess: (res: API.TUploadImageUserResponse[number]) => {
                 // Validate response data
                 if (res?.imageId && res?.publicId && res?.publicUrl) {
-                    onImageUploaded(res.imageId, res.publicId, res.publicUrl);
+                    onImageUploaded(res.imageId);
                     form.reset();
-                    clearImage();
                 } else {
                     addToast({
                         type: "error",

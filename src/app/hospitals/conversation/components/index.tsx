@@ -118,8 +118,6 @@ export default function GroupHospitalComponent() {
         setCurrentPage(page);
     };
 
-    console.log(currentPage);
-
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -138,10 +136,6 @@ export default function GroupHospitalComponent() {
                 form.setValue("avatarId", imageId);
             });
         }
-    };
-
-    const handleClearImages = () => {
-        setThumbnailPreview(null);
     };
 
     const formatDate = (dateString: string) => {

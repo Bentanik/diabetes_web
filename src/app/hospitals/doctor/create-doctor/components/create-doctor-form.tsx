@@ -59,32 +59,34 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const { form, onSubmit } = useCreateDoctor();
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
-    const [avatarPreview, setAvatarPreview] = useState<string>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadUserImage();
     const [currentContentHtml, setCurrentContentHtml] = useState("");
     const router = useRouter();
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+        null
+    );
 
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const file = e.target.files?.[0];
         if (file) {
-            const data = { image: file };
+            // Convert image to base64 for preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setThumbnailPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
 
-            onSubmitImage(
-                data,
-                handleClearImages,
-                (imageId, publicId, publicUrl) => {
-                    form.setValue("avatarId", imageId);
-                    setAvatarPreview(publicUrl);
-                }
-            );
+            // Upload image
+            const data = { images: file };
+            onSubmitImage(data, (imageId) => {
+                form.setValue("avatarId", imageId);
+            });
         }
     };
-
-    const handleClearImages = () => {};
 
     const updateContentHtml = useCallback(
         (editorContent: string) => {
@@ -149,10 +151,9 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 introduction: "Địt mẹ m",
             };
             onSubmit(formData, () => {
-                handleClearImages();
                 form.reset();
                 setTimeout(() => {
-                    router.push("/hospital/doctor");
+                    router.push("/hospitals/doctor");
                 }, 2000);
             });
         } catch (error) {
@@ -199,15 +200,21 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                             </label>
                                         </Button>
                                     </div>
-                                    {avatarPreview && (
+                                    {thumbnailPreview && (
                                         <motion.div
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
+                                            initial={{
+                                                opacity: 0,
+                                                scale: 0.8,
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                scale: 1,
+                                            }}
                                             className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
                                         >
                                             <Image
                                                 src={
-                                                    avatarPreview ||
+                                                    thumbnailPreview ||
                                                     "/placeholder.svg"
                                                 }
                                                 width={20}
@@ -349,15 +356,12 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     <FormControl>
                                                         <Input
                                                             {...field}
-                                                            type="number"
                                                             placeholder="Nhập số năm kinh nghiệm của bác sĩ"
                                                             className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
                                                             onChange={(e) =>
                                                                 field.onChange(
-                                                                    Number(
-                                                                        e.target
-                                                                            .value
-                                                                    )
+                                                                    e.target
+                                                                        .value
                                                                 )
                                                             }
                                                         />
@@ -551,15 +555,23 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                             if (
                                                                                 selectedDate
                                                                             ) {
+                                                                                const offsetDate =
+                                                                                    new Date(
+                                                                                        selectedDate.getTime() +
+                                                                                            7 *
+                                                                                                60 *
+                                                                                                60 *
+                                                                                                1000
+                                                                                    );
                                                                                 const isoDate =
-                                                                                    selectedDate.toISOString();
+                                                                                    offsetDate.toISOString();
                                                                                 field.onChange(
                                                                                     isoDate
-                                                                                ); // Update form value
+                                                                                );
                                                                             } else {
                                                                                 field.onChange(
                                                                                     null
-                                                                                ); // Handle undefined case
+                                                                                );
                                                                             }
                                                                             setOpen(
                                                                                 false
@@ -635,7 +647,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                         <div className="flex gap-5 leading-5">
                                                             <Image
                                                                 src={
-                                                                    avatarPreview ||
+                                                                    thumbnailPreview ||
                                                                     "/images/default_user.png"
                                                                 }
                                                                 alt="avatar"
@@ -651,7 +663,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                     </span>
                                                                     <span>
                                                                         {middleName ||
-                                                                            "Tên Đệm"}
+                                                                            ""}
                                                                     </span>
                                                                     <span>
                                                                         {lastName ||
@@ -710,7 +722,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                             </div>
                             <Button
                                 type="submit"
-                                disabled={isSubmitting || !avatarPreview}
+                                disabled={isSubmitting || !thumbnailPreview}
                                 className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                             >
                                 {isSubmitting ? (

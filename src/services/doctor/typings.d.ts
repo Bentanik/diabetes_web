@@ -16,6 +16,15 @@ declare namespace REQUEST {
         introduction: string;
     };
 
+    type GetDoctorsParams = {
+        search?: string | null;
+        gender?: GenderType | null;
+        position?: DoctorPositionType | null;
+        pageIndex?: number | null;
+        sortBy: string;
+        sortDirection: number;
+    };
+
     enum GenderType {
         Male = 0,
         Female = 1,
@@ -30,4 +39,26 @@ declare namespace REQUEST {
     }
 }
 
-declare namespace API {}
+declare namespace API {
+    type Doctors = {
+        id: string;
+        phoneNumber: string;
+        avatar: string;
+        name: string;
+        dateOfBirth: string;
+        gender: number;
+        numberOfExperiences: number;
+        position: number;
+        createdDate: string;
+    };
+
+    type TGetDoctors = {
+        items: Doctors[];
+        pageIndex: number;
+        pageSize: number;
+        totalCount: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}

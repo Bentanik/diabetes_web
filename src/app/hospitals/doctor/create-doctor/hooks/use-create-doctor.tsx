@@ -13,7 +13,13 @@ export const doctorSchema = z.object({
     dateOfBirth: z.string().min(1, "Vui lòng chọn ngày sinh cho bác sĩ"),
     gender: z.number(),
     avatarId: z.string().nonempty("Avatar là bắt buộc"),
-    numberOfExperiences: z.number(),
+    numberOfExperiences: z
+        .string()
+        .min(1, "Vui lòng nhập số năm kinh nghiệm")
+        .refine((val) => !isNaN(Number(val)), {
+            message: "Vui lòng chỉ nhập số",
+        })
+        .pipe(z.coerce.number().min(0, "Số năm kinh nghiệm không được âm")),
     position: z.number(),
     introduction: z.string().min(10, "Giới thiệu phải có ít nhất 10 ký tự"),
 });
@@ -30,7 +36,7 @@ export default function useCreateConversation() {
             dateOfBirth: "",
             gender: 0,
             avatarId: "",
-            numberOfExperiences: 1,
+            numberOfExperiences: 0,
             position: 0,
             introduction: "",
         },

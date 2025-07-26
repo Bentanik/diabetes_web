@@ -12,12 +12,12 @@ export const sidebar_items = [
         label: "Dashboard",
     },
     {
-        href: "/hospital/doctor",
+        href: "/hospitals/doctor",
         icon: UsersIcon,
         label: "Bác sĩ",
     },
     {
-        href: "/hospital/conversation",
+        href: "/hospitals/conversation",
         icon: MessageSquareIcon,
         label: "Nhóm Chat",
     },
