@@ -17,6 +17,7 @@ export const getDoctors = async ({
     pageIndex = 1,
     sortBy = "createdDate",
     sortDirection = 1,
+    pageSize = 10,
     gender = 1,
     position = 0,
     search = "",
@@ -25,15 +26,19 @@ export const getDoctors = async ({
         string,
         string | number | boolean | string[] | undefined
     > = {};
-    params.pageIndex = pageIndex;
-
+    if (pageIndex !== null) {
+        params.pageIndex = pageIndex;
+    }
+    if (pageSize !== null) {
+        params.pageSize = pageSize;
+    }
     if (search && search.trim() !== "") {
         params.search = search.trim();
     }
-    if (gender !== undefined) {
+    if (gender !== null) {
         params.gender = gender;
     }
-    if (position !== undefined) {
+    if (position !== null) {
         params.position = position;
     }
     if (sortBy && sortBy.trim() !== "") {

@@ -17,18 +17,38 @@ import {
     Briefcase,
     FileBadge,
     Hospital,
+    ArrowUpDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useGetDoctors } from "../hooks/use-get-doctors";
 import { useDebounce } from "@/hooks/use-debounce";
+import Image from "next/image";
+import PaginatedComponent from "@/components/paginated";
+import { Toggle } from "@radix-ui/react-toggle";
 
 const sortBy = [
-    { name: "Tên nhóm", value: "name" },
-    { name: "Ngày tạo", date: "date" },
+    { name: "Tên bác sĩ", value: "name" },
+    { name: "Năm kinh nghiệm", value: "experiences" },
+    { name: "Chức vụ", value: "position" },
+    { name: "Ngày tham gia", value: "createdDate" },
+    { name: "Ngày sinh", value: "dateOfBirth" },
+    { name: "Giới tính", value: "gender" },
+];
+
+const listGender = [
+    { name: "Nam", value: 0 },
+    { name: "Nữ", value: 1 },
+];
+
+const listPosition = [
+    { name: "Giám đốc", value: 0 },
+    { name: "Phó giám đốc", value: 1 },
+    { name: "Trưởng khoa", value: 2 },
+    { name: "Phó trưởng khoa", value: 3 },
+    { name: "Bác sĩ", value: 4 },
 ];
 
 const Header = () => {
@@ -75,12 +95,10 @@ const Header = () => {
 
 export default function DoctorComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
-    const [selectedStatus, setSelectedStatus] = useState<string>("all");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [selectSortBy, setSelectSortBy] = useState<string>("");
-    const [selectGender, setSelectGender] = useState<number>(0);
-    const [selectPosition, setSelectPosition] = useState<number>(0);
+    const [selectSortBy, setSelectSortBy] = useState<string>("createDate");
+    const [selectGender, setSelectGender] = useState<number | null>(null);
+    const [selectPosition, setSelectPosition] = useState<number | null>(null);
     const [isSortAsc, setIsSortAsc] = useState(false);
 
     const pageSize = 6;
@@ -88,13 +106,45 @@ export default function DoctorComponent() {
 
     const { doctors, isPending, isError, error } = useGetDoctors({
         search: debouncedSearchTerm,
-        gender: null,
-        position: null,
+        gender: selectGender,
+        pageSize: pageSize,
+        position: selectPosition,
         pageIndex: currentPage,
-        sortBy: "position",
-        sortDirection: isSortAsc ? 0 : 1,
+        sortBy: selectSortBy,
+        sortDirection: isSortAsc ? 1 : 0,
     });
 
+    const getPositionName = (position: number) => {
+        switch (position) {
+            case 0:
+                return "Giám đốc";
+            case 1:
+                return "Phó giám đốc";
+            case 2:
+                return "Trưởng khoa";
+            case 3:
+                return "Phó trưởng khoa";
+            case 4:
+                return "Bác sĩ";
+            default:
+                return "Không xác định vị trí";
+        }
+    };
+
+    const getGender = (gender: number) => {
+        switch (gender) {
+            case 0:
+                return "Nam";
+            case 1:
+                return "Nữ";
+            default:
+                return "Không xác định giới tính";
+        }
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
     return (
         <div>
             {/* Header */}
@@ -125,53 +175,90 @@ export default function DoctorComponent() {
                             onChange={(e) => setSelectSortBy(e.target.value)}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                            <option value="all">Tất cả khoa</option>
+                            <option value="createDate">Ngày tham gia</option>
                             {sortBy.map((dept) => (
-                                <option key={dept.name} value={dept.name}>
+                                <option key={dept.name} value={dept.value}>
                                     {dept.name}
                                 </option>
                             ))}
                         </select>
                         <select
-                            value={selectedStatus}
-                            onChange={(e) => setSelectedStatus(e.target.value)}
+                            value={selectGender === null ? "" : selectGender}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSelectGender(
+                                    val === "" ? null : Number(val)
+                                );
+                            }}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="active">Đang hoạt động</option>
-                            <option value="inactive">Tạm nghỉ</option>
-                            <option value="pending">Chờ xác thực</option>
+                            <option value="">Tất cả</option>
+                            {listGender.map((dept) => (
+                                <option key={dept.name} value={dept.value}>
+                                    {dept.name}
+                                </option>
+                            ))}
                         </select>
+
+                        <select
+                            value={
+                                selectPosition === null ? "" : selectPosition
+                            }
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSelectPosition(
+                                    val === "" ? null : Number(val)
+                                );
+                            }}
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Tất cả</option>
+                            {listPosition.map((dept) => (
+                                <option key={dept.name} value={dept.value}>
+                                    {dept.name}
+                                </option>
+                            ))}
+                        </select>
+                        <Toggle
+                            pressed={isSortAsc}
+                            onPressedChange={setIsSortAsc}
+                            className="cursor-pointer flex items-center border px-3 rounded-[10px]"
+                        >
+                            <ArrowUpDown className="h-4 w-4 mr-2" />
+                            {isSortAsc ? "A → Z" : "Z → A"}
+                        </Toggle>
                     </div>
                 </div>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {doctors?.items.map((staff, index) => (
+                {doctors?.items.map((doctor, index) => (
                     <motion.div
-                        key={staff.id}
+                        key={doctor.id}
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: index * 0.1 }}
                         className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                     >
                         <Link
-                            href={`/hospitals/doctor/doctor-detail/${staff.id}`}
+                            href={`/hospitals/doctor/doctor-detail/${doctor.id}`}
                         >
                             {/* Header */}
-                            <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="w-12 h-12">
-                                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold">
-                                            {staff.avatar}
-                                        </AvatarFallback>
-                                    </Avatar>
+                                    <Image
+                                        src={doctor.avatar}
+                                        alt="avatar"
+                                        width={50}
+                                        height={50}
+                                        className="rounded-full object-cover w-12 h-12"
+                                    />
                                     <div>
-                                        <h3 className="font-semibold text-[1.5rem]">
-                                            {staff.name}
+                                        <h3 className="font-semibold text-gray-800 text-[1.5rem]">
+                                            {doctor.name}
                                         </h3>
-                                        <p className="text-sm text-gray-500">
-                                            {staff.position}
+                                        <p className="text-sm text-[#248FCA]">
+                                            {getPositionName(doctor.position)}
                                         </p>
                                     </div>
                                 </div>
@@ -179,39 +266,61 @@ export default function DoctorComponent() {
 
                             {/* Info */}
                             <div className="space-y-3 mb-4">
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <PhoneIcon className="w-4 h-4" />
-                                    <span>
-                                        Số điện thoại: {staff.phoneNumber}
+                                {/* Phone number */}
+                                <div className="flex items-center justify-between text-sm text-gray-600">
+                                    <div className="flex items-center gap-2 ">
+                                        <PhoneIcon className="w-4 h-4" />
+                                        <span>Số điện thoại:</span>
+                                    </div>
+                                    <span>{doctor.phoneNumber}</span>
+                                </div>
+                                {/* Position */}
+                                <div className="flex items-center justify-between text-sm text-gray-600">
+                                    <div className="flex items-center gap-2 ">
+                                        <FileBadge className="w-4 h-4" />
+                                        <span>Số năm kinh nghiệm: </span>
+                                    </div>
+                                    <span className="font-bold text-[#248FCA]">
+                                        {" "}
+                                        {doctor.numberOfExperiences}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <VenusAndMars className="w-4 h-4" />
-                                    <span>Giới tính: {staff.gender}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Briefcase className="w-4 h-4" />
-                                    <span>Chức vụ: {staff.position}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <FileBadge className="w-4 h-4" />
+
+                                {/* Position */}
+                                <div className="flex items-center justify-between text-sm text-gray-600">
+                                    <div className="flex items-center gap-2 ">
+                                        <Briefcase className="w-4 h-4" />
+                                        <span>Chức vụ: </span>
+                                    </div>
                                     <span>
-                                        Số năm kinh nghiệm:{" "}
-                                        {staff.numberOfExperiences}
+                                        {getPositionName(doctor.position)}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Hospital className="w-4 h-4" />
-                                    <span>
-                                        Bác sĩ của bệnh viện:{" "}
-                                        {staff.numberOfExperiences}
-                                    </span>
+                                {/* Gender */}
+                                <div className="flex items-center justify-between text-sm text-gray-600">
+                                    <div className="flex items-center gap-2 ">
+                                        <VenusAndMars className="w-4 h-4" />
+                                        <span>Giới tính:</span>
+                                    </div>
+                                    <span>{getGender(doctor.gender)}</span>
                                 </div>
                             </div>
                         </Link>
                     </motion.div>
                 ))}
             </div>
+
+            {doctors?.items.length !== 0 && !isPending && (
+                <div className="my-10">
+                    <div className="mt-5">
+                        <PaginatedComponent
+                            totalPages={doctors?.totalPages || 0}
+                            currentPage={currentPage}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Empty State */}
             {doctors?.items.length === 0 && (
@@ -227,10 +336,6 @@ export default function DoctorComponent() {
                     <p className="text-gray-500 mb-6">
                         Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
                     </p>
-                    <Button className="gap-2">
-                        <PlusIcon className="w-4 h-4" />
-                        Thêm nhân viên mới
-                    </Button>
                 </motion.div>
             )}
         </div>

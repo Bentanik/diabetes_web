@@ -4,9 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { GET_DOCTORS_QUERY_KEY } from "../../hooks/use-get-doctors";
 
 export const doctorSchema = z.object({
-    phoneNumber: z.string().min(8, "Số điện thoại không hợp lệ"),
+    phoneNumber: z.string().regex(/^(0|\+84)\d{9,10}$/, {
+        message:
+            "Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có 10 đến 11 chữ số",
+    }),
     firstName: z.string().min(1, "Vui lòng nhập họ"),
     middleName: z.string().optional(),
     lastName: z.string().min(1, "Vui lòng nhập tên"),
@@ -52,9 +56,9 @@ export default function useCreateConversation() {
             onSuccess: async () => {
                 hideBackdrop();
                 onLoadData();
-                // await queryClient.invalidateQueries({
-                //     queryKey: [GET_CONVERSATIONS_QUERY_KEY],
-                // });
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_DOCTORS_QUERY_KEY],
+                });
                 form.reset();
             },
             onError: (err) => {

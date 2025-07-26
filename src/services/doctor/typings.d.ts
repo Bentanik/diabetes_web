@@ -20,6 +20,7 @@ declare namespace REQUEST {
         search?: string | null;
         gender?: GenderType | null;
         position?: DoctorPositionType | null;
+        pageSize?: number;
         pageIndex?: number | null;
         sortBy: string;
         sortDirection: number;

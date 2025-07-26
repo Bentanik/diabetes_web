@@ -427,7 +427,7 @@ export default function GroupHospitalComponent() {
                     </motion.div>
                 ))}
             </div>
-            {conversations?.items.length !== 0 && (
+            {conversations?.items.length !== 0 && !isPending && (
                 <div className="my-10">
                     <div className="mt-5">
                         <PaginatedComponent
