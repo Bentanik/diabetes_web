@@ -23,6 +23,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useGetDoctorDetail } from "../hooks/use-get-doctor";
 
 const Header = () => {
     return (
@@ -48,6 +49,38 @@ const Header = () => {
 export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
     const [isOpenDialog, setIsDialogOpen] = useState(false);
 
+    const { doctor_detail, isPending, isError, error } = useGetDoctorDetail({
+        doctorId,
+    });
+
+    const getPositionName = (position: any) => {
+        switch (position) {
+            case 0:
+                return "Giám đốc";
+            case 1:
+                return "Phó giám đốc";
+            case 2:
+                return "Trưởng khoa";
+            case 3:
+                return "Phó trưởng khoa";
+            case 4:
+                return "Bác sĩ";
+            default:
+                return "Không xác định vị trí";
+        }
+    };
+
+    const getGender = (gender: any) => {
+        switch (gender) {
+            case 0:
+                return "Nam";
+            case 1:
+                return "Nữ";
+            default:
+                return "Không xác định giới tính";
+        }
+    };
+
     return (
         <div>
             <header>
@@ -61,17 +94,20 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                             <div className="mx-[12%]">
                                 <div className="flex leading-5 gap-35">
                                     <Image
-                                        src="/images/home.jpg"
+                                        src={
+                                            doctor_detail?.avatar ||
+                                            "/images/home.jpg"
+                                        }
                                         alt="avatar"
                                         width={350}
                                         height={150}
-                                        className="rounded-2xl h-[350px] object-cover"
+                                        className="rounded-2xl h-[300px] object-cover"
                                     />
                                     <div>
                                         {/* Trình độ */}
                                         <h2 className="font-bold text-[1.5rem]">
                                             Bác sĩ
-                                            <span> Trần Quang Nam</span>
+                                            <span> {doctor_detail?.name}</span>
                                         </h2>
                                         <div className="flex items-center mt-4 gap-3 relative">
                                             <div className="flex gap-2 items-center">
@@ -80,14 +116,18 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                                     color="#0066ff"
                                                 />
                                                 <p className="text-[#0066ff] text-[1.3rem] font-medium">
-                                                    Bác sĩ
+                                                    {getPositionName(
+                                                        doctor_detail?.position
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="w-[1px] h-5 bg-[gray] bottom-100 top-0"></div>
 
                                             <p className=" text-[1.3rem]">
                                                 <span className="font-bold">
-                                                    25
+                                                    {
+                                                        doctor_detail?.numberOfExperiences
+                                                    }
                                                 </span>{" "}
                                                 <span className="font-extralight">
                                                     năm kinh nghiệm
@@ -95,21 +135,33 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                             </p>
                                         </div>
                                         <div className="flex flex-col gap-2 mt-5">
-                                            <div className="flex gap-4 items-center">
+                                            <div className="flex items-center gap-10">
                                                 <span className="min-w-[100px] text-gray-500">
-                                                    Chức vụ
+                                                    Chức vụ:
                                                 </span>
-                                                <span>
-                                                    Trưởng khoa Nội Tiết bệnh
-                                                    viện Đại học Y Dược TP.HCM
+                                                <span className="max-w-[100px]">
+                                                    {getPositionName(
+                                                        doctor_detail?.position
+                                                    )}
                                                 </span>
                                             </div>
-                                            <div className="flex gap-4 items-center">
+                                            <div className="flex items-center gap-10">
                                                 <span className="min-w-[100px] text-gray-500">
-                                                    Nơi công tác
+                                                    Nơi làm việc:
                                                 </span>
-                                                <span>
-                                                    Bệnh viện Trường Đh Y Dược
+                                                <span className="max-w-[100px]">
+                                                    {
+                                                        doctor_detail?.hospital
+                                                            .name
+                                                    }
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-8">
+                                                <span className="min-w-[100px] text-gray-500">
+                                                    Số điện thoại:
+                                                </span>
+                                                <span className="max-w-[100px]">
+                                                    {doctor_detail?.phoneNumber}
                                                 </span>
                                             </div>
                                         </div>

@@ -1,5 +1,5 @@
 import { useBackdrop } from "@/context/backdrop_context";
-import { useServiceCreateDoctor } from "@/services/doctor/services";
+import { useServiceCreateDoctor } from "@/services/hospital/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";

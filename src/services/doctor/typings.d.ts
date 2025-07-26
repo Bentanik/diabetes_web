@@ -1,29 +1,29 @@
 declare namespace REQUEST {
-    export type DoctorId = {
+    type DoctorId = {
         doctorId: string;
     };
+}
 
-    type TCreateDoctor = {
+declare namespace API {
+    type TGetDoctorDetail = {
+        id: string;
         phoneNumber: string;
-        firstName: string;
-        middleName: string;
-        lastName: string;
+        avatar: string;
+        name: string;
         dateOfBirth: string;
         gender: GenderType;
-        avatarId: string;
         numberOfExperiences: number;
         position: DoctorPositionType;
         introduction: string;
+        hospital: Hospital;
+        createdDate: string;
     };
 
-    type GetDoctorsParams = {
-        search?: string | null;
-        gender?: GenderType | null;
-        position?: DoctorPositionType | null;
-        pageSize?: number;
-        pageIndex?: number | null;
-        sortBy: string;
-        sortDirection: number;
+    type Hospital = {
+        id: string;
+        name: string;
+        phoneNumber: string;
+        thumbnail: string;
     };
 
     enum GenderType {
@@ -38,28 +38,4 @@ declare namespace REQUEST {
         DeputyHead = 3,
         Doctor = 4,
     }
-}
-
-declare namespace API {
-    type Doctors = {
-        id: string;
-        phoneNumber: string;
-        avatar: string;
-        name: string;
-        dateOfBirth: string;
-        gender: number;
-        numberOfExperiences: number;
-        position: number;
-        createdDate: string;
-    };
-
-    type TGetDoctors = {
-        items: Doctors[];
-        pageIndex: number;
-        pageSize: number;
-        totalCount: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-    };
 }

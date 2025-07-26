@@ -148,7 +148,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                         ? data.numberOfExperiences
                         : 0,
                 position: data.position,
-                introduction: "Địt mẹ m",
+                introduction: data.introduction,
             };
             onSubmit(formData, () => {
                 form.reset();

@@ -106,7 +106,7 @@ export default function DoctorComponent() {
         position: selectPosition,
         pageIndex: currentPage,
         sortBy: selectSortBy,
-        sortDirection: isSortAsc ? 0 : 1,
+        sortDirection: isSortAsc ? 1 : 0,
     });
 
     const getPositionName = (position: number) => {

@@ -1,4 +1,4 @@
-import { getDoctors } from "@/services/doctor/api-services";
+import { getDoctors } from "@/services/hospital/api-services";
 import { TMeta, TResponseData } from "@/typings";
 import { useQuery } from "@tanstack/react-query";
 
