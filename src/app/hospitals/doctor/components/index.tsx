@@ -3,20 +3,15 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    AlertCircleIcon,
     BarChartIcon,
     BellIcon,
-    CheckCircleIcon,
     PhoneIcon,
-    PlusIcon,
     SearchIcon,
     UsersIcon,
-    XCircleIcon,
     Plus,
     VenusAndMars,
     Briefcase,
     FileBadge,
-    Hospital,
     ArrowUpDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -111,7 +106,7 @@ export default function DoctorComponent() {
         position: selectPosition,
         pageIndex: currentPage,
         sortBy: selectSortBy,
-        sortDirection: isSortAsc ? 1 : 0,
+        sortDirection: isSortAsc ? 0 : 1,
     });
 
     const getPositionName = (position: number) => {

@@ -56,7 +56,7 @@ import useCreateDoctor, {
 import { useRouter } from "next/navigation";
 
 export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
-    const { form, onSubmit, errors } = useCreateDoctor();
+    const { form, onSubmit } = useCreateDoctor();
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -687,18 +687,13 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                 </div>
                                                                 <p className=" text-[0.9rem]">
                                                                     <span className="font-medium">
-                                                                        {exp}
+                                                                        {exp ||
+                                                                            "0"}
                                                                     </span>{" "}
                                                                     năm kinh
                                                                     nghiệm
                                                                 </p>
                                                             </div>
-                                                        </div>
-                                                        <div className="text-thin mt-1 text-[0.9rem]">
-                                                            Chuyên khoa:{" "}
-                                                            <span className="px-3 py-1 bg-gray-200 rounded-full text-[1rem]">
-                                                                Tiêu hóa
-                                                            </span>
                                                         </div>
                                                     </div>
 

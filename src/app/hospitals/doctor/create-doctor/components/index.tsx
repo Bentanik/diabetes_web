@@ -12,7 +12,7 @@ export default function CreateDoctorComponent() {
             <div className="flex items-center justify-between bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
                 <div>
                     <div className="flex items-center gap-5">
-                        <Link href="/hospital/doctor">
+                        <Link href="/hospitals/doctor">
                             <ArrowLeft color="#248fca" />
                         </Link>
 

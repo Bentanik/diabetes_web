@@ -70,8 +70,8 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                     <div>
                                         {/* Trình độ */}
                                         <h2 className="font-bold text-[1.5rem]">
-                                            Phó giáo sư, Tiến sĩ, Bác sĩ Trần
-                                            Quang Nam
+                                            Bác sĩ
+                                            <span> Trần Quang Nam</span>
                                         </h2>
                                         <div className="flex items-center mt-4 gap-3 relative">
                                             <div className="flex gap-2 items-center">
@@ -95,14 +95,6 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                             </p>
                                         </div>
                                         <div className="flex flex-col gap-2 mt-5">
-                                            <div className="flex gap-4 items-center">
-                                                <span className="min-w-[100px] text-gray-500">
-                                                    Chuyên khoa
-                                                </span>
-                                                <span className="text-blue-600 font-medium">
-                                                    Nội tiết
-                                                </span>
-                                            </div>
                                             <div className="flex gap-4 items-center">
                                                 <span className="min-w-[100px] text-gray-500">
                                                     Chức vụ
