@@ -356,6 +356,10 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     <FormControl>
                                                         <Input
                                                             {...field}
+                                                            value={
+                                                                field.value ??
+                                                                ""
+                                                            }
                                                             placeholder="Nhập số năm kinh nghiệm của bác sĩ"
                                                             className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
                                                             onChange={(e) =>

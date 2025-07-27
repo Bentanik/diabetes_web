@@ -23,6 +23,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 import PaginatedComponent from "@/components/paginated";
 import { Toggle } from "@radix-ui/react-toggle";
+import { Toaster } from "sonner";
 
 const sortBy = [
     { name: "Tên bác sĩ", value: "name" },
@@ -91,7 +92,7 @@ const Header = () => {
 export default function DoctorComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [selectSortBy, setSelectSortBy] = useState<string>("createDate");
+    const [selectSortBy, setSelectSortBy] = useState<string>("createdDate");
     const [selectGender, setSelectGender] = useState<number | null>(null);
     const [selectPosition, setSelectPosition] = useState<number | null>(null);
     const [isSortAsc, setIsSortAsc] = useState(false);
@@ -106,7 +107,7 @@ export default function DoctorComponent() {
         position: selectPosition,
         pageIndex: currentPage,
         sortBy: selectSortBy,
-        sortDirection: isSortAsc ? 1 : 0,
+        sortDirection: isSortAsc ? 0 : 1,
     });
 
     const getPositionName = (position: number) => {
@@ -142,6 +143,8 @@ export default function DoctorComponent() {
     };
     return (
         <div>
+            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
+
             {/* Header */}
             <header>
                 <Header />
@@ -170,7 +173,7 @@ export default function DoctorComponent() {
                             onChange={(e) => setSelectSortBy(e.target.value)}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                            <option value="createDate">Ngày tham gia</option>
+                            <option value="createdDate">Ngày tham gia</option>
                             {sortBy.map((dept) => (
                                 <option key={dept.name} value={dept.value}>
                                     {dept.name}

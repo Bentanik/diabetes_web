@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useGetDoctorDetail } from "../hooks/use-get-doctor";
+import { Toaster } from "sonner";
 
 const Header = () => {
     return (
@@ -52,6 +53,8 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
     const { doctor_detail, isPending, isError, error } = useGetDoctorDetail({
         doctorId,
     });
+
+    const introduction = doctor_detail?.introduction;
 
     const getPositionName = (position: any) => {
         switch (position) {
@@ -83,6 +86,8 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
 
     return (
         <div>
+            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
+
             <header>
                 <Header />
             </header>
@@ -96,7 +101,7 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                     <Image
                                         src={
                                             doctor_detail?.avatar ||
-                                            "/images/home.jpg"
+                                            "/images/default_img.jpg"
                                         }
                                         alt="avatar"
                                         width={350}
@@ -178,60 +183,12 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                             Giới thiệu bác sĩ
                                         </p>
                                     </div>
-                                    <div className="mt-5">
-                                        <p className="font-semibold">
-                                            Phó giáo sư, Tiến sĩ, Bác sĩ{" "}
-                                            <span className="font-bold">
-                                                Trần Quang Nam
-                                            </span>{" "}
-                                            hiện đang là Trưởng khoa Nội Tiết
-                                            bệnh viện Đại học Y Dược TP.HCM, Phó
-                                            Trưởng Bộ môn Nội tiết tại Đại học Y
-                                            Dược TP.HCM. Bác sĩ có nhiều năm
-                                            kinh nghiệm trong việc chuyên khám
-                                            và điều trị các bệnh như đái tháo
-                                            đường, bệnh bướu cổ, bệnh nội tiết
-                                            và các bệnh nội khoa.
-                                        </p>
-
-                                        <p className="mt-4">
-                                            Trước khi đến thăm khám, Bác sĩ Trần
-                                            Quang Nam khuyến khích bệnh nhân đặt
-                                            lịch sớm qua
-                                            <a
-                                                href="#"
-                                                className="text-blue-600 underline"
-                                            >
-                                                ứng dụng YouMed
-                                            </a>{" "}
-                                            để chọn khung giờ khám phù hợp,
-                                            tránh tình trạng hết lịch và giúp
-                                            phòng khám phục vụ tốt hơn.
-                                            <a
-                                                href="#"
-                                                className="text-blue-600 underline font-medium"
-                                            >
-                                                Tải ứng dụng YouMed tại đây
-                                            </a>{" "}
-                                            để đặt khám và nhận nhiều tiện ích:
-                                        </p>
-
-                                        <ul className="list-disc pl-6 mt-4 space-y-1">
-                                            <li>
-                                                Đăng ký ngày, giờ khám và lấy số
-                                                thứ tự sớm.
-                                            </li>
-                                            <li>Nhận và lưu trữ hồ sơ y tế.</li>
-                                            <li>
-                                                Nhắc lịch khám và lịch tái khám.
-                                            </li>
-                                            <li>
-                                                Nhắn tin và gọi video với bác
-                                                sĩ.
-                                            </li>
-                                            <li>Đọc tin y tế chính thống.</li>
-                                        </ul>
-                                    </div>
+                                    <div
+                                        className="prose prose-sm max-w-none mt-5"
+                                        dangerouslySetInnerHTML={{
+                                            __html: introduction || "",
+                                        }}
+                                    />
                                 </div>
                                 {/* Introduction */}
                                 <div className="mt-10 flex justify-end gap-4">
