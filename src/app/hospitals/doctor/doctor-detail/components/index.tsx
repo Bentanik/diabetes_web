@@ -73,16 +73,16 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
         }
     };
 
-    const getGender = (gender: any) => {
-        switch (gender) {
-            case 0:
-                return "Nam";
-            case 1:
-                return "Nữ";
-            default:
-                return "Không xác định giới tính";
-        }
-    };
+    // const getGender = (gender: any) => {
+    //     switch (gender) {
+    //         case 0:
+    //             return "Nam";
+    //         case 1:
+    //             return "Nữ";
+    //         default:
+    //             return "Không xác định giới tính";
+    //     }
+    // };
 
     return (
         <div>

@@ -1,32 +1,48 @@
-import React from "react";
+"use client";
+
+import React, { useCallback, useState } from "react";
 import Select, { SingleValue } from "react-select";
 import { Stethoscope } from "lucide-react";
 import { Controller, Control, useFormContext } from "react-hook-form";
 import { FormLabel } from "@/components/ui/form";
-
-type Doctor = {
-    Id: string;
-    value: string;
-    label: string;
-};
+import { useGetDoctors } from "../hooks/use-get-doctors";
+import { UseInfiniteQueryOptions } from "@tanstack/react-query";
 
 type DoctorSelectProps = {
     control: Control<any>;
-    doctors: Doctor[];
     name?: string;
 };
 
 export default function DoctorSelect({
     control,
-    doctors,
     name = "doctorId",
 }: DoctorSelectProps) {
+    const pageSize = 4;
     const {
         formState: { errors },
     } = useFormContext();
-    const options = doctors.map((doctor) => ({
-        value: doctor.Id,
-        label: doctor.label,
+
+    const [cursor, setCursor] = useState<string>("");
+
+    const { doctors, isPending, isError, error } = useGetDoctors({
+        search: null,
+        gender: null,
+        pageSize: pageSize,
+        position: null,
+        cursor: cursor,
+        sortBy: "name",
+        sortDirection: 1,
+    });
+
+    const loadMore = useCallback(() => {
+        if (!doctors?.nextCursor || isPending) return;
+
+        setCursor(doctors.nextCursor);
+    }, [doctors?.nextCursor, isPending]);
+
+    const options = doctors?.items.map((doctor) => ({
+        value: doctor.id,
+        label: doctor.name,
     }));
 
     return (
@@ -41,8 +57,9 @@ export default function DoctorSelect({
                 render={({ field }) => (
                     <Select
                         options={options}
+                        // Fix 2: Sửa logic tìm option được chọn
                         value={
-                            options.find(
+                            options?.find(
                                 (option) => option.value === field.value
                             ) || null
                         }
@@ -56,8 +73,12 @@ export default function DoctorSelect({
                                 selectedOption ? selectedOption.value : ""
                             );
                         }}
+                        onInputChange={(inputValue) => {
+                            inputValue;
+                        }}
                         placeholder="Lựa chọn bác sĩ"
                         isSearchable
+                        isLoading={isPending}
                         className="w-[250px] mt-4"
                         classNamePrefix="react-select"
                         styles={{

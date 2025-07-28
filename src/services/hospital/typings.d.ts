@@ -3,6 +3,10 @@ declare namespace REQUEST {
         doctorId: string;
     };
 
+    export type HospitalId = {
+        hospitalId: string;
+    };
+
     type TCreateDoctor = {
         phoneNumber: string;
         firstName: string;

@@ -13,7 +13,6 @@ import {
     EyeIcon,
     MailIcon,
     MapPinIcon,
-    MoreHorizontalIcon,
     PhoneIcon,
     PlusIcon,
     SearchIcon,

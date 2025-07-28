@@ -463,7 +463,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         <FormControl>
                                             <DoctorSelect
                                                 control={form.control}
-                                                doctors={doctors}
                                             />
                                         </FormControl>
                                         <FormMessage className="flex items-center gap-1">
