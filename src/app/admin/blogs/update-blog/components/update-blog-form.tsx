@@ -345,7 +345,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                         setIsDialogOpen(open);
                     }}
                 >
-                    <DialogContent className="sm:max-w-[600px] h-[700px] overflow-y-auto">
+                    <DialogContent className="sm:max-w-[600px] h-[750px] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>
                                 Hoàn thiện thông tin bài viết
@@ -472,7 +472,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 )}
                             />
 
-                            <DialogFooter>
+                            <DialogFooter className="mt-20">
                                 <Button
                                     type="button"
                                     variant="outline"

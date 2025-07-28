@@ -7,9 +7,9 @@ declare namespace REQUEST {
         search?: string | null;
         gender?: GenderType | null;
         position?: DoctorPositionType | null;
-        cursor: string | "";
+        cursor?: string | "";
         pageSize?: number;
-        pageIndex?: number | null;
+        pageIndex?: number;
         sortBy: string;
         sortDirection: number;
     };

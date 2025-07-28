@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import Select, { SingleValue } from "react-select";
 import { Stethoscope } from "lucide-react";
-import { Controller, Control, useFormContext } from "react-hook-form";
+import { Control, Controller, useFormContext } from "react-hook-form";
 import { FormLabel } from "@/components/ui/form";
 import { useGetDoctors } from "../hooks/use-get-doctors";
-import { UseInfiniteQueryOptions } from "@tanstack/react-query";
 
 type DoctorSelectProps = {
     control: Control<any>;
@@ -17,33 +16,35 @@ export default function DoctorSelect({
     control,
     name = "doctorId",
 }: DoctorSelectProps) {
-    const pageSize = 4;
+    const pageSize = 2;
+
     const {
         formState: { errors },
     } = useFormContext();
 
-    const [cursor, setCursor] = useState<string>("");
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+        useGetDoctors({
+            search: null,
+            gender: null,
+            pageSize,
+            position: null,
+            sortBy: "name",
+            sortDirection: 1,
+        });
 
-    const { doctors, isPending, isError, error } = useGetDoctors({
-        search: null,
-        gender: null,
-        pageSize: pageSize,
-        position: null,
-        cursor: cursor,
-        sortBy: "name",
-        sortDirection: 1,
-    });
+    const doctors =
+        data?.pages?.flatMap((page) => page.data?.items ?? []) ?? [];
 
-    const loadMore = useCallback(() => {
-        if (!doctors?.nextCursor || isPending) return;
-
-        setCursor(doctors.nextCursor);
-    }, [doctors?.nextCursor, isPending]);
-
-    const options = doctors?.items.map((doctor) => ({
+    const options = doctors.map((doctor: API.Doctors) => ({
         value: doctor.id,
         label: doctor.name,
     }));
+
+    const handleMenuScrollToBottom = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     return (
         <div>
@@ -57,10 +58,9 @@ export default function DoctorSelect({
                 render={({ field }) => (
                     <Select
                         options={options}
-                        // Fix 2: Sửa logic tìm option được chọn
                         value={
-                            options?.find(
-                                (option) => option.value === field.value
+                            options.find(
+                                (opt: any) => opt.value === field.value
                             ) || null
                         }
                         onChange={(
@@ -73,12 +73,10 @@ export default function DoctorSelect({
                                 selectedOption ? selectedOption.value : ""
                             );
                         }}
-                        onInputChange={(inputValue) => {
-                            inputValue;
-                        }}
                         placeholder="Lựa chọn bác sĩ"
+                        onMenuScrollToBottom={handleMenuScrollToBottom}
                         isSearchable
-                        isLoading={isPending}
+                        isLoading={isLoading || isFetchingNextPage}
                         className="w-[250px] mt-4"
                         classNamePrefix="react-select"
                         styles={{
@@ -92,6 +90,11 @@ export default function DoctorSelect({
                                         ? "red"
                                         : base.borderColor,
                                 },
+                            }),
+                            menuList: (base) => ({
+                                ...base,
+                                maxHeight: 150,
+                                overflowY: "auto",
                             }),
                         }}
                     />
