@@ -19,16 +19,16 @@ import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import Link from "next/link";
 import Image from "next/image";
-import useGetBlogs from "../hooks/use-get-blogs";
 import PaginatedComponent from "@/components/paginated";
 import BlogStatusDropdown from "./select-status";
 import DoctorSelectFilter from "@/components/select_doctor";
 import MultiSelectCategoriesFilter from "@/components/select-category";
-import useGetDataCategories from "@/app/admin/blogs/update-blog/hooks/use-get-categories";
 import BlogSortDropdown from "@/components/select-sort";
 import SearchInput from "@/components/search";
 import useCreateBlog from "@/app/admin/blogs/hooks/use-create-blog";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
+import { useGetCategories } from "../update-blog/hooks/use-get-categories";
+import { useGetBlogs } from "../hooks/use-get-blogs";
 
 const doctors = [
     {
@@ -135,19 +135,17 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
 
 export default function ModeratorManageBlogComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [selectedStatus, setSelectedStatus] = useState<number>(1);
-    const { getBlogsApi } = useGetBlogs();
-    const [data, setData] = useState<API.Blog[]>([]);
-    const [categoryData, setCategoryData] = useState<API.TGetCategories>([]);
+    const [selectedStatus, setSelectedStatus] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [totalPage, setTotalPage] = useState<number>(1);
     const [selectDoctor, setSelectDoctor] = useState<string>("");
-    const [selectSortType, setSelectSortType] = useState<string>("");
+    const [selectSortType, setSelectSortType] = useState<string>("createdDate");
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [isSortAsc, setIsSortAsc] = useState(true);
+
+    const pageSize = 6;
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -158,40 +156,26 @@ export default function ModeratorManageBlogComponent() {
         return `${day}-${month}-${year}`;
     };
 
-    const { getCategoriesApi, isPending } = useGetDataCategories();
+    const { categories, isPending } = useGetCategories();
 
-    const handleGetData = async (pageIndex: number) => {
-        try {
-            const res = await getBlogsApi({
-                searchContent: searchTerm,
-                categoryIds: selectedCategoryIds,
-                status: selectedStatus,
-                moderatorId: "",
-                doctorId: selectDoctor,
-                pageIndex: pageIndex,
-                pageSize: 6,
-                sortType: selectSortType,
-                isSortAsc: isSortAsc,
-            });
-            setTotalPage(res?.data?.totalPages || 1);
-            setData(res?.data?.items || []);
-        } catch (err) {
-            console.log(err);
-            setData([]);
-        }
-    };
+    console.log("slect asdasd ad á da đá a d" + selectedCategoryIds);
 
-    useEffect(() => {
-        const handleGetData = async () => {
-            try {
-                const res = await getCategoriesApi();
-                setCategoryData((res?.data as API.TGetCategories) || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetData();
-    }, []);
+    const {
+        blogs,
+        isPending: blogsPending,
+        isError,
+        error,
+    } = useGetBlogs({
+        searchContent: searchTerm,
+        categoryIds: selectedCategoryIds,
+        status: selectedStatus,
+        moderatorId: "",
+        doctorId: selectDoctor,
+        pageIndex: currentPage,
+        pageSize: pageSize,
+        sortType: selectSortType,
+        isSortAsc: isSortAsc,
+    });
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -203,18 +187,6 @@ export default function ModeratorManageBlogComponent() {
             clearTimeout(handler);
         };
     }, [searchTerm]);
-
-    useEffect(() => {
-        handleGetData(currentPage);
-    }, [
-        debouncedSearchTerm,
-        selectedStatus,
-        selectDoctor,
-        selectedCategoryIds,
-        selectSortType,
-        isSortAsc,
-        currentPage,
-    ]);
 
     const getStatusIcon = (status: number) => {
         switch (status) {
@@ -248,7 +220,6 @@ export default function ModeratorManageBlogComponent() {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        handleGetData(page);
     };
 
     return (
@@ -274,7 +245,7 @@ export default function ModeratorManageBlogComponent() {
                         />
                         {/* Select Category*/}
                         <MultiSelectCategoriesFilter
-                            data={categoryData}
+                            data={categories}
                             isPending={isPending}
                             onCategoryChange={setSelectedCategoryIds}
                         />
@@ -302,7 +273,7 @@ export default function ModeratorManageBlogComponent() {
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.map((data, index) => (
+                {blogs?.items.map((data, index) => (
                     <Link
                         href={`/admin/blogs/blog-detail/${data.id}`}
                         key={data.id}
@@ -374,11 +345,12 @@ export default function ModeratorManageBlogComponent() {
                     </Link>
                 ))}
             </div>
-            {data?.length > 0 && (
+            {/* Show pagination when has data */}
+            {blogs?.items && blogs.items.length > 0 && !blogsPending && (
                 <div className="my-10">
                     <div className="mt-5">
                         <PaginatedComponent
-                            totalPages={totalPage}
+                            totalPages={blogs.totalPages || 1}
                             currentPage={currentPage}
                             onPageChange={handlePageChange}
                         />
@@ -386,8 +358,8 @@ export default function ModeratorManageBlogComponent() {
                 </div>
             )}
 
-            {/* Empty State */}
-            {data.length === 0 && (
+            {/* Empty State - sử dụng cùng data source */}
+            {blogs?.items.length === 0 && !blogsPending && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

@@ -87,7 +87,9 @@ export const getAllBlogs = async ({
         params.searchContent = searchContent.trim();
     }
     if (categoryIds && categoryIds.length > 0) {
-        params.categoryIds = categoryIds.join(",");
+        categoryIds.forEach((id, index) => {
+            params[`CategoryIds[${index}]`] = id;
+        });
     }
     if (status !== undefined && status !== null) {
         params.status = status;
