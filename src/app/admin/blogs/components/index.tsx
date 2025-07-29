@@ -28,6 +28,7 @@ import useGetDataCategories from "@/app/admin/blogs/update-blog/hooks/use-get-ca
 import BlogSortDropdown from "@/components/select-sort";
 import SearchInput from "@/components/search";
 import useCreateBlog from "@/app/admin/blogs/hooks/use-create-blog";
+import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 
 const doctors = [
     {
@@ -296,6 +297,8 @@ export default function ModeratorManageBlogComponent() {
                     </div>
                 </div>
             </motion.div>
+
+            {isPending && <SkeletonFolderGrid count={6} />}
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

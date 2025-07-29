@@ -16,7 +16,7 @@ export default function DoctorSelect({
     control,
     name = "doctorId",
 }: DoctorSelectProps) {
-    const pageSize = 2;
+    const pageSize = 5;
 
     const {
         formState: { errors },
@@ -70,7 +70,11 @@ export default function DoctorSelect({
                             }>
                         ) => {
                             field.onChange(
-                                selectedOption ? selectedOption.value : ""
+                                selectedOption ? selectedOption.value : "",
+                                console.log(
+                                    "slect doctor option nè" +
+                                        selectedOption?.value
+                                )
                             );
                         }}
                         placeholder="Lựa chọn bác sĩ"

@@ -97,7 +97,6 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     return (
         <div>
             {/* Header */}
-            {isBlogPending && <div>...Loading</div>}
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <div className="mt-5 py-[2%] px-[10%] bg-[#ffffff] shadow-2xl rounded-2xl">
                 {/*Header*/}

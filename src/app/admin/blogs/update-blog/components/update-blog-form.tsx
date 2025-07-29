@@ -136,7 +136,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
 
             onSubmitImage(
                 data,
-                handleClearImages,
+                () => {},
                 (imageId, publicId, publicUrl) => {
                     form.setValue("thumbnail", imageId);
                     setThumbnailPreview(publicUrl);
@@ -188,9 +188,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         const newImageIds = extractImageIds(editorContent);
         setImageIds(newImageIds);
     };
-    const handleClearImages = () => {
-        setImageIds([]);
-    };
 
     const handleSubmitDraft = useCallback(
         async (formData: REQUEST.TUpdateBlog) => {
@@ -205,6 +202,8 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         },
         [onSubmit]
     );
+
+    console.log("bên form update nè m" + imageIds);
 
     const handleFormSubmit = async (data: BlogFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
@@ -225,7 +224,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                 isDraft: false,
             };
             onSubmit(formData, () => {
-                handleClearImages();
                 setIsDialogOpen(false);
                 form.reset();
                 setTimeout(() => {
