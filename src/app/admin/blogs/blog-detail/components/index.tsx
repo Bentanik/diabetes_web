@@ -4,7 +4,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import useGetBlog from "../hooks/use-get-blog";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -32,27 +31,18 @@ import {
 import useReviewBlog, { ReviewFormData } from "../hooks/use-review-blog";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/stores";
+import { useGetBlogDetail } from "../hooks/use-get-blog";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
-    const { getBlogApi, isBlogPending } = useGetBlog();
-    const [data, setData] = useState<API.TGetBlog>();
     const { onSubmit, form, isPending } = useReviewBlog({ blogId: blogId });
     const router = useRouter();
     const [isOpenDialog, setIsDialogOpen] = useState(false);
 
     const user = useAppSelector((state) => state.userSlice);
 
-    useEffect(() => {
-        const handleGetData = async (id: string) => {
-            try {
-                const res = await getBlogApi({ blogId: id });
-                setData(res?.data as API.TGetBlog);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetData(blogId);
-    }, []);
+    const { blog_detail, isPending: blogPending } = useGetBlogDetail({
+        blogId,
+    });
 
     const handleRejectBlog = (formData: ReviewFormData) => {
         try {
@@ -111,12 +101,12 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                         </h1>
                     </div>
                     <h1 className="text-[2.7rem] font-bold leading-[49px] mt-10">
-                        {data?.title || "Chưa cập nhật tiêu đề bài viết"}
+                        {blog_detail?.title || "Chưa cập nhật tiêu đề bài viết"}
                     </h1>
                     <div className="flex mt-4 items-center gap-3">
                         <Image
                             src={
-                                data?.doctor.imageUrl ||
+                                blog_detail?.doctor.imageUrl ||
                                 "/images/default_user.png"
                             }
                             alt="doctor-avatar"
@@ -126,12 +116,12 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                         />
                         <div>
                             <p className="font-medium">
-                                {data?.doctor.fullName ||
+                                {blog_detail?.doctor.fullName ||
                                     "Chưa cập nhật bác sĩ"}
                             </p>
                             <p className="text-gray-400">
-                                {data?.createdDate
-                                    ? formatDate(data.createdDate)
+                                {blog_detail?.createdDate
+                                    ? formatDate(blog_detail.createdDate)
                                     : "Không hiển thị ngày đăng"}
                             </p>
                         </div>
@@ -143,13 +133,13 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                     className="mt-6 prose prose-lg max-w-none"
                     dangerouslySetInnerHTML={{
                         __html:
-                            data?.contentHtml ||
+                            blog_detail?.contentHtml ||
                             "Chưa cập nhật nội dung cho bài viết",
                     }}
                 />
 
                 {/* Actions for rejected blog (status: -2) */}
-                {data?.status === -2 && (
+                {blog_detail?.status === -2 && (
                     <div className="mt-10 flex justify-end gap-4">
                         <Button
                             variant="outline"
@@ -169,7 +159,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                 )}
 
                 {/* Actions for pending blog (status: 0) */}
-                {data?.status === 0 &&
+                {blog_detail?.status === 0 &&
                     user.user?.roles?.includes("SystemAdmin") && (
                         <div className="mt-10 flex justify-end gap-4">
                             <Dialog

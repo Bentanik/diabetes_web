@@ -38,7 +38,7 @@ export const useGetDoctors = (params: REQUEST.GetDoctorsCursorParams) => {
         initialPageParam: "",
         getNextPageParam: (lastPage) =>
             lastPage.data?.hasNextPage ? lastPage.data.nextCursor : undefined,
-        staleTime: 5 * 60 * 1000, // cache giữ 5 phút
+        staleTime: 5 * 60 * 1000,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
     });

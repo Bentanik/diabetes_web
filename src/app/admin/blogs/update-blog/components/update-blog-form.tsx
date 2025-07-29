@@ -33,14 +33,15 @@ import { useState, useEffect, useCallback } from "react";
 import TiptapEditor from "@/components/tiptap";
 import useUploadImage from "@/app/admin/blogs/update-blog/hooks/use-upload-image";
 import MultiSelectCategories from "@/app/admin/blogs/update-blog/components/select-category";
-import useGetDataCategories from "@/app/admin/blogs/update-blog/hooks/use-get-categories";
 import DoctorSelect from "@/app/admin/blogs/update-blog/components/select-doctor";
-import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
 import useUpdateBlog, {
     BlogFormData,
 } from "@/app/admin/blogs/update-blog/hooks/use-update-blog";
 import { useRouter } from "next/navigation";
+import { useGetBlogDetail } from "../../blog-detail/hooks/use-get-blog";
+import { useGetCategories } from "../hooks/use-get-categories";
 
+//EXTRACT HTML CONTENT TO ROOT CONTENT
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -65,45 +66,13 @@ const extractTextContent = (html: string): string => {
     return textNodes.filter((text) => text !== "").join(", ");
 };
 
-const doctors = [
-    {
-        Id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
-        value: "tanphat",
-        label: "Bs.Lâm Tấn Phát",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b71",
-        value: "tanphat1",
-        label: "Bs.Lâm Tấn Phát1",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b72",
-        value: "tanphat2",
-        label: "Bs.Lâm Tấn Phát2",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b73",
-        value: "tanphat3",
-        label: "Bs.Lâm Tấn Phát3",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b74",
-        value: "tanphat4",
-        label: "Bs.Lâm Tấn Phát4",
-    },
-];
-
 export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadImage();
-    const { getCategoriesApi, isPending } = useGetDataCategories();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [data, setData] = useState<API.TGetCategories>([]);
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const { getBlogApi } = useGetBlog();
-    const [blogData, setBlogData] = useState<API.TGetBlog>();
     const { form, onSubmit } = useUpdateBlog({ blogId });
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
         null
@@ -111,22 +80,12 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const [thumbnailId, setThumbnailId] = useState<string | null>(null);
     const router = useRouter();
 
+    //GET DATA FROM FORM
     const categoryIds = form.watch("categoryIds");
     const doctorId = form.watch("doctorId");
     const title = form.watch("title");
 
-    useEffect(() => {
-        const handleGetData = async () => {
-            try {
-                const res = await getCategoriesApi();
-                setData((res?.data as API.TGetCategories) || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetData();
-    }, []);
-
+    //HANDLE SUBMIT UPLOAD IMAGES
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -146,26 +105,23 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         }
     };
 
-    useEffect(() => {
-        const handleGetBlogData = async (id: string) => {
-            try {
-                const res = await getBlogApi({ blogId: id });
-                setBlogData(res?.data as API.TGetBlog);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetBlogData(blogId);
-    }, []);
+    //FETCH API GET BLOG DETAIL
+    const { blog_detail, isPending: blogPending } = useGetBlogDetail({
+        blogId,
+    });
+
+    //FETCH API GET CATEGORIES
+    const { categories, isPending: categoriesPending } = useGetCategories();
 
     useEffect(() => {
-        if (blogData?.contentHtml) {
-            form.setValue("contentHtml", blogData.contentHtml);
-            setContent(extractTextContent(blogData.contentHtml));
-            setImageIds(extractImageIds(blogData.contentHtml));
+        if (blog_detail?.contentHtml) {
+            form.setValue("contentHtml", blog_detail.contentHtml);
+            setContent(extractTextContent(blog_detail.contentHtml));
+            setImageIds(extractImageIds(blog_detail.contentHtml));
         }
-    }, [blogData, form]);
+    }, [blog_detail, form]);
 
+    //EXTRACT HTML IMG CONTENT TO GET IMAGE IDS
     const extractImageIds = (html: string): string[] => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
@@ -189,6 +145,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         setImageIds(newImageIds);
     };
 
+    //HANDLE SUBMIT DRAFT POST FORM
     const handleSubmitDraft = useCallback(
         async (formData: REQUEST.TUpdateBlog) => {
             try {
@@ -203,8 +160,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         [onSubmit]
     );
 
-    console.log("bên form update nè m" + imageIds);
-
+    //HANDLE SUBMIT SUCCESSFULLY POST FORM
     const handleFormSubmit = async (data: BlogFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
             console.error("onSubmit is not a function");
@@ -441,8 +397,8 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         <FormControl>
                                             <MultiSelectCategories
                                                 control={form.control}
-                                                data={data}
-                                                isPending={isPending}
+                                                data={categories}
+                                                isPending={categoriesPending}
                                             />
                                         </FormControl>
                                         <FormMessage className="flex items-center gap-1">
