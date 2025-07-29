@@ -29,34 +29,7 @@ import useCreateBlog from "@/app/admin/blogs/hooks/use-create-blog";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import { useGetCategories } from "../update-blog/hooks/use-get-categories";
 import { useGetBlogs } from "../hooks/use-get-blogs";
-
-const doctors = [
-    {
-        Id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
-        value: "tanphat",
-        label: "Bs.Lâm Tấn Phát",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b71",
-        value: "tanphat1",
-        label: "Bs.Lâm Tấn Phát1",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b72",
-        value: "tanphat2",
-        label: "Bs.Lâm Tấn Phát2",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b73",
-        value: "tanphat3",
-        label: "Bs.Lâm Tấn Phát3",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b74",
-        value: "tanphat4",
-        label: "Bs.Lâm Tấn Phát4",
-    },
-];
+import ModeratorSelectFilter from "@/components/select_moderator";
 
 interface HeaderProps {
     searchTerm: string;
@@ -138,6 +111,7 @@ export default function ModeratorManageBlogComponent() {
     const [selectedStatus, setSelectedStatus] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectDoctor, setSelectDoctor] = useState<string>("");
+    const [selectModerator, setSelectModerator] = useState<string>("");
     const [selectSortType, setSelectSortType] = useState<string>("createdDate");
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
@@ -158,8 +132,6 @@ export default function ModeratorManageBlogComponent() {
 
     const { categories, isPending } = useGetCategories();
 
-    console.log("slect asdasd ad á da đá a d" + selectedCategoryIds);
-
     const {
         blogs,
         isPending: blogsPending,
@@ -169,7 +141,7 @@ export default function ModeratorManageBlogComponent() {
         searchContent: searchTerm,
         categoryIds: selectedCategoryIds,
         status: selectedStatus,
-        moderatorId: "",
+        moderatorId: selectModerator,
         doctorId: selectDoctor,
         pageIndex: currentPage,
         pageSize: pageSize,
@@ -250,10 +222,13 @@ export default function ModeratorManageBlogComponent() {
                             onCategoryChange={setSelectedCategoryIds}
                         />
                         {/* Select Doctor */}
-                        <DoctorSelectFilter
-                            doctors={doctors}
-                            onDoctorChange={setSelectDoctor}
+                        <DoctorSelectFilter onDoctorChange={setSelectDoctor} />
+
+                        {/* Select Moderator */}
+                        <ModeratorSelectFilter
+                            onModeratorChange={setSelectModerator}
                         />
+
                         {/* Select Sort Type */}
                         <BlogSortDropdown onSortChange={setSelectSortType} />
                         {/* Sort ASC/ DES */}

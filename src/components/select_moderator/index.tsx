@@ -1,24 +1,25 @@
 import React, { useState, useCallback } from "react";
 import Select, { SingleValue } from "react-select";
-import { useGetDoctors } from "@/app/admin/blogs/update-blog/hooks/use-get-doctors";
+import { useGetModerators } from "@/app/admin/blogs/update-blog/hooks/use-get-moderators";
 
-type DoctorSelectFilterProps = {
-    onDoctorChange: (doctorId: string) => void; // Callback để truyền giá trị lọc
+type ModeratorSelectFilterProps = {
+    onModeratorChange: (moderatorId: string) => void;
 };
 
-export default function DoctorSelectFilter({
-    onDoctorChange,
-}: DoctorSelectFilterProps) {
-    const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
+export default function ModeratorSelectFilter({
+    onModeratorChange,
+}: ModeratorSelectFilterProps) {
+    const [selectedModerator, setSelectedModerator] = useState<string | null>(
+        null
+    );
     const pageSize = 5;
 
     // Sử dụng hook để lấy dữ liệu từ API
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-        useGetDoctors({
+        useGetModerators({
             search: null,
             gender: null,
             pageSize,
-            position: null,
             sortBy: "name",
             sortDirection: 1,
         });
@@ -35,9 +36,9 @@ export default function DoctorSelectFilter({
     const handleChange = (
         selectedOption: SingleValue<{ value: string; label: string }>
     ) => {
-        const doctorId = selectedOption ? selectedOption.value : null;
-        setSelectedDoctor(doctorId);
-        onDoctorChange(doctorId || ""); // Gọi callback với doctorId hoặc chuỗi rỗng nếu null
+        const moderatorId = selectedOption ? selectedOption.value : null;
+        setSelectedModerator(moderatorId);
+        onModeratorChange(moderatorId || ""); // Gọi callback với doctorId hoặc chuỗi rỗng nếu null
     };
 
     // Xử lý cuộn đến cuối danh sách để load thêm dữ liệu
@@ -53,12 +54,12 @@ export default function DoctorSelectFilter({
                 options={options}
                 value={
                     options.find(
-                        (option: any) => option.value === selectedDoctor
+                        (option: any) => option.value === selectedModerator
                     ) || null
                 }
                 onChange={handleChange}
                 onMenuScrollToBottom={handleMenuScrollToBottom}
-                placeholder="Lựa chọn bác sĩ"
+                placeholder="Lựa chọn nhân viên"
                 isSearchable
                 isLoading={isLoading || isFetchingNextPage}
                 className="w-[250px] border rounded-full"

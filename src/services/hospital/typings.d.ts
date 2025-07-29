@@ -51,7 +51,7 @@ declare namespace API {
         avatar: string;
         name: string;
         dateOfBirth: string;
-        gender: number;
+        gender: GenderType;
         numberOfExperiences: number;
         position: number;
         createdDate: string;
@@ -66,4 +66,9 @@ declare namespace API {
         hasNextPage: boolean;
         hasPreviousPage: boolean;
     };
+
+    enum GenderType {
+        Male = 0,
+        Female = 1,
+    }
 }
