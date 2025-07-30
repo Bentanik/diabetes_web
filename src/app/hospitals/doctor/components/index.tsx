@@ -24,6 +24,7 @@ import Image from "next/image";
 import PaginatedComponent from "@/components/paginated";
 import { Toggle } from "@radix-ui/react-toggle";
 import { Toaster } from "sonner";
+import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 
 const sortBy = [
     { name: "Tên bác sĩ", value: "name" },
@@ -228,6 +229,8 @@ export default function DoctorComponent() {
                     </div>
                 </div>
             </motion.div>
+
+            {isPending && <SkeletonFolderGrid count={6} />}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {doctors?.items.map((doctor, index) => (

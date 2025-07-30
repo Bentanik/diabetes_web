@@ -38,7 +38,7 @@ export default function BlogSortDropdown({
                 }
                 onChange={handleChange}
                 placeholder="Chọn trạng thái"
-                className="w-[250px]"
+                className="w-[210px]"
                 classNamePrefix="react-select"
             />
         </div>

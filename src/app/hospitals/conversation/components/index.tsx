@@ -51,6 +51,7 @@ import PaginatedComponent from "@/components/paginated";
 import useUploadConversationImage from "@/app/hospitals/conversation/hooks/use-upload-conversation";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Toggle } from "@radix-ui/react-toggle";
+import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 
 const sortBy = [
     { name: "Tên nhóm", value: "name" },
@@ -358,6 +359,8 @@ export default function GroupHospitalComponent() {
                     </div>
                 </div>
             </motion.div>
+
+            {isPending && <SkeletonFolderGrid count={6} />}
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

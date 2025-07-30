@@ -13,7 +13,7 @@ export const sidebar_items = [
         label: "Dashboard",
     },
     {
-        href: "/admin/hospitals",
+        href: "/admin/hospital",
         icon: HospitalIcon,
         label: "Quản lý bệnh viện",
     },

@@ -59,10 +59,10 @@ export default function ModeratorSelectFilter({
                 }
                 onChange={handleChange}
                 onMenuScrollToBottom={handleMenuScrollToBottom}
-                placeholder="Lựa chọn nhân viên"
+                placeholder="Người quản lý"
                 isSearchable
                 isLoading={isLoading || isFetchingNextPage}
-                className="w-[250px] border rounded-full"
+                className="w-[200px] border rounded-full"
                 classNamePrefix="react-select"
                 styles={{
                     menuList: (base) => ({

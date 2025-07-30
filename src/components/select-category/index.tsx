@@ -40,7 +40,7 @@ export default function MultiSelectCategoriesFilter({
                 onChange={handleChange}
                 placeholder="Chọn thể loại"
                 isLoading={isPending}
-                className="w-[250px]"
+                className="w-[210px]"
                 classNamePrefix="react-select"
                 noOptionsMessage={() => "Không tìm thấy danh mục"}
                 isClearable

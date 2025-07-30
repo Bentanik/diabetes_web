@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
 import { motion } from "framer-motion";
-import { BarChartIcon, BellIcon, ArrowLeft } from "lucide-react";
+import { BarChartIcon, BellIcon, ArrowLeft, Divide } from "lucide-react";
 import {
     Dialog,
     DialogClose,
@@ -32,6 +32,7 @@ import useReviewBlog, { ReviewFormData } from "../hooks/use-review-blog";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/stores";
 import { useGetBlogDetail } from "../hooks/use-get-blog";
+import RejectedReason from "./rejected-reason-dialog";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const { onSubmit, form, isPending } = useReviewBlog({ blogId: blogId });
@@ -91,14 +92,21 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
             <div className="mt-5 py-[2%] px-[10%] bg-[#ffffff] shadow-2xl rounded-2xl">
                 {/*Header*/}
                 <div>
-                    <div className="flex items-center gap-5">
-                        <Link href="/admin/blogs">
-                            <ArrowLeft color="#248fca" />
-                        </Link>
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-5">
+                            <Link href="/admin/blogs">
+                                <ArrowLeft color="#248fca" />
+                            </Link>
 
-                        <h1 className="text-2xl font-medium text-[var(--primary-color)]">
-                            Chi tiết bài viết
-                        </h1>
+                            <h1 className="text-2xl font-medium text-[var(--primary-color)]">
+                                Chi tiết bài viết
+                            </h1>
+                        </div>
+                        {blog_detail?.status === -1 && (
+                            <div>
+                                <RejectedReason reason="Ngu" />
+                            </div>
+                        )}
                     </div>
                     <h1 className="text-[2.7rem] font-bold leading-[49px] mt-10">
                         {blog_detail?.title || "Chưa cập nhật tiêu đề bài viết"}

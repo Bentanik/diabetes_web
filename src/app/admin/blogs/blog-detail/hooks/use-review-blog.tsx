@@ -1,8 +1,10 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceReviewBlog } from "@/services/blog/services";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { GET_POSTS_QUERY_KEY } from "../../hooks/use-get-blogs";
 
 export const reviewSchema = z.object({
     reasonRejected: z
@@ -23,13 +25,16 @@ export default function useReviewBlog({ blogId }: REQUEST.BlogId) {
 
     const { mutate, isPending } = useServiceReviewBlog({ blogId });
     const { showBackdrop, hideBackdrop } = useBackdrop();
+    const queryClient = useQueryClient();
 
     const onSubmit = (data: REQUEST.ReviewBlog) => {
         showBackdrop();
         mutate(data, {
-            onSuccess: (res) => {
+            onSuccess: async (res) => {
                 hideBackdrop();
-                console.log("API Success:", res);
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_POSTS_QUERY_KEY],
+                });
                 form.reset();
             },
             onError: (err) => {

@@ -30,6 +30,8 @@ import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import { useGetCategories } from "../update-blog/hooks/use-get-categories";
 import { useGetBlogs } from "../hooks/use-get-blogs";
 import ModeratorSelectFilter from "@/components/select_moderator";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useAppSelector } from "@/stores";
 
 interface HeaderProps {
     searchTerm: string;
@@ -39,6 +41,8 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
     const { onSubmit } = useCreateBlog();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const user = useAppSelector((state) => state.userSlice);
+    const isSystemAdmin = user.user?.roles?.includes("SystemAdmin");
 
     const handleCreateForm = () => {
         setIsSubmitting(true);
@@ -70,30 +74,33 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
                     />
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        variant="outline"
-                        className="gap-2 cursor-pointer"
-                        onClick={handleCreateForm}
-                    >
-                        {isSubmitting ? (
-                            <div className="flex items-center gap-2">
-                                <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{
-                                        duration: 1,
-                                        repeat: Infinity,
-                                        ease: "linear",
-                                    }}
-                                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                                />
-                                Đang tạo...
-                            </div>
-                        ) : (
-                            "Tạo bài post"
-                        )}
-                    </Button>
+                    {!isSystemAdmin && (
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            variant="outline"
+                            className="gap-2 cursor-pointer"
+                            onClick={handleCreateForm}
+                        >
+                            {isSubmitting ? (
+                                <div className="flex items-center gap-2">
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{
+                                            duration: 1,
+                                            repeat: Infinity,
+                                            ease: "linear",
+                                        }}
+                                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                    />
+                                    Đang tạo...
+                                </div>
+                            ) : (
+                                "Tạo bài post"
+                            )}
+                        </Button>
+                    )}
+
                     <Button variant="ghost" size="icon">
                         <BellIcon className="w-5 h-5" />
                     </Button>
@@ -107,8 +114,13 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
 };
 
 export default function ModeratorManageBlogComponent() {
+    const user = useAppSelector((state) => state.userSlice);
+    const isSystemAdmin = user.user?.roles?.includes("SystemAdmin");
+
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [selectedStatus, setSelectedStatus] = useState<number>(0);
+    const [selectedStatus, setSelectedStatus] = useState<number>(
+        isSystemAdmin ? 1 : 0
+    );
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectDoctor, setSelectDoctor] = useState<string>("");
     const [selectModerator, setSelectModerator] = useState<string>("");
@@ -116,10 +128,10 @@ export default function ModeratorManageBlogComponent() {
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [isSortAsc, setIsSortAsc] = useState(true);
 
     const pageSize = 6;
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -138,7 +150,7 @@ export default function ModeratorManageBlogComponent() {
         isError,
         error,
     } = useGetBlogs({
-        searchContent: searchTerm,
+        searchContent: debouncedSearchTerm,
         categoryIds: selectedCategoryIds,
         status: selectedStatus,
         moderatorId: selectModerator,
@@ -148,17 +160,6 @@ export default function ModeratorManageBlogComponent() {
         sortType: selectSortType,
         isSortAsc: isSortAsc,
     });
-
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-            setCurrentPage(1);
-        }, 500);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [searchTerm]);
 
     const getStatusIcon = (status: number) => {
         switch (status) {
@@ -225,9 +226,11 @@ export default function ModeratorManageBlogComponent() {
                         <DoctorSelectFilter onDoctorChange={setSelectDoctor} />
 
                         {/* Select Moderator */}
-                        <ModeratorSelectFilter
-                            onModeratorChange={setSelectModerator}
-                        />
+                        {isSystemAdmin && (
+                            <ModeratorSelectFilter
+                                onModeratorChange={setSelectModerator}
+                            />
+                        )}
 
                         {/* Select Sort Type */}
                         <BlogSortDropdown onSortChange={setSelectSortType} />

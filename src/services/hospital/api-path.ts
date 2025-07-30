@@ -4,7 +4,10 @@ const DOCTOR =
 const CREATE_DOCTOR = DOCTOR + "/doctors";
 const GET_DOCTORS = DOCTOR + "/me/doctors";
 
+const GET_HOSPITALS = DOCTOR + "/me";
+
 export default {
     CREATE_DOCTOR,
     GET_DOCTORS,
+    GET_HOSPITALS,
 };

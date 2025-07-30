@@ -30,6 +30,14 @@ declare namespace REQUEST {
         sortDirection: number;
     };
 
+    type GetHospitalsParams = {
+        search?: string | null;
+        pageSize?: number;
+        pageIndex?: number | null;
+        sortBy: string;
+        sortDirection: number;
+    };
+
     enum GenderType {
         Male = 0,
         Female = 1,
@@ -55,6 +63,27 @@ declare namespace API {
         numberOfExperiences: number;
         position: number;
         createdDate: string;
+    };
+
+    type Hospitals = {
+        id: string;
+        name: string;
+        email: string;
+        phoneNumber: string;
+        website: string;
+        address: string;
+        thumbnail: string;
+        createdDate: string;
+    };
+
+    type TGetHospitals = {
+        items: Hospitals[];
+        pageIndex: number;
+        pageSize: number;
+        totalCount: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
     };
 
     type TGetDoctors = {

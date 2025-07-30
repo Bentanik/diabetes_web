@@ -58,10 +58,10 @@ export default function DoctorSelectFilter({
                 }
                 onChange={handleChange}
                 onMenuScrollToBottom={handleMenuScrollToBottom}
-                placeholder="Lựa chọn bác sĩ"
+                placeholder="Chọn bác sĩ"
                 isSearchable
                 isLoading={isLoading || isFetchingNextPage}
-                className="w-[250px] border rounded-full"
+                className="w-[210px] border rounded-full"
                 classNamePrefix="react-select"
                 styles={{
                     menuList: (base) => ({

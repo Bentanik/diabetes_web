@@ -48,11 +48,6 @@ export const useServiceUpdateBlog = ({ blogId }: REQUEST.BlogId) => {
             }
         },
         onError: (err) => {
-            // const errorMessages = err.errors
-            //     .flat()
-            //     .map((e) => e.message)
-            //     .join(", ");
-
             addToast({
                 type: "error",
                 description: err.title,
@@ -77,7 +72,6 @@ export const useServiceReviewBlog = ({ blogId }: REQUEST.BlogId) => {
             return response as TResponse;
         },
         onSuccess: () => {
-            console.log("Gửi đánh giá bài viết thành công");
             addToast({
                 type: "success",
                 description: "Duyệt bài viết thành công",
