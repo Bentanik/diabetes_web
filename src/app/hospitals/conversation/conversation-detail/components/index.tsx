@@ -48,6 +48,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import UpdateConversationDialog from "./update-conversation";
+import { useGetConversation } from "../hooks/use_get_conversation_detail";
 
 const sortBy = [
     { name: "Tên thành viên", value: "name" },
@@ -59,6 +60,10 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
+
+    const { conversation, isPending: conversationPending } = useGetConversation(
+        { conversationId }
+    );
 
     const handleFormSubmit = async () => {
         if (!onSubmit || typeof onSubmit !== "function") {
@@ -107,7 +112,7 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
                         <DialogTrigger asChild>
                             <Button
                                 variant="outline"
-                                className="gap-2 cursor-pointer hover:bg-red-200"
+                                className="gap-2 cursor-pointer hover:bg-red-200 py-5"
                             >
                                 <Trash className="w-4 h-4" />
                                 Xóa nhóm chat
@@ -119,7 +124,7 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
                                     Xóa nhóm chat
                                 </DialogTitle>
                                 <DialogDescription className="text-[1.1rem]">
-                                    Bạn có chắc chắn muốn xóa nhóm chat ra khỏi
+                                    Bạn có chắc chắn muốn xóa nhóm {} ra khỏi
                                     danh sách nhóm chat của bệnh viện ?
                                 </DialogDescription>
                             </DialogHeader>
@@ -170,7 +175,6 @@ export default function GroupDetailComponent({
     const [isSortAsc, setIsSortAsc] = useState(false);
     const [selectSortBy, setSelectSortBy] = useState<string>("all");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedUserForDeletion, setSelectedUserForDeletion] = useState<

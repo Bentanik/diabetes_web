@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_CONVERSATIONS_QUERY_KEY } from "../../hooks/use-get-conversations";
+import { CONVERSATION_QUERY_KEY } from "./use_get_conversation_detail";
 
 export const updateConversationSchema = z.object({
     name: z
@@ -48,6 +49,9 @@ export default function useUpdateConversation({
                 onLoadData;
                 await queryClient.invalidateQueries({
                     queryKey: [GET_CONVERSATIONS_QUERY_KEY],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: [CONVERSATION_QUERY_KEY],
                 });
                 form.reset();
                 setTimeout(() => {

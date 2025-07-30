@@ -98,6 +98,17 @@ declare namespace API {
         invitedBy: string;
     };
 
+    type TGetConversation = {
+        id: string;
+        name: string;
+        avatar: string;
+        conversationType: number;
+        memberCount: number;
+        status: number;
+        canView: boolean;
+        modifiedDate: string;
+    };
+
     type TGetConversationDetail = {
         items: ConversationDetail[];
         pageIndex: number;
