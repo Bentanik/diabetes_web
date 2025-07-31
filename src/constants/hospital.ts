@@ -3,6 +3,7 @@ import {
     BarChart,
     MessageCircle,
     MessageSquareIcon,
+    User,
     UserCogIcon,
     UsersIcon,
 } from "lucide-react";
@@ -36,5 +37,17 @@ export const sidebar_items = [
         href: "/hospitals/consultation",
         icon: MessageCircle,
         label: "Quản lí cuộc tư vấn",
+        subItems: [
+            {
+                label: "Quản lý lịch bác sĩ",
+                href: "/hospitals/consultation/schedule",
+                icon: User,
+            },
+            {
+                label: "Tạo lịch tư vấn",
+                href: "/hospitals/consultation/create-consultation",
+                icon: User,
+            },
+        ],
     },
 ];
