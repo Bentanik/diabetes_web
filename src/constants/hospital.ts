@@ -1,6 +1,7 @@
 import {
     ActivityIcon,
     BarChart,
+    MessageCircle,
     MessageSquareIcon,
     UserCogIcon,
     UsersIcon,
@@ -30,5 +31,10 @@ export const sidebar_items = [
         href: "/mentor/setting",
         icon: UserCogIcon,
         label: "Quản lí tài khoản",
+    },
+    {
+        href: "/hospitals/consultation",
+        icon: MessageCircle,
+        label: "Quản lí cuộc tư vấn",
     },
 ];
