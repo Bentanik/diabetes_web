@@ -83,45 +83,38 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const [selectedImage, setSelectedImage] = useState("");
     const router = useRouter();
 
-    // const handleImageChange = async (
-    //     e: React.ChangeEvent<HTMLInputElement>,
-    //     isAvatar: boolean
-    // ) => {
-    //     const files = e.target.files;
-    //     if (files && files.length > 0) {
-    //         const imagesData = Array.from(files).map((file) => ({
-    //             image: file,
-    //         }));
+    const handleImageChange = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        isAvatar: boolean
+    ) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            const imagesData = Array.from(files).map((file) => ({
+                image: file,
+            }));
 
-    //         for (const data of imagesData) {
-    //             await onSubmitImage(
-    //                 data,
-    //                 handleClearImages,
-    //                 (imageId, publicId, publicUrl) => {
-    //                     if (isAvatar) {
-    //                         // Handle single avatar
-    //                         form.setValue("avatarId", imageId);
-    //                         setAvatarPreview(publicUrl);
-    //                         setAvatarId(imageId);
-    //                         // setThumbnailPreviews([]);
-    //                         // setThumbnailIds([]);
-    //                     } else {
-    //                         // Handle multiple thumbnails
-    //                         // form.setValue("images", [
-    //                         //     ...(form.getValues("images") || []),
-    //                         //     imageId,
-    //                         // ]);
-    //                         setThumbnailPreviews((prev) => [
-    //                             ...prev,
-    //                             publicUrl,
-    //                         ]);
-    //                         setThumbnailIds((prev) => [...prev, imageId]);
-    //                     }
-    //                 }
-    //             );
-    //         }
-    //     }
-    // };
+            for (const data of imagesData) {
+                await onSubmitImage(data, (imageId, publicId, publicUrl) => {
+                    if (isAvatar) {
+                        // Handle single avatar
+                        form.setValue("avatarId", imageId);
+                        setAvatarPreview(publicUrl);
+                        setAvatarId(imageId);
+                        // setThumbnailPreviews([]);
+                        // setThumbnailIds([]);
+                    } else {
+                        // Handle multiple thumbnails
+                        // form.setValue("images", [
+                        //     ...(form.getValues("images") || []),
+                        //     imageId,
+                        // ]);
+                        setThumbnailPreviews((prev) => [...prev, publicUrl]);
+                        setThumbnailIds((prev) => [...prev, imageId]);
+                    }
+                });
+            }
+        }
+    };
 
     console.log("avatarURL" + avatarPreview);
     console.log(form.watch("avatarId"));

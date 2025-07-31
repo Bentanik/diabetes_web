@@ -48,7 +48,7 @@ const Header = () => {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Link href="/hospital/doctor/create-doctor">
+                    <Link href="/admin/hospital/create-hospital">
                         <Button
                             variant="outline"
                             className="gap-2 cursor-pointer"

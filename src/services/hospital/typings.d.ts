@@ -65,6 +65,19 @@ declare namespace API {
         createdDate: string;
     };
 
+    type TGetHospital = {
+        id: string;
+        name: string;
+        email: string;
+        phoneNumber: string;
+        website: string;
+        address: string;
+        introduction: string;
+        thumbnail: string;
+        images: string[];
+        createdDate: string;
+    };
+
     type Hospitals = {
         id: string;
         name: string;

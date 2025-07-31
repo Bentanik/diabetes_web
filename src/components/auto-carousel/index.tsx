@@ -30,7 +30,7 @@ const AutoCarousel = ({ images }: { images: string[] }) => {
     };
 
     return (
-        <div className="relative w-full h-[400px] rounded-lg overflow-hidden">
+        <div className="relative w-full h-[600px] object-cover rounded-lg overflow-hidden">
             <div className="relative w-full h-full">
                 {images.map((image, index) => (
                     <div

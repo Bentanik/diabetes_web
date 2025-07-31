@@ -272,7 +272,7 @@ export default function HospitalLayout({
                                                                 )
                                                             }
                                                             className={cn(
-                                                                "flex items-center gap-3 px-3 py-2 cursor-pointer transition-all duration-200 rounded-lg group text-sm -ml-3",
+                                                                "flex items-center gap-3 px-3 py-2 cursor-pointer transition-all duration-200 rounded-lg group text-sm -ml-3 mt-2",
                                                                 isSubActive
                                                                     ? "bg-[#248fca]/10 text-[#248fca] font-medium pl-5"
                                                                     : "text-gray-500 hover:text-[#248fca] hover:bg-[#248fca]/5"

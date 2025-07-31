@@ -1,10 +1,10 @@
 import React from "react";
-import AdminScheduleManager from "./components";
+import CreateDoctorSchedule from "./components";
 
 export default function CreateConsultationPage() {
     return (
         <div>
-            <AdminScheduleManager />
+            <CreateDoctorSchedule />
         </div>
     );
 }

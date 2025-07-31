@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
-import { ArrowLeft, Globe, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, Globe, Info, MapPin, Phone } from "lucide-react";
 import {
     Dialog,
     DialogClose,
@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import AutoCarousel from "@/components/auto-carousel";
+import { useGetHospitalDetail } from "../hooks/use-get-hospital";
+import Image from "next/image";
 
 const Header = () => {
     return (
@@ -34,7 +36,7 @@ const Header = () => {
                     </Link>
 
                     <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Thông tin chi tiết
+                        Thông tin chi tiết về bệnh viện
                     </h1>
                 </div>
                 <p className="text-gray-600 mt-1 ml-11 text-sm">
@@ -58,6 +60,8 @@ export default function HospitalDetailComponent({
         "/images/home3.jpg",
     ];
 
+    const { hospital_detail, isPending } = useGetHospitalDetail({ hospitalId });
+
     return (
         <div>
             <header>
@@ -68,137 +72,84 @@ export default function HospitalDetailComponent({
                     {/* Hospital Logo and Basic Info */}
                     <div className="p-6 border-b border-gray-100">
                         <div className="flex items-start gap-6">
-                            <div className="w-24 h-24 bg-blue-50 rounded-lg flex items-center justify-center border-2 border-blue-200">
-                                <div className="text-center">
-                                    <div className="text-blue-600 font-bold text-lg">
-                                        BV
-                                    </div>
-                                    <div className="text-blue-500 text-xs">
-                                        UNG BƯỚU
-                                    </div>
-                                </div>
-                            </div>
+                            <Image
+                                src={
+                                    hospital_detail?.thumbnail ||
+                                    "/images/default_img.jpg"
+                                }
+                                alt="thumbnail"
+                                width={300}
+                                height={500}
+                                className="object-cover"
+                            />
 
                             <div className="flex-1">
-                                <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                                    Bệnh viện Ung Bướu TPHCM
+                                <h1 className="text-2xl font-bold text-gray-800 mb-5">
+                                    {hospital_detail?.name}
                                 </h1>
-                                <p className="text-gray-600 mb-4">
-                                    Kiểm soát ung thư - Vững tin cuộc sống
-                                </p>
-
-                                <div className="flex flex-wrap gap-4 text-sm">
-                                    <div className="flex items-center gap-2 text-blue-600">
-                                        <Globe size={16} />
-                                        <span>Website</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-blue-600">
-                                        <MapPin size={16} />
-                                        <span>Địa chỉ</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-blue-600">
-                                        <Phone size={16} />
-                                        <span>
-                                            Tổng đài đặt khám: 1900636223
+                                {/* Website */}
+                                <div className="flex gap-3">
+                                    <div className="flex gap-2">
+                                        <Globe width={20} color="#808080d4" />
+                                        <span className="text-[#808080d4]">
+                                            Website:
                                         </span>
                                     </div>
+                                    <span className="text-[#0099ff] max-w-[300px]">
+                                        {hospital_detail?.website}
+                                    </span>
+                                </div>
+
+                                {/* Location */}
+                                <div className="flex gap-3 mt-2">
+                                    <div className="flex gap-2">
+                                        <MapPin width={20} color="#808080d4" />
+                                        <span className="text-[#808080d4]">
+                                            Địa chỉ:
+                                        </span>
+                                    </div>
+                                    <span className="max-w-[300px]">
+                                        {hospital_detail?.address}
+                                    </span>
+                                </div>
+
+                                {/* Phone number */}
+                                <div className="flex gap-3 mt-2">
+                                    <div className="flex gap-2">
+                                        <Phone width={20} color="#808080d4" />
+                                        <span className="text-[#808080d4]">
+                                            Số điện thoại:
+                                        </span>
+                                    </div>
+                                    <span className="max-w-[300px]">
+                                        {hospital_detail?.phoneNumber}
+                                    </span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="px-6 py-4 border-b border-gray-100">
-                        <div className="flex gap-8">
-                            <button className="text-blue-600 font-medium border-b-2 border-blue-600 pb-2">
-                                Thông tin
-                            </button>
-                            <button className="text-gray-500 hover:text-gray-700 pb-2">
-                                Chuyên khám
-                            </button>
                         </div>
                     </div>
 
                     {/* Hospital Images Carousel */}
                     <div className="p-6">
-                        <AutoCarousel images={hospitalImages} />
+                        <div className="flex gap-2 items-center mb-5">
+                            <Info color="#248FCA" />
+                            <span className="text-xl font-medium">
+                                Thông tin chi tiết về bệnh viện
+                            </span>
+                        </div>
+                        <AutoCarousel
+                            images={hospital_detail?.images || hospitalImages}
+                        />
                     </div>
 
                     {/* Hospital Details */}
                     <div className="p-6">
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div>
-                                <h3 className="text-lg font-semibold mb-4">
-                                    Thông tin cơ bản
-                                </h3>
-                                <div className="space-y-3">
-                                    <div className="flex">
-                                        <span className="w-24 text-gray-500 text-sm">
-                                            Địa chỉ:
-                                        </span>
-                                        <span className="text-sm">
-                                            123 Đường ABC, Quận 1, TP.HCM
-                                        </span>
-                                    </div>
-                                    <div className="flex">
-                                        <span className="w-24 text-gray-500 text-sm">
-                                            Điện thoại:
-                                        </span>
-                                        <span className="text-sm">
-                                            1900636223
-                                        </span>
-                                    </div>
-                                    <div className="flex">
-                                        <span className="w-24 text-gray-500 text-sm">
-                                            Email:
-                                        </span>
-                                        <span className="text-sm">
-                                            info@bvungbuou.vn
-                                        </span>
-                                    </div>
-                                    <div className="flex">
-                                        <span className="w-24 text-gray-500 text-sm">
-                                            Giờ làm việc:
-                                        </span>
-                                        <span className="text-sm">
-                                            7:00 - 17:00 (Thứ 2 - Thứ 7)
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="text-lg font-semibold mb-4">
-                                    Chuyên khoa
-                                </h3>
-                                <div className="space-y-2">
-                                    <div className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm inline-block mr-2 mb-2">
-                                        Ung bướu học
-                                    </div>
-                                    <div className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm inline-block mr-2 mb-2">
-                                        Xạ trị
-                                    </div>
-                                    <div className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm inline-block mr-2 mb-2">
-                                        Hóa trị
-                                    </div>
-                                    <div className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm inline-block mr-2 mb-2">
-                                        Phẫu thuật ung thư
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-8">
+                        <div className="">
                             <h3 className="text-lg font-semibold mb-4">
-                                Giới thiệu
+                                Giới thiệu về bệnh viện
                             </h3>
                             <p className="text-gray-700 leading-relaxed">
-                                Bệnh viện Ung Bướu TP.HCM là bệnh viện chuyên
-                                khoa hàng đầu trong lĩnh vực chẩn đoán và điều
-                                trị ung thư. Với đội ngũ bác sĩ giàu kinh nghiệm
-                                và trang thiết bị y tế hiện đại, bệnh viện cam
-                                kết mang đến dịch vụ chăm sóc sức khỏe chất
-                                lượng cao cho bệnh nhân ung thư.
+                                {hospital_detail?.introduction}
                             </p>
                         </div>
 

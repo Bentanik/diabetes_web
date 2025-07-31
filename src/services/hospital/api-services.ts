@@ -92,3 +92,13 @@ export const getHospitals = async ({
     );
     return response.data;
 };
+
+export const getHospital = async ({ hospitalId }: REQUEST.HospitalId) => {
+    const response = await request<TResponseData<API.TGetHospital>>(
+        API_ENDPOINTS.GET_HOSPITAL(hospitalId),
+        {
+            method: "GET",
+        }
+    );
+    return response.data;
+};
