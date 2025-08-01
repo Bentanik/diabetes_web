@@ -167,7 +167,7 @@ export default function ManageHospitalComponent() {
                                         className="rounded-full object-cover w-12 h-12"
                                     />
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 text-[1.5rem]">
+                                        <h3 className="font-semibold text-gray-800 text-[1.5rem] line-clamp-2">
                                             {hospital.name}
                                         </h3>
                                     </div>
@@ -176,24 +176,31 @@ export default function ManageHospitalComponent() {
 
                             {/* Info */}
                             <div className="space-y-3 mb-4">
-                                {/* Phone number */}
+                                {/* Email */}
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
                                         <Mail className="w-4 h-4" />
                                         <span>email:</span>
                                     </div>
-                                    <span>{hospital.email}</span>
+                                    {hospital.email.length > 30
+                                        ? hospital.email.slice(0, 30) + "..."
+                                        : hospital.email}
                                 </div>
-                                {/* Position */}
+                                {/* Address */}
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
                                         <MapPin className="w-4 h-4" />
                                         <span>Địa chỉ: </span>
                                     </div>
-                                    <span> {hospital.address}</span>
+                                    {hospital.address.split(" ").length > 6
+                                        ? hospital.address
+                                              .split(" ")
+                                              .slice(0, 6)
+                                              .join(" ") + "..."
+                                        : hospital.address}
                                 </div>
 
-                                {/* Position */}
+                                {/* Phone Number */}
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
                                         <Phone className="w-4 h-4" />
@@ -201,14 +208,17 @@ export default function ManageHospitalComponent() {
                                     </div>
                                     <span>{hospital.phoneNumber}</span>
                                 </div>
-                                {/* Gender */}
+                                {/* Website */}
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
                                         <PanelTop className="w-4 h-4" />
                                         <span>Website:</span>
                                     </div>
-                                    <span className=" text-[#248FCA]">
-                                        {hospital.website}
+                                    <span className="text-[#248FCA]">
+                                        {hospital.website.length > 30
+                                            ? hospital.website.slice(0, 30) +
+                                              "..."
+                                            : hospital.website}
                                     </span>
                                 </div>
                             </div>
@@ -238,7 +248,7 @@ export default function ManageHospitalComponent() {
                 >
                     <UsersIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Không tìm thấy nhân viên
+                        Không tìm thấy bệnh viện
                     </h3>
                     <p className="text-gray-500 mb-6">
                         Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm

@@ -33,7 +33,7 @@ export const doctorSchema = z.object({
 });
 
 export type DoctorFormData = z.infer<typeof doctorSchema>;
-export default function useCreateConversation() {
+export default function useCreateDoctor() {
     const form = useForm<DoctorFormData>({
         resolver: zodResolver(doctorSchema),
         defaultValues: {

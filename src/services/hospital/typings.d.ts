@@ -20,6 +20,17 @@ declare namespace REQUEST {
         introduction: string;
     };
 
+    type TCreateHospital = {
+        name: string;
+        email: string;
+        phoneNumber: string;
+        website: string;
+        address: string;
+        introduction: string;
+        thumbnail: string;
+        images: string[];
+    };
+
     type GetDoctorsParams = {
         search?: string | null;
         gender?: GenderType | null;

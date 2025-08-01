@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
-import { ArrowLeft, Globe, Info, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, FileText, Globe, Info, MapPin, Phone } from "lucide-react";
 import {
     Dialog,
     DialogClose,
@@ -61,6 +61,7 @@ export default function HospitalDetailComponent({
     ];
 
     const { hospital_detail, isPending } = useGetHospitalDetail({ hospitalId });
+    const introduction = hospital_detail?.introduction;
 
     return (
         <div>
@@ -145,12 +146,16 @@ export default function HospitalDetailComponent({
                     {/* Hospital Details */}
                     <div className="p-6">
                         <div className="">
-                            <h3 className="text-lg font-semibold mb-4">
+                            <h3 className="text-lg font-semibold mb-4 flex gap-2">
+                                <FileText width={18} />
                                 Giới thiệu về bệnh viện
                             </h3>
-                            <p className="text-gray-700 leading-relaxed">
-                                {hospital_detail?.introduction}
-                            </p>
+                            <div
+                                className="prose prose-sm max-w-none mt-5"
+                                dangerouslySetInnerHTML={{
+                                    __html: introduction || "",
+                                }}
+                            />
                         </div>
 
                         {/* Action Buttons */}

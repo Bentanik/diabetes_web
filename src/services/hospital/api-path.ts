@@ -6,10 +6,12 @@ const GET_DOCTORS = DOCTOR + "/me/doctors";
 
 const GET_HOSPITALS = DOCTOR + "/me";
 const GET_HOSPITAL = (hospitalId: string) => `${DOCTOR}/${hospitalId}`;
+const CREATE_HOSPITAL = DOCTOR;
 
 export default {
     CREATE_DOCTOR,
     GET_DOCTORS,
     GET_HOSPITALS,
     GET_HOSPITAL,
+    CREATE_HOSPITAL,
 };

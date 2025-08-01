@@ -11,12 +11,12 @@ export default function CreateHospitalComponent() {
             <div className="flex items-center justify-between bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
                 <div>
                     <div className="flex items-center gap-5">
-                        <Link href="/hospital/doctor">
+                        <Link href="/admin/hospital">
                             <ArrowLeft color="#248fca" />
                         </Link>
 
                         <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                            Thêm bác sĩ
+                            Thêm bệnh viện
                         </h1>
                     </div>
                     <p className="text-gray-600 mt-1 text-sm ml-11">
@@ -33,7 +33,7 @@ export default function CreateHospitalComponent() {
                 <Header />
             </header>
             <div className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
-                <CreateHospitalForm blogId="" />
+                <CreateHospitalForm hospitalId="" />
             </div>
         </div>
     );

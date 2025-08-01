@@ -13,6 +13,17 @@ export const createDoctorAsync = async (body: REQUEST.TCreateDoctor) => {
     return response.data;
 };
 
+export const createHospitalAsync = async (body: REQUEST.TCreateHospital) => {
+    const response = await request<TResponse>(API_ENDPOINTS.CREATE_HOSPITAL, {
+        method: "POST",
+        data: body,
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    return response.data;
+};
+
 export const getDoctors = async ({
     pageIndex = 1,
     sortBy = "createdDate",
