@@ -25,8 +25,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { useGetDoctorDetail } from "../hooks/use-get-doctor";
 import { Toaster } from "sonner";
+import CreateConsultationDialog from "./create-consultation-dialog";
+import useCreateConsultation, {
+    ConsultationFormData,
+} from "../hooks/use-create-consultation";
 
-const Header = () => {
+const Header = ({ doctorId }: REQUEST.DoctorId) => {
+    const { form, onSubmit } = useCreateConsultation({ doctorId });
+    const handleFormSubmit = async (formData: REQUEST.TCreateConsultation) => {
+        if (!onSubmit || typeof onSubmit !== "function") {
+            console.error("onSubmit is not a function");
+            return;
+        }
+        try {
+            onSubmit(formData, () => {
+                form.reset();
+            });
+        } catch (error) {
+            console.error("Error creating consultation:", error);
+            alert("Có lỗi xảy ra khi tạo cuộc tư vấn.");
+        }
+    };
+
     return (
         <div className="flex items-center justify-between bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
             <div>
@@ -43,6 +63,7 @@ const Header = () => {
                     Thông tin chi tiết của bác sĩ
                 </p>
             </div>
+            <CreateConsultationDialog onSubmit={handleFormSubmit} />
         </div>
     );
 };
@@ -89,7 +110,7 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
 
             <header>
-                <Header />
+                <Header doctorId="d9af5b42-f881-4de1-9ae3-08f0644d2da7" />
             </header>
             <main>
                 <div className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">

@@ -48,6 +48,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import TimePicker from "@/components/time-picker";
+import DoctorSelect from "./select-doctor";
 
 const sortBy = [
     { name: "Tên bác sĩ", value: "name" },
@@ -109,7 +110,6 @@ const Header = () => {
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
         null
     );
-    // Trạng thái cho thời gian bắt đầu và kết thúc
     const [startTime, setStartTime] = useState("00:00");
     const [endTime, setEndTime] = useState("00:00");
 
