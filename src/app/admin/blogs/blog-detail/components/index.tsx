@@ -104,7 +104,9 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                         </div>
                         {blog_detail?.status === -1 && (
                             <div>
-                                <RejectedReason reason="Ngu" />
+                                <RejectedReason
+                                    reason={blog_detail.reasonRejected}
+                                />
                             </div>
                         )}
                     </div>

@@ -94,6 +94,7 @@ declare namespace API {
         status: number;
         moderator: Moderator;
         doctor: Doctor;
+        reasonRejected: string;
     };
 
     type TGetBlogId = {

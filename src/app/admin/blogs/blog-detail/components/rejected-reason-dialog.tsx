@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { CircleAlert } from "lucide-react";
+import { BadgeX, CircleAlert } from "lucide-react";
 
 type PropReason = {
     reason: string;
@@ -31,20 +31,20 @@ export default function RejectedReason({ reason }: PropReason) {
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Lý do từ chối</DialogTitle>
-                    <DialogDescription>
-                        Vui lòng nhập lý do tại sao bạn từ chối yêu cầu này.
-                        Thông tin này sẽ được gửi đến người yêu cầu.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="reason" className="text-right">
-                            {reason}
-                        </Label>
+                <DialogHeader className="">
+                    <DialogTitle className="text-[1.5rem] font-medium">
+                        Từ chối
+                    </DialogTitle>
+                    <div className="mt-5">
+                        <div className="flex gap-2">
+                            <BadgeX color="#a00808" width={20} />
+                            <p className="text-[#a00808] font-medium">
+                                Bị từ chối bởi lý do:{" "}
+                            </p>
+                        </div>
+                        <p className="ml-2 mt-2">{reason}</p>
                     </div>
-                </div>
+                </DialogHeader>
             </DialogContent>
         </Dialog>
     );

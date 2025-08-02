@@ -247,7 +247,7 @@ export default function ModeratorManageBlogComponent() {
                 </div>
             </motion.div>
 
-            {isPending && <SkeletonFolderGrid count={6} />}
+            {blogsPending && <SkeletonFolderGrid count={6} />}
 
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
