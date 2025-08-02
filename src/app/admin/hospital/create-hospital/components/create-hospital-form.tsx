@@ -2,7 +2,8 @@
 
 import React from "react";
 import EditDoctor from "@/components/editor/editor";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Globe, Mail, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { useState, useEffect, useCallback } from "react";
-import useUploadUserImage from "@/app/hospitals/doctor/create-doctor/hooks/use-upload-image";
 import useCreateHospital, {
     HospitalFormData,
 } from "@/app/admin/hospital/create-hospital/hooks/use-create-hospital";
@@ -43,6 +43,12 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
 
     const images = form.watch("images");
     const thumbnail = form.watch("thumbnail");
+    const name = form.watch("name");
+    const email = form.watch("email");
+    const phoneNumber = form.watch("phoneNumber");
+    const address = form.watch("address");
+    const website = form.watch("website");
+
     const handleClearImages = () => {
         setAvatarPreview("");
         form.setValue("images", []);
@@ -167,7 +173,7 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                                         render={({ field }) => (
                                             <FormItem className="w-full">
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                                    <UserPen className="h-5 w-5 text-[#248fca]" />
+                                                    <Mail className="h-5 w-5 text-[#248fca]" />
                                                     Email
                                                 </FormLabel>
                                                 <FormControl>
@@ -227,7 +233,7 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                                    <Award className="h-5 w-5 text-[#248fca]" />
+                                                    <MapPin className="h-5 w-5 text-[#248fca]" />
                                                     Địa chỉ
                                                 </FormLabel>
                                                 <FormControl>
@@ -255,7 +261,7 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                                    <Phone className="h-5 w-5 text-[#248fca]" />
+                                                    <Globe className="h-5 w-5 text-[#248fca]" />
                                                     Địa chỉ website
                                                 </FormLabel>
                                                 <FormControl>
@@ -310,7 +316,13 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                                 {/* Mobile Preview */}
                                 <MobilePreview
                                     avatarPreview={avatarPreview}
+                                    imagesPreview={uploadedImages}
                                     currentContentHtml={currentContentHtml}
+                                    name={name}
+                                    email={email}
+                                    phone={phoneNumber}
+                                    location={address}
+                                    website={website}
                                 />
                             </div>
                             <Button
@@ -320,7 +332,22 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                                 type="submit"
                                 className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
                             >
-                                Tạo bệnh viện
+                                {submitPending ? (
+                                    <div className="flex items-center gap-2 ">
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{
+                                                duration: 1,
+                                                repeat: Infinity,
+                                                ease: "linear",
+                                            }}
+                                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full "
+                                        />
+                                        Đang tải lên...
+                                    </div>
+                                ) : (
+                                    "Tạo bệnh viện"
+                                )}
                             </Button>
                         </div>
                     </div>

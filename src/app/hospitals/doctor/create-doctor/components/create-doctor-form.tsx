@@ -83,7 +83,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
             // Upload image
             const data = { images: file };
             onSubmitImage(data, (imageId) => {
-                form.setValue("avatarId", imageId);
+                form.setValue("avatarId", imageId as string);
             });
         }
     };

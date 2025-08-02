@@ -1,8 +1,6 @@
-// ✅ images-upload.tsx (Đã tối ưu)
 "use client";
 
 import React from "react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ImageIcon, Upload, Eye, Trash2, X } from "lucide-react";

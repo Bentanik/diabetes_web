@@ -1,16 +1,30 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
-import { Smartphone, CircleUserRound, BadgeCheck } from "lucide-react";
+import { Smartphone, Globe, MapPin, Phone, Mail } from "lucide-react";
+import AutoCarouselMobile from "./auto-carousel";
 
 interface MobilePreviewProps {
     avatarPreview?: string;
+    imagesPreview?: { id: string; preview: string }[];
     currentContentHtml: string;
+    name: string;
+    phone: string;
+    email: string;
+    location: string;
+    website: string;
 }
 
 export default function MobilePreview({
     avatarPreview,
+    imagesPreview,
     currentContentHtml,
+    name,
+    phone,
+    email,
+    location,
+    website,
 }: MobilePreviewProps) {
+    useEffect(() => {}, [imagesPreview]);
     return (
         <div className="flex-1 relative flex justify-center">
             <div>
@@ -39,55 +53,95 @@ export default function MobilePreview({
                                     <Image
                                         src={
                                             avatarPreview ||
-                                            "/images/default_user.png"
+                                            "/images/default_img.jpg"
                                         }
                                         alt="avatar"
                                         width={100}
-                                        height={100}
-                                        className="rounded-full"
+                                        height={50}
+                                        className="rounded-2xl object-cover h-[100px]"
                                     />
                                     <div>
-                                        <p className="text-[gray] font-thin text-[0.9rem]">
-                                            PGS. TS. BS
-                                        </p>
-                                        <h2 className="font-medium text-[1.2rem]">
-                                            Lâm Việt Trung
+                                        <h2 className="font-medium text-[1.2rem] mt-5 line-clamp-2">
+                                            {name || "Tên Bệnh Viện"}
                                         </h2>
-                                        <div className="flex gap-1 items-center">
-                                            <BadgeCheck
-                                                width={15}
-                                                color="#0066ff"
-                                            />
-                                            <p className="text-[#0066ff] text-[0.9rem]">
-                                                Bác sĩ
-                                            </p>
-                                        </div>
-                                        <p className=" text-[0.9rem]">
-                                            <span className="font-medium">
-                                                25
-                                            </span>{" "}
-                                            năm kinh nghiệm
-                                        </p>
                                     </div>
-                                </div>
-                                <div className="text-thin mt-1 text-[0.9rem]">
-                                    Chuyên khoa:{" "}
-                                    <span className="px-3 py-1 bg-gray-200 rounded-full text-[1rem]">
-                                        Tiêu hóa
-                                    </span>
                                 </div>
                             </div>
 
-                            <div className="flex gap-2 mt-10">
-                                <CircleUserRound />
-                                <p>Giới thiệu bác sĩ</p>
+                            {/* List Images */}
+                            <div>
+                                <AutoCarouselMobile
+                                    imagesPreview={imagesPreview}
+                                />
                             </div>
-                            <div
-                                className="prose prose-sm max-w-none mt-5"
-                                dangerouslySetInnerHTML={{
-                                    __html: currentContentHtml || "",
-                                }}
-                            />
+                            <div className="mt-4">
+                                <p className="font-medium text-[1.1rem] text-[#248FCA]">
+                                    Thông tin bệnh viện
+                                </p>
+                                <p className="text-[#a5a5a5] font-light text-[0.9rem]">
+                                    Đây là thông tin cơ bản của bệnh viện, bạn
+                                    có thể liên hệ qua số điện thoại
+                                </p>
+                                <div className="mt-2">
+                                    {/* Website */}
+                                    <div className="flex gap-3">
+                                        <div className="flex gap-2">
+                                            <Globe width={20} />
+                                            <span className="">Website:</span>
+                                        </div>
+                                        <span className="text-[#0099ff] max-w-[250px] line-clamp-1">
+                                            {website}
+                                        </span>
+                                    </div>
+
+                                    {/* Location */}
+                                    <div className="flex gap-3 mt-2">
+                                        <div className="flex gap-2">
+                                            <MapPin width={20} />
+                                            <span className="]">Địa chỉ:</span>
+                                        </div>
+                                        <span className="max-w-[200px] line-clamp-1">
+                                            {location}
+                                        </span>
+                                    </div>
+
+                                    {/* Phone number */}
+                                    <div className="flex gap-3 mt-2">
+                                        <div className="flex gap-2">
+                                            <Phone width={20} />
+                                            <span className="]">
+                                                Số điện thoại:
+                                            </span>
+                                        </div>
+                                        <span className="max-w-[300px]">
+                                            {phone}
+                                        </span>
+                                    </div>
+
+                                    {/* Email */}
+                                    <div className="flex gap-3 mt-2">
+                                        <div className="flex gap-2">
+                                            <Mail width={20} />
+                                            <span className="]">Email:</span>
+                                        </div>
+                                        <span className="max-w-[300px]">
+                                            {email}
+                                        </span>
+                                    </div>
+                                </div>
+                                {/* Website */}
+                            </div>
+                            <div className="mt-4">
+                                <p className="font-medium text-[1.1rem] text-[#248FCA]">
+                                    Giới thiệu bệnh viện
+                                </p>
+                                <div
+                                    className="prose prose-sm max-w-none mt-2"
+                                    dangerouslySetInnerHTML={{
+                                        __html: currentContentHtml || "",
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
