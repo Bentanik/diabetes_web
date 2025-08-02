@@ -58,10 +58,10 @@ const Header = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Quản lí nhân viên
+                        Quản lí bác sĩ
                     </h1>
                     <p className="text-gray-600 mt-1 text-sm">
-                        Tổng cộng 6 nhân viên - 6 kết quả hiển thị
+                        Hiện có 6 kết quả đang hiển thị
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -332,7 +332,7 @@ export default function DoctorComponent() {
                 >
                     <UsersIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Không tìm thấy nhân viên
+                        Không tìm thấy bác sĩ
                     </h3>
                     <p className="text-gray-500 mb-6">
                         Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
