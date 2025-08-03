@@ -3,7 +3,7 @@ import Select, { SingleValue } from "react-select";
 import { useGetDoctors } from "@/app/admin/blogs/update-blog/hooks/use-get-doctors";
 
 type DoctorSelectFilterProps = {
-    onDoctorChange: (doctorId: string) => void; // Callback để truyền giá trị lọc
+    onDoctorChange: (doctorId: string) => void;
 };
 
 export default function DoctorSelectFilter({

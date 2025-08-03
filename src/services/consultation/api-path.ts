@@ -4,7 +4,8 @@ const CONSULTATION =
 
 const CREATE_CONSULTATION = (doctorId: string) =>
     `${CONSULTATION}/${doctorId}/consultation-templates`;
-
+const GET_CONSULTATION = CREATE_CONSULTATION;
 export default {
     CREATE_CONSULTATION,
+    GET_CONSULTATION,
 };

@@ -10,9 +10,19 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
-    type UploadImageResponse = {
-        imageId: string;
-        publicId: string;
-        publicUrl: string;
+    type Consultation = {
+        startTime: string;
+        endTime: string;
+        status: number;
+    };
+
+    type TGetConsultations = {
+        items: Consultation[];
+        pageIndex: number;
+        pageSize: number;
+        totalCount: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
     };
 }
