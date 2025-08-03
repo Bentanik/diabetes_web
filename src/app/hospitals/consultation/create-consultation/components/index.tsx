@@ -256,7 +256,7 @@ export default function CreateDoctorSchedule() {
                                     {consultations?.items.map(
                                         (template, index) => (
                                             <TableRow
-                                                // key={template.id || index}
+                                                key={index}
                                                 className="hover:bg-gray-50"
                                             >
                                                 <TableCell className="font-medium">
