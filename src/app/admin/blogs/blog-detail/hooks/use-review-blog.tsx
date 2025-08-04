@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { GET_POSTS_QUERY_KEY } from "../../hooks/use-get-blogs";
+import { BLOG_DETAIL_QUERY_KEY } from "./use-get-blog";
 
 export const reviewSchema = z.object({
     reasonRejected: z
@@ -34,6 +35,9 @@ export default function useReviewBlog({ blogId }: REQUEST.BlogId) {
                 hideBackdrop();
                 await queryClient.invalidateQueries({
                     queryKey: [GET_POSTS_QUERY_KEY],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: [BLOG_DETAIL_QUERY_KEY],
                 });
                 form.reset();
             },

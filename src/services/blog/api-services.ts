@@ -1,6 +1,7 @@
 import API_ENDPOINTS from "@/services/blog/api-path";
 import request from "@/services/interceptor";
 import { TResponse, TResponseData } from "@/typings";
+import { any } from "zod";
 
 export const createBlogAsync = async () => {
     const response = await request<TResponseData<API.TGetBlogId>>(
@@ -76,20 +77,12 @@ export const getAllBlogs = async ({
     sortType = "",
     isSortAsc,
 }: REQUEST.BlogRequestParam) => {
-    const params: Record<
-        string,
-        string | number | boolean | string[] | undefined
-    > = {};
+    const params: Record<string, string | number | boolean> = {};
     params.pageIndex = pageIndex;
     params.pageSize = pageSize;
 
     if (searchContent && searchContent.trim() !== "") {
         params.searchContent = searchContent.trim();
-    }
-    if (categoryIds && categoryIds.length > 0) {
-        categoryIds.forEach((id, index) => {
-            params[`CategoryIds[${index}]`] = id;
-        });
     }
     if (status !== undefined && status !== null) {
         params.status = status;
@@ -106,11 +99,27 @@ export const getAllBlogs = async ({
     if (isSortAsc !== undefined) {
         params.isSortAsc = isSortAsc;
     }
+
+    // Tạo query string thủ công
+    let queryString = Object.entries(params)
+        .filter(([_, value]) => value !== undefined && value !== "")
+        .map(([key, value]) => `${key}=${encodeURIComponent(value.toString())}`)
+        .join("&");
+
+    // Xử lý categoryIds riêng biệt
+    if (categoryIds && categoryIds.length > 0) {
+        const categoryQuery = categoryIds
+            .map((id) => `CategoryIds=${encodeURIComponent(id)}`)
+            .join("&");
+        queryString = queryString
+            ? `${queryString}&${categoryQuery}`
+            : categoryQuery;
+    }
+
     const response = await request<TResponseData<API.TGetBlogs>>(
-        API_ENDPOINTS.GET_POSTS,
+        `${API_ENDPOINTS.GET_POSTS}?${queryString}`,
         {
             method: "GET",
-            params: Object.keys(params).length > 0 ? params : undefined,
         }
     );
     return response.data;

@@ -60,7 +60,7 @@ export default function BlogStatusDropdown({
                 }
                 onChange={handleChange}
                 placeholder="Chọn trạng thái"
-                className="w-[250px]"
+                className="w-[210px]"
                 classNamePrefix="react-select"
             />
         </div>

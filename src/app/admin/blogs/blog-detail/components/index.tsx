@@ -33,6 +33,7 @@ import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/stores";
 import { useGetBlogDetail } from "../hooks/use-get-blog";
 import RejectedReason from "./rejected-reason-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const { onSubmit, form, isPending } = useReviewBlog({ blogId: blogId });
@@ -210,7 +211,7 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                                                             Lý do từ chối
                                                         </FormLabel>
                                                         <FormControl>
-                                                            <Input
+                                                            <Textarea
                                                                 placeholder="Điền lý do từ chối bài viết"
                                                                 {...field}
                                                             />

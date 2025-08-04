@@ -69,37 +69,41 @@ const extractTextContent = (html: string): string => {
 export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadImage();
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const { form, onSubmit } = useUpdateBlog({ blogId });
+    const { form, onSubmit, isPendingUpdate } = useUpdateBlog({ blogId });
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
         null
     );
-    const [thumbnailId, setThumbnailId] = useState<string | null>(null);
     const router = useRouter();
 
     //GET DATA FROM FORM
-    const categoryIds = form.watch("categoryIds");
-    const doctorId = form.watch("doctorId");
-    const title = form.watch("title");
+    // const categoryIds = form.watch("categoryIds");
+    // const doctorId = form.watch("doctorId");
+    // const title = form.watch("title");
 
+    console.log("thumnail preview console" + thumbnailPreview);
     //HANDLE SUBMIT UPLOAD IMAGES
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const file = e.target.files?.[0];
         if (file) {
-            const data = { image: file };
+            // Convert image to base64 for preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setThumbnailPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
 
+            // Upload image
+            const data = { image: file };
             onSubmitImage(
                 data,
                 () => {},
-                (imageId, publicId, publicUrl) => {
-                    form.setValue("thumbnail", imageId);
-                    setThumbnailPreview(publicUrl);
-                    setThumbnailId(imageId);
+                (imageId) => {
+                    form.setValue("thumbnail", imageId as string);
                 }
             );
         }
@@ -166,14 +170,12 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             console.error("onSubmit is not a function");
             return;
         }
-
-        setIsSubmitting(true);
         try {
             const formData: REQUEST.TUpdateBlog = {
                 title: data.title || null,
                 content: content || null,
                 contentHtml: data.contentHtml || null,
-                thumbnail: thumbnailId || null,
+                thumbnail: data.thumbnail || null,
                 categoryIds: data.categoryIds || null,
                 images: imageIds || null,
                 doctorId: data.doctorId || null,
@@ -189,8 +191,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         } catch (error) {
             console.error("Error updating post:", error);
             alert("Có lỗi xảy ra khi cập nhật bài viết.");
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -199,9 +199,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         form.setValue("categoryIds", []);
         form.setValue("doctorId", "");
         setThumbnailPreview(null);
-        setThumbnailId(null);
         setImageIds([]);
-
         setIsDialogOpen(false);
     };
 
@@ -437,17 +435,10 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 </Button>
                                 <Button
                                     type="submit"
-                                    disabled={
-                                        isSubmitting ||
-                                        isUploading ||
-                                        !thumbnailId ||
-                                        !categoryIds ||
-                                        !doctorId ||
-                                        !title
-                                    }
+                                    disabled={isUploading || !thumbnailPreview}
                                     className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
                                 >
-                                    {isSubmitting ? (
+                                    {isPendingUpdate ? (
                                         <div className="flex items-center gap-2 cursor-pointer">
                                             <motion.div
                                                 animate={{ rotate: 360 }}

@@ -62,7 +62,7 @@ export default function ModeratorSelectFilter({
                 placeholder="Người quản lý"
                 isSearchable
                 isLoading={isLoading || isFetchingNextPage}
-                className="w-[200px] border rounded-full"
+                className="w-[210px] border rounded-full"
                 classNamePrefix="react-select"
                 styles={{
                     menuList: (base) => ({

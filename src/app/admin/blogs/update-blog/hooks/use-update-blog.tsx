@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { BLOG_DETAIL_QUERY_KEY } from "../../blog-detail/hooks/use-get-blog";
+import { GET_POSTS_QUERY_KEY } from "../../hooks/use-get-blogs";
 
 export const blogSchema = z.object({
     title: z
@@ -47,6 +48,9 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
             onSuccess: async (res) => {
                 await queryClient.invalidateQueries({
                     queryKey: [BLOG_DETAIL_QUERY_KEY],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_POSTS_QUERY_KEY],
                 });
                 if (!data.isDraft) {
                     hideBackdrop();

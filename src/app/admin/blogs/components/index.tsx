@@ -121,8 +121,8 @@ export default function ModeratorManageBlogComponent() {
     const [selectedStatus, setSelectedStatus] = useState<number>(
         isSystemAdmin ? 1 : 0
     );
+    const [selectedDoctor, setSelectedDoctor] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [selectDoctor, setSelectDoctor] = useState<string>("");
     const [selectModerator, setSelectModerator] = useState<string>("");
     const [selectSortType, setSelectSortType] = useState<string>("createdDate");
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
@@ -142,6 +142,10 @@ export default function ModeratorManageBlogComponent() {
         return `${day}-${month}-${year}`;
     };
 
+    const handleClearFilter = () => {
+        setSelectedDoctor("");
+    };
+
     const { categories, isPending } = useGetCategories();
 
     const {
@@ -154,7 +158,7 @@ export default function ModeratorManageBlogComponent() {
         categoryIds: selectedCategoryIds,
         status: selectedStatus,
         moderatorId: selectModerator,
-        doctorId: selectDoctor,
+        doctorId: selectedDoctor,
         pageIndex: currentPage,
         pageSize: pageSize,
         sortType: selectSortType,
@@ -209,8 +213,8 @@ export default function ModeratorManageBlogComponent() {
                 transition={{ delay: 0.3 }}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
-                <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                    <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                <div className="flex flex-col lg:flex-row items-center justify-between">
+                    <div className="flex flex-col sm:flex-row gap-3 flex-1">
                         {/*Select status*/}
                         <BlogStatusDropdown
                             selectedStatus={selectedStatus}
@@ -223,7 +227,10 @@ export default function ModeratorManageBlogComponent() {
                             onCategoryChange={setSelectedCategoryIds}
                         />
                         {/* Select Doctor */}
-                        <DoctorSelectFilter onDoctorChange={setSelectDoctor} />
+                        <DoctorSelectFilter
+                            onDoctorChange={setSelectedDoctor}
+                            selectDoctor={selectedDoctor}
+                        />
 
                         {/* Select Moderator */}
                         {isSystemAdmin && (
@@ -243,6 +250,12 @@ export default function ModeratorManageBlogComponent() {
                             <ArrowUpDown className="h-4 w-4 mr-2" />
                             {isSortAsc ? "A → Z" : "Z → A"}
                         </Toggle>
+                        <Button
+                            className="bg-red-400 hover:bg-red-300 cursor-pointer"
+                            onClick={handleClearFilter}
+                        >
+                            Xóa bộ lọc
+                        </Button>
                     </div>
                 </div>
             </motion.div>

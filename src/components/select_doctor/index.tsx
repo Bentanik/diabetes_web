@@ -4,15 +4,15 @@ import { useGetDoctors } from "@/app/admin/blogs/update-blog/hooks/use-get-docto
 
 type DoctorSelectFilterProps = {
     onDoctorChange: (doctorId: string) => void;
+    selectDoctor: string;
 };
 
 export default function DoctorSelectFilter({
     onDoctorChange,
+    selectDoctor,
 }: DoctorSelectFilterProps) {
-    const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
     const pageSize = 5;
 
-    // Sử dụng hook để lấy dữ liệu từ API
     const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
         useGetDoctors({
             search: null,
@@ -23,7 +23,6 @@ export default function DoctorSelectFilter({
             sortDirection: 1,
         });
 
-    // Chuyển đổi dữ liệu từ API thành options cho Select
     const doctors =
         data?.pages?.flatMap((page: any) => page.data?.items ?? []) ?? [];
 
@@ -35,9 +34,9 @@ export default function DoctorSelectFilter({
     const handleChange = (
         selectedOption: SingleValue<{ value: string; label: string }>
     ) => {
-        const doctorId = selectedOption ? selectedOption.value : null;
-        setSelectedDoctor(doctorId);
-        onDoctorChange(doctorId || ""); // Gọi callback với doctorId hoặc chuỗi rỗng nếu null
+        const doctorId = selectedOption ? selectedOption.value : "";
+        // setSelectedDoctor(doctorId);
+        onDoctorChange(doctorId || "");
     };
 
     // Xử lý cuộn đến cuối danh sách để load thêm dữ liệu
@@ -53,7 +52,7 @@ export default function DoctorSelectFilter({
                 options={options}
                 value={
                     options.find(
-                        (option: any) => option.value === selectedDoctor
+                        (option: any) => option.value === selectDoctor
                     ) || null
                 }
                 onChange={handleChange}

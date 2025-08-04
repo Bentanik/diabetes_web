@@ -657,18 +657,21 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                 alt="avatar"
                                                                 width={100}
                                                                 height={100}
-                                                                className="rounded-full"
+                                                                className="rounded-full object-cover w-[100px] h-[100px]"
                                                             />
                                                             <div className="mt-3">
-                                                                <div className="font-medium text-[1.2rem] flex gap-1">
+                                                                <div className="font-medium text-[1.2rem] flex flex-wrap gap-1">
                                                                     <span>
                                                                         {firstName ||
                                                                             "Họ"}
                                                                     </span>
-                                                                    <span>
-                                                                        {middleName ||
-                                                                            ""}
-                                                                    </span>
+                                                                    {middleName && (
+                                                                        <span>
+                                                                            {
+                                                                                middleName
+                                                                            }
+                                                                        </span>
+                                                                    )}
                                                                     <span>
                                                                         {lastName ||
                                                                             "Tên"}

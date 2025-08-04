@@ -45,13 +45,6 @@ export default function useUploadImage() {
             }
             return response.data[0];
         },
-        onSuccess: () => {
-            addToast({
-                type: "success",
-                description: "Tải ảnh lên thành công",
-                duration: 5000,
-            });
-        },
         onError: (error: Error) => {
             console.error("Upload error:", error);
             addToast({

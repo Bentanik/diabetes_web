@@ -44,7 +44,6 @@ export default function useUploadUserImage() {
             images: undefined,
         },
     });
-
     const { mutate, isPending } = useMutation({
         mutationFn: async (
             data: ImageUserFormData
