@@ -5,6 +5,8 @@ import {
     HospitalIcon,
     UserIcon,
     SquarePen,
+    Plus,
+    SquareChartGantt,
 } from "lucide-react";
 export const sidebar_items = [
     {
@@ -16,6 +18,18 @@ export const sidebar_items = [
         href: "/admin/hospital",
         icon: HospitalIcon,
         label: "Quản lý bệnh viện",
+        subItems: [
+            {
+                label: "Quản lý bác sĩ",
+                href: "/admin/hospital",
+                icon: SquareChartGantt,
+            },
+            {
+                label: "Tạo bệnh viện",
+                href: "/admin/hospital/create-hospital",
+                icon: Plus,
+            },
+        ],
     },
     {
         href: "/admin/users",

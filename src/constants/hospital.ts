@@ -3,6 +3,8 @@ import {
     BarChart,
     MessageCircle,
     MessageSquareIcon,
+    Plus,
+    SquareChartGantt,
     User,
     UserCogIcon,
     UsersIcon,
@@ -21,12 +23,12 @@ export const sidebar_items = [
             {
                 label: "Quản lý bác sĩ",
                 href: "/hospitals/doctor",
-                icon: UsersIcon,
+                icon: SquareChartGantt,
             },
             {
                 label: "Tạo bác sĩ",
                 href: "/hospitals/doctor/create-doctor",
-                icon: UsersIcon,
+                icon: Plus,
             },
         ],
     },
@@ -53,12 +55,12 @@ export const sidebar_items = [
             {
                 label: "Quản lý lịch bác sĩ",
                 href: "/hospitals/consultation/schedule",
-                icon: User,
+                icon: SquareChartGantt,
             },
             {
                 label: "Tạo lịch tư vấn",
                 href: "/hospitals/consultation/create-consultation",
-                icon: User,
+                icon: Plus,
             },
         ],
     },

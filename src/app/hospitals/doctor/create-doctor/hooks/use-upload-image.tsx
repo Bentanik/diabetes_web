@@ -106,11 +106,11 @@ export default function useUploadUserImage() {
 
                     form.reset();
 
-                    addToast({
-                        type: "success",
-                        description: `Tải lên thành công ${validImages.length} ảnh`,
-                        duration: 3000,
-                    });
+                    // addToast({
+                    //     type: "success",
+                    //     description: `Tải lên thành công ${validImages.length} ảnh`,
+                    //     duration: 3000,
+                    // });
                 } else {
                     addToast({
                         type: "error",

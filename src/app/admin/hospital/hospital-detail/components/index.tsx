@@ -147,7 +147,7 @@ export default function HospitalDetailComponent({
                     <div className="p-6">
                         <div className="">
                             <h3 className="text-lg font-semibold mb-4 flex gap-2">
-                                <FileText width={18} />
+                                <FileText width={18} color="#248FCA" />
                                 Giới thiệu về bệnh viện
                             </h3>
                             <div

@@ -11,15 +11,15 @@ export default function CreateHospitalComponent() {
             <div className="flex items-center justify-between bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
                 <div>
                     <div className="flex items-center gap-5">
-                        <Link href="/admin/hospital">
+                        {/* <Link href="/admin/hospital">
                             <ArrowLeft color="#248fca" />
-                        </Link>
+                        </Link> */}
 
                         <h1 className="text-2xl font-bold text-[var(--primary-color)]">
                             Thêm bệnh viện
                         </h1>
                     </div>
-                    <p className="text-gray-600 mt-1 text-sm ml-11">
+                    <p className="text-gray-600 mt-1 text-sm">
                         Thêm thông tin tạo bệnh viện mới
                     </p>
                 </div>

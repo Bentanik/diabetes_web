@@ -109,7 +109,7 @@ export default function MobilePreview({
                                     <div className="flex gap-3 mt-2">
                                         <div className="flex gap-2">
                                             <Phone width={20} />
-                                            <span className="]">
+                                            <span className="">
                                                 Số điện thoại:
                                             </span>
                                         </div>
@@ -124,7 +124,7 @@ export default function MobilePreview({
                                             <Mail width={20} />
                                             <span className="]">Email:</span>
                                         </div>
-                                        <span className="max-w-[300px]">
+                                        <span className="max-w-[300px] line-clamp-1">
                                             {email}
                                         </span>
                                     </div>

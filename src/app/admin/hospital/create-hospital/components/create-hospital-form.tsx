@@ -38,6 +38,7 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
     const [uploadedImages, setUploadedImages] = useState<
         { id: string; preview: string }[]
     >([]);
+    const [isUploading, setIsUploading] = useState<boolean>(false);
 
     const { addToast } = useToast();
 
@@ -83,8 +84,12 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
             return;
         }
 
-        if (!onSubmit || typeof onSubmit !== "function") {
-            console.error("onSubmit is not a function");
+        if (images.length === 0) {
+            addToast({
+                type: "error",
+                description: "Hãy thêm ảnh giới thiệu cho bệnh viện",
+                duration: 5000,
+            });
             return;
         }
         try {
@@ -125,6 +130,7 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                                     form={form}
                                     avatarPreview={avatarPreview}
                                     setAvatarPreview={setAvatarPreview}
+                                    onPendingChange={setIsUploading}
                                 />
 
                                 {/* Images Upload*/}
@@ -327,27 +333,14 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                             </div>
                             <Button
                                 disabled={
-                                    submitPending && !images && !thumbnail
+                                    submitPending ||
+                                    isUploading ||
+                                    !avatarPreview
                                 }
                                 type="submit"
                                 className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
                             >
-                                {submitPending ? (
-                                    <div className="flex items-center gap-2 ">
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{
-                                                duration: 1,
-                                                repeat: Infinity,
-                                                ease: "linear",
-                                            }}
-                                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full "
-                                        />
-                                        Đang tải lên...
-                                    </div>
-                                ) : (
-                                    "Tạo bệnh viện"
-                                )}
+                                Tạo bệnh viện
                             </Button>
                         </div>
                     </div>

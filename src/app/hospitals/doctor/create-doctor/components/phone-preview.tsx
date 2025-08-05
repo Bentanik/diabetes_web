@@ -100,10 +100,9 @@ export default function PhonePreview({
                                 </div>
                             </div>
 
-                            <div className="flex gap-2 mt-10">
-                                <CircleUserRound />
-                                <p>Giới thiệu bác sĩ</p>
-                            </div>
+                            <p className="font-medium text-[1.1rem] text-[#248FCA] mt-5">
+                                Giới thiệu bác sĩ
+                            </p>
                             <div
                                 className="prose prose-sm max-w-none mt-5"
                                 dangerouslySetInnerHTML={{

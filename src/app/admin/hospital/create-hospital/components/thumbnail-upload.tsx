@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ImageIcon, Upload } from "lucide-react";
@@ -10,14 +10,20 @@ interface AvatarUploadProps {
     form: any;
     avatarPreview?: string;
     setAvatarPreview: React.Dispatch<React.SetStateAction<string | undefined>>;
+    onPendingChange?: (isPending: boolean) => void;
 }
 
 export default function AvatarUpload({
     form,
     avatarPreview,
     setAvatarPreview,
+    onPendingChange,
 }: AvatarUploadProps) {
-    const { onSubmit: onSubmitImage } = useUploadUserImage();
+    const { onSubmit: onSubmitImage, isPending } = useUploadUserImage();
+
+    useEffect(() => {
+        onPendingChange?.(isPending);
+    }, [isPending, onPendingChange]);
 
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>

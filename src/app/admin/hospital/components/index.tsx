@@ -48,7 +48,7 @@ const Header = () => {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Link href="/admin/hospital/create-hospital">
+                    {/* <Link href="/admin/hospital/create-hospital">
                         <Button
                             variant="outline"
                             className="gap-2 cursor-pointer"
@@ -56,7 +56,7 @@ const Header = () => {
                             <Plus className="w-4 h-4" />
                             Thêm bệnh viện
                         </Button>
-                    </Link>
+                    </Link> */}
                     <Button variant="outline" className="gap-2">
                         <BarChartIcon className="w-4 h-4" />
                         Xuất báo cáo
