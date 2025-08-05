@@ -2,21 +2,19 @@
 // eslint-disable-next-line react-hooks/exhaustive-deps
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import {
-    BellIcon,
-    XCircleIcon,
-    FileWarning,
+    ArrowUpDown,
     BadgeCheck,
     BadgeX,
     CircleDotDashed,
     Eye,
-    ArrowUpDown,
+    FileWarning,
+    XCircleIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import Link from "next/link";
 import Image from "next/image";
 import PaginatedComponent from "@/components/paginated";
@@ -24,94 +22,13 @@ import BlogStatusDropdown from "./select-status";
 import DoctorSelectFilter from "@/components/select_doctor";
 import MultiSelectCategoriesFilter from "@/components/select-category";
 import BlogSortDropdown from "@/components/select-sort";
-import SearchInput from "@/components/search";
-import useCreateBlog from "@/app/admin/blogs/hooks/use-create-blog";
-import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
-import { useGetCategories } from "../update-blog/hooks/use-get-categories";
-import { useGetBlogs } from "../hooks/use-get-blogs";
 import ModeratorSelectFilter from "@/components/select_moderator";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useAppSelector } from "@/stores";
-
-interface HeaderProps {
-    searchTerm: string;
-    setSearchTerm: (value: string) => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
-    const { onSubmit } = useCreateBlog();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const user = useAppSelector((state) => state.userSlice);
-    const isSystemAdmin = user.user?.roles?.includes("SystemAdmin");
-
-    const handleCreateForm = () => {
-        setIsSubmitting(true);
-        try {
-            onSubmit();
-        } catch (err) {
-            console.log(err);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    return (
-        <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shadow-hospital"
-        >
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Quản lý bài viết
-                    </h1>
-                    <p className="text-gray-600 mt-1 text-sm">
-                        Hiện có 6 kết quả hiển thị
-                    </p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <SearchInput
-                        searchTerm={searchTerm}
-                        setSearchTerm={setSearchTerm}
-                    />
-                    {!isSystemAdmin && (
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            variant="outline"
-                            className="gap-2 cursor-pointer"
-                            onClick={handleCreateForm}
-                        >
-                            {isSubmitting ? (
-                                <div className="flex items-center gap-2">
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{
-                                            duration: 1,
-                                            repeat: Infinity,
-                                            ease: "linear",
-                                        }}
-                                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                                    />
-                                    Đang tạo...
-                                </div>
-                            ) : (
-                                "Tạo bài post"
-                            )}
-                        </Button>
-                    )}
-
-                    <Button variant="ghost" size="icon">
-                        <BellIcon className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <ProfileHospitalMenu profile={1} />
-                    </div>
-                </div>
-            </div>
-        </motion.div>
-    );
-};
+import { useGetCategories } from "../update-blog/hooks/use-get-categories";
+import { useGetBlogs } from "../hooks/use-get-blogs";
+import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
+import Header from "./header";
 
 export default function ModeratorManageBlogComponent() {
     const user = useAppSelector((state) => state.userSlice);

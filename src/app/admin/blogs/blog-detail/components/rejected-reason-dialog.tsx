@@ -33,7 +33,7 @@ export default function RejectedReason({ reason }: PropReason) {
                     <DialogTitle className="text-[1.5rem] font-medium">
                         Từ chối
                     </DialogTitle>
-                    <div className="mt-5">
+                    <div className="mt-5 max-h-[500px] overflow-x-auto">
                         <div className="flex gap-2">
                             <BadgeX color="#a00808" width={20} />
                             <p className="text-[#a00808] font-medium">

@@ -166,10 +166,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
 
     //HANDLE SUBMIT SUCCESSFULLY POST FORM
     const handleFormSubmit = async (data: BlogFormData) => {
-        if (!onSubmit || typeof onSubmit !== "function") {
-            console.error("onSubmit is not a function");
-            return;
-        }
         try {
             const formData: REQUEST.TUpdateBlog = {
                 title: data.title || null,
@@ -190,7 +186,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             });
         } catch (error) {
             console.error("Error updating post:", error);
-            alert("Có lỗi xảy ra khi cập nhật bài viết.");
         }
     };
 
@@ -435,25 +430,14 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 </Button>
                                 <Button
                                     type="submit"
-                                    disabled={isUploading || !thumbnailPreview}
+                                    disabled={
+                                        isUploading ||
+                                        !thumbnailPreview ||
+                                        isPendingUpdate
+                                    }
                                     className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
                                 >
-                                    {isPendingUpdate ? (
-                                        <div className="flex items-center gap-2 cursor-pointer">
-                                            <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{
-                                                    duration: 1,
-                                                    repeat: Infinity,
-                                                    ease: "linear",
-                                                }}
-                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full "
-                                            />
-                                            Đang tải lên...
-                                        </div>
-                                    ) : (
-                                        "Tải lên"
-                                    )}
+                                    Hoàn tất tạo bài viết
                                 </Button>
                             </DialogFooter>
                         </form>
