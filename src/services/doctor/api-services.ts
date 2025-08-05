@@ -1,6 +1,5 @@
 import request from "@/services/interceptor";
 import API_ENDPOINTS from "@/services/doctor/api-path";
-import { TResponseData } from "@/typings";
 
 export const getDoctorDetail = async ({ doctorId }: REQUEST.DoctorId) => {
     const response = await request<TResponseData<API.TGetDoctorDetail>>(

@@ -1,6 +1,5 @@
 import API_ENDPOINTS from "@/services/category/api-path";
 import request from "@/services/interceptor";
-import { TResponseData } from "@/typings";
 
 export const getCategories = async () => {
     const response = await request<TResponseData<API.TGetCategories>>(

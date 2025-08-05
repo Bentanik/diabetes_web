@@ -2,7 +2,6 @@ import {
     getChatHistoryAsync,
     sendMessageAsync,
 } from "@/services/chat/api-services";
-import { TMeta, TResponse } from "@/typings";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const CHAT_QUERY_KEY = "chat";

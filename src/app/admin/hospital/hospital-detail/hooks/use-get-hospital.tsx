@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { getHospital } from "@/services/hospital/api-services";
-import { TMeta, TResponseData } from "@/typings";
 
 export const HOSPITAL_DETAIL_QUERY_KEY = "hospital_detail";
 

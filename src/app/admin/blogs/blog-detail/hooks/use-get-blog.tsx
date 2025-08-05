@@ -1,5 +1,4 @@
 import { getBlog } from "@/services/blog/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useQuery } from "@tanstack/react-query";
 
 export const BLOG_DETAIL_QUERY_KEY = "blog_detail";

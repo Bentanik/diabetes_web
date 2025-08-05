@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { getDoctorDetail } from "@/services/doctor/api-services";
-import { TMeta, TResponseData } from "@/typings";
 
 export const DOCTOR_DETAIL_QUERY_KEY = "doctor_detail";
 

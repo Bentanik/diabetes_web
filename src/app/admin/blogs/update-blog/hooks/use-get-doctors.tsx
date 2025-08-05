@@ -1,5 +1,4 @@
 import { getDoctors } from "@/services/doctor/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useInfiniteQuery, InfiniteData } from "@tanstack/react-query";
 
 export const GET_DOCTORS_CURSOR_QUERY_KEY = "doctors";

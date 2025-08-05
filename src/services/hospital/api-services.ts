@@ -1,6 +1,5 @@
 import request from "@/services/interceptor";
 import API_ENDPOINTS from "@/services/hospital/api-path";
-import { TResponse, TResponseData } from "@/typings";
 
 export const createDoctorAsync = async (body: REQUEST.TCreateDoctor) => {
     const response = await request<TResponse>(API_ENDPOINTS.CREATE_DOCTOR, {

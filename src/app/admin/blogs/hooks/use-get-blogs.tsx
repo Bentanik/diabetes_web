@@ -1,5 +1,4 @@
 import { getAllBlogs } from "@/services/blog/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useQuery } from "@tanstack/react-query";
 
 export const GET_POSTS_QUERY_KEY = "blogs";

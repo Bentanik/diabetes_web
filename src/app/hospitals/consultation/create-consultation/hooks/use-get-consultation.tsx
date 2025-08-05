@@ -1,5 +1,4 @@
 import { getConsultations } from "@/services/consultation/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useQuery } from "@tanstack/react-query";
 
 export const GET_CONSULTATIONS_QUERY_KEY = "consultations";

@@ -1,5 +1,4 @@
 import { getUserAvailable } from "@/services/conversation/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useQuery } from "@tanstack/react-query";
 
 export const USER_AVAILABLE_QUERY_KEY = "user_available";

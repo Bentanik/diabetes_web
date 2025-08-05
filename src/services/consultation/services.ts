@@ -1,6 +1,5 @@
 import useToast from "@/hooks/use-toast";
 import { createConsultationAsync } from "@/services/consultation/api-services";
-import { TMeta, TResponse } from "@/typings";
 import { useMutation } from "@tanstack/react-query";
 
 export const useServiceCreateConsultation = ({

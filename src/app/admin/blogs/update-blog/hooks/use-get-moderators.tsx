@@ -1,5 +1,4 @@
 import { getModerators } from "@/services/moderator/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useInfiniteQuery, InfiniteData } from "@tanstack/react-query";
 
 export const GET_MODERATORS_CURSOR_QUERY_KEY = "moderators";

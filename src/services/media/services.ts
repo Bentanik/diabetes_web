@@ -3,7 +3,6 @@ import {
     uploadImageAsync,
     uploadImageConversationAsync,
 } from "@/services/media/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useMutation } from "@tanstack/react-query";
 
 export function useUploadImageService() {
@@ -36,7 +35,6 @@ export function useUploadImageService() {
 }
 
 export function useUploadImageConversationService() {
-    const { addToast } = useToast();
     return useMutation<
         TResponseData<API.TUploadConversationImageResponse>,
         TMeta,

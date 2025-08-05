@@ -2,7 +2,6 @@ import {
     getChatSettingAsync,
     updateChatSettingAsync,
 } from "@/services/setting/api-services";
-import { TMeta, TResponse } from "@/typings";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const CHAT_SETTING_QUERY_KEY = "chat-setting";

@@ -3,7 +3,6 @@ import {
     KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY,
     useDeleteDocumentService,
 } from "@/services/train-ai/services";
-import { TMeta } from "@/typings";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const useDeleteDocument = () => {

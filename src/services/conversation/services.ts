@@ -9,7 +9,6 @@ import {
     updateConversationAsync,
 } from "./api-services";
 import useToast from "@/hooks/use-toast";
-import { TMeta, TResponse, TResponseData } from "@/typings";
 
 export const useServiceCreateConversation = () => {
     const { addToast } = useToast();

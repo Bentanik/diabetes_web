@@ -1,6 +1,5 @@
 import request from "@/services/interceptor";
 import API_ENDPOINTS from "@/services/consultation/api-path";
-import { TResponse, TResponseData } from "@/typings";
 
 export const createConsultationAsync = async (
     { doctorId }: REQUEST.DoctorId,

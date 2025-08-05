@@ -1,5 +1,3 @@
-import { error } from "console";
-
 declare type TMeta = {
     detail: string;
     errorCode: string;

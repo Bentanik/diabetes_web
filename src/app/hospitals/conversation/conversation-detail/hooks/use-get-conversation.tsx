@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { getConversationDetail } from "@/services/conversation/api-services";
-import { TMeta, TResponseData } from "@/typings";
 
 export const CONVERSATION_DETAIL_QUERY_KEY = "conversation_detail";
 

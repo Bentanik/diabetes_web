@@ -1,5 +1,4 @@
 import { getCategories } from "@/services/category/api-services";
-import { TMeta, TResponseData } from "@/typings";
 import { useQuery } from "@tanstack/react-query";
 
 export const GET_CATEGORIES_QUERY_KEY = "categories";

@@ -1,6 +1,5 @@
 import request from "@/services/interceptor";
 import API_ENDPOINTS from "@/services/moderator/api-path";
-import { TResponseData } from "@/typings";
 
 export const getModerators = async ({
     sortBy = "name",
