@@ -12,6 +12,7 @@ import {
     CircleDotDashed,
     Eye,
     FileWarning,
+    FunnelX,
     XCircleIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -133,7 +134,7 @@ export default function ModeratorManageBlogComponent() {
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
                 <div className="flex flex-col lg:flex-row items-center justify-between">
-                    <div className="flex flex-col sm:flex-row gap-3 flex-1">
+                    <div className="flex flex-col sm:flex-row gap-2 flex-1">
                         {/*Select status*/}
                         <BlogStatusDropdown
                             selectedStatus={selectedStatus}
@@ -171,10 +172,12 @@ export default function ModeratorManageBlogComponent() {
                             <ArrowUpDown className="h-4 w-4 mr-2" />
                             {isSortAsc ? "A → Z" : "Z → A"}
                         </Toggle>
+
                         <Button
-                            className="bg-red-400 hover:bg-red-300 cursor-pointer"
+                            className="bg-white text-red-400 border-red-300 border-[1px] hover:bg-red-300 cursor-pointer hover:text-[white]"
                             onClick={handleClearFilter}
                         >
+                            <FunnelX />
                             Xóa bộ lọc
                         </Button>
                     </div>

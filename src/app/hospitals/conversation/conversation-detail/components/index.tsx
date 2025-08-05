@@ -39,7 +39,7 @@ import GroupDoctorDialog from "./doctor-dialog";
 import GroupStaffDialog from "./staff-dialog";
 import PaginatedComponent from "@/components/paginated";
 import { Toaster } from "sonner";
-import Header from "./header"; // Import Header component
+import Header from "./header";
 
 const sortBy = [
     { name: "Tên thành viên", value: "name" },
@@ -104,7 +104,7 @@ export default function GroupDetailComponent({
             case 2:
                 return <Stethoscope className="h-4 w-4" />;
             default:
-                return <Crown className="h-4 h-4" />;
+                return <Crown className="h-4 w-4" />;
         }
     };
 

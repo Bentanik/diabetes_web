@@ -17,6 +17,18 @@ export const sidebar_items = [
         href: "/hospitals/doctor",
         icon: UsersIcon,
         label: "Bác sĩ",
+        subItems: [
+            {
+                label: "Quản lý bác sĩ",
+                href: "/hospitals/doctor",
+                icon: UsersIcon,
+            },
+            {
+                label: "Tạo bác sĩ",
+                href: "/hospitals/doctor/create-doctor",
+                icon: UsersIcon,
+            },
+        ],
     },
     {
         href: "/hospitals/conversation",

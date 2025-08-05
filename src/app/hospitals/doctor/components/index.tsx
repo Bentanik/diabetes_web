@@ -6,89 +6,23 @@ import {
     BarChartIcon,
     BellIcon,
     PhoneIcon,
-    SearchIcon,
     UsersIcon,
     Plus,
     VenusAndMars,
     Briefcase,
     FileBadge,
-    ArrowUpDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import { Input } from "@/components/ui/input";
+import Image from "next/image";
 import Link from "next/link";
 import { useGetDoctors } from "../hooks/use-get-doctors";
 import { useDebounce } from "@/hooks/use-debounce";
-import Image from "next/image";
 import PaginatedComponent from "@/components/paginated";
-import { Toggle } from "@radix-ui/react-toggle";
 import { Toaster } from "sonner";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
-
-const sortBy = [
-    { name: "Tên bác sĩ", value: "name" },
-    { name: "Năm kinh nghiệm", value: "experiences" },
-    { name: "Chức vụ", value: "position" },
-    { name: "Ngày tham gia", value: "createdDate" },
-    { name: "Ngày sinh", value: "dateOfBirth" },
-    { name: "Giới tính", value: "gender" },
-];
-
-const listGender = [
-    { name: "Nam", value: 0 },
-    { name: "Nữ", value: 1 },
-];
-
-const listPosition = [
-    { name: "Giám đốc", value: 0 },
-    { name: "Phó giám đốc", value: 1 },
-    { name: "Trưởng khoa", value: 2 },
-    { name: "Phó trưởng khoa", value: 3 },
-    { name: "Bác sĩ", value: 4 },
-];
-
-const Header = () => {
-    return (
-        <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital"
-        >
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Quản lí bác sĩ
-                    </h1>
-                    <p className="text-gray-600 mt-1 text-sm">
-                        Hiện có 6 kết quả đang hiển thị
-                    </p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Link href="/hospitals/doctor/create-doctor">
-                        <Button
-                            variant="outline"
-                            className="gap-2 cursor-pointer"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Thêm bác sĩ
-                        </Button>
-                    </Link>
-                    <Button variant="outline" className="gap-2">
-                        <BarChartIcon className="w-4 h-4" />
-                        Xuất báo cáo
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                        <BellIcon className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <ProfileHospitalMenu profile={1} />
-                    </div>
-                </div>
-            </div>
-        </motion.div>
-    );
-};
+import Header from "./header";
+import DoctorFilters from "./doctor-filter";
 
 export default function DoctorComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
@@ -142,6 +76,7 @@ export default function DoctorComponent() {
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
+
     return (
         <div>
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
@@ -158,76 +93,18 @@ export default function DoctorComponent() {
                 transition={{ delay: 0.3 }}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
-                <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                    <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                        <div className="relative flex-1">
-                            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <Input
-                                placeholder="Tìm kiếm theo tên, email, khoa..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10"
-                            />
-                        </div>
-                        <select
-                            value={selectSortBy}
-                            onChange={(e) => setSelectSortBy(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="createdDate">Ngày tham gia</option>
-                            {sortBy.map((dept) => (
-                                <option key={dept.name} value={dept.value}>
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            value={selectGender === null ? "" : selectGender}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setSelectGender(
-                                    val === "" ? null : Number(val)
-                                );
-                            }}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">Tất cả</option>
-                            {listGender.map((dept) => (
-                                <option key={dept.name} value={dept.value}>
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
-
-                        <select
-                            value={
-                                selectPosition === null ? "" : selectPosition
-                            }
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setSelectPosition(
-                                    val === "" ? null : Number(val)
-                                );
-                            }}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">Tất cả</option>
-                            {listPosition.map((dept) => (
-                                <option key={dept.name} value={dept.value}>
-                                    {dept.name}
-                                </option>
-                            ))}
-                        </select>
-                        <Toggle
-                            pressed={isSortAsc}
-                            onPressedChange={setIsSortAsc}
-                            className="cursor-pointer flex items-center border px-3 rounded-[10px]"
-                        >
-                            <ArrowUpDown className="h-4 w-4 mr-2" />
-                            {isSortAsc ? "A → Z" : "Z → A"}
-                        </Toggle>
-                    </div>
-                </div>
+                <DoctorFilters
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    selectSortBy={selectSortBy}
+                    setSelectSortBy={setSelectSortBy}
+                    selectGender={selectGender}
+                    setSelectGender={setSelectGender}
+                    selectPosition={selectPosition}
+                    setSelectPosition={setSelectPosition}
+                    isSortAsc={isSortAsc}
+                    setIsSortAsc={setIsSortAsc}
+                />
             </motion.div>
 
             {isPending && <SkeletonFolderGrid count={6} />}

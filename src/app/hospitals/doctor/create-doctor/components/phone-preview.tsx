@@ -1,19 +1,46 @@
 import React from "react";
 import Image from "next/image";
-import { Smartphone, CircleUserRound, BadgeCheck } from "lucide-react";
+import { BadgeCheck, CircleUserRound, Smartphone } from "lucide-react";
 
-interface MobilePreviewProps {
-    avatarPreview?: string;
+interface PhonePreviewProps {
+    thumbnailPreview: string | null;
+    firstName: string;
+    middleName: string | undefined;
+    lastName: string;
+    position: number;
+    exp: number;
     currentContentHtml: string;
 }
 
-export default function MobilePreview({
-    avatarPreview,
+const getPosition = (position: number) => {
+    switch (position) {
+        case 0:
+            return "Giám đốc";
+        case 1:
+            return "Phó Giám đốc";
+        case 2:
+            return "Trưởng khoa";
+        case 3:
+            return "Phó trưởng khoa";
+        case 4:
+            return "Bác sĩ";
+        default:
+            return "Chức vụ không xác định";
+    }
+};
+
+export default function PhonePreview({
+    thumbnailPreview,
+    firstName,
+    middleName,
+    lastName,
+    position,
+    exp,
     currentContentHtml,
-}: MobilePreviewProps) {
+}: PhonePreviewProps) {
     return (
         <div className="flex-1 relative flex justify-center">
-            <div>
+            <div className="">
                 <div className="flex justify-center font-semibold text-lg items-center gap-2">
                     <Smartphone className="h-5 w-5 text-[#248fca]" />
                     Xem trước trên mobile
@@ -38,43 +65,38 @@ export default function MobilePreview({
                                 <div className="flex gap-5 leading-5">
                                     <Image
                                         src={
-                                            avatarPreview ||
+                                            thumbnailPreview ||
                                             "/images/default_user.png"
                                         }
                                         alt="avatar"
                                         width={100}
                                         height={100}
-                                        className="rounded-full"
+                                        className="rounded-full object-cover w-[100px] h-[100px]"
                                     />
-                                    <div>
-                                        <p className="text-[gray] font-thin text-[0.9rem]">
-                                            PGS. TS. BS
-                                        </p>
-                                        <h2 className="font-medium text-[1.2rem]">
-                                            Lâm Việt Trung
-                                        </h2>
+                                    <div className="mt-3">
+                                        <div className="font-medium text-[1.2rem] flex flex-wrap gap-1">
+                                            <span>{firstName || "Họ"}</span>
+                                            {middleName && (
+                                                <span>{middleName}</span>
+                                            )}
+                                            <span>{lastName || "Tên"}</span>
+                                        </div>
                                         <div className="flex gap-1 items-center">
                                             <BadgeCheck
                                                 width={15}
                                                 color="#0066ff"
                                             />
                                             <p className="text-[#0066ff] text-[0.9rem]">
-                                                Bác sĩ
+                                                {getPosition(position)}
                                             </p>
                                         </div>
                                         <p className=" text-[0.9rem]">
                                             <span className="font-medium">
-                                                25
+                                                {exp || "0"}
                                             </span>{" "}
                                             năm kinh nghiệm
                                         </p>
                                     </div>
-                                </div>
-                                <div className="text-thin mt-1 text-[0.9rem]">
-                                    Chuyên khoa:{" "}
-                                    <span className="px-3 py-1 bg-gray-200 rounded-full text-[1rem]">
-                                        Tiêu hóa
-                                    </span>
                                 </div>
                             </div>
 
