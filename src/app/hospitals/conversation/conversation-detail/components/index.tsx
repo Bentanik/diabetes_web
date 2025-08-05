@@ -5,17 +5,13 @@ import { motion } from "framer-motion";
 import {
     User,
     Crown,
-    BarChartIcon,
-    BellIcon,
-    SearchIcon,
-    ArrowLeft,
-    Trash,
     Stethoscope,
+    SearchIcon,
     ArrowUpDown,
+    Trash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import {
     Table,
     TableBody,
@@ -24,21 +20,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
-import useDeleteConversation from "../hooks/use-delete-conversation";
-import useDeleteParticipant from "../hooks/use-delete-participant";
-
-import GroupUserDialog from "./user-dialog";
-import GroupDoctorDialog from "./doctor-dialog";
-import { Toaster } from "sonner";
-import GroupStaffDialog from "./staff-dialog";
-import { useGetConversationDetail } from "../hooks/use-get-conversation";
-import Image from "next/image";
-import useToast from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { Toggle } from "@radix-ui/react-toggle";
-import { useDebounce } from "@/hooks/use-debounce";
-import PaginatedComponent from "@/components/paginated";
 import {
     Dialog,
     DialogContent,
@@ -47,121 +28,23 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import UpdateConversationDialog from "./update-conversation";
-import { useGetConversation } from "../hooks/use_get_conversation_detail";
+import { Toggle } from "@radix-ui/react-toggle";
+import Image from "next/image";
+import { useDebounce } from "@/hooks/use-debounce";
+import useToast from "@/hooks/use-toast";
+import { useGetConversationDetail } from "../hooks/use-get-conversation";
+import useDeleteParticipant from "../hooks/use-delete-participant";
+import GroupUserDialog from "./user-dialog";
+import GroupDoctorDialog from "./doctor-dialog";
+import GroupStaffDialog from "./staff-dialog";
+import PaginatedComponent from "@/components/paginated";
+import { Toaster } from "sonner";
+import Header from "./header"; // Import Header component
 
 const sortBy = [
     { name: "Tên thành viên", value: "name" },
     { name: "Chưa biết", count: 8, color: "name" },
 ];
-
-const Header = ({ conversationId }: REQUEST.ConversationId) => {
-    const { onSubmit, isPending } = useDeleteConversation({ conversationId });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const router = useRouter();
-    const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
-
-    const handleFormSubmit = async () => {
-        if (!onSubmit || typeof onSubmit !== "function") {
-            return;
-        }
-        setIsSubmitting(true);
-        try {
-            await onSubmit(() => {
-                setIsDialogOpen(false);
-                setTimeout(() => {
-                    router.push("/hospitals/conversation");
-                }, 1000);
-            });
-        } catch (error) {
-            console.error("Error updating post:", error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital"
-        >
-            <div className="flex items-center justify-between">
-                <div>
-                    <div className="flex items-center gap-5">
-                        <Link
-                            href="/hospitals/conversation
-                        "
-                        >
-                            <ArrowLeft color="#248fca" />
-                        </Link>
-                        <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                            Quản lí người dùng trong nhóm
-                        </h1>
-                    </div>
-                    <p className="text-gray-600 mt-1 ml-11 text-sm">
-                        Hiện có 6 kết quả hiển thị
-                    </p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Dialog open={isOpenDialog} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button
-                                variant="outline"
-                                className="gap-2 cursor-pointer hover:bg-red-200 py-5"
-                            >
-                                <Trash className="w-4 h-4" />
-                                Xóa nhóm chat
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle className="text-[1.5rem] font-medium">
-                                    Xóa nhóm chat
-                                </DialogTitle>
-                                <DialogDescription className="text-[1.1rem]">
-                                    Bạn có chắc chắn muốn xóa nhóm {} ra khỏi
-                                    danh sách nhóm chat của bệnh viện ?
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="flex justify-end gap-5">
-                                <div>
-                                    <Button
-                                        variant="outline"
-                                        className="gap-2 cursor-pointer hover:border-gray-300 min-w-[100px]"
-                                        onClick={() => setIsDialogOpen(false)}
-                                    >
-                                        Hủy
-                                    </Button>
-                                </div>
-                                <div>
-                                    <Button
-                                        type="submit"
-                                        onClick={() => handleFormSubmit()}
-                                        variant="outline"
-                                        className="gap-2 cursor-pointer hover:bg-red-200 hover:border-red-200"
-                                        disabled={isSubmitting || isPending}
-                                    >
-                                        Xóa nhóm chat
-                                    </Button>
-                                </div>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                    <UpdateConversationDialog conversationId={conversationId} />
-                    <Button variant="outline" className="gap-2">
-                        <BarChartIcon className="w-4 h-4" />
-                        Xuất báo cáo
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                        <BellIcon className="w-5 h-5" />
-                    </Button>
-                    <ProfileHospitalMenu profile={1} />
-                </div>
-            </div>
-        </motion.div>
-    );
-};
 
 export default function GroupDetailComponent({
     conversationId,
@@ -221,7 +104,7 @@ export default function GroupDetailComponent({
             case 2:
                 return <Stethoscope className="h-4 w-4" />;
             default:
-                return <Crown className="h-4 w-4" />;
+                return <Crown className="h-4 h-4" />;
         }
     };
 
@@ -260,7 +143,7 @@ export default function GroupDetailComponent({
         <div>
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <header>
-                <Header conversationId={conversationId} />
+                <Header conversationId={conversationId} />{" "}
             </header>
 
             <div className="min-h-screen bg-gray-50 flex">
@@ -342,6 +225,9 @@ export default function GroupDetailComponent({
                                     <TableHead className="w-[20%]">
                                         Số điện thoại
                                     </TableHead>
+                                    <TableHead className="w-[20%]">
+                                        Trạng thái
+                                    </TableHead>
                                     <TableHead className="w-[10%]">
                                         Xóa thành viên
                                     </TableHead>
@@ -390,6 +276,11 @@ export default function GroupDetailComponent({
                                             </div>
                                         </TableCell>
                                         <TableCell>
+                                            <div className="font-medium text-gray-900">
+                                                {user.fullName || "Không tên"}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
                                             <div className="flex justify-center max-w-[100px]">
                                                 <Dialog
                                                     open={
@@ -426,7 +317,7 @@ export default function GroupDetailComponent({
                                                                 dùng{" "}
                                                                 {user.fullName}{" "}
                                                                 này ra khỏi nhóm
-                                                                chat ?
+                                                                chat?
                                                             </DialogDescription>
                                                         </DialogHeader>
                                                         <div className="flex justify-end gap-3">

@@ -78,11 +78,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     );
     const router = useRouter();
 
-    //GET DATA FROM FORM
-    // const categoryIds = form.watch("categoryIds");
-    // const doctorId = form.watch("doctorId");
-    // const title = form.watch("title");
-
     console.log("thumnail preview console" + thumbnailPreview);
     //HANDLE SUBMIT UPLOAD IMAGES
     const handleImageChange = async (
