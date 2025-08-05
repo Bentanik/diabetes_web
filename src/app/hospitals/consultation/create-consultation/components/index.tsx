@@ -1,31 +1,12 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BarChartIcon, BellIcon, Clock, Edit, User } from "lucide-react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { useDebounce } from "@/hooks/use-debounce";
-import Image from "next/image";
-import PaginatedComponent from "@/components/paginated";
 import { Toaster, toast } from "sonner";
-import { FormProvider, useForm } from "react-hook-form";
-import { Label } from "@radix-ui/react-label";
-import TimePicker from "@/components/time-picker";
-import useCreateConsultation, {
-    ConsultationFormData,
-} from "../hooks/use-create-consultation";
+import useCreateConsultation from "../hooks/use-create-consultation";
 import DoctorSelectFilter from "@/components/select_doctor";
 import {
     Table,
@@ -45,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import CreateConsultationDialog from "./create-consultation-dialog";
 import { useGetConsultations } from "../hooks/use-get-consultation";
+import ExcelImportDialog from "./excel-import-dialog";
 
 const mockDoctors = {
     totalPages: 1,
@@ -97,7 +79,6 @@ export default function CreateDoctorSchedule() {
     const [loading, setLoading] = useState(false);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
     const [newTemplate, setNewTemplate] = useState({ start: "", end: "" });
 
     const pageSize = 6;
@@ -121,6 +102,27 @@ export default function CreateDoctorSchedule() {
         }
     };
 
+    // Handle Excel import
+    const handleExcelImport = async (importedData: any[]) => {
+        try {
+            setLoading(true);
+
+            // Process each imported consultation
+            for (const consultation of importedData) {
+                await handleFormSubmit(consultation);
+            }
+
+            toast.success(
+                `Đã import thành công ${importedData.length} khung giờ tư vấn`
+            );
+        } catch (error) {
+            console.error("Error importing consultations:", error);
+            toast.error("Có lỗi xảy ra khi import dữ liệu");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
@@ -134,16 +136,12 @@ export default function CreateDoctorSchedule() {
     const calculateDuration = (start: string, end: string) => {
         const [startHours, startMinutes] = start.split(":").map(Number);
         const [endHours, endMinutes] = end.split(":").map(Number);
-
         const startTotalMinutes = startHours * 60 + startMinutes;
         const endTotalMinutes = endHours * 60 + endMinutes;
-
         let duration = endTotalMinutes - startTotalMinutes;
         if (duration < 0) duration += 24 * 60; // Handle overnight sessions
-
         const hours = Math.floor(duration / 60);
         const minutes = duration % 60;
-
         if (hours === 0) return `${minutes} phút`;
         if (minutes === 0) return `${hours} giờ`;
         return `${hours} giờ ${minutes} phút`;
@@ -164,14 +162,14 @@ export default function CreateDoctorSchedule() {
                 transition={{ delay: 0.1 }}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
-                <div className="flex items-center space-x-2 mb-4">
-                    <User className="h-5 w-5 text-[#248FCA]" />
-                    <h2 className="text-xl font-semibold text-[#248FCA]">
-                        Chọn bác sĩ
-                    </h2>
-                </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-4">
+                            <User className="h-5 w-5 text-[#248FCA]" />
+                            <h2 className="text-xl font-semibold text-[#248FCA]">
+                                Chọn bác sĩ
+                            </h2>
+                        </div>
                         <Select
                             value={selectedDoctorId}
                             onValueChange={setSelectedDoctorId}
@@ -191,130 +189,140 @@ export default function CreateDoctorSchedule() {
                             </SelectContent>
                         </Select>
                     </div>
-                </div>
+                    <div className="flex-3">
+                        {selectedDoctorId && (
+                            <div>
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                    <div>
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            <Clock className="h-5 w-5 text-[#248FCA]" />
+                                            <h2 className="text-xl font-semibold text-[#248FCA]">
+                                                Khung giờ tư vấn
+                                            </h2>
+                                        </div>
+                                        <p className="text-gray-600">
+                                            Quản lý khung giờ tư vấn cho{" "}
+                                            {mockDoctors.items.find(
+                                                (d) => d.id === selectedDoctorId
+                                            )?.name ||
+                                                `Bác sĩ ID: ${selectedDoctorId}`}
+                                        </p>
+                                    </div>
 
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-2">
+                                        <CreateConsultationDialog
+                                            onSubmit={handleFormSubmit}
+                                        />
+                                        <ExcelImportDialog
+                                            onImportSuccess={handleExcelImport}
+                                            doctorId={selectedDoctorId}
+                                        />
+                                    </div>
+                                </div>
+
+                                {consultations?.items.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                        <p className="text-lg font-medium mb-2">
+                                            Chưa có khung giờ tư vấn
+                                        </p>
+                                        <p className="text-sm">
+                                            Thêm khung giờ đầu tiên để bắt đầu
+                                            hoặc import từ Excel
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-lg border border-gray-200">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="bg-gray-50">
+                                                    <TableHead className="font-semibold">
+                                                        Thời gian bắt đầu
+                                                    </TableHead>
+                                                    <TableHead className="font-semibold">
+                                                        Thời gian kết thúc
+                                                    </TableHead>
+                                                    <TableHead className="font-semibold">
+                                                        Thời lượng
+                                                    </TableHead>
+                                                    <TableHead className="text-right font-semibold">
+                                                        Thao tác
+                                                    </TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {consultations?.items.map(
+                                                    (template, index) => (
+                                                        <TableRow
+                                                            key={index}
+                                                            className="hover:bg-gray-50"
+                                                        >
+                                                            <TableCell className="font-medium">
+                                                                {
+                                                                    template.startTime
+                                                                }
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {
+                                                                    template.endTime
+                                                                }
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge
+                                                                    variant="secondary"
+                                                                    className="bg-[#248FCA]/10 text-[#248FCA]"
+                                                                >
+                                                                    {calculateDuration(
+                                                                        template.startTime,
+                                                                        template.endTime
+                                                                    )}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                <div className="flex justify-end space-x-2">
+                                                                    <Dialog
+                                                                        open={
+                                                                            isEditDialogOpen
+                                                                        }
+                                                                        onOpenChange={
+                                                                            setIsEditDialogOpen
+                                                                        }
+                                                                    >
+                                                                        <DialogTrigger
+                                                                            asChild
+                                                                        >
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                className="hover:bg-[#248FCA]/10 bg-transparent"
+                                                                            >
+                                                                                <Edit className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </DialogTrigger>
+                                                                        <DialogContent></DialogContent>
+                                                                    </Dialog>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
                 {/* Select Doctor */}
-                <DoctorSelectFilter onDoctorChange={setSelectedDoctorId} />
+                {/* <DoctorSelectFilter
+                    onDoctorChange={setSelectedDoctorId}
+                    selectDoctor=""
+                /> */}
             </motion.div>
 
             {/* Templates Management */}
-            {selectedDoctorId && (
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
-                >
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                        <div>
-                            <div className="flex items-center space-x-2 mb-2">
-                                <Clock className="h-5 w-5 text-[#248FCA]" />
-                                <h2 className="text-xl font-semibold text-[#248FCA]">
-                                    Khung giờ tư vấn
-                                </h2>
-                            </div>
-                            <p className="text-gray-600">
-                                Quản lý khung giờ tư vấn cho{" "}
-                                {mockDoctors.items.find(
-                                    (d) => d.id === selectedDoctorId
-                                )?.name || `Bác sĩ ID: ${selectedDoctorId}`}
-                            </p>
-                        </div>
-                        <CreateConsultationDialog onSubmit={handleFormSubmit} />
-                    </div>
-
-                    {consultations?.items.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                            <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                            <p className="text-lg font-medium mb-2">
-                                Chưa có khung giờ tư vấn
-                            </p>
-                            <p className="text-sm">
-                                Thêm khung giờ đầu tiên để bắt đầu
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="rounded-lg border border-gray-200">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="bg-gray-50">
-                                        <TableHead className="font-semibold">
-                                            Thời gian bắt đầu
-                                        </TableHead>
-                                        <TableHead className="font-semibold">
-                                            Thời gian kết thúc
-                                        </TableHead>
-                                        <TableHead className="font-semibold">
-                                            Thời lượng
-                                        </TableHead>
-                                        <TableHead className="text-right font-semibold">
-                                            Thao tác
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {consultations?.items.map(
-                                        (template, index) => (
-                                            <TableRow
-                                                key={index}
-                                                className="hover:bg-gray-50"
-                                            >
-                                                <TableCell className="font-medium">
-                                                    {template.startTime}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {template.endTime}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge
-                                                        variant="secondary"
-                                                        className="bg-[#248FCA]/10 text-[#248FCA]"
-                                                    >
-                                                        {calculateDuration(
-                                                            template.startTime,
-                                                            template.endTime
-                                                        )}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    <div className="flex justify-end space-x-2">
-                                                        <Dialog
-                                                            open={
-                                                                isEditDialogOpen
-                                                            }
-                                                            onOpenChange={
-                                                                setIsEditDialogOpen
-                                                            }
-                                                        >
-                                                            <DialogTrigger
-                                                                asChild
-                                                            >
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    // onClick={() =>
-                                                                    //     setEditingTemplate(
-                                                                    //         template
-                                                                    //     )
-                                                                    // }
-                                                                    className="hover:bg-[#248FCA]/10"
-                                                                >
-                                                                    <Edit className="h-4 w-4" />
-                                                                </Button>
-                                                            </DialogTrigger>
-                                                            <DialogContent></DialogContent>
-                                                        </Dialog>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    )}
-                </motion.div>
-            )}
         </div>
     );
 }

@@ -277,7 +277,15 @@ export default function GroupDetailComponent({
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium text-gray-900">
-                                                {user.fullName || "Không tên"}
+                                                {user.status === 0 ? (
+                                                    <div className="text-[green]">
+                                                        Đang hoạt động
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-[green]">
+                                                        Đang hoạt động
+                                                    </div>
+                                                )}
                                             </div>
                                         </TableCell>
                                         <TableCell>

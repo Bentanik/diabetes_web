@@ -215,7 +215,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                 <div className="flex-1 flex gap-2">
                                     <FormField
                                         control={form.control}
-                                        name="firstName"
+                                        name="lastName"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
@@ -265,7 +265,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="lastName"
+                                        name="firstName"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">

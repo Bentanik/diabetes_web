@@ -96,6 +96,7 @@ declare namespace API {
         phoneNumber: string;
         role: UserRole;
         invitedBy: string;
+        status: number;
     };
 
     type TGetConversation = {
