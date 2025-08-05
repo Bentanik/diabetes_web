@@ -61,10 +61,6 @@ const Header = ({ conversationId }: REQUEST.ConversationId) => {
     const router = useRouter();
     const [isOpenDialog, setIsDialogOpen] = useState<boolean>(false);
 
-    const { conversation, isPending: conversationPending } = useGetConversation(
-        { conversationId }
-    );
-
     const handleFormSubmit = async () => {
         if (!onSubmit || typeof onSubmit !== "function") {
             return;

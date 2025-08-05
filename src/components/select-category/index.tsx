@@ -5,15 +5,16 @@ type MultiSelectCategoriesFilterProps = {
     data: API.TGetCategories | null | undefined;
     isPending: boolean;
     onCategoryChange: (categoryIds: string[]) => void;
+    selectedCategories: string[];
 };
 
 export default function MultiSelectCategoriesFilter({
     data,
     isPending,
     onCategoryChange,
+    selectedCategories,
 }: MultiSelectCategoriesFilterProps) {
     // Giữ state là array of IDs như yêu cầu
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
     const options =
         data?.map((category) => ({
@@ -25,7 +26,6 @@ export default function MultiSelectCategoriesFilter({
         newValue: MultiValue<{ value: string; label: string }>
     ) => {
         const categoryIds = newValue.map((option) => option.value);
-        setSelectedCategories(categoryIds);
         onCategoryChange(categoryIds);
     };
 

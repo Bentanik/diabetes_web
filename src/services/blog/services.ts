@@ -4,6 +4,7 @@ import {
     createBlogAsync,
     updateBlogAsync,
     reviewBlogAsync,
+    deletePostAsync,
 } from "./api-services";
 import { TMeta, TResponse, TResponseData } from "@/typings";
 
@@ -20,6 +21,30 @@ export const useServiceCreateBlog = () => {
                 description: "Tạo bài viết thành công",
                 duration: 5000,
             });
+        },
+        onError: (err) => {
+            addToast({
+                type: "error",
+                description: err.title,
+                duration: 5000,
+            });
+        },
+    });
+};
+
+export const useServiceDeletePost = ({ blogId }: REQUEST.BlogId) => {
+    const { addToast } = useToast();
+    return useMutation<TResponse<object | null>, TMeta, void>({
+        mutationFn: () => deletePostAsync({ blogId }),
+        onSuccess: () => {
+            addToast(
+                {
+                    type: "success",
+                    description: "Xóa bài viết thành công",
+                    duration: 5000,
+                },
+                false
+            );
         },
         onError: (err) => {
             addToast({

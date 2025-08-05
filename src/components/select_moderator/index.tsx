@@ -4,14 +4,13 @@ import { useGetModerators } from "@/app/admin/blogs/update-blog/hooks/use-get-mo
 
 type ModeratorSelectFilterProps = {
     onModeratorChange: (moderatorId: string) => void;
+    selectedModerator: string;
 };
 
 export default function ModeratorSelectFilter({
     onModeratorChange,
+    selectedModerator,
 }: ModeratorSelectFilterProps) {
-    const [selectedModerator, setSelectedModerator] = useState<string | null>(
-        null
-    );
     const pageSize = 5;
 
     // Sử dụng hook để lấy dữ liệu từ API
@@ -37,8 +36,7 @@ export default function ModeratorSelectFilter({
         selectedOption: SingleValue<{ value: string; label: string }>
     ) => {
         const moderatorId = selectedOption ? selectedOption.value : null;
-        setSelectedModerator(moderatorId);
-        onModeratorChange(moderatorId || ""); // Gọi callback với doctorId hoặc chuỗi rỗng nếu null
+        onModeratorChange(moderatorId || "");
     };
 
     // Xử lý cuộn đến cuối danh sách để load thêm dữ liệu

@@ -13,6 +13,19 @@ export const createBlogAsync = async () => {
     return response.data;
 };
 
+export const deletePostAsync = async ({ blogId }: REQUEST.BlogId) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.DELETE_POST(blogId),
+        {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const updateBlogAsync = async (
     { blogId }: REQUEST.BlogId,
     body: REQUEST.TUpdateBlog

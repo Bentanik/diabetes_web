@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
 import { motion } from "framer-motion";
-import { BarChartIcon, BellIcon, ArrowLeft, Divide } from "lucide-react";
+import { ArrowLeft, Trash } from "lucide-react";
 import {
     Dialog,
     DialogClose,
@@ -19,7 +19,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import {
     Form,
     FormControl,
@@ -34,12 +33,32 @@ import { useAppSelector } from "@/stores";
 import { useGetBlogDetail } from "../hooks/use-get-blog";
 import RejectedReason from "./rejected-reason-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { DialogDescription } from "@radix-ui/react-dialog";
+import useDeletePost from "../../hooks/use-delete-blog";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     const { onSubmit, form, isPending } = useReviewBlog({ blogId: blogId });
     const router = useRouter();
     const [isOpenDialog, setIsDialogOpen] = useState(false);
+    const { onSubmit: deleteSubmit, isPending: deletedPending } = useDeletePost(
+        { blogId }
+    );
 
+    const handleFormSubmit = async () => {
+        if (!deleteSubmit || typeof deleteSubmit !== "function") {
+            return;
+        }
+        try {
+            await deleteSubmit(() => {
+                setIsDialogOpen(false);
+                setTimeout(() => {
+                    router.push("/admin/blogs");
+                }, 1000);
+            });
+        } catch (error) {
+            console.error("Error updating post:", error);
+        }
+    };
     const user = useAppSelector((state) => state.userSlice);
 
     const { blog_detail, isPending: blogPending } = useGetBlogDetail({
@@ -149,15 +168,58 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                     }}
                 />
 
-                {/* Actions for rejected blog (status: -2) */}
+                {/* Action with post status = -2 */}
                 {blog_detail?.status === -2 && (
                     <div className="mt-10 flex justify-end gap-4">
-                        <Button
-                            variant="outline"
-                            className="cursor-pointer px-6 py-6 min-w-[180px] hover:border-red-500 hover:text-red-500"
+                        <Dialog
+                            open={isOpenDialog}
+                            onOpenChange={setIsDialogOpen}
                         >
-                            Xóa bài viết
-                        </Button>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="gap-2 cursor-pointer hover:bg-red-200 py-6 min-w-[180px]"
+                                >
+                                    <Trash className="w-4 h-4" />
+                                    Xóa bài viết
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle className="text-[1.5rem] font-medium">
+                                        Xóa bài viết
+                                    </DialogTitle>
+                                    <DialogDescription className="text-[1.1rem]">
+                                        Bạn có chắc chắn muốn xóa bài viết{" "}
+                                        {blog_detail.title}
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="flex justify-end gap-5">
+                                    <div>
+                                        <Button
+                                            variant="outline"
+                                            className="gap-2 cursor-pointer hover:border-gray-300 min-w-[100px]"
+                                            onClick={() =>
+                                                setIsDialogOpen(false)
+                                            }
+                                        >
+                                            Hủy
+                                        </Button>
+                                    </div>
+                                    <div>
+                                        <Button
+                                            type="submit"
+                                            onClick={() => handleFormSubmit()}
+                                            variant="outline"
+                                            className="gap-2 cursor-pointer hover:bg-red-200 hover:border-red-200"
+                                            disabled={deletedPending}
+                                        >
+                                            Xóa bài viết
+                                        </Button>
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                         <Link href={`/admin/blogs/update-blog/${blogId}`}>
                             <Button
                                 variant="outline"
