@@ -1,8 +1,11 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import { useServiceUpdateBlog } from "@/services/blog/services";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { BLOG_DETAIL_QUERY_KEY } from "../../blog-detail/hooks/use-get-blog";
+import { GET_POSTS_QUERY_KEY } from "../../hooks/use-get-blogs";
 
 export const blogSchema = z.object({
     title: z
@@ -35,21 +38,27 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
 
     const isPendingUpdate = isPending;
     const { showBackdrop, hideBackdrop } = useBackdrop();
+    const queryClient = useQueryClient();
 
     const onSubmit = (data: REQUEST.TUpdateBlog, clearImages: () => void) => {
         if (!data.isDraft) {
             showBackdrop();
         }
         mutate(data, {
-            onSuccess: (res) => {
+            onSuccess: async (res) => {
+                await queryClient.invalidateQueries({
+                    queryKey: [BLOG_DETAIL_QUERY_KEY],
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_POSTS_QUERY_KEY],
+                });
                 if (!data.isDraft) {
                     hideBackdrop();
-                    console.log("API Success:", res);
                     form.reset();
                     clearImages();
                 }
             },
-            onError: (err) => {
+            onError: async (err) => {
                 hideBackdrop();
                 console.log("API Fail:", err);
             },

@@ -1,33 +1,32 @@
-'use client'
+"use client";
 
-import React from 'react'
+import React from "react";
 import { motion } from "framer-motion";
-import { Button } from '@/components/ui/button';
-import { HEADER_NAVIGATIONS } from '@/constants/home';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-
+import { Button } from "@/components/ui/button";
+import { HEADER_NAVIGATIONS } from "@/constants/home";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const renderHeaderNavigations = () => {
     return HEADER_NAVIGATIONS.map((nav, index) => (
         <li key={index}>
-            <Link href
-                ={nav.href}
+            <Link
+                href={nav.href}
                 className="hover:text-[#248fca] cursor-pointer"
             >
                 {nav.title}
             </Link>
-        </li >
-    ))
-}
+        </li>
+    ));
+};
 
 export default function Header() {
     const router = useRouter();
 
     const handleRouteToLogin = () => {
-        router.push('/login')
-    }
+        router.push("/login");
+    };
     return (
         <motion.header
             className="fixed top-0 left-0 w-full bg-gradient-to-br from-blue-50 via-white to-cyan-50 px-6 md:px-[66px] h-[80px] flex items-center justify-between z-50 font-be-vietnam-pro"
@@ -51,7 +50,9 @@ export default function Header() {
                             width={60}
                             height={60}
                         />
-                        <h1 className="text-2xl font-bold text-[#248fca]">DbDoctor</h1>
+                        <h1 className="text-2xl font-bold text-[#248fca]">
+                            DbDoctor
+                        </h1>
                     </Link>
                 </div>
 
@@ -65,9 +66,10 @@ export default function Header() {
 
             {/* Search & Buttons */}
             <section className="flex items-center gap-x-9">
-
                 {/* Apply Button */}
-                <Button type="button" className="hidden md:block px-5 py-2 text-sm font-medium bg-[#248fca] text-white hover:bg-[#2485ca] cursor-pointer"
+                <Button
+                    type="button"
+                    className="hidden md:block px-5 py-2 text-sm font-medium bg-[#248fca] text-white hover:bg-[#2485ca] cursor-pointer"
                     onClick={handleRouteToLogin}
                 >
                     Đăng nhập
@@ -79,5 +81,5 @@ export default function Header() {
                 </div> */}
             </section>
         </motion.header>
-    )
+    );
 }

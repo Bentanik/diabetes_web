@@ -33,14 +33,15 @@ import { useState, useEffect, useCallback } from "react";
 import TiptapEditor from "@/components/tiptap";
 import useUploadImage from "@/app/admin/blogs/update-blog/hooks/use-upload-image";
 import MultiSelectCategories from "@/app/admin/blogs/update-blog/components/select-category";
-import useGetDataCategories from "@/app/admin/blogs/update-blog/hooks/use-get-categories";
 import DoctorSelect from "@/app/admin/blogs/update-blog/components/select-doctor";
-import useGetBlog from "@/app/admin/blogs/blog-detail/hooks/use-get-blog";
 import useUpdateBlog, {
     BlogFormData,
 } from "@/app/admin/blogs/update-blog/hooks/use-update-blog";
 import { useRouter } from "next/navigation";
+import { useGetBlogDetail } from "../../blog-detail/hooks/use-get-blog";
+import { useGetCategories } from "../hooks/use-get-categories";
 
+//EXTRACT HTML CONTENT TO ROOT CONTENT
 const extractTextContent = (html: string): string => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
@@ -65,107 +66,61 @@ const extractTextContent = (html: string): string => {
     return textNodes.filter((text) => text !== "").join(", ");
 };
 
-const doctors = [
-    {
-        Id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
-        value: "tanphat",
-        label: "Bs.Lâm Tấn Phát",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b71",
-        value: "tanphat1",
-        label: "Bs.Lâm Tấn Phát1",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b72",
-        value: "tanphat2",
-        label: "Bs.Lâm Tấn Phát2",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b73",
-        value: "tanphat3",
-        label: "Bs.Lâm Tấn Phát3",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b74",
-        value: "tanphat4",
-        label: "Bs.Lâm Tấn Phát4",
-    },
-];
-
 export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadImage();
-    const { getCategoriesApi, isPending } = useGetDataCategories();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [data, setData] = useState<API.TGetCategories>([]);
     const [imageIds, setImageIds] = useState<string[]>([]);
     const [content, setContent] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const { getBlogApi } = useGetBlog();
-    const [blogData, setBlogData] = useState<API.TGetBlog>();
-    const { form, onSubmit } = useUpdateBlog({ blogId });
+    const { form, onSubmit, isPendingUpdate } = useUpdateBlog({ blogId });
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
         null
     );
-    const [thumbnailId, setThumbnailId] = useState<string | null>(null);
     const router = useRouter();
 
-    const categoryIds = form.watch("categoryIds");
-    const doctorId = form.watch("doctorId");
-    const title = form.watch("title");
-
-    useEffect(() => {
-        const handleGetData = async () => {
-            try {
-                const res = await getCategoriesApi();
-                setData((res?.data as API.TGetCategories) || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetData();
-    }, []);
-
+    console.log("thumnail preview console" + thumbnailPreview);
+    //HANDLE SUBMIT UPLOAD IMAGES
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const file = e.target.files?.[0];
         if (file) {
-            const data = { image: file };
+            // Convert image to base64 for preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setThumbnailPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
 
+            // Upload image
+            const data = { image: file };
             onSubmitImage(
                 data,
-                handleClearImages,
-                (imageId, publicId, publicUrl) => {
-                    form.setValue("thumbnail", imageId);
-                    setThumbnailPreview(publicUrl);
-                    setThumbnailId(imageId);
+                () => {},
+                (imageId) => {
+                    form.setValue("thumbnail", imageId as string);
                 }
             );
         }
     };
 
-    useEffect(() => {
-        const handleGetBlogData = async (id: string) => {
-            try {
-                const res = await getBlogApi({ blogId: id });
-                setBlogData(res?.data as API.TGetBlog);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetBlogData(blogId);
-    }, []);
+    //FETCH API GET BLOG DETAIL
+    const { blog_detail, isPending: blogPending } = useGetBlogDetail({
+        blogId,
+    });
+
+    //FETCH API GET CATEGORIES
+    const { categories, isPending: categoriesPending } = useGetCategories();
 
     useEffect(() => {
-        if (blogData?.contentHtml) {
-            form.setValue("contentHtml", blogData.contentHtml);
-            setContent(extractTextContent(blogData.contentHtml));
-            setImageIds(extractImageIds(blogData.contentHtml));
+        if (blog_detail?.contentHtml) {
+            form.setValue("contentHtml", blog_detail.contentHtml);
+            setContent(extractTextContent(blog_detail.contentHtml));
+            setImageIds(extractImageIds(blog_detail.contentHtml));
         }
-    }, [blogData, form]);
+    }, [blog_detail, form]);
 
+    //EXTRACT HTML IMG CONTENT TO GET IMAGE IDS
     const extractImageIds = (html: string): string[] => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, "text/html");
@@ -188,10 +143,8 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         const newImageIds = extractImageIds(editorContent);
         setImageIds(newImageIds);
     };
-    const handleClearImages = () => {
-        setImageIds([]);
-    };
 
+    //HANDLE SUBMIT DRAFT POST FORM
     const handleSubmitDraft = useCallback(
         async (formData: REQUEST.TUpdateBlog) => {
             try {
@@ -206,26 +159,20 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         [onSubmit]
     );
 
+    //HANDLE SUBMIT SUCCESSFULLY POST FORM
     const handleFormSubmit = async (data: BlogFormData) => {
-        if (!onSubmit || typeof onSubmit !== "function") {
-            console.error("onSubmit is not a function");
-            return;
-        }
-
-        setIsSubmitting(true);
         try {
             const formData: REQUEST.TUpdateBlog = {
                 title: data.title || null,
                 content: content || null,
                 contentHtml: data.contentHtml || null,
-                thumbnail: thumbnailId || null,
+                thumbnail: data.thumbnail || null,
                 categoryIds: data.categoryIds || null,
                 images: imageIds || null,
                 doctorId: data.doctorId || null,
                 isDraft: false,
             };
             onSubmit(formData, () => {
-                handleClearImages();
                 setIsDialogOpen(false);
                 form.reset();
                 setTimeout(() => {
@@ -234,9 +181,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             });
         } catch (error) {
             console.error("Error updating post:", error);
-            alert("Có lỗi xảy ra khi cập nhật bài viết.");
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -245,9 +189,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         form.setValue("categoryIds", []);
         form.setValue("doctorId", "");
         setThumbnailPreview(null);
-        setThumbnailId(null);
         setImageIds([]);
-
         setIsDialogOpen(false);
     };
 
@@ -345,7 +287,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                         setIsDialogOpen(open);
                     }}
                 >
-                    <DialogContent className="sm:max-w-[600px] h-[700px] overflow-y-auto">
+                    <DialogContent className="sm:max-w-[600px] h-[750px] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>
                                 Hoàn thiện thông tin bài viết
@@ -443,8 +385,8 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         <FormControl>
                                             <MultiSelectCategories
                                                 control={form.control}
-                                                data={data}
-                                                isPending={isPending}
+                                                data={categories}
+                                                isPending={categoriesPending}
                                             />
                                         </FormControl>
                                         <FormMessage className="flex items-center gap-1">
@@ -463,7 +405,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                         <FormControl>
                                             <DoctorSelect
                                                 control={form.control}
-                                                doctors={doctors}
                                             />
                                         </FormControl>
                                         <FormMessage className="flex items-center gap-1">
@@ -473,7 +414,7 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 )}
                             />
 
-                            <DialogFooter>
+                            <DialogFooter className="mt-20">
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -485,31 +426,13 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
                                 <Button
                                     type="submit"
                                     disabled={
-                                        isSubmitting ||
                                         isUploading ||
-                                        !thumbnailId ||
-                                        !categoryIds ||
-                                        !doctorId ||
-                                        !title
+                                        !thumbnailPreview ||
+                                        isPendingUpdate
                                     }
                                     className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl"
                                 >
-                                    {isSubmitting ? (
-                                        <div className="flex items-center gap-2 cursor-pointer">
-                                            <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{
-                                                    duration: 1,
-                                                    repeat: Infinity,
-                                                    ease: "linear",
-                                                }}
-                                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full "
-                                            />
-                                            Đang tải lên...
-                                        </div>
-                                    ) : (
-                                        "Tải lên"
-                                    )}
+                                    Hoàn tất tạo bài viết
                                 </Button>
                             </DialogFooter>
                         </form>

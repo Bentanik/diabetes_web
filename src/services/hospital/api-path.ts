@@ -1,8 +1,17 @@
 /* eslint-disable import/no-anonymous-default-export */
-const HOSPITAL = "https://localhost:1122/api/v1/hospitals";
-const CREATE_HOSPITAL = HOSPITAL + "";
+const DOCTOR =
+    "https://capstonegateway-dqdrf9g0g9h0ffdd.southeastasia-01.azurewebsites.net/api/v1/hospitals";
+const CREATE_DOCTOR = DOCTOR + "/doctors";
+const GET_DOCTORS = DOCTOR + "/me/doctors";
+
+const GET_HOSPITALS = DOCTOR + "/me";
+const GET_HOSPITAL = (hospitalId: string) => `${DOCTOR}/${hospitalId}`;
+const CREATE_HOSPITAL = DOCTOR;
 
 export default {
-    HOSPITAL,
+    CREATE_DOCTOR,
+    GET_DOCTORS,
+    GET_HOSPITALS,
+    GET_HOSPITAL,
     CREATE_HOSPITAL,
 };

@@ -3,7 +3,6 @@ import { useServiceCreateConversation } from "@/services/conversation/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_CONVERSATIONS_QUERY_KEY } from "./use-get-conversations";
 
@@ -26,8 +25,6 @@ export default function useCreateConversation() {
             avatarId: "",
         },
     });
-
-    const router = useRouter();
 
     const { mutate, isPending } = useServiceCreateConversation();
     const { showBackdrop, hideBackdrop } = useBackdrop();

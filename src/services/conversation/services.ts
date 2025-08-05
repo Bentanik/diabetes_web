@@ -55,7 +55,6 @@ export const useServiceDeleteConversation = ({
                     description: "Xóa nhóm thành công",
                     duration: 5000,
                 },
-
                 false
             );
         },

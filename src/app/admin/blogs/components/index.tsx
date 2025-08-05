@@ -2,218 +2,88 @@
 // eslint-disable-next-line react-hooks/exhaustive-deps
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import {
-    BellIcon,
-    XCircleIcon,
-    FileWarning,
+    ArrowUpDown,
     BadgeCheck,
     BadgeX,
     CircleDotDashed,
     Eye,
-    ArrowUpDown,
+    FileWarning,
+    FunnelX,
+    XCircleIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import Link from "next/link";
 import Image from "next/image";
-import useGetBlogs from "../hooks/use-get-blogs";
 import PaginatedComponent from "@/components/paginated";
 import BlogStatusDropdown from "./select-status";
 import DoctorSelectFilter from "@/components/select_doctor";
 import MultiSelectCategoriesFilter from "@/components/select-category";
-import useGetDataCategories from "@/app/admin/blogs/update-blog/hooks/use-get-categories";
 import BlogSortDropdown from "@/components/select-sort";
-import SearchInput from "@/components/search";
-import useCreateBlog from "@/app/admin/blogs/hooks/use-create-blog";
-
-const doctors = [
-    {
-        Id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
-        value: "tanphat",
-        label: "Bs.Lâm Tấn Phát",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b71",
-        value: "tanphat1",
-        label: "Bs.Lâm Tấn Phát1",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b72",
-        value: "tanphat2",
-        label: "Bs.Lâm Tấn Phát2",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b73",
-        value: "tanphat3",
-        label: "Bs.Lâm Tấn Phát3",
-    },
-    {
-        Id: "019771dd-87ee-75a9-513c-1e6200629b74",
-        value: "tanphat4",
-        label: "Bs.Lâm Tấn Phát4",
-    },
-];
-
-interface HeaderProps {
-    searchTerm: string;
-    setSearchTerm: (value: string) => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm }) => {
-    const { onSubmit } = useCreateBlog();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleCreateForm = () => {
-        setIsSubmitting(true);
-        try {
-            onSubmit();
-        } catch (err) {
-            console.log(err);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    return (
-        <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shadow-hospital"
-        >
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Quản lý bài viết
-                    </h1>
-                    <p className="text-gray-600 mt-1 text-sm">
-                        Hiện có 6 kết quả hiển thị
-                    </p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <SearchInput
-                        searchTerm={searchTerm}
-                        setSearchTerm={setSearchTerm}
-                    />
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        variant="outline"
-                        className="gap-2 cursor-pointer"
-                        onClick={handleCreateForm}
-                    >
-                        {isSubmitting ? (
-                            <div className="flex items-center gap-2">
-                                <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{
-                                        duration: 1,
-                                        repeat: Infinity,
-                                        ease: "linear",
-                                    }}
-                                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                                />
-                                Đang tạo...
-                            </div>
-                        ) : (
-                            "Tạo bài post"
-                        )}
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                        <BellIcon className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <ProfileHospitalMenu profile={1} />
-                    </div>
-                </div>
-            </div>
-        </motion.div>
-    );
-};
+import ModeratorSelectFilter from "@/components/select_moderator";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useAppSelector } from "@/stores";
+import { useGetCategories } from "../update-blog/hooks/use-get-categories";
+import { useGetBlogs } from "../hooks/use-get-blogs";
+import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
+import Header from "./header";
 
 export default function ModeratorManageBlogComponent() {
+    const user = useAppSelector((state) => state.userSlice);
+    const isSystemAdmin = user.user?.roles?.includes("SystemAdmin");
+
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [selectedStatus, setSelectedStatus] = useState<number>(1);
-    const { getBlogsApi } = useGetBlogs();
-    const [data, setData] = useState<API.Blog[]>([]);
-    const [categoryData, setCategoryData] = useState<API.TGetCategories>([]);
+    const [selectedStatus, setSelectedStatus] = useState<number>(
+        isSystemAdmin ? 1 : 0
+    );
+    const [selectedDoctor, setSelectedDoctor] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [totalPage, setTotalPage] = useState<number>(1);
-    const [selectDoctor, setSelectDoctor] = useState<string>("");
-    const [selectSortType, setSelectSortType] = useState<string>("");
+    const [selectModerator, setSelectModerator] = useState<string>("");
+    const [selectSortType, setSelectSortType] = useState<string>("createdDate");
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
     const [isSortAsc, setIsSortAsc] = useState(true);
+
+    const pageSize = 6;
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, "0");
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const year = date.getFullYear();
-
         return `${day}-${month}-${year}`;
     };
 
-    const { getCategoriesApi, isPending } = useGetDataCategories();
-
-    const handleGetData = async (pageIndex: number) => {
-        try {
-            const res = await getBlogsApi({
-                searchContent: searchTerm,
-                categoryIds: selectedCategoryIds,
-                status: selectedStatus,
-                moderatorId: "",
-                doctorId: selectDoctor,
-                pageIndex: pageIndex,
-                pageSize: 6,
-                sortType: selectSortType,
-                isSortAsc: isSortAsc,
-            });
-            setTotalPage(res?.data?.totalPages || 1);
-            setData(res?.data?.items || []);
-        } catch (err) {
-            console.log(err);
-            setData([]);
-        }
+    const handleClearFilter = () => {
+        setSelectedDoctor("");
+        setSelectModerator("");
+        setSelectedCategoryIds([]);
+        setSearchTerm("");
     };
 
-    useEffect(() => {
-        const handleGetData = async () => {
-            try {
-                const res = await getCategoriesApi();
-                setCategoryData((res?.data as API.TGetCategories) || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        handleGetData();
-    }, []);
+    const { categories, isPending } = useGetCategories();
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-            setCurrentPage(1);
-        }, 500);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [searchTerm]);
-
-    useEffect(() => {
-        handleGetData(currentPage);
-    }, [
-        debouncedSearchTerm,
-        selectedStatus,
-        selectDoctor,
-        selectedCategoryIds,
-        selectSortType,
-        isSortAsc,
-        currentPage,
-    ]);
+    const {
+        blogs,
+        isPending: blogsPending,
+        isError,
+        error,
+    } = useGetBlogs({
+        searchContent: debouncedSearchTerm,
+        categoryIds: selectedCategoryIds,
+        status: selectedStatus,
+        moderatorId: selectModerator,
+        doctorId: selectedDoctor,
+        pageIndex: currentPage,
+        pageSize: pageSize,
+        sortType: selectSortType,
+        isSortAsc: isSortAsc,
+    });
 
     const getStatusIcon = (status: number) => {
         switch (status) {
@@ -247,7 +117,6 @@ export default function ModeratorManageBlogComponent() {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        handleGetData(page);
     };
 
     return (
@@ -264,8 +133,8 @@ export default function ModeratorManageBlogComponent() {
                 transition={{ delay: 0.3 }}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
-                <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                    <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                <div className="flex flex-col lg:flex-row items-center justify-between">
+                    <div className="flex flex-col sm:flex-row gap-2 flex-1">
                         {/*Select status*/}
                         <BlogStatusDropdown
                             selectedStatus={selectedStatus}
@@ -273,15 +142,25 @@ export default function ModeratorManageBlogComponent() {
                         />
                         {/* Select Category*/}
                         <MultiSelectCategoriesFilter
-                            data={categoryData}
+                            data={categories}
                             isPending={isPending}
                             onCategoryChange={setSelectedCategoryIds}
+                            selectedCategories={selectedCategoryIds}
                         />
                         {/* Select Doctor */}
                         <DoctorSelectFilter
-                            doctors={doctors}
-                            onDoctorChange={setSelectDoctor}
+                            onDoctorChange={setSelectedDoctor}
+                            selectDoctor={selectedDoctor}
                         />
+
+                        {/* Select Moderator */}
+                        {isSystemAdmin && (
+                            <ModeratorSelectFilter
+                                onModeratorChange={setSelectModerator}
+                                selectedModerator={selectModerator}
+                            />
+                        )}
+
                         {/* Select Sort Type */}
                         <BlogSortDropdown onSortChange={setSelectSortType} />
                         {/* Sort ASC/ DES */}
@@ -293,13 +172,23 @@ export default function ModeratorManageBlogComponent() {
                             <ArrowUpDown className="h-4 w-4 mr-2" />
                             {isSortAsc ? "A → Z" : "Z → A"}
                         </Toggle>
+
+                        <Button
+                            className="bg-white text-red-400 border-red-300 border-[1px] hover:bg-red-300 cursor-pointer hover:text-[white]"
+                            onClick={handleClearFilter}
+                        >
+                            <FunnelX />
+                            Xóa bộ lọc
+                        </Button>
                     </div>
                 </div>
             </motion.div>
 
+            {blogsPending && <SkeletonFolderGrid count={6} />}
+
             {/* Staff Grid/List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.map((data, index) => (
+                {blogs?.items.map((data, index) => (
                     <Link
                         href={`/admin/blogs/blog-detail/${data.id}`}
                         key={data.id}
@@ -371,11 +260,12 @@ export default function ModeratorManageBlogComponent() {
                     </Link>
                 ))}
             </div>
-            {data?.length > 0 && (
+            {/* Show pagination when has data */}
+            {blogs?.items && blogs.items.length > 0 && !blogsPending && (
                 <div className="my-10">
                     <div className="mt-5">
                         <PaginatedComponent
-                            totalPages={totalPage}
+                            totalPages={blogs.totalPages || 1}
                             currentPage={currentPage}
                             onPageChange={handlePageChange}
                         />
@@ -383,8 +273,8 @@ export default function ModeratorManageBlogComponent() {
                 </div>
             )}
 
-            {/* Empty State */}
-            {data.length === 0 && (
+            {/* Empty State - sử dụng cùng data source */}
+            {blogs?.items.length === 0 && !blogsPending && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

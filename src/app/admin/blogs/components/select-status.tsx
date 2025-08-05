@@ -19,15 +19,15 @@ const getStatusText = (status: number) => {
 
 interface BlogStatusDropdownProps {
     selectedStatus: number;
-    onStatusChange: (status: number) => void; // Callback để truyền giá trị status
+    onStatusChange: (status: number) => void;
 }
 
 export default function BlogStatusDropdown({
     selectedStatus,
     onStatusChange,
 }: BlogStatusDropdownProps) {
-    const [selectedOption, setSelectedOption] = useState<string | null>(
-        getStatusText(selectedStatus)
+    const [selectedOption, setSelectedOption] = useState<string>(
+        getStatusText(selectedStatus) || "Chờ xác thực"
     );
 
     const user = useAppSelector((state) => state.userSlice);
@@ -44,10 +44,10 @@ export default function BlogStatusDropdown({
     const handleChange = (
         newValue: SingleValue<{ value: string; label: string }>
     ) => {
-        const statusValue = newValue?.value || "1";
-        setSelectedOption(newValue?.label || "Đã duyệt");
-        const status = statusValue === "null" ? null : parseInt(statusValue);
-        onStatusChange(status || 0);
+        const statusValue = newValue?.value || "0";
+        setSelectedOption(newValue?.label || "Chờ xác thực");
+        const status = parseInt(statusValue);
+        onStatusChange(status);
     };
 
     return (
@@ -60,7 +60,7 @@ export default function BlogStatusDropdown({
                 }
                 onChange={handleChange}
                 placeholder="Chọn trạng thái"
-                className="w-[250px]"
+                className="w-[210px]"
                 classNamePrefix="react-select"
             />
         </div>

@@ -1,39 +1,27 @@
-import { useBackdrop } from "@/context/backdrop_context";
-import useToast from "@/hooks/use-toast";
 import { getBlog } from "@/services/blog/api-services";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-export default function useGetBlog() {
-    const { addToast } = useToast();
-    const [isBlogPending, setIsBlogPending] = useState<boolean>(false);
-    const { showBackdrop, hideBackdrop } = useBackdrop();
+export const BLOG_DETAIL_QUERY_KEY = "blog_detail";
 
-    const getBlogApi = async (param: REQUEST.BlogId) => {
-        showBackdrop();
-        setIsBlogPending(true);
-        try {
-            const res = await getBlog(param);
-            if (res.data != null) {
-                return res as TResponseData<API.TGetBlog>;
-            } else {
-                addToast({
-                    type: "error",
-                    description: "Failed to fetch applications",
-                });
-                return null;
+export const useGetBlogDetail = (params: REQUEST.BlogId) => {
+    const {
+        data: blog_detail,
+        isPending,
+        isError,
+        error,
+    } = useQuery<TResponseData<API.TGetBlog>, TMeta, API.TGetBlog | null>({
+        queryKey: [BLOG_DETAIL_QUERY_KEY, params],
+        queryFn: async () => {
+            const res = await getBlog(params);
+            if (res.data == null) {
+                throw new Error("No data returned from get blog");
             }
-        } catch (error) {
-            addToast({
-                type: "error",
-                description: "An error occurred while fetching applications",
-            });
-            console.log(error);
-            return null;
-        } finally {
-            setIsBlogPending(false);
-            hideBackdrop();
-        }
-    };
+            return res as TResponseData<API.TGetBlog>;
+        },
+        select: (data) => data.data,
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: true,
+    });
 
-    return { getBlogApi, isBlogPending };
-}
+    return { blog_detail, isPending, isError, error };
+};

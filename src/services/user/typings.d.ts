@@ -1,6 +1,6 @@
 declare namespace REQUEST {
     type TUploadUserImage = {
-        image: File;
+        images: File;
     };
 }
 

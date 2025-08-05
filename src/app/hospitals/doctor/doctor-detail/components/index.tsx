@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
-import { ArrowLeft, BadgeCheck, CircleUserRound } from "lucide-react";
+import { ArrowLeft, BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import {
     Dialog,
@@ -23,13 +23,15 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useGetDoctorDetail } from "../hooks/use-get-doctor";
+import { Toaster } from "sonner";
 
 const Header = () => {
     return (
         <div className="flex items-center justify-between bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
             <div>
                 <div className="flex items-center gap-5">
-                    <Link href={`/hospital/doctor`}>
+                    <Link href={`/hospitals/doctor`}>
                         <ArrowLeft color="#248fca" />
                     </Link>
 
@@ -48,8 +50,33 @@ const Header = () => {
 export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
     const [isOpenDialog, setIsDialogOpen] = useState(false);
 
+    const { doctor_detail, isPending, isError, error } = useGetDoctorDetail({
+        doctorId,
+    });
+
+    const introduction = doctor_detail?.introduction;
+
+    const getPositionName = (position: any) => {
+        switch (position) {
+            case 0:
+                return "Giám đốc";
+            case 1:
+                return "Phó giám đốc";
+            case 2:
+                return "Trưởng khoa";
+            case 3:
+                return "Phó trưởng khoa";
+            case 4:
+                return "Bác sĩ";
+            default:
+                return "Không xác định vị trí";
+        }
+    };
+
     return (
         <div>
+            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
+
             <header>
                 <Header />
             </header>
@@ -61,17 +88,20 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                             <div className="mx-[12%]">
                                 <div className="flex leading-5 gap-35">
                                     <Image
-                                        src="/images/home.jpg"
+                                        src={
+                                            doctor_detail?.avatar ||
+                                            "/images/default_img.jpg"
+                                        }
                                         alt="avatar"
                                         width={350}
                                         height={150}
-                                        className="rounded-2xl h-[350px] object-cover"
+                                        className="rounded-2xl h-[300px] object-cover"
                                     />
                                     <div>
                                         {/* Trình độ */}
                                         <h2 className="font-bold text-[1.5rem]">
-                                            Phó giáo sư, Tiến sĩ, Bác sĩ Trần
-                                            Quang Nam
+                                            Bác sĩ
+                                            <span> {doctor_detail?.name}</span>
                                         </h2>
                                         <div className="flex items-center mt-4 gap-3 relative">
                                             <div className="flex gap-2 items-center">
@@ -80,14 +110,18 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                                     color="#0066ff"
                                                 />
                                                 <p className="text-[#0066ff] text-[1.3rem] font-medium">
-                                                    Bác sĩ
+                                                    {getPositionName(
+                                                        doctor_detail?.position
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="w-[1px] h-5 bg-[gray] bottom-100 top-0"></div>
 
                                             <p className=" text-[1.3rem]">
                                                 <span className="font-bold">
-                                                    25
+                                                    {
+                                                        doctor_detail?.numberOfExperiences
+                                                    }
                                                 </span>{" "}
                                                 <span className="font-extralight">
                                                     năm kinh nghiệm
@@ -95,99 +129,52 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                             </p>
                                         </div>
                                         <div className="flex flex-col gap-2 mt-5">
-                                            <div className="flex gap-4 items-center">
+                                            <div className="flex items-center gap-10">
                                                 <span className="min-w-[100px] text-gray-500">
-                                                    Chuyên khoa
+                                                    Chức vụ:
                                                 </span>
-                                                <span className="text-blue-600 font-medium">
-                                                    Nội tiết
+                                                <span className="max-w-[100px]">
+                                                    {getPositionName(
+                                                        doctor_detail?.position
+                                                    )}
                                                 </span>
                                             </div>
-                                            <div className="flex gap-4 items-center">
+                                            <div className="flex items-center gap-10">
                                                 <span className="min-w-[100px] text-gray-500">
-                                                    Chức vụ
+                                                    Nơi làm việc:
                                                 </span>
-                                                <span>
-                                                    Trưởng khoa Nội Tiết bệnh
-                                                    viện Đại học Y Dược TP.HCM
+                                                <span className="max-w-[100px]">
+                                                    {
+                                                        doctor_detail?.hospital
+                                                            .name
+                                                    }
                                                 </span>
                                             </div>
-                                            <div className="flex gap-4 items-center">
+                                            <div className="flex items-center gap-8">
                                                 <span className="min-w-[100px] text-gray-500">
-                                                    Nơi công tác
+                                                    Số điện thoại:
                                                 </span>
-                                                <span>
-                                                    Bệnh viện Trường Đh Y Dược
+                                                <span className="max-w-[100px]">
+                                                    {doctor_detail?.phoneNumber}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                                 {/* Introduction */}
                                 <div>
-                                    <div className="flex gap-2 mt-10 item-center">
-                                        <CircleUserRound
-                                            width={30}
-                                            height={30}
-                                        />
-                                        <p className="text-[1.5rem] font-semibold">
+                                    <div className="mt-5">
+                                        <p className="text-[1.4rem] font-semibold text-[#248FCA]">
                                             Giới thiệu bác sĩ
                                         </p>
                                     </div>
-                                    <div className="mt-5">
-                                        <p className="font-semibold">
-                                            Phó giáo sư, Tiến sĩ, Bác sĩ{" "}
-                                            <span className="font-bold">
-                                                Trần Quang Nam
-                                            </span>{" "}
-                                            hiện đang là Trưởng khoa Nội Tiết
-                                            bệnh viện Đại học Y Dược TP.HCM, Phó
-                                            Trưởng Bộ môn Nội tiết tại Đại học Y
-                                            Dược TP.HCM. Bác sĩ có nhiều năm
-                                            kinh nghiệm trong việc chuyên khám
-                                            và điều trị các bệnh như đái tháo
-                                            đường, bệnh bướu cổ, bệnh nội tiết
-                                            và các bệnh nội khoa.
-                                        </p>
-
-                                        <p className="mt-4">
-                                            Trước khi đến thăm khám, Bác sĩ Trần
-                                            Quang Nam khuyến khích bệnh nhân đặt
-                                            lịch sớm qua
-                                            <a
-                                                href="#"
-                                                className="text-blue-600 underline"
-                                            >
-                                                ứng dụng YouMed
-                                            </a>{" "}
-                                            để chọn khung giờ khám phù hợp,
-                                            tránh tình trạng hết lịch và giúp
-                                            phòng khám phục vụ tốt hơn.
-                                            <a
-                                                href="#"
-                                                className="text-blue-600 underline font-medium"
-                                            >
-                                                Tải ứng dụng YouMed tại đây
-                                            </a>{" "}
-                                            để đặt khám và nhận nhiều tiện ích:
-                                        </p>
-
-                                        <ul className="list-disc pl-6 mt-4 space-y-1">
-                                            <li>
-                                                Đăng ký ngày, giờ khám và lấy số
-                                                thứ tự sớm.
-                                            </li>
-                                            <li>Nhận và lưu trữ hồ sơ y tế.</li>
-                                            <li>
-                                                Nhắc lịch khám và lịch tái khám.
-                                            </li>
-                                            <li>
-                                                Nhắn tin và gọi video với bác
-                                                sĩ.
-                                            </li>
-                                            <li>Đọc tin y tế chính thống.</li>
-                                        </ul>
-                                    </div>
+                                    <div
+                                        className="prose prose-sm max-w-none mt-5"
+                                        dangerouslySetInnerHTML={{
+                                            __html: introduction || "",
+                                        }}
+                                    />
                                 </div>
                                 {/* Introduction */}
                                 <div className="mt-10 flex justify-end gap-4">

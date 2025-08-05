@@ -3,14 +3,7 @@
 import React from "react";
 import EditDoctor from "@/components/editor/editor";
 import { motion } from "framer-motion";
-import {
-    AlertCircle,
-    ImageIcon,
-    Upload,
-    Smartphone,
-    BadgeCheck,
-    CircleUserRound,
-} from "lucide-react";
+import { AlertCircle, ImageIcon, Upload } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -54,37 +47,40 @@ import useCreateDoctor, {
     DoctorFormData,
 } from "@/app/hospitals/doctor/create-doctor/hooks/use-create-doctor";
 import { useRouter } from "next/navigation";
+import PhonePreview from "./phone-preview";
 
 export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const { form, onSubmit } = useCreateDoctor();
     const [open, setOpen] = React.useState(false);
     const [date, setDate] = React.useState<Date | undefined>(undefined);
-    const [avatarPreview, setAvatarPreview] = useState<string>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadUserImage();
     const [currentContentHtml, setCurrentContentHtml] = useState("");
     const router = useRouter();
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
+        null
+    );
 
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
         const file = e.target.files?.[0];
         if (file) {
-            const data = { image: file };
+            // Convert image to base64 for preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setThumbnailPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
 
-            onSubmitImage(
-                data,
-                handleClearImages,
-                (imageId, publicId, publicUrl) => {
-                    form.setValue("avatarId", imageId);
-                    setAvatarPreview(publicUrl);
-                }
-            );
+            // Upload image
+            const data = { images: file };
+            onSubmitImage(data, (imageId) => {
+                form.setValue("avatarId", imageId as string);
+            });
         }
     };
-
-    const handleClearImages = () => {};
 
     const updateContentHtml = useCallback(
         (editorContent: string) => {
@@ -108,22 +104,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const middleName = form.watch("middleName");
     const lastName = form.watch("lastName");
     const exp = form.watch("numberOfExperiences");
-    const getPosition = (position: number) => {
-        switch (position) {
-            case 0:
-                return "Giám đốc";
-            case 1:
-                return "Phó Giám đốc";
-            case 2:
-                return "Trưởng khoa";
-            case 3:
-                return "Phó trưởng khoa";
-            case 4:
-                return "Bác sĩ";
-            default:
-                return "Chức vụ không xác định";
-        }
-    };
+    const position = form.watch("position");
 
     const handleFormSubmit = async (data: DoctorFormData) => {
         if (!onSubmit || typeof onSubmit !== "function") {
@@ -146,13 +127,12 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                         ? data.numberOfExperiences
                         : 0,
                 position: data.position,
-                introduction: "Địt mẹ m",
+                introduction: data.introduction,
             };
             onSubmit(formData, () => {
-                handleClearImages();
                 form.reset();
                 setTimeout(() => {
-                    router.push("/hospital/doctor");
+                    router.push("/hospitals/doctor");
                 }, 2000);
             });
         } catch (error) {
@@ -199,15 +179,21 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                             </label>
                                         </Button>
                                     </div>
-                                    {avatarPreview && (
+                                    {thumbnailPreview && (
                                         <motion.div
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
+                                            initial={{
+                                                opacity: 0,
+                                                scale: 0.8,
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                scale: 1,
+                                            }}
                                             className="w-20 h-20 rounded-xl border-4 border-[#248fca]/20 overflow-hidden shadow-lg"
                                         >
                                             <Image
                                                 src={
-                                                    avatarPreview ||
+                                                    thumbnailPreview ||
                                                     "/placeholder.svg"
                                                 }
                                                 width={20}
@@ -229,7 +215,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                 <div className="flex-1 flex gap-2">
                                     <FormField
                                         control={form.control}
-                                        name="firstName"
+                                        name="lastName"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
@@ -279,7 +265,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="lastName"
+                                        name="firstName"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
@@ -349,15 +335,16 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     <FormControl>
                                                         <Input
                                                             {...field}
-                                                            type="number"
+                                                            value={
+                                                                field.value ??
+                                                                ""
+                                                            }
                                                             placeholder="Nhập số năm kinh nghiệm của bác sĩ"
                                                             className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
                                                             onChange={(e) =>
                                                                 field.onChange(
-                                                                    Number(
-                                                                        e.target
-                                                                            .value
-                                                                    )
+                                                                    e.target
+                                                                        .value
                                                                 )
                                                             }
                                                         />
@@ -461,8 +448,8 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                             value
                                                                         )
                                                                     )
-                                                                } // Convert string to number
-                                                                value={field.value?.toString()} // Ensure value is string for Select
+                                                                }
+                                                                value={field.value?.toString()}
                                                             >
                                                                 <SelectTrigger className="w-[250px] min-h-[50px]">
                                                                     <SelectValue placeholder="Chọn giới tính" />
@@ -551,15 +538,23 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                                             if (
                                                                                 selectedDate
                                                                             ) {
+                                                                                const offsetDate =
+                                                                                    new Date(
+                                                                                        selectedDate.getTime() +
+                                                                                            7 *
+                                                                                                60 *
+                                                                                                60 *
+                                                                                                1000
+                                                                                    );
                                                                                 const isoDate =
-                                                                                    selectedDate.toISOString();
+                                                                                    offsetDate.toISOString();
                                                                                 field.onChange(
                                                                                     isoDate
-                                                                                ); // Update form value
+                                                                                );
                                                                             } else {
                                                                                 field.onChange(
                                                                                     null
-                                                                                ); // Handle undefined case
+                                                                                );
                                                                             }
                                                                             setOpen(
                                                                                 false
@@ -609,126 +604,26 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                     />
                                 </div>
 
-                                <div className="flex-1 relative flex justify-center">
-                                    <div className="">
-                                        <div className="flex justify-center font-semibold text-lg items-center gap-2">
-                                            <Smartphone className="h-5 w-5 text-[#248fca]" />
-                                            Xem trước trên mobile
-                                        </div>
-                                        <div className="relative inline-block mt-10">
-                                            <Image
-                                                src="/images/phone.png"
-                                                alt="phone frame"
-                                                width={385}
-                                                height={667}
-                                                className="mx-auto"
-                                            />
-                                            <div
-                                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-white rounded-lg overflow-auto wrap-break-word"
-                                                style={{
-                                                    width: "340px",
-                                                    height: "600px",
-                                                }}
-                                            >
-                                                <div>
-                                                    <div>
-                                                        <div className="flex gap-5 leading-5">
-                                                            <Image
-                                                                src={
-                                                                    avatarPreview ||
-                                                                    "/images/default_user.png"
-                                                                }
-                                                                alt="avatar"
-                                                                width={100}
-                                                                height={100}
-                                                                className="rounded-full"
-                                                            />
-                                                            <div className="mt-3">
-                                                                <div className="font-medium text-[1.2rem] flex gap-1">
-                                                                    <span>
-                                                                        {firstName ||
-                                                                            "Họ"}
-                                                                    </span>
-                                                                    <span>
-                                                                        {middleName ||
-                                                                            "Tên Đệm"}
-                                                                    </span>
-                                                                    <span>
-                                                                        {lastName ||
-                                                                            "Tên"}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex gap-1 items-center">
-                                                                    <BadgeCheck
-                                                                        width={
-                                                                            15
-                                                                        }
-                                                                        color="#0066ff"
-                                                                    />
-                                                                    <p className="text-[#0066ff] text-[0.9rem]">
-                                                                        {getPosition(
-                                                                            form.watch(
-                                                                                "position"
-                                                                            )
-                                                                        )}
-                                                                    </p>
-                                                                </div>
-                                                                <p className=" text-[0.9rem]">
-                                                                    <span className="font-medium">
-                                                                        {exp}
-                                                                    </span>{" "}
-                                                                    năm kinh
-                                                                    nghiệm
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-thin mt-1 text-[0.9rem]">
-                                                            Chuyên khoa:{" "}
-                                                            <span className="px-3 py-1 bg-gray-200 rounded-full text-[1rem]">
-                                                                Tiêu hóa
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex gap-2 mt-10">
-                                                        <CircleUserRound />
-                                                        <p>Giới thiệu bác sĩ</p>
-                                                    </div>
-                                                    <div
-                                                        className="prose prose-sm max-w-none mt-5"
-                                                        dangerouslySetInnerHTML={{
-                                                            __html:
-                                                                currentContentHtml ||
-                                                                "",
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <PhonePreview
+                                    thumbnailPreview={thumbnailPreview}
+                                    firstName={firstName}
+                                    middleName={middleName}
+                                    lastName={lastName}
+                                    position={position}
+                                    exp={exp}
+                                    currentContentHtml={currentContentHtml}
+                                />
                             </div>
                             <Button
                                 type="submit"
-                                disabled={isSubmitting || !avatarPreview}
+                                disabled={
+                                    isSubmitting ||
+                                    !thumbnailPreview ||
+                                    isUploading
+                                }
                                 className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                             >
-                                {isSubmitting ? (
-                                    <div className="flex items-center gap-2 ">
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{
-                                                duration: 1,
-                                                repeat: Infinity,
-                                                ease: "linear",
-                                            }}
-                                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full "
-                                        />
-                                        Đang tải lên...
-                                    </div>
-                                ) : (
-                                    "Tạo bác sĩ"
-                                )}
+                                Tạo bác sĩ
                             </Button>
                         </div>
                     </div>

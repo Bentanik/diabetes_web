@@ -4,14 +4,9 @@ import { Controller, Control, useFormContext } from "react-hook-form";
 import { ListTree } from "lucide-react";
 import { FormLabel } from "@/components/ui/form";
 
-type Category = {
-    id: string;
-    name: string;
-};
-
 type MultiSelectCategoriesProps = {
     control: Control<any>;
-    data: Category[];
+    data: API.TGetCategories | undefined | null;
     isPending: boolean;
     name?: string;
 };
@@ -25,7 +20,8 @@ export default function MultiSelectCategories({
     const {
         formState: { errors },
     } = useFormContext();
-    const options = data.map((category) => ({
+
+    const options = data?.map((category) => ({
         value: category.id,
         label: category.name,
     }));
@@ -43,7 +39,7 @@ export default function MultiSelectCategories({
                     <Select
                         isMulti
                         options={options}
-                        value={options.filter((option) =>
+                        value={options?.filter((option) =>
                             field.value?.includes(option.value)
                         )}
                         onChange={(selectedOptions) =>

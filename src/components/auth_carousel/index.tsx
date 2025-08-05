@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useState, useEffect, useMemo } from "react";
 import { MoveLeftIcon, MoveRightIcon } from "lucide-react";
 import { auth_slides } from "@/constants/auth";
@@ -18,7 +18,9 @@ export default function AuthCarousel() {
     }, [isPaused]);
 
     const prevSlide = () => {
-        setIndex((prev) => (prev - 1 + auth_slides.length) % auth_slides.length);
+        setIndex(
+            (prev) => (prev - 1 + auth_slides.length) % auth_slides.length
+        );
     };
 
     const nextSlide = () => {
@@ -28,15 +30,15 @@ export default function AuthCarousel() {
     const slides = useMemo(() => auth_slides, []);
 
     return (
-        <div 
+        <div
             className="relative w-full h-full font-be-vietnam-pro overflow-hidden will-change-transform"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
             <div className="relative w-full h-full">
                 {slides.map((slide, i) => (
-                    <motion.div 
-                        key={i} 
+                    <motion.div
+                        key={i}
                         className="absolute inset-0 w-full h-full"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: index === i ? 1 : 0 }}
@@ -50,13 +52,22 @@ export default function AuthCarousel() {
                             fill={true}
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/70"></div>
-                        <motion.div 
+                        <motion.div
                             className="absolute bottom-20 left-10 text-white px-6 py-4 max-w-lg"
                             initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: index === i ? 1 : 0, y: index === i ? 0 : 10 }}
-                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+                            animate={{
+                                opacity: index === i ? 1 : 0,
+                                y: index === i ? 0 : 10,
+                            }}
+                            transition={{
+                                duration: 0.6,
+                                ease: "easeOut",
+                                delay: 0.2,
+                            }}
                         >
-                            <p className="text-2xl font-semibold leading-[1.8]">{slide.text}</p>
+                            <p className="text-2xl font-semibold leading-[1.8]">
+                                {slide.text}
+                            </p>
                         </motion.div>
                     </motion.div>
                 ))}

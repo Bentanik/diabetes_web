@@ -1,33 +1,50 @@
-import React from "react";
+"use client";
+
+import React, { useCallback } from "react";
 import Select, { SingleValue } from "react-select";
 import { Stethoscope } from "lucide-react";
-import { Controller, Control, useFormContext } from "react-hook-form";
+import { Control, Controller, useFormContext } from "react-hook-form";
 import { FormLabel } from "@/components/ui/form";
-
-type Doctor = {
-    Id: string;
-    value: string;
-    label: string;
-};
+import { useGetDoctors } from "../hooks/use-get-doctors";
 
 type DoctorSelectProps = {
     control: Control<any>;
-    doctors: Doctor[];
     name?: string;
 };
 
 export default function DoctorSelect({
     control,
-    doctors,
     name = "doctorId",
 }: DoctorSelectProps) {
+    const pageSize = 5;
+
     const {
         formState: { errors },
     } = useFormContext();
-    const options = doctors.map((doctor) => ({
-        value: doctor.Id,
-        label: doctor.label,
+
+    const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+        useGetDoctors({
+            search: null,
+            gender: null,
+            pageSize,
+            position: null,
+            sortBy: "name",
+            sortDirection: 1,
+        });
+
+    const doctors =
+        data?.pages?.flatMap((page) => page.data?.items ?? []) ?? [];
+
+    const options = doctors.map((doctor: API.Doctors) => ({
+        value: doctor.id,
+        label: doctor.name,
     }));
+
+    const handleMenuScrollToBottom = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     return (
         <div>
@@ -43,7 +60,7 @@ export default function DoctorSelect({
                         options={options}
                         value={
                             options.find(
-                                (option) => option.value === field.value
+                                (opt: any) => opt.value === field.value
                             ) || null
                         }
                         onChange={(
@@ -53,11 +70,17 @@ export default function DoctorSelect({
                             }>
                         ) => {
                             field.onChange(
-                                selectedOption ? selectedOption.value : ""
+                                selectedOption ? selectedOption.value : "",
+                                console.log(
+                                    "slect doctor option nè" +
+                                        selectedOption?.value
+                                )
                             );
                         }}
                         placeholder="Lựa chọn bác sĩ"
+                        onMenuScrollToBottom={handleMenuScrollToBottom}
                         isSearchable
+                        isLoading={isLoading || isFetchingNextPage}
                         className="w-[250px] mt-4"
                         classNamePrefix="react-select"
                         styles={{
@@ -71,6 +94,11 @@ export default function DoctorSelect({
                                         ? "red"
                                         : base.borderColor,
                                 },
+                            }),
+                            menuList: (base) => ({
+                                ...base,
+                                maxHeight: 150,
+                                overflowY: "auto",
                             }),
                         }}
                     />

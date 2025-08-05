@@ -11,7 +11,7 @@ export default function useUploadImageService() {
     >({
         mutationFn: async (data: REQUEST.TUploadUserImage) => {
             const formData = new FormData();
-            formData.append("Image", data.image);
+            formData.append("Image", data.images);
             return await uploadImageUserAsync(formData);
         },
         onSuccess: () => {

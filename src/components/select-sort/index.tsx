@@ -21,9 +21,10 @@ export default function BlogSortDropdown({
     const handleChange = (
         newValue: SingleValue<{ value: string; label: string }>
     ) => {
-        const statusValue = newValue?.value || "id";
-        setSelectedOption(newValue?.label || "Mặc định");
-        const sortBy = statusValue === "id" ? "id" : statusValue;
+        const statusValue = newValue?.value || "createdDate";
+        setSelectedOption(newValue?.label || "Ngày tạo");
+        const sortBy =
+            statusValue === "createdDate" ? "createdDate" : statusValue;
         onSortChange(sortBy);
     };
 
@@ -33,11 +34,11 @@ export default function BlogSortDropdown({
                 options={options}
                 value={
                     options.find((option) => option.label === selectedOption) ||
-                    options[0]
+                    options[1]
                 }
                 onChange={handleChange}
                 placeholder="Chọn trạng thái"
-                className="w-[250px]"
+                className="w-[210px]"
                 classNamePrefix="react-select"
             />
         </div>

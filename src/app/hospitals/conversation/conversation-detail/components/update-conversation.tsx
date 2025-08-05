@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import {
     Dialog,
@@ -29,6 +29,7 @@ import useUploadConversationImage from "@/app/hospitals/conversation/hooks/use-u
 import useUpdateConversation, {
     ConversationFormData,
 } from "../hooks/use-update-conversation";
+import { useGetConversation } from "../hooks/use_get_conversation_detail";
 
 type UpdateProp = {
     conversationId: string;
@@ -37,13 +38,30 @@ type UpdateProp = {
 export default function UpdateConversationDialog({
     conversationId,
 }: UpdateProp) {
+    const { conversation, isPending: conversationPending } = useGetConversation(
+        { conversationId }
+    );
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const { isPending, onSubmit: onSubmitImage } = useUploadConversationImage();
     const { form, onSubmit } = useUpdateConversation({ conversationId });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
+    const [thumbnailPreview, setThumbnailPreview] = useState<
+        string | undefined
+    >();
+
+    useEffect(() => {
+        if (conversation) {
+            setThumbnailPreview(conversation.avatar);
+            form.setValue("name", conversation.name || "");
+        }
+    }, [conversation, form]);
+
     const handleCancel = () => {
-        console.log("");
+        // Reset về giá trị ban đầu khi cancel
+        if (conversation) {
+            setThumbnailPreview(conversation.avatar);
+            form.setValue("name", conversation.name || "");
+        }
     };
 
     const handleFormSubmit = async (data: ConversationFormData) => {
@@ -55,7 +73,7 @@ export default function UpdateConversationDialog({
         setIsSubmitting(true);
         try {
             const formData: REQUEST.TUpdateConversation = {
-                name: data.name || null,
+                name: data.name == conversation?.name ? null : data.name,
                 avatarId: data.avatarId || null,
             };
             await onSubmit(formData, () => setIsDialogOpen(false));
@@ -174,7 +192,7 @@ export default function UpdateConversationDialog({
                                                         width={20}
                                                         height={20}
                                                         alt="Logo preview"
-                                                        className="w-full h-full"
+                                                        className="w-full h-full object-cover"
                                                     />
                                                 </motion.div>
                                             )}
@@ -199,9 +217,6 @@ export default function UpdateConversationDialog({
                                                         {...field}
                                                         placeholder="Nhập tên nhóm"
                                                         className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
-                                                        onChange={
-                                                            field.onChange
-                                                        }
                                                     />
                                                 </FormControl>
                                                 <FormMessage className="flex items-center gap-1">
@@ -215,10 +230,12 @@ export default function UpdateConversationDialog({
                                 <DialogFooter>
                                     <Button
                                         type="submit"
-                                        disabled={isPending}
+                                        disabled={isPending || isSubmitting}
                                         className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                                     >
-                                        Cập nhật nhóm chat
+                                        {isSubmitting
+                                            ? "Đang cập nhật..."
+                                            : "Cập nhật nhóm chat"}
                                     </Button>
                                 </DialogFooter>
                             </form>

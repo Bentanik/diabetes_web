@@ -96,6 +96,18 @@ declare namespace API {
         phoneNumber: string;
         role: UserRole;
         invitedBy: string;
+        status: number;
+    };
+
+    type TGetConversation = {
+        id: string;
+        name: string;
+        avatar: string;
+        conversationType: number;
+        memberCount: number;
+        status: number;
+        canView: boolean;
+        modifiedDate: string;
     };
 
     type TGetConversationDetail = {

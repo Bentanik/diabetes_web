@@ -227,3 +227,15 @@ export const getConversationDetail = async (
     );
     return response.data;
 };
+
+export const getConversation = async ({
+    conversationId,
+}: REQUEST.ConversationId) => {
+    const response = await request<TResponseData<API.TGetConversation>>(
+        API_ENDPOINTS.GET_CONVERSATION_DETAIL(conversationId),
+        {
+            method: "GET",
+        }
+    );
+    return response.data;
+};

@@ -1,7 +1,7 @@
 import React from "react";
 import CreateHospitalComponent from "./components";
 
-export default function CreateDoctor() {
+export default function CreateHospital() {
     return (
         <div>
             <CreateHospitalComponent />
