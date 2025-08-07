@@ -15,7 +15,7 @@ export default function Header() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Quản lí bác sĩ
+                        Quản lí nhân viên bệnh viện
                     </h1>
                     <p className="text-gray-600 mt-1 text-sm">
                         Hiện có 6 kết quả đang hiển thị

@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-    PhoneIcon,
-    UsersIcon,
-    VenusAndMars,
-    Briefcase,
-    FileBadge,
-} from "lucide-react";
+import { UsersIcon, VenusAndMars, Mail, ClockPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,14 +11,15 @@ import PaginatedComponent from "@/components/paginated";
 import { Toaster } from "sonner";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import Header from "./header";
-import DoctorFilters from "./hospital-staff-filter";
+import HospitalStaffFilters from "./hospital-staff-filter";
 
 export default function HospitalStaffComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectSortBy, setSelectSortBy] = useState<string>("createdDate");
-    const [selectGender, setSelectGender] = useState<number | null>(null);
     const [isSortAsc, setIsSortAsc] = useState(false);
+    const [selectedHospital, setSelectedHospital] = useState<string>("");
+    const [selectGender, setSelectGender] = useState<number | null>(null);
 
     const pageSize = 6;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -32,7 +27,7 @@ export default function HospitalStaffComponent() {
     const { hospital_staffs, isPending, isError, error } = useGetHospitalStaffs(
         {
             search: debouncedSearchTerm,
-            hospitalId: "",
+            hospitalId: selectedHospital,
             gender: selectGender,
             pageSize: pageSize,
             pageIndex: currentPage,
@@ -40,6 +35,14 @@ export default function HospitalStaffComponent() {
             sortDirection: isSortAsc ? 0 : 1,
         }
     );
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
 
     const getGender = (gender: number) => {
         switch (gender) {
@@ -72,13 +75,15 @@ export default function HospitalStaffComponent() {
                 transition={{ delay: 0.3 }}
                 className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 mb-6"
             >
-                <DoctorFilters
+                <HospitalStaffFilters
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     selectSortBy={selectSortBy}
                     setSelectSortBy={setSelectSortBy}
                     selectGender={selectGender}
                     setSelectGender={setSelectGender}
+                    setSelectHospital={setSelectedHospital}
+                    selectHospital={selectedHospital}
                     isSortAsc={isSortAsc}
                     setIsSortAsc={setIsSortAsc}
                 />
@@ -108,6 +113,9 @@ export default function HospitalStaffComponent() {
                                         height={50}
                                         className="rounded-full object-cover w-12 h-12"
                                     />
+                                    <h3 className="font-semibold text-gray-800 text-[1.5rem]">
+                                        {doctor.name}
+                                    </h3>
                                 </div>
                             </div>
 
@@ -116,20 +124,22 @@ export default function HospitalStaffComponent() {
                                 {/* Phone number */}
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
-                                        <PhoneIcon className="w-4 h-4" />
-                                        <span>Số điện thoại:</span>
+                                        <Mail className="w-4 h-4" />
+                                        <span>Email:</span>
                                     </div>
-                                    <span>{doctor.email}</span>
+                                    <span className="truncate max-w-[200px] text-[#248FCA]">
+                                        {doctor.email}
+                                    </span>
                                 </div>
-                                {/* Position */}
+                                {/* Create Date */}
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
-                                        <FileBadge className="w-4 h-4" />
-                                        <span>Số năm kinh nghiệm: </span>
+                                        <ClockPlus className="w-4 h-4" />
+                                        <span>Ngày tạo: </span>
                                     </div>
-                                    <span className="font-bold text-[#248FCA]">
+                                    <span className="">
                                         {" "}
-                                        {doctor.createdDate}
+                                        {formatDate(doctor.createdDate)}
                                     </span>
                                 </div>
 

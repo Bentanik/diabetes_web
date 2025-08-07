@@ -5,14 +5,17 @@ import { SearchIcon, ArrowUpDown, FunnelX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@radix-ui/react-toggle";
 import { Button } from "@/components/ui/button";
+import HospitalsSelectFilter from "@/components/select-hospital";
 
 interface HospitalStaffFiltersProps {
     searchTerm: string;
     setSearchTerm: (value: string) => void;
     selectSortBy: string;
     setSelectSortBy: (value: string) => void;
+    selectHospital: string;
     selectGender: number | null;
     setSelectGender: (value: number | null) => void;
+    setSelectHospital: (value: string) => void;
     isSortAsc: boolean;
     setIsSortAsc: (value: boolean) => void;
 }
@@ -31,14 +34,6 @@ const listGender = [
     { name: "Nữ", value: 1 },
 ];
 
-const listPosition = [
-    { name: "Giám đốc", value: 0 },
-    { name: "Phó giám đốc", value: 1 },
-    { name: "Trưởng khoa", value: 2 },
-    { name: "Phó trưởng khoa", value: 3 },
-    { name: "Bác sĩ", value: 4 },
-];
-
 export default function HospitalStaffFilters({
     searchTerm,
     setSearchTerm,
@@ -46,13 +41,15 @@ export default function HospitalStaffFilters({
     setSelectSortBy,
     selectGender,
     setSelectGender,
+    selectHospital,
+    setSelectHospital,
     isSortAsc,
     setIsSortAsc,
 }: HospitalStaffFiltersProps) {
     const handleClearFilter = () => {
         setSearchTerm("");
         setSelectSortBy("createdDate");
-        setSelectGender(null);
+        setSelectHospital("");
     };
     return (
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
@@ -60,7 +57,7 @@ export default function HospitalStaffFilters({
                 <div className="relative flex-1">
                     <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <Input
-                        placeholder="Tìm kiếm theo tên, email, khoa..."
+                        placeholder="Tìm kiếm theo tên nhân viên..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
@@ -97,6 +94,12 @@ export default function HospitalStaffFilters({
                         </option>
                     ))}
                 </select>
+
+                {/* Select Hospital */}
+                <HospitalsSelectFilter
+                    onHospitalChange={setSelectHospital}
+                    selectHospital={selectHospital}
+                />
 
                 <Toggle
                     pressed={isSortAsc}

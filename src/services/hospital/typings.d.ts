@@ -7,6 +7,15 @@ declare namespace REQUEST {
         hospitalId: string;
     };
 
+    type GetHospitalsCursorParams = {
+        search?: string | null;
+        cursor?: string | "";
+        pageSize?: number;
+        pageIndex?: number;
+        sortBy: string;
+        sortDirection: number;
+    };
+
     type TCreateDoctor = {
         phoneNumber: string;
         firstName: string;
@@ -87,6 +96,24 @@ declare namespace API {
         thumbnail: string;
         images: string[];
         createdDate: string;
+    };
+
+    type HospitalCursor = {
+        id: string;
+        name: string;
+        email: string;
+        phoneNumber: string;
+        website: string;
+        address: string;
+        thumbnail: string;
+        createdDate: string;
+    };
+
+    type TGetHospitalsCursor = {
+        items: Doctors[];
+        pageSize: number;
+        nextCursor: string;
+        hasNextPage: boolean;
     };
 
     type Hospitals = {
