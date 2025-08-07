@@ -1,22 +1,28 @@
-import { getDoctors } from "@/services/hospital/api-services";
+import { getHospitalStaffs } from "@/services/hospital-staff/api-services";
 import { useQuery } from "@tanstack/react-query";
 
-export const GET_DOCTORS_QUERY_KEY = "doctors";
+export const GET_HOSPITAL_STAFFS_QUERY_KEY = "hospital_staffs";
 
-export const useGetDoctors = (params: REQUEST.GetDoctorsParams) => {
+export const useGetHospitalStaffs = (
+    params: REQUEST.GetHospitalStaffsParams
+) => {
     const {
-        data: doctors,
+        data: hospital_staffs,
         isPending,
         isError,
         error,
-    } = useQuery<TResponseData<API.TGetDoctors>, TMeta, API.TGetDoctors>({
-        queryKey: [GET_DOCTORS_QUERY_KEY, params],
+    } = useQuery<
+        TResponseData<API.TGetHospitalStaffs>,
+        TMeta,
+        API.TGetHospitalStaffs
+    >({
+        queryKey: [GET_HOSPITAL_STAFFS_QUERY_KEY, params],
         queryFn: async () => {
-            const res = await getDoctors(params);
+            const res = await getHospitalStaffs(params);
             if (res.data == null) {
                 throw new Error("No data returned from get doctors");
             }
-            return res as TResponseData<API.TGetDoctors>;
+            return res as TResponseData<API.TGetHospitalStaffs>;
         },
 
         select: (data) =>
@@ -33,5 +39,5 @@ export const useGetDoctors = (params: REQUEST.GetDoctorsParams) => {
         refetchOnWindowFocus: true,
     });
 
-    return { doctors, isPending, isError, error };
+    return { hospital_staffs, isPending, isError, error };
 };

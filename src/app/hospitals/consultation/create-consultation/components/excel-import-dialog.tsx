@@ -149,16 +149,48 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                 "giờ kết thúc",
                 "gio ket thuc",
             ]);
+            const date = findColumnValue(row, [
+                "date",
+                "ngày",
+                "ngay",
+                "datetime",
+                "consultation date",
+                "ngay tu van",
+            ]);
 
             // Validate required fields
-            if (!startTime || !endTime) {
+            if (!startTime || !endTime || !date) {
                 errors.push(
-                    `Dòng ${rowNumber}: Thiếu thông tin bắt buộc (start time, end time)`
+                    `Dòng ${rowNumber}: Thiếu thông tin bắt buộc (start time, end time, date)`
                 );
                 return;
             }
 
             try {
+                // Parse and validate date
+                let parsedDate;
+                if (typeof date === "number") {
+                    // Excel date serial number
+                    const dateInfo = XLSX.SSF.parse_date_code(date);
+                    parsedDate = new Date(
+                        dateInfo.y,
+                        dateInfo.m - 1,
+                        dateInfo.d
+                    );
+                } else if (typeof date === "string") {
+                    // Try different date formats
+                    parsedDate = parseDate(date);
+                } else {
+                    parsedDate = new Date(date);
+                }
+
+                if (isNaN(parsedDate.getTime())) {
+                    errors.push(
+                        `Dòng ${rowNumber}: Định dạng ngày không hợp lệ`
+                    );
+                    return;
+                }
+
                 // Parse time (assuming format HH:MM or decimal hours)
                 const parsedStartTime = parseTime(startTime);
                 const parsedEndTime = parseTime(endTime);
@@ -178,9 +210,20 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                     return;
                 }
 
+                // Check if date is not in the past (optional validation)
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (parsedDate < today) {
+                    console.warn(
+                        `Dòng ${rowNumber}: Ngày ${parsedDate.toLocaleDateString()} đã qua`
+                    );
+                }
+
                 validData.push({
                     startTime: parsedStartTime,
                     endTime: parsedEndTime,
+                    date: parsedDate.toISOString().split("T")[0], // YYYY-MM-DD format
+                    dateDisplay: parsedDate.toLocaleDateString("vi-VN"), // DD/MM/YYYY for display
                     duration: calculateDuration(parsedStartTime, parsedEndTime),
                     originalRow: rowNumber,
                 });
@@ -198,6 +241,51 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
         }
 
         return validData;
+    };
+
+    // Parse date from various formats
+    const parseDate = (dateValue: string) => {
+        // Try different date formats
+        const formats = [
+            // DD/MM/YYYY
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/,
+            // MM/DD/YYYY
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/,
+            // YYYY-MM-DD
+            /^(\d{4})-(\d{1,2})-(\d{1,2})$/,
+            // DD-MM-YYYY
+            /^(\d{1,2})-(\d{1,2})-(\d{4})$/,
+        ];
+
+        // Try DD/MM/YYYY format first (Vietnamese format)
+        const ddmmyyyy = dateValue.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (ddmmyyyy) {
+            const day = parseInt(ddmmyyyy[1]);
+            const month = parseInt(ddmmyyyy[2]);
+            const year = parseInt(ddmmyyyy[3]);
+            return new Date(year, month - 1, day);
+        }
+
+        // Try YYYY-MM-DD format
+        const yyyymmdd = dateValue.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (yyyymmdd) {
+            const year = parseInt(yyyymmdd[1]);
+            const month = parseInt(yyyymmdd[2]);
+            const day = parseInt(yyyymmdd[3]);
+            return new Date(year, month - 1, day);
+        }
+
+        // Try DD-MM-YYYY format
+        const ddmmyyyy2 = dateValue.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+        if (ddmmyyyy2) {
+            const day = parseInt(ddmmyyyy2[1]);
+            const month = parseInt(ddmmyyyy2[2]);
+            const year = parseInt(ddmmyyyy2[3]);
+            return new Date(year, month - 1, day);
+        }
+
+        // Fallback to native Date parsing
+        return new Date(dateValue);
     };
 
     // Helper function to find column value with different possible names
@@ -268,6 +356,8 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                 doctorId: doctorId,
                 startTime: item.startTime,
                 endTime: item.endTime,
+                date: item.date, // Include date in the consultation data
+                consultationDate: item.date, // Alternative field name if needed
             }));
 
             // Call the parent component's import handler
@@ -317,12 +407,13 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                     Import Excel
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Import khung giờ tư vấn từ Excel</DialogTitle>
                     <DialogDescription>
-                        Tải lên file Excel chứa thông tin khung giờ tư vấn để
-                        import vào hệ thống
+                        Tải lên file Excel chứa thông tin khung giờ tư vấn (bao
+                        gồm ngày, giờ bắt đầu, giờ kết thúc) để import vào hệ
+                        thống
                     </DialogDescription>
                 </DialogHeader>
 
@@ -393,6 +484,9 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                                             <TableRow>
                                                 <TableHead>STT</TableHead>
                                                 <TableHead>
+                                                    Ngày tư vấn
+                                                </TableHead>
+                                                <TableHead>
                                                     Giờ bắt đầu
                                                 </TableHead>
                                                 <TableHead>
@@ -413,6 +507,16 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                                                     >
                                                         <TableCell>
                                                             {index + 1}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="bg-blue-50 text-blue-700 border-blue-200"
+                                                            >
+                                                                {
+                                                                    item.dateDisplay
+                                                                }
+                                                            </Badge>
                                                         </TableCell>
                                                         <TableCell>
                                                             {item.startTime}
@@ -469,6 +573,10 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                         </h4>
                         <ul className="text-sm text-blue-700 space-y-1">
                             <li>
+                                • <strong>Cột Date/Ngày:</strong> Ngày tư vấn
+                                (định dạng: DD/MM/YYYY hoặc YYYY-MM-DD)
+                            </li>
+                            <li>
                                 • <strong>Cột Start Time:</strong> Giờ bắt đầu
                                 (định dạng: HH:MM)
                             </li>
@@ -480,6 +588,10 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                                 • Tên cột có thể là tiếng Việt hoặc tiếng Anh
                             </li>
                             <li>• File không được quá 10MB</li>
+                            <li>
+                                • Hỗ trợ nhiều định dạng ngày: DD/MM/YYYY,
+                                YYYY-MM-DD, DD-MM-YYYY
+                            </li>
                         </ul>
                     </div>
                 </div>

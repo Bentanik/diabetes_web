@@ -25,9 +25,7 @@ interface FormData {
     end: string;
 }
 
-const CreateConsultationDialog: React.FC<CreateConsultationDialogProps> = ({
-    onSubmit,
-}) => {
+export default function CreateConsultationDialog() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const form = useForm<FormData>({
         defaultValues: {
@@ -72,7 +70,7 @@ const CreateConsultationDialog: React.FC<CreateConsultationDialogProps> = ({
                 },
             ],
         };
-        onSubmit(formData);
+        // onSubmit(formData);
         setIsDialogOpen(false);
     };
 
@@ -183,6 +181,4 @@ const CreateConsultationDialog: React.FC<CreateConsultationDialogProps> = ({
             </DialogContent>
         </Dialog>
     );
-};
-
-export default CreateConsultationDialog;
+}

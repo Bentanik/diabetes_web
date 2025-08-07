@@ -42,10 +42,11 @@ export default function ModeratorManageBlogComponent() {
     const [selectedDoctor, setSelectedDoctor] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectModerator, setSelectModerator] = useState<string>("");
-    const [selectSortType, setSelectSortType] = useState<string>("createdDate");
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
+    const [selectedOption, setSelectedOption] = useState<string>("createdDate");
+
     const [isSortAsc, setIsSortAsc] = useState(true);
 
     const pageSize = 6;
@@ -64,6 +65,7 @@ export default function ModeratorManageBlogComponent() {
         setSelectModerator("");
         setSelectedCategoryIds([]);
         setSearchTerm("");
+        setSelectedOption("createdDate");
     };
 
     const { categories, isPending } = useGetCategories();
@@ -81,7 +83,7 @@ export default function ModeratorManageBlogComponent() {
         doctorId: selectedDoctor,
         pageIndex: currentPage,
         pageSize: pageSize,
-        sortType: selectSortType,
+        sortType: selectedOption,
         isSortAsc: isSortAsc,
     });
 
@@ -162,7 +164,10 @@ export default function ModeratorManageBlogComponent() {
                         )}
 
                         {/* Select Sort Type */}
-                        <BlogSortDropdown onSortChange={setSelectSortType} />
+                        <BlogSortDropdown
+                            onSortChange={setSelectedOption}
+                            selectedOption={selectedOption}
+                        />
                         {/* Sort ASC/ DES */}
                         <Toggle
                             pressed={isSortAsc}

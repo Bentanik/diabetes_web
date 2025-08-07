@@ -212,7 +212,7 @@ export default function CreateDoctorSchedule() {
                                     {/* Action Buttons */}
                                     <div className="flex gap-2">
                                         <CreateConsultationDialog
-                                            onSubmit={handleFormSubmit}
+                                        // onSubmit={handleFormSubmit}
                                         />
                                         <ExcelImportDialog
                                             onImportSuccess={handleExcelImport}
