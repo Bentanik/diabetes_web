@@ -45,7 +45,11 @@ const Header = ({ blogId }: REQUEST.BlogId) => {
     );
 };
 
-export default function UpdateBlogComponent({ blogId }: REQUEST.BlogId) {
+interface UpdateBlogComponentProps {
+    blogId: string;
+}
+
+export default function UpdateBlogComponent({ blogId }: UpdateBlogComponentProps) {
     return (
         <div>
             {/* Header */}
