@@ -9,20 +9,34 @@ export const consultationSchema = z.object({
     timeTemplates: z
         .array(
             z.object({
-                start: z.string().regex(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/, {
-                    message:
-                        "Thời gian bắt đầu phải có định dạng HH:mm (00:00-23:59)",
+                date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+                    message: "Ngày phải có định dạng YYYY-MM-DD",
                 }),
-                end: z.string().regex(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/, {
-                    message:
-                        "Thời gian kết thúc phải có định dạng HH:mm (00:00-23:59)",
-                }),
+                times: z
+                    .array(
+                        z.object({
+                            start: z
+                                .string()
+                                .regex(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/, {
+                                    message:
+                                        "Thời gian bắt đầu phải có định dạng HH:mm (00:00-23:59)",
+                                }),
+                            end: z
+                                .string()
+                                .regex(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/, {
+                                    message:
+                                        "Thời gian kết thúc phải có định dạng HH:mm (00:00-23:59)",
+                                }),
+                        })
+                    )
+                    .min(1, "Phải có ít nhất một khoảng thời gian"),
             })
         )
         .min(1, "Phải có ít nhất một template thời gian"),
 });
 
 export type ConsultationFormData = z.infer<typeof consultationSchema>;
+
 export default function useCreateConsultation({ doctorId }: REQUEST.DoctorId) {
     const form = useForm<ConsultationFormData>({
         resolver: zodResolver(consultationSchema),
@@ -35,10 +49,7 @@ export default function useCreateConsultation({ doctorId }: REQUEST.DoctorId) {
     const { showBackdrop, hideBackdrop } = useBackdrop();
     const queryClient = useQueryClient();
 
-    const onSubmit = (
-        data: REQUEST.TCreateConsultation,
-        onLoadData: () => void
-    ) => {
+    const onSubmit = (data: ConsultationFormData, onLoadData: () => void) => {
         showBackdrop();
         mutate(data, {
             onSuccess: async () => {
@@ -55,6 +66,7 @@ export default function useCreateConsultation({ doctorId }: REQUEST.DoctorId) {
             },
         });
     };
+
     return {
         onSubmit,
         form,

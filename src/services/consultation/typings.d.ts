@@ -1,11 +1,16 @@
 declare namespace REQUEST {
-    type CreateConsultation = {
+    type TimeRange = {
         start: string;
         end: string;
     };
 
+    type TimeTemplate = {
+        date: string;
+        times: TimeRange[];
+    };
+
     type TCreateConsultation = {
-        timeTemplates: CreateConsultation[];
+        timeTemplates: TimeTemplate[];
     };
 }
 
