@@ -3,7 +3,7 @@ import {
     createKnowledgeBaseSchema,
 } from "@/lib/validations/knowledge_base.schema";
 import {
-    KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY,
+    DOCUMENTS_QUERY_KEY,
     useTrainDocumentService,
 } from "@/services/train-ai/services";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +41,7 @@ export default function useTrainDocument() {
             onSuccess: () => {
                 backdrop.hideBackdrop()
                 queryClient.invalidateQueries({
-                    queryKey: [KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY],
+                    queryKey: [DOCUMENTS_QUERY_KEY],
                 })
                 addNotification({
                     type: "success",

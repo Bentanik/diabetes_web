@@ -13,7 +13,7 @@ import { useUploadDocument } from "@/app/admin/train-ai/[id]/upload/hooks/useUpl
 import { fileForTrainAI } from "@/lib/validations/file_train_ai";
 import { useGetActiveUploadJobService } from "@/services/job/services";
 import HistoryUploadFileDisplay from "@/app/admin/train-ai/[id]/upload/components/history_upload_file_display";
-import { useGetKnowledgeBaseByIdService } from "@/services/train-ai/services";
+import { useGetKnowledgeByIdService } from "@/services/train-ai/services";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
     const { handleUploadDocument } = useUploadDocument();
     const { addNotification } = useNotification();
 
-    const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeBaseByIdService(id);
+    const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeByIdService(id);
 
     // Lấy job active (polling)
     const { job, refetch } = useGetActiveUploadJobService();

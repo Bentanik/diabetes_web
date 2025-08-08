@@ -21,13 +21,13 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Pagination from "@/components/shared/pagination";
-import { useGetKnowledgeBaseListService } from "@/services/train-ai/services";
+import { useGetKnowledgeListService } from "@/services/train-ai/services";
 import { useDebounce } from "@/hooks/use-debounce";
 import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting";
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
 
 interface KnowledgeBaseItemProps {
-    knowledgeBase: API.TKnowledgeBase;
+    knowledgeBase: API.TKnowledge;
     isSelected: boolean;
     onToggle: (id: string) => void;
     onSettings?: (id: string) => void;
@@ -85,11 +85,10 @@ const KnowledgeBaseItem = ({
                             {formatSize(knowledgeBase.total_size_mb)}
                         </span>
                         <span
-                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
-                                knowledgeBase.select_training === true
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-gray-100 text-gray-800"
-                            }`}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${knowledgeBase.select_training === true
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                                }`}
                         >
                             {knowledgeBase.select_training === true ? (
                                 <>
@@ -156,7 +155,7 @@ export default function KnowledgeBaseSetting() {
         knowledge_bases: data,
         isPending,
         error,
-    } = useGetKnowledgeBaseListService({
+    } = useGetKnowledgeListService({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         search: debouncedSearchTerm,

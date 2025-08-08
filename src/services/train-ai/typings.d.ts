@@ -1,5 +1,5 @@
 declare namespace REQUEST {
-  type TCreateKnowledgeBaseRequest = {
+  type TCreateKnowledgeRequest = {
     name: string;
     description: string;
   };
@@ -36,26 +36,22 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
-  type TKnowledgeBase = {
+  type TKnowledgeStats = {
+    total_size_bytes: number;
+    document_count: number;
+  };
+
+  type TKnowledge = {
     id: string;
     name: string;
     description: string;
-    document_count: number;
+    stats: TKnowledgeStats;
+    select_training: boolean;
     created_at: string;
     updated_at: string;
-    total_size_mb: number;
-    select_training: boolean;
   };
 
-  type TGetKnowledgeBaseListResponse = {
-    knowledge_bases: TKnowledgeBase[];
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
-  };
-
-  type TKnowledgeBaseDocument = {
+  type TKnowledgeDocument = {
     id: string;
     kb_name: string;
     status: "uploaded" | "training" | "trained";
@@ -72,8 +68,8 @@ declare namespace API {
     };
   };
 
-  type TGetKnowledgeBaseDocumentsResponse = {
-    documents: TKnowledgeBaseDocument[];
+  type TGetKnowledgeDocumentsResponse = {
+    documents: TKnowledgeDocument[];
     total: number;
     page: number;
     limit: number;

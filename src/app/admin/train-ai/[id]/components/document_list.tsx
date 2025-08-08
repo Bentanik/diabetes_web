@@ -9,7 +9,7 @@ import Pagination from "@/components/shared/pagination"
 type DocumentListProps = {
     knowledgeBaseId: string
     isPending: boolean
-    documentsData: API.TGetKnowledgeBaseDocumentsResponse
+    documentsData: API.TGetKnowledgeDocumentsResponse
     document_limit: number
     onPageChange: (page: number) => void
 }

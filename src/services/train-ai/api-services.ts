@@ -2,15 +2,15 @@ import API_ENDPOINTS from "@/services/train-ai/api-path";
 import request from "@/services/interceptor";
 import axios from "axios";
 
-export const getKnowledgeBaseListAsync = async (
+export const getKnowledgeListAsync = async (
   search: string,
   sort_by: "updated_at" | "created_at",
   sort_order: "asc" | "desc",
   page: number,
   limit: number
 ) => {
-  const response = await request<TResponse<API.TGetKnowledgeBaseListResponse>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE,
+  const response = await request<TResponseData<TPagination<API.TKnowledge>>>(
+    API_ENDPOINTS.KNOWLEDGES,
     {
       method: "GET",
       params: {
@@ -26,9 +26,9 @@ export const getKnowledgeBaseListAsync = async (
   return response.data;
 };
 
-export const getKnowledgeBaseByIdAsync = async (id: string) => {
-  const response = await request<TResponse<API.TKnowledgeBase>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE + "/" + id,
+export const getKnowledgeByIdAsync = async (id: string) => {
+  const response = await request<TResponseData<API.TKnowledge>>(
+    API_ENDPOINTS.KNOWLEDGES + "/" + id,
     {
       method: "GET",
     }
@@ -37,11 +37,11 @@ export const getKnowledgeBaseByIdAsync = async (id: string) => {
   return response.data;
 };
 
-export const createKnowledgeBaseAsync = async (
-  data: REQUEST.TCreateKnowledgeBaseRequest
+export const createKnowledgeAsync = async (
+  data: REQUEST.TCreateKnowledgeRequest
 ) => {
-  const response = await request<TResponse<API.TKnowledgeBase>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE,
+  const response = await request<TResponseData<API.TKnowledge>>(
+    API_ENDPOINTS.KNOWLEDGES,
     {
       method: "POST",
       data,
@@ -51,9 +51,9 @@ export const createKnowledgeBaseAsync = async (
   return response.data;
 };
 
-export const deleteKnowledgeBaseAsync = async (name: string) => {
-  const response = await request<TResponse<API.TKnowledgeBase>>(
-    API_ENDPOINTS.KNOWLEDGE_BASE + "/" + name,
+export const deleteKnowledgeAsync = async (name: string) => {
+  const response = await request<TResponseData<API.TKnowledge>>(
+    API_ENDPOINTS.KNOWLEDGES + "/" + name,
     {
       method: "DELETE",
     }
@@ -63,7 +63,7 @@ export const deleteKnowledgeBaseAsync = async (name: string) => {
 };
 
 export const uploadDocumentAsync = async (data: FormData) => {
-  const response = await request<TResponse>(
+  const response = await request<TResponseData>(
     API_ENDPOINTS.KNOWLEDGE_BASE_UPLOAD_DOCUMENT,
     {
       method: "POST",
@@ -78,7 +78,7 @@ export const uploadDocumentAsync = async (data: FormData) => {
 };
 
 export const deleteDocumentAsync = async (id: string) => {
-  const response = await request<TResponse>(
+  const response = await request<TResponseData>(
     API_ENDPOINTS.KNOWLEDGE_BASE_DOCUMENTS + "/" + id,
     {
       method: "DELETE",
@@ -107,7 +107,7 @@ export const getKnowledgeBaseDocumentsAsync = async (
   };
 
   const response = await request<
-    TResponse<API.TGetKnowledgeBaseDocumentsResponse>
+    TResponseData<API.TGetKnowledgeDocumentsResponse>
   >(API_ENDPOINTS.KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID(id), {
     method: "GET",
     params: queryParams,
@@ -172,7 +172,7 @@ export const downloadDocumentAsync = async (id: string) => {
 };
 
 export const trainDocumentAsync = async (id: string) => {
-  const response = await request<TResponse>(
+  const response = await request<TResponseData>(
     API_ENDPOINTS.KNOWLEDGE_BASE_TRAIN_DOCUMENT(id),
     {
       method: "POST",

@@ -3,6 +3,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface PaginationProps {
     currentPage: number
@@ -13,6 +14,8 @@ interface PaginationProps {
     hasPrev: boolean
     onPageChange: (page: number) => void
     isLoading?: boolean
+    perPageOptions?: number[]
+    onPerPageChange?: (perPage: number) => void
 }
 
 export default function Pagination({
@@ -24,6 +27,8 @@ export default function Pagination({
     hasPrev,
     onPageChange,
     isLoading = false,
+    perPageOptions = [6, 9, 12, 18, 24],
+    onPerPageChange,
 }: PaginationProps) {
     // Tính toán range hiển thị
     const getVisiblePages = () => {
@@ -64,14 +69,38 @@ export default function Pagination({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 p-4 bg-white rounded-lg border border-gray-200 transition-opacity duration-200 ${isLoading ? "opacity-50" : "opacity-100"
-                }`}
+            className={`flex flex-col lg:flex-row items-center justify-between gap-4 mt-8 p-4 bg-white rounded-xl border border-gray-200 transition-opacity duration-200 ${isLoading ? "opacity-50" : "opacity-100"}`}
         >
-            {/* Thông tin hiển thị */}
-            <div className="text-sm text-gray-600">
-                Hiển thị <span className="font-medium text-[#248fca]">{startItem}</span> đến{" "}
-                <span className="font-medium text-[#248fca]">{endItem}</span> trong tổng số{" "}
-                <span className="font-medium text-[#248fca]">{totalItems}</span> mục
+            {/* Thông tin hiển thị + chọn số mục mỗi trang */}
+            <div className="w-full flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-gray-600">
+                <div>
+                    Hiển thị <span className="font-medium text-[#248fca]">{startItem}</span> đến{" "}
+                    <span className="font-medium text-[#248fca]">{endItem}</span> trong tổng số{" "}
+                    <span className="font-medium text-[#248fca]">{totalItems}</span> mục
+                </div>
+                {onPerPageChange && perPageOptions?.length > 0 && (
+                    <div className="flex items-center gap-2">
+                        <span className="text-gray-500">Mỗi trang:</span>
+                        <Select
+                            value={String(perPage)}
+                            onValueChange={(val) => {
+                                const next = parseInt(val, 10)
+                                if (!isNaN(next)) onPerPageChange(next)
+                            }}
+                        >
+                            <SelectTrigger size="sm" className="h-8 px-2 py-1 rounded-md">
+                                <SelectValue placeholder={`${perPage}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {perPageOptions.map((opt) => (
+                                    <SelectItem key={opt} value={String(opt)}>
+                                        {opt}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
             </div>
 
             {/* Pagination controls */}

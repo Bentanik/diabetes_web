@@ -1,6 +1,6 @@
 import {
-  KNOWLEDGE_BASE_QUERY_KEY,
-  useDeleteKnowledgeBaseService,
+  KNOWLEDGE_QUERY_KEY,
+  useDeleteKnowledgeService,
 } from "@/services/train-ai/services";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { useState } from "react";
 export default function useDeleteKnowlege() {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { mutate } = useDeleteKnowledgeBaseService();
+  const { mutate } = useDeleteKnowledgeService();
   const queryClient = useQueryClient();
 
   const onSubmit = async (id: string, onClose: () => void) => {
@@ -23,7 +23,7 @@ export default function useDeleteKnowlege() {
             setIsDeleting(false);
             onClose();
             await queryClient.invalidateQueries({
-              queryKey: [KNOWLEDGE_BASE_QUERY_KEY],
+              queryKey: [KNOWLEDGE_QUERY_KEY],
             });
           }
         },

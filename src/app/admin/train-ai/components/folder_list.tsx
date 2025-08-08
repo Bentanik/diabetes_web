@@ -1,76 +1,35 @@
 "use client"
 
 import type React from "react"
-import {
-    FolderIcon,
-    PlusIcon,
-    SearchIcon,
-    XIcon,
-} from "lucide-react"
+import { FolderIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react"
 import { motion } from "framer-motion"
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege"
-import { useGetKnowledgeBaseListService } from "@/services/train-ai/services"
+import { useGetKnowledgeListService } from "@/services/train-ai/services"
 import { SkeletonFolderGrid } from "@/app/admin/train-ai/components/skeleton_folder_card"
 import Pagination from "@/components/shared/pagination"
 import { useDebounce } from "@/hooks/use-debounce"
 import FolderCard from "@/app/admin/train-ai/components/folder_card"
+import SearchInput from "@/app/admin/train-ai/components/search_input"
 
-const SearchInput = ({
-    value,
-    onChange,
-    onClear,
-    placeholder = "Tìm kiếm cơ sở tri thức...",
-}: {
-    value: string
-    onChange: (value: string) => void
-    onClear: () => void
-    placeholder?: string
-}) => {
-    return (
-        <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <SearchIcon className="h-4 w-4 text-gray-400" />
-            </div>
-            <Input
-                type="text"
-                placeholder={placeholder}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="pl-10 pr-10 border-gray-200 focus:border-[#248fca] 
-                border-2 focus-visible:border-[#248fca] rounded-full focus-visible:ring-0 input-auth"
-            />
-            {value && (
-                <button
-                    onClick={onClear}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600 transition-colors"
-                >
-                    <XIcon className="h-4 w-4 text-gray-400" />
-                </button>
-            )}
-        </div>
-    )
-}
+// tách SearchInput ra component riêng
 
 export default function FolderList() {
     const [createModalOpen, setCreateModalOpen] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
     const [searchTerm, setSearchTerm] = useState("")
-    const ITEMS_PER_PAGE = 6
+    const [itemsPerPage, setItemsPerPage] = useState(6)
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-    const { knowledge_bases: data, isPending } = useGetKnowledgeBaseListService({
+    const { knowledges: data, isPending } = useGetKnowledgeListService({
         page: currentPage,
-        limit: ITEMS_PER_PAGE,
+        limit: itemsPerPage,
         search: debouncedSearchTerm,
         sort_by: "updated_at",
         sort_order: "desc",
     })
-
-    console.log("Knowledge Base Data:", data)
 
     const handleCloseCreateModal = () => {
         setCreateModalOpen(false)
@@ -78,18 +37,25 @@ export default function FolderList() {
 
     const handleSearchChange = useCallback((value: string) => {
         setSearchTerm(value)
+        setCurrentPage(1)
     }, [])
 
     const handleClearSearch = useCallback(() => {
         setSearchTerm("")
+        setCurrentPage(1)
     }, [])
 
     const handlePageChange = async (page: number) => {
         setCurrentPage(page)
     }
 
-    const hasData = !isPending && data && data.knowledge_bases && data.knowledge_bases.length > 0
-    const isEmpty = !isPending && data && (!data.knowledge_bases || data.knowledge_bases.length === 0)
+    const handlePerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage)
+        setCurrentPage(1)
+    }
+
+    const hasData = !isPending && data && data.items && data.items.length > 0
+    const isEmpty = !isPending && data && (!data.items || data.items.length === 0)
     const isSearching = debouncedSearchTerm.length > 0
 
     return (
@@ -138,7 +104,7 @@ export default function FolderList() {
             {/* Grid hiển thị các cơ sở tri thức khi đã load xong */}
             {hasData && (
                 <>
-                    <div className="relative h-[440px]">
+                    <div className="relative min-h-[420px]">
                         {/* Loading overlay khi đang fetch trang mới */}
                         {isPending && (
                             <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 rounded-lg flex items-center justify-center">
@@ -151,11 +117,11 @@ export default function FolderList() {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
                         >
-                            {data.knowledge_bases.map((folder, index) => (
+                            {data.items.map((folder, index) => (
                                 <motion.div
-                                    key={`${folder.name}-${currentPage}-${debouncedSearchTerm}`}
+                                    key={`${folder.id}-${currentPage}-${debouncedSearchTerm}`}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
@@ -176,6 +142,8 @@ export default function FolderList() {
                             hasPrev={data.page > 1}
                             onPageChange={handlePageChange}
                             isLoading={isPending}
+                            perPageOptions={[6, 9, 12, 18, 24]}
+                            onPerPageChange={handlePerPageChange}
                         />
                     )}
                 </>

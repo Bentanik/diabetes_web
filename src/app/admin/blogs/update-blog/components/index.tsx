@@ -8,7 +8,7 @@ import UpdateBlogForm from "@/app/admin/blogs/update-blog/components/update-blog
 import { BellIcon, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-const Header = ({ blogId }: REQUEST.BlogId) => {
+const Header = ({ blogId }: { blogId: string }) => {
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
