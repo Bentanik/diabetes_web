@@ -16,7 +16,7 @@ import { CalendarDays, ChevronDownIcon } from "lucide-react";
 import { Controller } from "react-hook-form";
 
 interface DateOfBirthPickerProps {
-    control: any; // Thay thế bằng kiểu dữ liệu chính xác nếu có
+    control: any;
     name: string;
 }
 

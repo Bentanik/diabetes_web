@@ -73,17 +73,17 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
-    type Doctors = {
-        id: string;
-        phoneNumber: string;
-        avatar: string;
-        name: string;
-        dateOfBirth: string;
-        gender: GenderType;
-        numberOfExperiences: number;
-        position: number;
-        createdDate: string;
-    };
+    // type Doctors = {
+    //     id: string;
+    //     phoneNumber: string;
+    //     avatar: string;
+    //     name: string;
+    //     dateOfBirth: string;
+    //     gender: GenderType;
+    //     numberOfExperiences: number;
+    //     position: number;
+    //     createdDate: string;
+    // };
 
     type TGetHospital = {
         id: string;
@@ -110,7 +110,7 @@ declare namespace API {
     };
 
     type TGetHospitalsCursor = {
-        items: Doctors[];
+        items: HospitalCursor[];
         pageSize: number;
         nextCursor: string;
         hasNextPage: boolean;

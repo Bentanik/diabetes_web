@@ -13,6 +13,16 @@ declare namespace REQUEST {
         sortDirection: number;
     };
 
+    type TCreateHospitalStaff = {
+        email: string;
+        firstName: string;
+        middleName?: string;
+        lastName: string;
+        dateOfBirth: string;
+        gender: GenderType;
+        avatarId: string;
+        hospitalId: string;
+    };
     enum GenderType {
         Male = 0,
         Female = 1,
@@ -34,6 +44,7 @@ declare namespace API {
         createdDate: string;
     };
 
+    // Get All Hospital Staffs
     type HospitalStaffs = {
         id: string;
         email: string;
@@ -52,6 +63,25 @@ declare namespace API {
         totalPages: number;
         hasNextPage: boolean;
         hasPreviousPage: boolean;
+    };
+
+    // Get Hospital Staff Detail
+    type HospitalInfo = {
+        id: string;
+        name: string;
+        phoneNumber: string;
+        thumbnail: string;
+    };
+
+    type TGetHospitalStaffDetail = {
+        id: string;
+        email: string;
+        avatar: string;
+        name: string;
+        dateOfBirth: string;
+        gender: number;
+        hospital: HospitalInfo;
+        createdDate: string;
     };
 
     enum GenderType {

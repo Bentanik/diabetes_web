@@ -92,29 +92,29 @@ export default function HospitalStaffComponent() {
             {isPending && <SkeletonFolderGrid count={6} />}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {hospital_staffs?.items.map((doctor, index) => (
+                {hospital_staffs?.items.map((hospital_staff, index) => (
                     <motion.div
-                        key={doctor.id}
+                        key={hospital_staff.id}
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: index * 0.1 }}
                         className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                     >
                         <Link
-                            href={`/hospitals/doctor/doctor-detail/${doctor.id}`}
+                            href={`/admin/hospital-staff/hospital-staff-detail/${hospital_staff.id}`}
                         >
                             {/* Header */}
                             <div className="flex items-start justify-between mb-6">
                                 <div className="flex items-center gap-3">
                                     <Image
-                                        src={doctor.avatar}
+                                        src={hospital_staff.avatar}
                                         alt="avatar"
                                         width={50}
                                         height={50}
                                         className="rounded-full object-cover w-12 h-12"
                                     />
                                     <h3 className="font-semibold text-gray-800 text-[1.5rem]">
-                                        {doctor.name}
+                                        {hospital_staff.name}
                                     </h3>
                                 </div>
                             </div>
@@ -128,7 +128,7 @@ export default function HospitalStaffComponent() {
                                         <span>Email:</span>
                                     </div>
                                     <span className="truncate max-w-[200px] text-[#248FCA]">
-                                        {doctor.email}
+                                        {hospital_staff.email}
                                     </span>
                                 </div>
                                 {/* Create Date */}
@@ -139,7 +139,7 @@ export default function HospitalStaffComponent() {
                                     </div>
                                     <span className="">
                                         {" "}
-                                        {formatDate(doctor.createdDate)}
+                                        {formatDate(hospital_staff.createdDate)}
                                     </span>
                                 </div>
 
@@ -148,7 +148,9 @@ export default function HospitalStaffComponent() {
                                         <VenusAndMars className="w-4 h-4" />
                                         <span>Giới tính:</span>
                                     </div>
-                                    <span>{getGender(doctor.gender)}</span>
+                                    <span>
+                                        {getGender(hospital_staff.gender)}
+                                    </span>
                                 </div>
                             </div>
                         </Link>

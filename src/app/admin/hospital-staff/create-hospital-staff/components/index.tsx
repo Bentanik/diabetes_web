@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import CreateDoctorForm from "./create-doctor-form";
+import CreateHospitalStaffForm from "./create-hospital-staff-form";
 // import { Button } from "@/components/ui/button";
 // import { BarChartIcon, BellIcon, Plus, ArrowLeft } from "lucide-react";
 // import Link from "next/link";
 
-export default function CreateDoctorComponent() {
+export default function CreateHospitalStaffComponent() {
     const Header = () => {
         return (
             <div className="flex items-center justify-between bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
@@ -17,11 +17,11 @@ export default function CreateDoctorComponent() {
                         </Link> */}
 
                         <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                            Thêm bác sĩ
+                            Thêm nhân viên bệnh viện
                         </h1>
                     </div>
                     <p className="text-gray-600 mt-1 text-sm">
-                        Thêm thông tin tạo bác sĩ mới
+                        Thêm thông tin tạo nhân viên mới
                     </p>
                 </div>
             </div>
@@ -34,7 +34,7 @@ export default function CreateDoctorComponent() {
                 <Header />
             </header>
             <div className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
-                <CreateDoctorForm blogId="" />
+                <CreateHospitalStaffForm />
             </div>
         </div>
     );

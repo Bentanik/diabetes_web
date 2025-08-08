@@ -43,7 +43,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
                                 <PopoverTrigger asChild>
                                     <Button
                                         variant="outline"
-                                        className="w-[250px] h-[50px] justify-between font-normal"
+                                        className="w-[250px] h-[48px] justify-between font-normal"
                                     >
                                         {date ? (
                                             date.toLocaleDateString()

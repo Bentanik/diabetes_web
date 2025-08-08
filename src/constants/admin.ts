@@ -44,7 +44,7 @@ export const sidebar_items = [
             },
             {
                 label: "Tạo nhân viên",
-                href: "/admin/hospital-staff/create-hospital-staff-create",
+                href: "/admin/hospital-staff/create-hospital-staff",
                 icon: Plus,
             },
         ],

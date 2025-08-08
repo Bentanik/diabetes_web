@@ -1,10 +1,10 @@
 import React from "react";
-import CreateDoctorComponent from "./components";
+import CreateHospitalStaffComponent from "./components";
 
-export default function CreateDoctor() {
+export default function CreateHospitalStaff() {
     return (
         <div>
-            <CreateDoctorComponent />
+            <CreateHospitalStaffComponent />
         </div>
     );
 }

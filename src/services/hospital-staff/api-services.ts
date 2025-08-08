@@ -1,15 +1,33 @@
 import request from "@/services/interceptor";
 import API_ENDPOINTS from "@/services/hospital-staff/api-path";
 
-// export const getDoctorDetail = async ({ doctorId }: REQUEST.DoctorId) => {
-//     const response = await request<TResponseData<API.TGetDoctorDetail>>(
-//         API_ENDPOINTS.GET_DOCTOR(doctorId),
-//         {
-//             method: "GET",
-//         }
-//     );
-//     return response.data;
-// };
+export const getHospitalStaffDetail = async ({
+    hospitalStaffId,
+}: REQUEST.hospitalStaffId) => {
+    const response = await request<TResponseData<API.TGetHospitalStaffDetail>>(
+        API_ENDPOINTS.GET_HOSPITAL_STAFF(hospitalStaffId),
+        {
+            method: "GET",
+        }
+    );
+    return response.data;
+};
+
+export const createHospitalStaffAsync = async (
+    body: REQUEST.TCreateHospitalStaff
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.CREATE_HOSPITAL_STAFF,
+        {
+            method: "POST",
+            data: body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
 
 export const getHospitalStaffs = async ({
     pageIndex = 1,

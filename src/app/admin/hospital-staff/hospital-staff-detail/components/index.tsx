@@ -23,7 +23,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useGetDoctorDetail } from "../hooks/use-get-doctor";
+import { useGetHospitalStaffDetail } from "../hooks/use-get-hospital-staff";
 import { Toaster } from "sonner";
 
 const Header = () => {
@@ -31,7 +31,7 @@ const Header = () => {
         <div className="flex items-center justify-between bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
             <div>
                 <div className="flex items-center gap-5">
-                    <Link href={`/hospitals/doctor`}>
+                    <Link href={`/admin/hospital-staff`}>
                         <ArrowLeft color="#248fca" />
                     </Link>
 
@@ -40,7 +40,7 @@ const Header = () => {
                     </h1>
                 </div>
                 <p className="text-gray-600 mt-1 ml-11 text-sm">
-                    Thông tin chi tiết của bác sĩ
+                    Thông tin chi tiết của nhân viên
                 </p>
             </div>
         </div>
@@ -52,28 +52,58 @@ export default function HospitalStaffDetailComponent({
 }: REQUEST.hospitalStaffId) {
     const [isOpenDialog, setIsDialogOpen] = useState(false);
 
-    const { doctor_detail, isPending, isError, error } = useGetDoctorDetail({
-        hospitalStaffId,
-    });
+    const { hospital_staff_detail, isPending, isError, error } =
+        useGetHospitalStaffDetail({
+            hospitalStaffId,
+        });
 
-    const introduction = doctor_detail?.introduction;
+    const formatDate = (dateString: string | undefined) => {
+        if (!dateString) return;
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
 
-    const getPositionName = (position: any) => {
-        switch (position) {
+    const getGender = (gender: number | undefined) => {
+        switch (gender) {
             case 0:
-                return "Giám đốc";
+                return "Nam";
             case 1:
-                return "Phó giám đốc";
-            case 2:
-                return "Trưởng khoa";
-            case 3:
-                return "Phó trưởng khoa";
-            case 4:
-                return "Bác sĩ";
+                return "Nữ";
             default:
-                return "Không xác định vị trí";
+                return "Không xác định giới tính";
         }
     };
+
+    const hospital_staff_info = [
+        {
+            label: "Nhân viên của bệnh viện:",
+            value: hospital_staff_detail?.hospital.name,
+            color: "black",
+        },
+        {
+            label: "Email:",
+            value: hospital_staff_detail?.email,
+            color: "#248FCA",
+        },
+        {
+            label: "Giới tính:",
+            value: getGender(hospital_staff_detail?.gender),
+            color: "black",
+        },
+        {
+            label: "Ngày sinh:",
+            value: formatDate(hospital_staff_detail?.dateOfBirth),
+            color: "black",
+        },
+        {
+            label: "Ngày tạo:",
+            value: formatDate(hospital_staff_detail?.createdDate),
+            color: "black",
+        },
+    ];
 
     return (
         <div>
@@ -91,7 +121,7 @@ export default function HospitalStaffDetailComponent({
                                 <div className="flex leading-5 gap-35">
                                     <Image
                                         src={
-                                            doctor_detail?.avatar ||
+                                            hospital_staff_detail?.avatar ||
                                             "/images/default_img.jpg"
                                         }
                                         alt="avatar"
@@ -99,86 +129,35 @@ export default function HospitalStaffDetailComponent({
                                         height={150}
                                         className="rounded-2xl h-[300px] object-cover"
                                     />
-                                    <div>
+                                    {/* Info */}
+                                    <div className="mt-10">
                                         {/* Trình độ */}
-                                        <h2 className="font-bold text-[1.5rem]">
-                                            Bác sĩ
-                                            <span> {doctor_detail?.name}</span>
+                                        <h2 className="font-bold text-[1.7rem]">
+                                            <span>
+                                                {" "}
+                                                {hospital_staff_detail?.name}
+                                            </span>
                                         </h2>
-                                        <div className="flex items-center mt-4 gap-3 relative">
-                                            <div className="flex gap-2 items-center">
-                                                <BadgeCheck
-                                                    width={30}
-                                                    color="#0066ff"
-                                                />
-                                                <p className="text-[#0066ff] text-[1.3rem] font-medium">
-                                                    {getPositionName(
-                                                        doctor_detail?.position
-                                                    )}
-                                                </p>
-                                            </div>
-                                            <div className="w-[1px] h-5 bg-[gray] bottom-100 top-0"></div>
 
-                                            <p className=" text-[1.3rem]">
-                                                <span className="font-bold">
-                                                    {
-                                                        doctor_detail?.numberOfExperiences
-                                                    }
-                                                </span>{" "}
-                                                <span className="font-extralight">
-                                                    năm kinh nghiệm
-                                                </span>
-                                            </p>
-                                        </div>
-                                        <div className="flex flex-col gap-2 mt-5">
-                                            <div className="flex items-center gap-10">
-                                                <span className="min-w-[100px] text-gray-500">
-                                                    Chức vụ:
-                                                </span>
-                                                <span className="max-w-[100px]">
-                                                    {getPositionName(
-                                                        doctor_detail?.position
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-10">
-                                                <span className="min-w-[100px] text-gray-500">
-                                                    Nơi làm việc:
-                                                </span>
-                                                <span className="max-w-[100px]">
-                                                    {
-                                                        doctor_detail?.hospital
-                                                            .name
-                                                    }
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-8">
-                                                <span className="min-w-[100px] text-gray-500">
-                                                    Số điện thoại:
-                                                </span>
-                                                <span className="max-w-[100px]">
-                                                    {doctor_detail?.phoneNumber}
-                                                </span>
-                                            </div>
+                                        <div className="grid grid-cols-[230px_1fr] gap-y-2 mt-7">
+                                            {hospital_staff_info.map(
+                                                (item, index) => (
+                                                    <React.Fragment key={index}>
+                                                        <div className="text-gray-500">
+                                                            {item.label}
+                                                        </div>
+                                                        <div
+                                                            className={`text-[${item.color}]`}
+                                                        >
+                                                            {item.value}
+                                                        </div>
+                                                    </React.Fragment>
+                                                )
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Introduction */}
-                                <div>
-                                    <div className="mt-5">
-                                        <p className="text-[1.4rem] font-semibold text-[#248FCA]">
-                                            Giới thiệu bác sĩ
-                                        </p>
-                                    </div>
-                                    <div
-                                        className="prose prose-sm max-w-none mt-5"
-                                        dangerouslySetInnerHTML={{
-                                            __html: introduction || "",
-                                        }}
-                                    />
-                                </div>
-                                {/* Introduction */}
                                 <div className="mt-10 flex justify-end gap-4">
                                     <Dialog
                                         open={isOpenDialog}
@@ -192,13 +171,13 @@ export default function HospitalStaffDetailComponent({
                                                 variant="outline"
                                                 className="cursor-pointer px-6 py-6 min-w-[180px] hover:border-red-500 hover:text-red-500"
                                             >
-                                                Xóa bác sĩ
+                                                Xóa nhân viên
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[425px]">
                                             <DialogHeader>
                                                 <DialogTitle className="text-[1.5rem]">
-                                                    Xóa bác sĩ
+                                                    Xóa nhân viên
                                                 </DialogTitle>
                                             </DialogHeader>
 
@@ -247,23 +226,13 @@ export default function HospitalStaffDetailComponent({
                                                         {/* {isPending
                                                                 ? "Đang xử lý..."
                                                                 : "Từ chối"} */}
-                                                        Xóa bác sĩ
+                                                        Xóa nhân viên
                                                     </Button>
                                                 </DialogFooter>
                                             </form>
                                             {/* </Form> */}
                                         </DialogContent>
                                     </Dialog>
-                                    <Link
-                                        href={`/hospital/doctor/create-doctor`}
-                                    >
-                                        <Button
-                                            variant="outline"
-                                            className="cursor-pointer px-6 py-6 min-w-[180px] bg-[#248FCA] hover:bg-[#2490cad8] text-white hover:text-white"
-                                        >
-                                            Chỉnh sửa bác sĩ
-                                        </Button>
-                                    </Link>
                                 </div>
                             </div>
                         </div>
