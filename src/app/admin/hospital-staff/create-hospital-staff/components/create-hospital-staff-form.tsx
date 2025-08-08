@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import EditDoctor from "@/components/editor/editor";
 import { motion } from "framer-motion";
 import { AlertCircle, ImageIcon, Mail, Upload } from "lucide-react";
 import {
@@ -16,23 +15,8 @@ import {
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Image from "next/image";
-import {
-    ChevronDownIcon,
-    Phone,
-    UserPen,
-    Award,
-    VenusAndMars,
-    CalendarDays,
-    Info,
-} from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+import { UserPen, VenusAndMars } from "lucide-react";
+
 import {
     Form,
     FormControl,
@@ -51,14 +35,12 @@ import useCreateHospitalStaff, {
 } from "../hooks/use-create-hospital-staff";
 
 export default function CreateHospitalStaffForm() {
-    const { form, onSubmit } = useCreateHospitalStaff();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { form, onSubmit, isPending } = useCreateHospitalStaff();
     const router = useRouter();
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [avatarPreview, setAvatarPreview] = useState<string>();
 
     const handleFormSubmit = async (data: HospitalStaffFormData) => {
-        console.log("đã click");
         try {
             const formData: REQUEST.TCreateHospitalStaff = {
                 email: data.email,
@@ -285,11 +267,9 @@ export default function CreateHospitalStaffForm() {
 
                             <Button
                                 type="submit"
-                                // disabled={
-                                //     isSubmitting ||
-                                //     !avatarPreview ||
-                                //     isUploading
-                                // }
+                                disabled={
+                                    !avatarPreview || isUploading || isPending
+                                }
                                 className="px-8 h-12 text-base bg-[#248fca] hover:bg-[#1e7bb8] transition-all duration-300 shadow-lg hover:shadow-xl mt-10 cursor-pointer"
                             >
                                 Tạo nhân viên

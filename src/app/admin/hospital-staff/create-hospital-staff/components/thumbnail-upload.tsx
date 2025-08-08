@@ -40,7 +40,7 @@ export default function AvatarUpload({
             // Upload image
             const data = { images: file };
             onSubmitImage(data, (imageId) => {
-                form.setValue("thumbnail", imageId as string);
+                form.setValue("avatarId", imageId as string);
             });
         }
     };
