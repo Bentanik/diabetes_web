@@ -10,7 +10,7 @@ import { useDeleteDocument } from "@/hooks/use-delete-document"
 interface DeleteDocumentModalProps {
     isOpen: boolean
     onClose: () => void
-    document: API.TKnowledgeDocument
+    document: API.TDocument
 }
 
 export default function DeleteDocumentModal({ isOpen, onClose, document }: DeleteDocumentModalProps) {

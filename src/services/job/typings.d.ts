@@ -1,31 +1,41 @@
 declare namespace REQUEST {
-  type TJobType = "upload" | "training";
+  type TJobType = "upload_document" | "training_document";
 }
 
 declare namespace API {
-  type TJob = {
-    id: string;
-    type: "upload" | "training";
-    file_name: string;
-    file_size: number;
-    file_type: string;
-    title: string;
-    description: string;
+  type TProgress = {
     status: "queued" | "processing" | "completed" | "failed";
     progress: number;
-    current_step: string;
+    progress_message: string;
+  };
+
+  type TDocumentJobFile = {
+    file_path: string;
+    file_name: string;
+    file_size_bytes: number;
+    file_type: string;
+  };
+
+  type TStatus = {
+    status: "queued" | "processing" | "completed" | "failed";
+    progress: number;
+    progress_message: string;
+  };
+
+  type TJob = {
+    id: string;
+    document_id: string;
+    knowledge_id: string;
+    title: string;
+    description: string;
+    file: TDocumentJobFile;
+    type: "upload_document" | "training_document";
+    status: TStatus;
+    progress: TProgress;
+    priority_diabetes: number;
+    is_document_delete: boolean;
+    is_document_duplicate: boolean;
     created_at: string;
     updated_at: string;
-    completed_at?: string;
-    error_message?: string;
-    document_id?: string;
-    minio_object_name?: string;
-    minio_bucket_name?: string;
-    kb_name?: string;
-    diabetes_score_avg?: number;
-    rejection_reason?: string;
-    is_deleted?: boolean;
-    is_duplicate?: boolean;
-    is_training?: boolean;
   };
 }

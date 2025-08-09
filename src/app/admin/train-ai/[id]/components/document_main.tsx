@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import DocumentList from "@/app/admin/train-ai/[id]/components/document_list"
 import DocumentSearch from "@/app/admin/train-ai/[id]/components/document_search"
-import { useGetKnowledgeBaseDocumentsService } from "@/services/train-ai/services"
+import { useGetDocumentsService } from "@/services/train-ai/services"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileTextIcon, BrainIcon } from "lucide-react"
@@ -24,7 +24,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
     // API call cho documents
-    const { data: documentsData, isPending: isDocumentsPending, refetch: refetchDocuments } = useGetKnowledgeBaseDocumentsService(knowledgeBaseId, {
+    const { data: documentsData, isPending: isDocumentsPending, refetch: refetchDocuments } = useGetDocumentsService(knowledgeBaseId, {
         search_name: debouncedSearchTerm,
         page: currentPage,
         limit: ITEMS_PER_PAGE,

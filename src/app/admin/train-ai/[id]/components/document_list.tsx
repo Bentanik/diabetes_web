@@ -9,7 +9,7 @@ import Pagination from "@/components/shared/pagination"
 type DocumentListProps = {
     knowledgeBaseId: string
     isPending: boolean
-    documentsData: API.TGetKnowledgeDocumentsResponse
+    documentsData: TPagination<API.TDocument>
     document_limit: number
     onPageChange: (page: number) => void
 }
@@ -26,7 +26,7 @@ export default function DocumentList({
         return <DocumentListSkeleton />
     }
 
-    if (documentsData.documents.length === 0) {
+    if (documentsData.items.length === 0) {
         return <DocumentEmptyState
             knowledgeBaseId={knowledgeBaseId}
             isSearching={false}
@@ -48,9 +48,9 @@ export default function DocumentList({
                     animate={{ opacity: 1 }}
                     className="flex flex-col gap-4"
                 >
-                    {documentsData.documents.map((document, index) => (
+                    {documentsData.items.map((document, index) => (
                         <motion.div
-                            key={document.id || index} // Sử dụng document.id thay vì index
+                            key={document.id || index}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}

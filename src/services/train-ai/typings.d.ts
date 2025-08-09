@@ -51,28 +51,24 @@ declare namespace API {
     updated_at: string;
   };
 
-  type TKnowledgeDocument = {
-    id: string;
-    kb_name: string;
-    status: "uploaded" | "training" | "trained";
-    file_name: string;
-    file_type: string;
-    file_size: number;
-    title: string;
-    description: string;
-    created_at: string;
-    updated_at: string;
-    metadata: {
-      diabetes_score_avg: number;
-      is_training: boolean;
-    };
+  type TDocumentType = "upload_document" | "training_document";
+
+  type TDocumentFile = {
+    path: string;
+    size_bytes: number;
+    hash: string;
   };
 
-  type TGetKnowledgeDocumentsResponse = {
-    documents: TKnowledgeDocument[];
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
+  type TDocument = {
+    id: string;
+    knowledge_id: string;
+    title: string;
+    description: string;
+    file: TDocumentFile;
+    progress: number;
+    type: TDocumentType;
+    priority_diabetes: number;
+    created_at: string;
+    updated_at: string;
   };
 }

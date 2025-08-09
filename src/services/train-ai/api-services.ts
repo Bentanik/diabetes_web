@@ -63,23 +63,20 @@ export const deleteKnowledgeAsync = async (name: string) => {
 };
 
 export const uploadDocumentAsync = async (data: FormData) => {
-  const response = await request<TResponseData>(
-    API_ENDPOINTS.KNOWLEDGE_BASE_UPLOAD_DOCUMENT,
-    {
-      method: "POST",
-      data,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+  const response = await request<TResponseData>(API_ENDPOINTS.DOCUMENTS, {
+    method: "POST",
+    data,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 
   return response.data;
 };
 
 export const deleteDocumentAsync = async (id: string) => {
   const response = await request<TResponseData>(
-    API_ENDPOINTS.KNOWLEDGE_BASE_DOCUMENTS + "/" + id,
+    API_ENDPOINTS.DOCUMENTS + "/" + id,
     {
       method: "DELETE",
     }
@@ -88,7 +85,7 @@ export const deleteDocumentAsync = async (id: string) => {
   return response.data;
 };
 
-export const getKnowledgeBaseDocumentsAsync = async (
+export const getDocumentsAsync = async (
   id: string,
   params: {
     search_name?: string;
@@ -96,29 +93,31 @@ export const getKnowledgeBaseDocumentsAsync = async (
     sort_order?: string;
     page?: number;
     limit?: number;
+    type?: "upload_document" | "training_document";
   } = {}
 ) => {
   const queryParams = {
-    sort_by: "created_at",
+    sort_by: "updated_at",
     sort_order: "desc",
     page: 1,
     limit: 10,
     ...params,
   };
 
-  const response = await request<
-    TResponseData<API.TGetKnowledgeDocumentsResponse>
-  >(API_ENDPOINTS.KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID(id), {
-    method: "GET",
-    params: queryParams,
-  });
+  const response = await request<TResponseData<TPagination<API.TDocument>>>(
+    API_ENDPOINTS.DOCUMENTS,
+    {
+      method: "GET",
+      params: queryParams,
+    }
+  );
   return response.data;
 };
 
 export const downloadDocumentAsync = async (id: string) => {
   try {
     const response = await axios({
-      url: API_ENDPOINTS.KNOWLEDGE_BASE_DOWNLOAD_DOCUMENT(id),
+      url: API_ENDPOINTS.DOWNLOAD_DOCUMENT(id),
       method: "GET",
       responseType: "blob",
       headers: {
@@ -173,7 +172,7 @@ export const downloadDocumentAsync = async (id: string) => {
 
 export const trainDocumentAsync = async (id: string) => {
   const response = await request<TResponseData>(
-    API_ENDPOINTS.KNOWLEDGE_BASE_TRAIN_DOCUMENT(id),
+    API_ENDPOINTS.TRAIN_DOCUMENT(id),
     {
       method: "POST",
     }

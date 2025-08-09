@@ -2,24 +2,18 @@
 const TRAIN_AI = "http://localhost:8000/api/v1/rag";
 const KNOWLEDGES = TRAIN_AI + "/knowledges";
 
-const KNOWLEDGE_BASE_DOCUMENTS = `${KNOWLEDGES}/documents`;
+const DOCUMENTS = `${TRAIN_AI}/documents`;
 
-const KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID = (id: string) =>
-  `${KNOWLEDGES}/${id}/documents`;
+const GET_DOCUMENT_BY_ID = (id: string) => `${DOCUMENTS}/${id}`;
 
-const KNOWLEDGE_BASE_UPLOAD_DOCUMENT = `${KNOWLEDGE_BASE_DOCUMENTS}/upload`;
+const DOWNLOAD_DOCUMENT = (id: string) => `${DOCUMENTS}/${id}/download`;
 
-const KNOWLEDGE_BASE_DOWNLOAD_DOCUMENT = (id: string) =>
-  `${KNOWLEDGE_BASE_DOCUMENTS}/${id}/download`;
-
-const KNOWLEDGE_BASE_TRAIN_DOCUMENT = (id: string) =>
-  `${KNOWLEDGE_BASE_DOCUMENTS}/${id}/training`;
+const TRAIN_DOCUMENT = (id: string) => `${DOCUMENTS}/${id}/training`;
 
 export default {
   KNOWLEDGES,
-  KNOWLEDGE_BASE_DOCUMENTS,
-  KNOWLEDGE_BASE_UPLOAD_DOCUMENT,
-  KNOWLEDGE_BASE_DOWNLOAD_DOCUMENT,
-  KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID,
-  KNOWLEDGE_BASE_TRAIN_DOCUMENT,
+  DOCUMENTS,
+  GET_DOCUMENT_BY_ID,
+  DOWNLOAD_DOCUMENT,
+  TRAIN_DOCUMENT,
 };

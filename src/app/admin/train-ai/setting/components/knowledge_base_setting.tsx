@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Pagination from "@/components/shared/pagination";
-import { useGetKnowledgeListService } from "@/services/train-ai/services";
+import { useGetKnowledgesService } from "@/services/train-ai/services";
 import { useDebounce } from "@/hooks/use-debounce";
 import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting";
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
@@ -155,7 +155,7 @@ export default function KnowledgeBaseSetting() {
         knowledge_bases: data,
         isPending,
         error,
-    } = useGetKnowledgeListService({
+    } = useGetKnowledgesService({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         search: debouncedSearchTerm,

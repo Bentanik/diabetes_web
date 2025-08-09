@@ -3,7 +3,7 @@ import {
   deleteDocumentAsync,
   deleteKnowledgeAsync,
   getKnowledgeByIdAsync,
-  getKnowledgeBaseDocumentsAsync,
+  getDocumentsAsync,
   getKnowledgeListAsync,
   trainDocumentAsync,
   uploadDocumentAsync,
@@ -13,7 +13,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 export const KNOWLEDGE_QUERY_KEY = "knowledge";
 export const DOCUMENTS_QUERY_KEY = "documents";
 
-interface IGetKnowledgeListService {
+interface IGetKnowledgesService {
   search: string;
   sort_by: "updated_at";
   sort_order: "asc" | "desc";
@@ -21,13 +21,13 @@ interface IGetKnowledgeListService {
   limit: number;
 }
 
-export const useGetKnowledgeListService = ({
+export const useGetKnowledgesService = ({
   search = "",
   sort_by = "updated_at",
   sort_order = "desc",
   page = 1,
   limit = 10,
-}: IGetKnowledgeListService) => {
+}: IGetKnowledgesService) => {
   const {
     data: knowledges,
     isPending,
@@ -94,7 +94,7 @@ export const useUploadDocumentService = () => {
   });
 };
 
-export const useGetKnowledgeBaseDocumentsService = (
+export const useGetDocumentsService = (
   id: string,
   params: {
     search_name?: string;
@@ -104,16 +104,12 @@ export const useGetKnowledgeBaseDocumentsService = (
     limit?: number;
   } = {}
 ) => {
-  return useQuery<
-    TResponseData<API.TGetKnowledgeDocumentsResponse>,
-    TMeta,
-    API.TGetKnowledgeDocumentsResponse
-  >({
+  return useQuery({
     queryKey: [DOCUMENTS_QUERY_KEY, id, params],
-    queryFn: () => getKnowledgeBaseDocumentsAsync(id, params),
+    queryFn: () => getDocumentsAsync(id, params),
     select: (data) =>
       data.data || {
-        documents: [],
+        items: [],
         total: 0,
         page: 0,
         limit: 0,

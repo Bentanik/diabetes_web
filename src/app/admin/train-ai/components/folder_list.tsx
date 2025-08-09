@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege"
-import { useGetKnowledgeListService } from "@/services/train-ai/services"
+import { useGetKnowledgesService } from "@/services/train-ai/services"
 import { SkeletonFolderGrid } from "@/app/admin/train-ai/components/skeleton_folder_card"
 import Pagination from "@/components/shared/pagination"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -23,7 +23,7 @@ export default function FolderList() {
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-    const { knowledges: data, isPending } = useGetKnowledgeListService({
+    const { knowledges: data, isPending } = useGetKnowledgesService({
         page: currentPage,
         limit: itemsPerPage,
         search: debouncedSearchTerm,

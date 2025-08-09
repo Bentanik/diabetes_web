@@ -32,7 +32,7 @@ export default function Header() {
                 <div className="flex items-center gap-4">
                     {/* Create Dropdown */}
                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger asChild className="outline-none">
                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                                 <Button variant="outline" className="gap-2 bg-transparent">
                                     <PlusIcon className="w-4 h-4" />

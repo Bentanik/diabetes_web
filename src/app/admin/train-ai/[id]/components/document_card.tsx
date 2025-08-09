@@ -30,7 +30,7 @@ import { useState } from "react"
 import useTrainDocument from "@/hooks/use-train"
 
 type DocumentCardProps = {
-    document: API.TKnowledgeDocument
+    document: API.TDocument
 }
 
 export default function DocumentCard({ document }: DocumentCardProps) {

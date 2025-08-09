@@ -1,4 +1,3 @@
-import { JOB } from "@/services/job/services";
 import {
   DOCUMENTS_QUERY_KEY,
   useDeleteDocumentService,
@@ -11,12 +10,8 @@ export const useDeleteDocument = () => {
   const queryClient = useQueryClient();
 
   const handleDeleteDocument = (id: string, onClose: () => void) => {
-    console.log(id);
     deleteDocument(id, {
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: [JOB],
-        });
         await queryClient.invalidateQueries({
           queryKey: [DOCUMENTS_QUERY_KEY],
         });
