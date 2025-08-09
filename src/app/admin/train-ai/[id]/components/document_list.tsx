@@ -10,16 +10,16 @@ type DocumentListProps = {
     knowledgeBaseId: string
     isPending: boolean
     documentsData: TPagination<API.TDocument>
-    document_limit: number
     onPageChange: (page: number) => void
+    onPerPageChange: (perPage: number) => void
 }
 
 export default function DocumentList({
     knowledgeBaseId,
     documentsData,
     isPending,
-    document_limit,
     onPageChange,
+    onPerPageChange,
 }: DocumentListProps) {
 
     if (isPending) {
@@ -46,31 +46,27 @@ export default function DocumentList({
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="flex flex-col gap-4"
+                    transition={{ duration: 0.5 }}
+                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 justify-center w-full"
                 >
-                    {documentsData.items.map((document, index) => (
-                        <motion.div
-                            key={document.id || index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                        >
-                            <DocumentCard document={document} />
-                        </motion.div>
+                    {documentsData.items.map((document) => (
+                        <DocumentCard key={document.id} document={document} />
                     ))}
                 </motion.div>
             </div>
-            <div>
+            {documentsData.total_pages > 1 && (
                 <Pagination
                     currentPage={documentsData.page}
                     totalPages={documentsData.total_pages}
                     totalItems={documentsData.total}
-                    perPage={document_limit}
-                    hasNext={documentsData.total_pages > documentsData.page}
+                    perPage={documentsData.limit}
+                    hasNext={documentsData.page < documentsData.total_pages}
                     hasPrev={documentsData.page > 1}
                     onPageChange={onPageChange}
+                    perPageOptions={[12, 18, 24, 36, 48]}
+                    onPerPageChange={onPerPageChange}
                 />
-            </div>
+            )}
         </div>
     )
 }

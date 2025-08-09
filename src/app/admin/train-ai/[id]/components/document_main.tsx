@@ -19,7 +19,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<"all" | "completed" | "failed" | "processing" | "queued">("all")
     const [activeTab, setActiveTab] = useState<"documents" | "training">("documents")
-    const ITEMS_PER_PAGE = 3
+    const [itemsPerPage, setItemsPerPage] = useState(12)
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
@@ -27,7 +27,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
     const { data: documentsData, isPending: isDocumentsPending, refetch: refetchDocuments } = useGetDocumentsService(knowledgeBaseId, {
         search: debouncedSearchTerm,
         page: currentPage,
-        limit: ITEMS_PER_PAGE,
+        limit: itemsPerPage,
         sort_by: "updated_at",
         sort_order: "desc",
     })
@@ -61,6 +61,11 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page)
+    }
+
+    const handlePerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage)
+        setCurrentPage(1)
     }
 
     const handleTabChange = (value: string) => {
@@ -115,8 +120,8 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
                             knowledgeBaseId={knowledgeBaseId}
                             isPending={isDocumentsPending}
                             documentsData={documentsData}
-                            document_limit={ITEMS_PER_PAGE}
                             onPageChange={handlePageChange}
+                            onPerPageChange={handlePerPageChange}
                         />
                     )}
                 </TabsContent>
