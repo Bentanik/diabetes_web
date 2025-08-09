@@ -12,6 +12,7 @@ type DocumentListProps = {
     documentsData: TPagination<API.TDocument>
     onPageChange: (page: number) => void
     onPerPageChange: (perPage: number) => void
+    onTrainSuccess?: () => void
 }
 
 export default function DocumentList({
@@ -20,6 +21,7 @@ export default function DocumentList({
     isPending,
     onPageChange,
     onPerPageChange,
+    onTrainSuccess = () => { },
 }: DocumentListProps) {
 
     if (isPending) {
@@ -50,7 +52,11 @@ export default function DocumentList({
                     className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 justify-center w-full"
                 >
                     {documentsData.items.map((document) => (
-                        <DocumentCard key={document.id} document={document} />
+                        <DocumentCard
+                            key={document.id}
+                            document={document}
+                            onTrainSuccess={onTrainSuccess}
+                        />
                     ))}
                 </motion.div>
             </div>

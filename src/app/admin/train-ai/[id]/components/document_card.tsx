@@ -21,8 +21,9 @@ import {
 } from "lucide-react";
 
 import { formatFileSize, getFileIcon } from "@/utils/file";
-
-
+import { useTrainDocumentService } from "@/services/train-ai/services";
+import { useNotification } from "@/context/notification_context";
+import { downloadDocumentAsync } from "@/services/train-ai/api-services";
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -38,18 +39,51 @@ const formatDate = (dateString: string) => {
 interface DocumentCardProps {
     document: API.TDocument;
     onDelete?: (document: API.TDocument) => void;
-    onDownload?: (document: API.TDocument) => void;
+    onTrainSuccess?: () => void;
 }
 
 export default function DocumentCard({
     document,
     onDelete = () => { },
-    onDownload = () => { }
+    onTrainSuccess = () => { }
 }: DocumentCardProps) {
     const isUploadDoc = document.type === "upload_document";
+    const { mutate: trainDocument, isPending: isTraining } = useTrainDocumentService();
+    const { addNotification } = useNotification();
+
+    const handleTrainDocument = () => {
+        trainDocument(
+            { document_id: document.id },
+            {
+                onSuccess: () => {
+                    addNotification({
+                        title: "Thành công",
+                        message: "Đã bắt đầu huấn luyện tài liệu",
+                        type: "success",
+                        duration: 4000,
+                        position: "top-right",
+                    });
+                    onTrainSuccess();
+                },
+                onError: (error) => {
+                    addNotification({
+                        title: error.title || "Lỗi huấn luyện",
+                        message: error.detail || "Đã xảy ra lỗi khi huấn luyện tài liệu",
+                        type: "error",
+                        duration: 4000,
+                        position: "top-right",
+                    });
+                },
+            }
+        );
+    };
+
+    const handleDownloadDocument = async (document: API.TDocument) => {
+        await downloadDocumentAsync(document.id)
+    }
 
     return (
-        <div className="rounded-xl border border-gray-200 bg-white py-5 px-4 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 w-[270px] h-[270px]">
+        <div className="rounded-xl border border-gray-200 bg-white py-5 px-4 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 w-[260px] h-[260px]">
             {/* Header với file type và actions */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -73,7 +107,7 @@ export default function DocumentCard({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className="text-sm py-2"
-                            onClick={() => onDownload(document)}
+                            onClick={() => handleDownloadDocument(document)}
                         >
                             <DownloadIcon className="w-4 h-4 mr-2" />
                             Tải xuống
@@ -131,34 +165,39 @@ export default function DocumentCard({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between">
-                {/* Trái: Status + Train button */}
-                <div className="flex items-center gap-2">
-                    <Badge
+            <div className="flex flex-col items-start gap-y-4 w-full">
+                {isUploadDoc && (
+                    <Button
                         variant="outline"
-                        className={`${isUploadDoc
-                            ? "bg-blue-50 text-blue-600 border-blue-200"
-                            : "bg-green-50 text-green-700 border-green-200"
-                            } text-xs font-medium`}
+                        size="sm"
+                        className="h-6 px-2 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                        onClick={handleTrainDocument}
+                        disabled={isTraining}
                     >
-                        {isUploadDoc ? "Chưa huấn luyện" : "Đã huấn luyện"}
-                    </Badge>
-                    {isUploadDoc && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-6 px-2 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
-                        >
-                            <TrainIcon className="w-3 h-3 mr-1" />
-                            Huấn luyện
-                        </Button>
-                    )}
-                </div>
+                        <TrainIcon className="w-3 h-3 mr-1" />
+                        {isTraining ? "Đang xử lý..." : "Huấn luyện"}
+                    </Button>
+                )}
+                <div className="flex items-center justify-between w-full">
+                    {/* Trái: Status + Train button */}
 
-                {/* Phải: Date */}
-                <div className="flex items-center gap-1 text-xs text-gray-400">
-                    <CalendarIcon className="w-3 h-3" />
-                    <span>{formatDate(document.created_at)}</span>
+                    <div className="flex items-center gap-2">
+                        <Badge
+                            variant="outline"
+                            className={`${isUploadDoc
+                                ? "bg-blue-50 text-blue-600 border-blue-200"
+                                : "bg-green-50 text-green-700 border-green-200"
+                                } text-xs font-medium`}
+                        >
+                            {isUploadDoc ? "Chưa huấn luyện" : "Đã huấn luyện"}
+                        </Badge>
+                    </div>
+
+                    {/* Phải: Date */}
+                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <CalendarIcon className="w-3 h-3" />
+                        <span>{formatDate(document.created_at).split(" ")[1]}</span>
+                    </div>
                 </div>
             </div>
         </div>

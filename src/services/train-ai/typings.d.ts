@@ -33,6 +33,10 @@ declare namespace REQUEST {
     system_prompt: string;
     available_collections: string[];
   };
+
+  type TTrainingDocumentRequest = {
+    document_id: string;
+  };
 }
 
 declare namespace API {

@@ -127,7 +127,7 @@ export const useDeleteDocumentService = () => {
 };
 
 export const useTrainDocumentService = () => {
-  return useMutation<TResponseData, TMeta, string>({
-    mutationFn: (id) => trainDocumentAsync(id),
+  return useMutation<TResponseData, TMeta, REQUEST.TTrainingDocumentRequest>({
+    mutationFn: (data) => trainDocumentAsync(data),
   });
 };

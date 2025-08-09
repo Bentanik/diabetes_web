@@ -1,6 +1,12 @@
+declare type TErrorCodes = {
+  code: string;
+  message: string;
+};
+
 declare type TMeta = {
   detail: string;
-  errorCode: string;
+  errorCode?: string | null;
+  errorCodes?: TErrorCodes[] | null;
   status: number;
   title: string;
 };

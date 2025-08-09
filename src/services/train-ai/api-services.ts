@@ -125,36 +125,39 @@ export const downloadDocumentAsync = async (id: string) => {
       },
     });
 
+    // Lấy tên file mặc định
     let filename = "download";
     const contentDisposition = response.headers["content-disposition"];
 
     if (contentDisposition) {
-      console.log("Content-Disposition:", contentDisposition);
-
       const patterns = [
-        /filename\*=UTF-8''([^;]+)/,
-        /filename="([^"]+)"/,
-        /filename=([^;]+)/,
+        /filename\*=UTF-8''([^;]+)/i,
+        /filename="([^"]+)"/i,
+        /filename=([^;]+)/i,
       ];
-
       for (const pattern of patterns) {
         const match = contentDisposition.match(pattern);
         if (match) {
-          filename = decodeURIComponent(match[1]);
+          filename = decodeURIComponent(match[1].trim());
           break;
         }
       }
     }
 
+    // Nếu vẫn chưa có tên, lấy từ URL
     if (filename === "download") {
       const urlParts = response.config.url?.split("/");
       const lastPart = urlParts?.[urlParts.length - 1];
-      if (lastPart && lastPart.includes(".")) {
-        filename = lastPart;
-      }
+      if (lastPart) filename = lastPart;
     }
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
+    // Lấy content-type từ backend
+    const contentType =
+      response.headers["content-type"] || "application/octet-stream";
+    const blob = new Blob([response.data], { type: contentType });
+
+    // Tạo link download
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
@@ -170,12 +173,12 @@ export const downloadDocumentAsync = async (id: string) => {
   }
 };
 
-export const trainDocumentAsync = async (id: string) => {
-  const response = await request<TResponseData>(
-    API_ENDPOINTS.TRAIN_DOCUMENT(id),
-    {
-      method: "POST",
-    }
-  );
+export const trainDocumentAsync = async (
+  data: REQUEST.TTrainingDocumentRequest
+) => {
+  const response = await request<TResponseData>(API_ENDPOINTS.TRAIN_DOCUMENT, {
+    method: "POST",
+    data,
+  });
   return response.data;
 };

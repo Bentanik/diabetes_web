@@ -10,7 +10,6 @@ import WarningModal from "@/app/admin/train-ai/[id]/upload/components/warning_mo
 import { useNotification } from "@/context/notification_context";
 import { useUploadDocument } from "@/app/admin/train-ai/[id]/upload/hooks/useUploadDocument";
 import { fileForTrainAI } from "@/lib/validations/file_train_ai";
-import { useGetActiveUploadJobService } from "@/services/job/services";
 import HistoryUploadFileDisplay from "@/app/admin/train-ai/[id]/upload/components/history_upload_file_display";
 import { useGetKnowledgeByIdService } from "@/services/train-ai/services";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,9 +38,6 @@ export default function UploadPageComponent({ id }: { id: string }) {
     const { addNotification } = useNotification();
 
     const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeByIdService(id);
-
-    // Lấy job active (polling)
-    const { job, refetch } = useGetActiveUploadJobService();
 
     // Timeout handler - 10 giây
     useEffect(() => {
@@ -103,7 +99,6 @@ export default function UploadPageComponent({ id }: { id: string }) {
             try {
                 handleUploadDocument(formData, {
                     onSuccess: () => {
-                        refetch();
                     },
                     onError: (error) => {
                         addNotification({
@@ -369,7 +364,7 @@ export default function UploadPageComponent({ id }: { id: string }) {
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                             onFileUpload={handleFileUpload}
-                            job={job ?? null}
+                            job={null}
                         />
                         <ValidationInfo />
                     </div>

@@ -8,7 +8,7 @@ const GET_DOCUMENT_BY_ID = (id: string) => `${DOCUMENTS}/${id}`;
 
 const DOWNLOAD_DOCUMENT = (id: string) => `${DOCUMENTS}/${id}/download`;
 
-const TRAIN_DOCUMENT = (id: string) => `${DOCUMENTS}/${id}/training`;
+const TRAIN_DOCUMENT = `${TRAIN_AI}/train-ai`;
 
 export default {
   KNOWLEDGES,

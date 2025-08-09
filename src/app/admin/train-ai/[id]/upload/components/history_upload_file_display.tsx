@@ -357,6 +357,8 @@ export default function HistoryUploadFileDisplay() {
         sort_by: "created_at",
         sort_order: "desc",
         search: "",
+        type: "upload_document",
+        enabled: true,
     });
     const [isDeleteDocumentOpen, setIsDeleteDocumentOpen] = useState(false);
     const [document, setDocument] = useState<API.TJob | null>(null);
