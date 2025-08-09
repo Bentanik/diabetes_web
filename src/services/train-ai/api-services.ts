@@ -88,7 +88,7 @@ export const deleteDocumentAsync = async (id: string) => {
 export const getDocumentsAsync = async (
   id: string,
   params: {
-    search_name?: string;
+    search?: string;
     sort_by?: string;
     sort_order?: string;
     page?: number;

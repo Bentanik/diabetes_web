@@ -97,7 +97,7 @@ export const useUploadDocumentService = () => {
 export const useGetDocumentsService = (
   id: string,
   params: {
-    search_name?: string;
+    search?: string;
     sort_by?: string;
     sort_order?: string;
     page?: number;

@@ -36,7 +36,7 @@ export default function Header({ knowledgeBase }: HeaderProps) {
                         <div className="flex flex-col gap-2">
                             <h1 className="text-xl font-semibold text-[#248fca]">{knowledgeBase.name}</h1>
                             <div className="flex items-center gap-4 text-sm text-gray-500">
-                                <span>{knowledgeBase.document_count} tài liệu</span>
+                                <span>{knowledgeBase.stats.document_count} tài liệu</span>
                                 <span>Cập nhật mới nhất {new Date(knowledgeBase.updated_at).toLocaleString()}</span>
                             </div>
                         </div>

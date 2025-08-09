@@ -25,7 +25,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
 
     // API call cho documents
     const { data: documentsData, isPending: isDocumentsPending, refetch: refetchDocuments } = useGetDocumentsService(knowledgeBaseId, {
-        search_name: debouncedSearchTerm,
+        search: debouncedSearchTerm,
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         sort_by: "updated_at",
@@ -51,7 +51,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
 
     const handleSearchChange = (value: string) => {
         setSearchTerm(value)
-        setCurrentPage(1) // Reset về trang đầu khi search
+        setCurrentPage(1)
     }
 
     const handleStatusFilterChange = (status: "all" | "completed" | "failed" | "processing" | "queued") => {
@@ -65,9 +65,9 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
 
     const handleTabChange = (value: string) => {
         setActiveTab(value as "documents" | "training")
-        setCurrentPage(1) // Reset page khi đổi tab
-        setSearchTerm("") // Reset search khi đổi tab
-        setStatusFilter("all") // Reset filter khi đổi tab
+        setCurrentPage(1)
+        setSearchTerm("")
+        setStatusFilter("all")
     }
 
     // Tính toán training count

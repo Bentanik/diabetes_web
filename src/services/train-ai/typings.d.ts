@@ -57,6 +57,7 @@ declare namespace API {
     path: string;
     size_bytes: number;
     hash: string;
+    file_type: string;
   };
 
   type TDocument = {
