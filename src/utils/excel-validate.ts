@@ -205,47 +205,63 @@ export const validateAndTransformData = (rawData: any[]) => {
 
     Object.keys(slotsByDate).forEach((date) => {
         const slots = slotsByDate[date];
-        slots.sort((a, b) => {
-            const aStart = parseTime(a.startTime).split(":").map(Number);
-            const bStart = parseTime(b.startTime).split(":").map(Number);
-            return aStart[0] * 60 + aStart[1] - (bStart[0] * 60 + bStart[1]);
+
+        // Tạo sự kiện bắt đầu và kết thúc cho mỗi slot
+        const events: {
+            time: number;
+            type: "start" | "end";
+            slot: any;
+        }[] = [];
+
+        for (const slot of slots) {
+            if (!slot.valid) continue;
+
+            const [sh, sm] = parseTime(slot.startTime).split(":").map(Number);
+            const [eh, em] = parseTime(slot.endTime).split(":").map(Number);
+            const startMins = sh * 60 + sm;
+            const endMins = eh * 60 + em;
+
+            events.push({ time: startMins, type: "start", slot });
+            events.push({ time: endMins, type: "end", slot });
+
+            slot._startMins = startMins;
+            slot._endMins = endMins;
+        }
+
+        // Sắp xếp các event theo thời gian, start ưu tiên trước end nếu trùng
+        events.sort((a, b) => {
+            if (a.time !== b.time) return a.time - b.time;
+            return a.type === "start" ? -1 : 1;
         });
 
-        for (let i = 0; i < slots.length; i++) {
-            const slotA = slots[i];
-            if (!slotA.valid) continue;
-            for (let j = i + 1; j < slots.length; j++) {
-                const slotB = slots[j];
-                if (!slotB.valid) continue;
-                const aStartMinutes = parseTime(slotA.startTime)
-                    .split(":")
-                    .map(Number);
-                const aEndMinutes = parseTime(slotA.endTime)
-                    .split(":")
-                    .map(Number);
-                const bStartMinutes = parseTime(slotB.startTime)
-                    .split(":")
-                    .map(Number);
-                const bEndMinutes = parseTime(slotB.endTime)
-                    .split(":")
-                    .map(Number);
-                const aStartTotal = aStartMinutes[0] * 60 + aStartMinutes[1];
-                const aEndTotal = aEndMinutes[0] * 60 + aEndMinutes[1];
-                const bStartTotal = bStartMinutes[0] * 60 + bStartMinutes[1];
-                const bEndTotal = bEndMinutes[0] * 60 + bEndMinutes[1];
-                if (bStartTotal >= aEndTotal) {
-                    break;
+        const active: any[] = [];
+
+        for (const event of events) {
+            const current = event.slot;
+
+            if (event.type === "start") {
+                for (const other of active) {
+                    // Có giao nhau
+                    if (
+                        other._endMins > current._startMins &&
+                        current._endMins > other._startMins
+                    ) {
+                        current.valid = false;
+                        other.valid = false;
+
+                        current.validationErrors.push(
+                            `Trùng thời gian với dòng ${other.originalRow}`
+                        );
+                        other.validationErrors.push(
+                            `Trùng thời gian với dòng ${current.originalRow}`
+                        );
+                    }
                 }
-                if (bStartTotal < aEndTotal && aStartTotal < bEndTotal) {
-                    slotA.valid = false;
-                    slotB.valid = false;
-                    slotA.validationErrors.push(
-                        `Trùng thời gian với dòng ${slotB.originalRow}`
-                    );
-                    slotB.validationErrors.push(
-                        `Trùng thời gian với dòng ${slotA.originalRow}`
-                    );
-                }
+                active.push(current);
+            } else {
+                // Xoá khỏi danh sách active
+                const idx = active.indexOf(current);
+                if (idx !== -1) active.splice(idx, 1);
             }
         }
     });

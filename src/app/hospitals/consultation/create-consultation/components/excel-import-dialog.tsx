@@ -81,6 +81,8 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
         setError("");
         setSuccess("");
 
+        const start = performance.now(); // 🔸 Bắt đầu đo thời gian
+
         try {
             const buffer = await file.arrayBuffer();
             const workbook = XLSX.read(buffer, { type: "buffer" });
@@ -91,12 +93,14 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
             if (jsonData.length === 0) {
                 throw new Error("File Excel trống hoặc không có dữ liệu");
             }
+
             const processedData = validateAndTransformData(jsonData);
             setData(processedData);
 
             const invalidRows = processedData.filter(
                 (item) => !item.valid || item.validationErrors.length > 0
             );
+
             if (invalidRows.length > 0) {
                 setError(
                     `Có ${invalidRows.length} khung giờ không hợp lệ. Vui lòng kiểm tra dữ liệu.`
@@ -109,6 +113,12 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                     `Đã xử lý thành công ${processedData.length} khung giờ`
                 );
             }
+
+            const end = performance.now(); // 🔸 Kết thúc đo thời gian
+
+            console.log(
+                `⏱️ Thời gian xử lý file Excel: ${(end - start).toFixed(2)} ms`
+            );
         } catch (err: any) {
             setError(`Lỗi xử lý file: ${err.message}`);
         } finally {

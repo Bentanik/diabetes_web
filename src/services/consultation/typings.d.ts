@@ -15,14 +15,20 @@ declare namespace REQUEST {
 }
 
 declare namespace API {
-    type Consultation = {
+    type ConsultationTemplate = {
+        id: string;
         startTime: string;
         endTime: string;
         status: number;
     };
 
+    type ConsultationByDate = {
+        date: string;
+        consultationTemplates: ConsultationTemplate[];
+    };
+
     type TGetConsultations = {
-        items: Consultation[];
+        items: ConsultationByDate[];
         pageIndex: number;
         pageSize: number;
         totalCount: number;

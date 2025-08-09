@@ -22,17 +22,23 @@ interface WeeklyScheduleProps {
         label: string;
         dates: string[];
     };
-    daysOfWeek: { short: string; full: string }[];
-    scheduleData: { doctorId: string; timeTemplates: DaySchedule[] };
-    setScheduleData: (data: {
-        doctorId: string;
-        timeTemplates: DaySchedule[];
-    }) => void;
+    scheduleData: { timeTemplates: DaySchedule[] };
+    setScheduleData: (data: { timeTemplates: DaySchedule[] }) => void;
     editingSlot: { dayIndex: number; slotIndex: number } | null;
     setEditingSlot: (
         slot: { dayIndex: number; slotIndex: number } | null
     ) => void;
 }
+
+const DAYS_OF_WEEK = [
+    { short: "T2", full: "Thứ 2" },
+    { short: "T3", full: "Thứ 3" },
+    { short: "T4", full: "Thứ 4" },
+    { short: "T5", full: "Thứ 5" },
+    { short: "T6", full: "Thứ 6" },
+    { short: "T7", full: "Thứ 7" },
+    { short: "CN", full: "Chủ nhật" },
+];
 
 // Hàm validate thời gian
 const validateTimeSlot = (
@@ -95,7 +101,6 @@ const incrementTime = (time: string): string => {
 
 export default function WeeklySchedule({
     selectedWeekData,
-    daysOfWeek,
     scheduleData,
     setScheduleData,
     editingSlot,
@@ -124,11 +129,45 @@ export default function WeeklySchedule({
             newEnd = incrementTime(newStart); // Tăng thêm 15 phút để tạo khung 30 phút
         }
 
-        const newTimeSlot: TimeSlot = { start: newStart, end: newEnd };
-        daySchedule.times.push(newTimeSlot);
+        // Validate: Kiểm tra nếu newEnd vượt quá 24:00
+        if (compareTimes(newEnd, "24:00") >= 0) {
+            toast.error("Bạn đã thêm hết thời gian trong 24 giờ !");
+            return; // Không thêm slot nếu vượt quá
+        }
+
+        // Validate: Kiểm tra chồng chéo với các slot hiện có
+        const newSlot = { start: newStart, end: newEnd };
+        if (hasOverlap(daySchedule.times, newSlot)) {
+            toast.error("Bạn đã thêm hết thời gian trong 24 giờ !");
+            return; // Không thêm nếu chồng chéo
+        }
+
+        daySchedule.times.push(newSlot);
         setScheduleData(newScheduleData);
         setEditingSlot({ dayIndex, slotIndex: daySchedule.times.length - 1 });
     };
+
+    // Hàm helper để so sánh thời gian (HH:MM)
+    function compareTimes(time1: string, time2: string): number {
+        const [h1, m1] = time1.split(":").map(Number);
+        const [h2, m2] = time2.split(":").map(Number);
+        const total1 = h1 * 60 + m1;
+        const total2 = h2 * 60 + m2;
+        return total1 - total2;
+    }
+
+    // Hàm helper để kiểm tra chồng chéo
+    function hasOverlap(existingSlots: TimeSlot[], newSlot: TimeSlot): boolean {
+        for (const slot of existingSlots) {
+            if (
+                compareTimes(newSlot.start, slot.end) < 0 &&
+                compareTimes(newSlot.end, slot.start) > 0
+            ) {
+                return true; // Có chồng chéo
+            }
+        }
+        return false;
+    }
 
     const updateTimeSlot = (
         dayIndex: number,
@@ -221,7 +260,7 @@ export default function WeeklySchedule({
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="grid grid-cols-7 gap-px bg-gray-200">
-                        {daysOfWeek.map((day, dayIndex) => {
+                        {DAYS_OF_WEEK.map((day, dayIndex) => {
                             const daySchedule = getDaySchedule(dayIndex);
                             const dayDate = selectedWeekData.dates[dayIndex];
 
