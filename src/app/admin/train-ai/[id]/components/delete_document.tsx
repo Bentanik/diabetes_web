@@ -141,21 +141,18 @@ export default function DeleteDocumentModal({ isOpen, onClose, document }: Delet
                             <div className="flex items-center gap-4 p-4 bg-white rounded-lg border border-gray-100">
                                 {/* File icon */}
                                 <div className="flex-shrink-0 w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                                    {getFileIcon(document.file_type)}
+                                    {getFileIcon(document.file.file_type)}
                                 </div>
 
                                 {/* File info */}
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-gray-900 truncate text-base">
-                                        {document.file_name}
-                                    </p>
                                     <div className="flex items-center gap-3 mt-2">
                                         <span className="text-xs text-gray-500 uppercase font-medium bg-gray-100 px-2 py-1 rounded">
-                                            {document.file_type}
+                                            {document.file.file_type}
                                         </span>
-                                        {document.file_size && (
+                                        {document.file.size_bytes && (
                                             <span className="text-sm text-gray-500">
-                                                {(document.file_size / 1024 / 1024).toFixed(2)} MB
+                                                {(document.file.size_bytes / 1024 / 1024).toFixed(2)} MB
                                             </span>
                                         )}
                                     </div>

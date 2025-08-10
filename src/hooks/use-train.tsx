@@ -37,7 +37,9 @@ export default function useTrainDocument() {
 
     const onSubmit = async (id: string) => {
         backdrop.showBackdrop()
-        mutate(id, {
+        mutate({
+            document_id: id,
+        }, {
             onSuccess: () => {
                 backdrop.hideBackdrop()
                 queryClient.invalidateQueries({

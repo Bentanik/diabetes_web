@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import type { UseFormRegisterReturn } from "react-hook-form";
+// import type { UseFormRegisterReturn } from "react-hook-form";
 
 interface InputSettingProps {
     type?: "text" | "number" | "email" | "password" | "tel" | "url";
@@ -13,6 +13,8 @@ interface InputSettingProps {
     max?: string | number;
     step?: string | number;
     className?: string;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function InputSettingAI({

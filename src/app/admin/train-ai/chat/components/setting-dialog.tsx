@@ -374,9 +374,14 @@ export default function SettingModal({ isOpen, onClose, onSubmit }: SettingModal
                                 <InputSettingAI
                                     type="text"
                                     value={availableCollections.join(", ")}
-                                    onChange={(e) => setAvailableCollections(
-                                        e.target.value.split(",").map(s => s.trim()).filter(Boolean)
-                                    )}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        setAvailableCollections(
+                                            e.target.value
+                                                .split(",")
+                                                .map((s) => s.trim())
+                                                .filter(Boolean)
+                                        )
+                                    }
                                     error=""
                                     placeholder="Ví dụ: collection1, collection2"
                                     disabled={isCreating}
