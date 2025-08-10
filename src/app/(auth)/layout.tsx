@@ -5,6 +5,7 @@ import { MoveLeftIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { useAppSelector } from "@/stores";
 // import { useStepAuth } from "@/context/step_auth_context";
 
 export default function AuthLayout({
@@ -13,7 +14,17 @@ export default function AuthLayout({
     children: React.ReactNode;
 }>) {
     // const { handlePrevious } = useStepAuth();
+    // const userState = useAppSelector((state) => state.userSlice);
 
+    // if (
+    //     userState.user?.roles?.includes("SystemAdmin") ||
+    //     userState.user?.roles?.includes("Moderator")
+    // ) {
+    //     return (window.location.href = "/admin/home");
+    // }
+    // if (userState.user?.roles?.includes("HospitalStaff")) {
+    //     return (window.location.href = "/hospitals/home");
+    // }
     return (
         <motion.div
             initial={{ opacity: 0 }}

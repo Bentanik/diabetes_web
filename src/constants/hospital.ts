@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 export const sidebar_items = [
     {
-        href: "/hospital/home",
+        href: "/hospitals/home",
         icon: ActivityIcon,
         label: "Dashboard",
     },

@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { sidebar_items } from "@/constants/admin";
 import { LogOutIcon, ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useAppSelector } from "@/stores";
 
-// Định nghĩa type cho sidebar item với submenu
 interface SidebarSubItem {
     label: string;
     href: string;
@@ -30,6 +30,15 @@ export default function HospitalLayout({
     const pathname = usePathname();
     const router = useRouter();
 
+    const userState = useAppSelector((state) => state.userSlice);
+
+    // Cho phép cả SystemAdmin và Moderator
+    if (
+        !userState.user?.roles?.includes("SystemAdmin") &&
+        !userState.user?.roles?.includes("Moderator")
+    ) {
+        return (window.location.href = "/");
+    }
     const sidebarWidth = open ? 280 : 80;
 
     const toggleExpanded = (index: number) => {
@@ -106,6 +115,13 @@ export default function HospitalLayout({
                         const isExpanded = expandedItems.has(index);
                         const hasSubItems =
                             item.subItems && item.subItems.length > 0;
+
+                        if (
+                            userState.user?.roles?.includes("Moderator") &&
+                            item.href !== "/admin/blogs"
+                        ) {
+                            return null;
+                        }
 
                         return (
                             <motion.div

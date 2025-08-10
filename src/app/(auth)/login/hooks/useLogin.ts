@@ -1,7 +1,7 @@
 import { useBackdrop } from "@/context/backdrop_context";
 import {
-  loginSchema,
-  LoginSchemaFormData,
+    loginSchema,
+    LoginSchemaFormData,
 } from "@/lib/validations/auth.schema";
 import { useServiceLogin } from "@/services/auth/services";
 import { useAppDispatch } from "@/stores";
@@ -11,66 +11,85 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 export default function useLogin() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-    setValue,
-    reset,
-  } = useForm<LoginSchemaFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const { mutate } = useServiceLogin();
-  const { showBackdrop, hideBackdrop } = useBackdrop();
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-
-  const onSubmit = async (data: LoginSchemaFormData) => {
-    try {
-      const request: REQUEST.TLogin = {
-        email: data?.email,
-        password: data.password,
-      };
-
-      showBackdrop();
-      mutate(request, {
-        onSuccess: async (data) => {
-          if (data) {
-            hideBackdrop();
-            reset();
-            dispatch(clearAllRegister());
-            router.push("/admin/home");
-          }
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setError,
+        setValue,
+        reset,
+    } = useForm<LoginSchemaFormData>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: "",
+            password: "",
         },
-        onError: (error) => {
-          hideBackdrop();
-          error.errorCodes?.forEach((error) => {
-            if (error.code === "auth_error_13") {
-              setError("email", {
-                type: "manual",
-                message: error.message,
-              });
-            }
-          });
-        },
-      });
-    } catch (err) {
-      console.log("err: ", err);
-    }
-  };
+    });
 
-  return {
-    register,
-    handleSubmit,
-    errors,
-    onSubmit,
-    setValue,
-    setError,
-  };
+    const { mutate } = useServiceLogin();
+    const { showBackdrop, hideBackdrop } = useBackdrop();
+    const router = useRouter();
+    const dispatch = useAppDispatch();
+
+    const onSubmit = async (data: LoginSchemaFormData) => {
+        try {
+            const request: REQUEST.TLogin = {
+                email: data?.email,
+                password: data.password,
+            };
+
+            showBackdrop();
+            mutate(request, {
+                onSuccess: async (data) => {
+                    if (data) {
+                        hideBackdrop();
+                        reset();
+                        dispatch(clearAllRegister());
+                        if (
+                            data.data?.authUser.roles?.includes(
+                                "SystemAdmin"
+                            ) ||
+                            data.data?.authUser.roles?.includes("Moderator")
+                        )
+                            return router.push("/admin/home");
+                        if (
+                            data.data?.authUser.roles?.includes("HospitalStaff")
+                        )
+                            return router.push("/hospitals/home");
+                        return router.push("/");
+                    }
+                },
+                onError: (error) => {
+                    hideBackdrop();
+                    error.errors?.forEach((error) => {
+                        console.log(error);
+
+                        if (error.code === "auth_error_13") {
+                            setError("email", {
+                                type: "manual",
+                                message: error.message,
+                            });
+                        }
+                        if (error.code === "auth_error_04") {
+                            setError("password", {
+                                type: "manual",
+                                message: error.message,
+                            });
+                        }
+                    });
+                },
+            });
+        } catch (err) {
+            console.log("err: ", err);
+        }
+    };
+
+    return {
+        register,
+        handleSubmit,
+        errors,
+        onSubmit,
+        setValue,
+        setError,
+    };
 }

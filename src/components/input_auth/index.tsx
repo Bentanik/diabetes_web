@@ -23,7 +23,7 @@ export default function InputAuth({
     const [isFocused, setIsFocused] = useState(false);
 
     const isLabelFloating = isFocused || hasText;
-
+    console.log(error);
     return (
         <div className="w-full">
             <div className="relative">
