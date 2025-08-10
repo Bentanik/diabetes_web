@@ -12,7 +12,7 @@ export default function BlogSortDropdown({
 }: BlogStatusDropdownProps) {
     const options = [
         { value: "id", label: "Mặc định" },
-        { value: "createdDate", label: "Ngày tạo" },
+        { value: "modifiedDate", label: "Ngày tạo" },
         { value: "like", label: "Lượt thích" },
         { value: "view", label: "Người xem" },
         { value: "title ", label: "Tiêu đề" },
@@ -21,8 +21,8 @@ export default function BlogSortDropdown({
     const handleChange = (
         newValue: SingleValue<{ value: string; label: string }>
     ) => {
-        const sortBy = newValue ? newValue.value : "createdDate";
-        onSortChange(sortBy || "createdDate");
+        const sortBy = newValue ? newValue.value : "modifiedDate";
+        onSortChange(sortBy || "modifiedDate");
     };
 
     return (

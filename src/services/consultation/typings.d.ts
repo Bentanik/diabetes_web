@@ -12,6 +12,13 @@ declare namespace REQUEST {
     type TCreateConsultation = {
         timeTemplates: TimeTemplate[];
     };
+
+    type GetConsultationsCursorParams = {
+        cursor?: string;
+        pageSize?: number;
+        fromDate: string;
+        toDate: string;
+    };
 }
 
 declare namespace API {
@@ -29,11 +36,9 @@ declare namespace API {
 
     type TGetConsultations = {
         items: ConsultationByDate[];
-        pageIndex: number;
+        totalItems: number;
         pageSize: number;
-        totalCount: number;
-        totalPages: number;
+        nextCursor: string;
         hasNextPage: boolean;
-        hasPreviousPage: boolean;
     };
 }

@@ -21,7 +21,7 @@ export const sidebar_items = [
         label: "Quản lý bệnh viện",
         subItems: [
             {
-                label: "Quản lý bác sĩ",
+                label: "Quản lý bệnh viện",
                 href: "/admin/hospital",
                 icon: SquareChartGantt,
             },

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { GET_CONSULTATIONS_QUERY_KEY } from "./use-get-consultation";
 
 export const consultationSchema = z.object({
     timeTemplates: z
@@ -55,9 +56,9 @@ export default function useCreateConsultation({ doctorId }: REQUEST.DoctorId) {
             onSuccess: async () => {
                 hideBackdrop();
                 onLoadData();
-                // await queryClient.invalidateQueries({
-                //     queryKey: [GET_DOCTORS_QUERY_KEY],
-                // });
+                await queryClient.invalidateQueries({
+                    queryKey: [GET_CONSULTATIONS_QUERY_KEY],
+                });
                 form.reset();
             },
             onError: (err) => {

@@ -45,7 +45,8 @@ export default function ModeratorManageBlogComponent() {
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
         []
     );
-    const [selectedOption, setSelectedOption] = useState<string>("createdDate");
+    const [selectedOption, setSelectedOption] =
+        useState<string>("modifiedDate");
 
     const [isSortAsc, setIsSortAsc] = useState(true);
 
@@ -65,7 +66,7 @@ export default function ModeratorManageBlogComponent() {
         setSelectModerator("");
         setSelectedCategoryIds([]);
         setSearchTerm("");
-        setSelectedOption("createdDate");
+        setSelectedOption("modifiedDate");
     };
 
     const { categories, isPending } = useGetCategories();

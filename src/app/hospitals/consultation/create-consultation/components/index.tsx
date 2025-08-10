@@ -1,11 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, User, Save, Calendar } from "lucide-react";
+import { Clock, User, Save } from "lucide-react";
 import {
     Dialog,
     DialogContent,
-    DialogTrigger,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
@@ -26,6 +25,7 @@ import ExcelImportDialog from "./excel-import-dialog";
 import WeeklySchedule, { TimeSlot } from "./weekly-schedule";
 import Header from "./header";
 import DateSelector from "./date-selector";
+import { useGetConsultationsCursor } from "@/app/hospitals/consultation/create-consultation/hooks/use-get-consultation";
 
 interface DaySchedule {
     date: string;
@@ -59,6 +59,51 @@ const mockDoctors = {
     ],
 };
 
+// Utility to generate week options (unchanged)
+const generateWeekOptionsForMonth = (year: number, month: number) => {
+    const weeks: WeekOption[] = [];
+    const firstDay = new Date(year, month - 1, 1);
+    const lastDay = new Date(year, month, 0);
+
+    let currentWeekStart = new Date(firstDay);
+    currentWeekStart.setDate(
+        firstDay.getDate() - ((firstDay.getDay() + 6) % 7)
+    );
+
+    let weekNumber = 1;
+    while (currentWeekStart <= lastDay) {
+        const weekEnd = new Date(currentWeekStart);
+        weekEnd.setDate(currentWeekStart.getDate() + 6);
+
+        if (weekEnd >= firstDay && currentWeekStart <= lastDay) {
+            const startStr = currentWeekStart.toLocaleDateString("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+            });
+            const endStr = weekEnd.toLocaleDateString("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+            });
+
+            weeks.push({
+                label: `Tuần ${weekNumber} (${startStr} - ${endStr})`,
+                value: `week-${year}-${month}-${weekNumber}`,
+                dates: Array.from({ length: 7 }, (_, index) => {
+                    const date = new Date(currentWeekStart);
+                    date.setDate(currentWeekStart.getDate() + index);
+                    return date.toISOString().split("T")[0];
+                }),
+                weekStart: new Date(currentWeekStart),
+                weekEnd: new Date(weekEnd),
+            });
+
+            weekNumber++;
+        }
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    }
+    return weeks;
+};
+
 export default function CreateDoctorSchedule() {
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
     const [loading, setLoading] = useState(false);
@@ -69,7 +114,7 @@ export default function CreateDoctorSchedule() {
         slotIndex: number;
     } | null>(null);
 
-    // State cho việc chọn năm, tháng, tuần
+    // State for selecting year, month, week
     const currentDate = new Date();
     const [selectedYear, setSelectedYear] = useState<string>(
         currentDate.getFullYear().toString()
@@ -82,63 +127,90 @@ export default function CreateDoctorSchedule() {
     const [scheduleData, setScheduleData] = useState<ScheduleData>({
         timeTemplates: [],
     });
-    const [showPreview, setShowPreview] = useState(false);
 
-    const generateWeekOptionsForMonth = (year: number, month: number) => {
-        const weeks: WeekOption[] = [];
-        const firstDay = new Date(year, month - 1, 1);
-        const lastDay = new Date(year, month, 0);
-
-        let currentWeekStart = new Date(firstDay);
-        currentWeekStart.setDate(
-            firstDay.getDate() - ((firstDay.getDay() + 6) % 7)
+    // Compute week options and selectedWeekData from year/month/week
+    const weekOptions = useMemo(() => {
+        if (!selectedYear || !selectedMonth) return [];
+        return generateWeekOptionsForMonth(
+            parseInt(selectedYear, 10),
+            parseInt(selectedMonth, 10)
         );
+    }, [selectedYear, selectedMonth]);
 
-        let weekNumber = 1;
+    const selectedWeekData = useMemo(() => {
+        return weekOptions.find((w) => w.value === selectedWeek);
+    }, [weekOptions, selectedWeek]);
 
-        while (currentWeekStart <= lastDay) {
-            const weekEnd = new Date(currentWeekStart);
-            weekEnd.setDate(currentWeekStart.getDate() + 6);
+    // Prepare API params based on selected week
+    const apiParams = useMemo(() => {
+        if (!selectedWeekData) return null;
+        return {
+            pageSize: 7,
+            fromDate: selectedWeekData.weekStart.toISOString().split("T")[0],
+            toDate: selectedWeekData.weekEnd.toISOString().split("T")[0],
+        };
+    }, [
+        selectedWeekData?.weekStart?.getTime(),
+        selectedWeekData?.weekEnd?.getTime(),
+    ]);
 
-            if (weekEnd >= firstDay && currentWeekStart <= lastDay) {
-                const startStr = currentWeekStart.toLocaleDateString("vi-VN", {
-                    day: "2-digit",
-                    month: "2-digit",
-                });
-                const endStr = weekEnd.toLocaleDateString("vi-VN", {
-                    day: "2-digit",
-                    month: "2-digit",
-                });
+    // Use react-query to fetch consultations (infinite query)
+    const {
+        data: consultationData,
+        isLoading: isLoadingConsultations,
+        isError,
+        error,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch,
+    } = useGetConsultationsCursor(
+        { doctorId: selectedDoctorId },
+        apiParams || { pageSize: 7, fromDate: "", toDate: "" }
+    );
 
-                weeks.push({
-                    label: `Tuần ${weekNumber} (${startStr} - ${endStr})`,
-                    value: `week-${year}-${month}-${weekNumber}`,
-                    dates: Array.from({ length: 7 }, (_, index) => {
-                        const date = new Date(currentWeekStart);
-                        date.setDate(currentWeekStart.getDate() + index);
-                        return date.toISOString().split("T")[0];
-                    }),
-                    weekStart: new Date(currentWeekStart),
-                    weekEnd: new Date(weekEnd),
-                });
+    // Clear scheduleData when doctor or week changes
+    useEffect(() => {
+        setScheduleData({ timeTemplates: [] });
+    }, [selectedDoctorId, selectedWeek]);
 
-                weekNumber++;
-            }
-
-            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    // Transform API data into scheduleData when data pages arrive
+    useEffect(() => {
+        // Only proceed if a week and doctor are selected
+        if (!selectedDoctorId || !selectedWeekData) {
+            return;
         }
+        if (consultationData?.pages) {
+            const allConsultations = consultationData.pages.flatMap(
+                (page: any) => page.data?.items ?? []
+            );
 
-        return weeks;
-    };
+            if (allConsultations.length > 0) {
+                // Map API items to our schedule format
+                const transformedScheduleData: ScheduleData = {
+                    timeTemplates: allConsultations.map((item: any) => ({
+                        date: item.date.split("T")[0], // YYYY-MM-DD
+                        times: item.consultationTemplates.map(
+                            (template: any) => ({
+                                start: template.startTime,
+                                end: template.endTime,
+                                id: template.id,
+                                status: template.status,
+                            })
+                        ),
+                    })),
+                };
+                setScheduleData(transformedScheduleData);
+            } else {
+                // No items returned for this week
+                setScheduleData({ timeTemplates: [] });
+            }
+        }
+    }, [consultationData?.pages]);
 
-    const weekOptions =
-        selectedYear && selectedMonth
-            ? generateWeekOptionsForMonth(
-                  parseInt(selectedYear),
-                  parseInt(selectedMonth)
-              )
-            : [];
-    const selectedWeekData = weekOptions.find((w) => w.value === selectedWeek);
+    // Reset scheduleData before calling API (already handled by above effect)
+    // (The useEffect above takes care of updating scheduleData when data arrives.)
+
     const selectedDoctor = mockDoctors.items.find(
         (d) => d.id === selectedDoctorId
     );
@@ -148,9 +220,7 @@ export default function CreateDoctorSchedule() {
     });
 
     const handleFormSubmit = async (formData: any) => {
-        if (!onSubmit || typeof onSubmit !== "function") {
-            return;
-        }
+        if (!onSubmit) return;
         try {
             await onSubmit(formData, () => {});
         } catch (error) {
@@ -167,9 +237,11 @@ export default function CreateDoctorSchedule() {
             onSubmit(formData, () => {
                 form.reset();
                 setScheduleData({ timeTemplates: [] });
+                toast.success("Lưu lịch tuần thành công!");
             });
         } catch (error) {
             console.error("Error submitting schedule data:", error);
+            toast.error("Có lỗi xảy ra khi lưu lịch tuần.");
         }
     };
 
@@ -199,13 +271,18 @@ export default function CreateDoctorSchedule() {
                     []
                 ),
             };
-
             await handleFormSubmit(transformedData);
         } catch (error) {
             console.error("Error importing consultations:", error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleWeekChange = (newWeek: string) => {
+        setSelectedWeek(newWeek);
+        // Reset editing state when week changes
+        setEditingSlot(null);
     };
 
     return (
@@ -217,7 +294,7 @@ export default function CreateDoctorSchedule() {
                 <Header />
             </header>
 
-            <div className=" py-4">
+            <div className="py-4">
                 {/* Doctor Selection and Date Selection */}
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
@@ -277,14 +354,14 @@ export default function CreateDoctorSchedule() {
                             selectedMonth={selectedMonth}
                             setSelectedMonth={setSelectedMonth}
                             selectedWeek={selectedWeek}
-                            setSelectedWeek={setSelectedWeek}
+                            setSelectedWeek={handleWeekChange}
                             selectedWeekData={selectedWeekData}
                         />
 
                         {/* Import Excel */}
                         <div className="space-y-3">
                             <div className="flex items-center space-x-2">
-                                <Calendar className="h-5 w-5 text-[#248FCA]" />
+                                <Clock className="h-5 w-5 text-[#248FCA]" />
                                 <h2 className="text-lg font-semibold text-[#248FCA]">
                                     Tạo bằng file
                                 </h2>
@@ -324,14 +401,14 @@ export default function CreateDoctorSchedule() {
                         </motion.div>
                     )}
 
-                    {/* Hiển thị thông tin đã chọn */}
+                    {/* Selected Info Display */}
                     {selectedYear &&
                         selectedMonth &&
                         selectedWeek &&
                         selectedWeekData && (
                             <div className="mt-4 p-4 bg-green-100 border border-green-300 rounded-xl">
                                 <div className="flex items-center space-x-2 text-green-800">
-                                    <Calendar className="h-5 w-5" />
+                                    <Clock className="h-5 w-5" />
                                     <span className="font-medium">
                                         Đã chọn: {selectedWeekData.label} - Năm{" "}
                                         {selectedYear}
@@ -339,9 +416,23 @@ export default function CreateDoctorSchedule() {
                                 </div>
                             </div>
                         )}
+
+                    {/* Loading State */}
+                    {isLoadingConsultations &&
+                        selectedDoctorId &&
+                        selectedWeekData && (
+                            <div className="mt-4 p-4 bg-blue-100 border border-blue-300 rounded-xl">
+                                <div className="flex items-center space-x-2 text-blue-800">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-800 border-t-transparent"></div>
+                                    <span className="font-medium">
+                                        Đang tải dữ liệu khung giờ...
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                 </motion.div>
 
-                {/* View Mode Toggle */}
+                {/* View Mode Toggle & Weekly Schedule */}
                 {selectedDoctorId && selectedWeek && selectedWeekData && (
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
@@ -359,33 +450,11 @@ export default function CreateDoctorSchedule() {
 
                             <div className="flex items-center gap-4">
                                 <div className="flex gap-2">
-                                    {/* <Dialog
-                                        open={showPreview}
-                                        onOpenChange={setShowPreview}
-                                    >
-                                        <DialogTrigger asChild>
-                                            <Button variant="outline" size="sm">
-                                                Xem trước JSON
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
-                                            <DialogHeader>
-                                                <DialogTitle>
-                                                    Preview JSON
-                                                </DialogTitle>
-                                            </DialogHeader>
-                                            <pre className="bg-gray-900 text-green-400 p-4 rounded-lg text-sm overflow-auto">
-                                                {JSON.stringify(
-                                                    scheduleData,
-                                                    null,
-                                                    2
-                                                )}
-                                            </pre>
-                                        </DialogContent>
-                                    </Dialog> */}
                                     <Button
                                         onClick={handleScheduleSubmit}
-                                        disabled={loading}
+                                        disabled={
+                                            loading || isLoadingConsultations
+                                        }
                                         size="sm"
                                         className="bg-[#248FCA] hover:bg-[#248FCA]/90"
                                     >
@@ -396,6 +465,22 @@ export default function CreateDoctorSchedule() {
                                         )}
                                         Lưu lịch tuần
                                     </Button>
+
+                                    {/* Load More Button nếu có hasNextPage */}
+                                    {hasNextPage && (
+                                        <Button
+                                            onClick={() => fetchNextPage()}
+                                            disabled={isFetchingNextPage}
+                                            variant="outline"
+                                            size="sm"
+                                        >
+                                            {isFetchingNextPage ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent mr-2"></div>
+                                            ) : (
+                                                "Tải thêm"
+                                            )}
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -407,6 +492,7 @@ export default function CreateDoctorSchedule() {
                             setScheduleData={setScheduleData}
                             editingSlot={editingSlot}
                             setEditingSlot={setEditingSlot}
+                            isLoading={isLoadingConsultations}
                         />
                     </motion.div>
                 )}
@@ -443,7 +529,7 @@ export default function CreateDoctorSchedule() {
                             className="bg-white rounded-2xl p-12 shadow-lg border border-gray-200 text-center"
                         >
                             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Calendar className="h-10 w-10 text-[#248FCA]" />
+                                <Clock className="h-10 w-10 text-[#248FCA]" />
                             </div>
                             <h3 className="text-xl font-semibold text-gray-900 mb-3">
                                 Chọn thời gian để tiếp tục
@@ -456,7 +542,7 @@ export default function CreateDoctorSchedule() {
                     )}
             </div>
 
-            {/* Edit Dialog for table mode */}
+            {/* Edit Dialog for table mode (unchanged) */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
