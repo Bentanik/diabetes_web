@@ -3,11 +3,25 @@ import ChatMain from "@/app/admin/train-ai/chat/components";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { BarChartIcon, BellIcon, Settings2 } from "lucide-react";
+import {
+    BarChartIcon,
+    BellIcon,
+    PlusIcon,
+    Settings2,
+    SettingsIcon,
+} from "lucide-react";
+import { useState } from "react";
+import SettingDialog from "./components/setting-dialog";
 
 export default function ChatPage() {
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+    };
+
     return (
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div className="">
             <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -24,8 +38,13 @@ export default function ChatPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" className="gap-2">
-                            <Settings2 className="w-4 h-4" />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="gap-2 bg-transparent"
+                            onClick={() => setModalOpen(true)}
+                        >
+                            <SettingsIcon className="w-4 h-4" />
                             Cài đặt
                         </Button>
                         <Button variant="ghost" size="icon">
@@ -37,6 +56,7 @@ export default function ChatPage() {
                     </div>
                 </div>
             </motion.div>
+            <SettingDialog isOpen={modalOpen} onClose={handleCloseModal} />
 
             <ChatMain />
         </div>

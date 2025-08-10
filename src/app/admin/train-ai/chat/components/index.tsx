@@ -118,7 +118,10 @@ export default function ChatMain() {
 
     return (
         <div className="mx-auto">
-            <div className="relative bg-white rounded-3xl shadow-2xl border border-[#248FCA]/10 flex flex-col h-[calc(100vh-240px)] max-h-[720px] overflow-hidden">
+            <div
+                style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}
+                className="relative bg-white rounded-3xl border border-[#248FCA]/10 flex flex-col h-[calc(100vh-240px)] max-h-[720px] overflow-hidden"
+            >
                 {/* Modern Header */}
                 <div className="px-6 py-4 rounded-t-3xl bg-gradient-to-r from-[#248FCA] via-[#1e7bb8] to-[#248FCA]">
                     <div className="flex items-center justify-between">
@@ -297,7 +300,7 @@ export default function ChatMain() {
                         <Button
                             type="submit"
                             disabled={!message.trim()}
-                            className="h-[52px] w-[52px] p-0 rounded-2xl bg-gradient-to-r from-[#248FCA] to-[#1e7bb8] hover:from-[#1e7bb8] hover:to-[#248FCA] disabled:from-gray-300 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none cursor-pointer"
+                            className="h-[52px] w-[52px] p-0 rounded-2xl bg-gradient-to-r from-[#248FCA] to-[#1e7bb8] hover:from-[#1e7bb8] hover:to-[#248FCA] transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none cursor-pointer"
                         >
                             <Send className="w-5 h-5" />
                         </Button>

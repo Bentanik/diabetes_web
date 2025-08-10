@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import FolderList from "@/app/admin/train-ai/components/folder_list"
-import Header from "@/app/admin/train-ai/components/header"
+import FolderList from "@/app/admin/train-ai/components/folder_list";
+import Header from "@/app/admin/train-ai/components/header";
 
 export default function TrainAIComponent() {
     return (
@@ -15,5 +15,5 @@ export default function TrainAIComponent() {
                 <FolderList />
             </main>
         </div>
-    )
+    );
 }
