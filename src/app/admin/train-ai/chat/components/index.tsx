@@ -1,8 +1,14 @@
 "use client";
-
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import {
+    type FormEvent,
+    type KeyboardEvent,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Send, Trash2, ChevronDown, Bot, User } from "lucide-react";
 
 type ChatMessage = {
     role: "user" | "assistant";
@@ -18,18 +24,21 @@ const SUGGESTIONS = [
 ];
 
 const formatTime = (iso: string) =>
-    new Date(iso).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    new Date(iso).toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 
 export default function ChatMain() {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
             role: "assistant",
-            content: "Xin chào! Đây là khu vực kiểm thử hội thoại của admin.",
+            content:
+                "Xin chào! Đây là khu vực kiểm thử hội thoại của admin. Tôi sẵn sàng hỗ trợ bạn với mọi câu hỏi.",
             created_at: new Date().toISOString(),
         },
     ]);
-
     const listRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
 
@@ -43,8 +52,9 @@ export default function ChatMain() {
     const handleScroll = () => {
         const el = listRef.current;
         if (!el) return;
-        const threshold = 48; // px
-        const distanceFromBottom = el.scrollHeight - el.clientHeight - el.scrollTop;
+        const threshold = 48;
+        const distanceFromBottom =
+            el.scrollHeight - el.clientHeight - el.scrollTop;
         setIsAtBottom(distanceFromBottom <= threshold);
     };
 
@@ -56,28 +66,34 @@ export default function ChatMain() {
 
     const sendMock = (text: string) => {
         const now = new Date().toISOString();
-        // Add user message and typing placeholder
         setMessages((prev) => [
             ...prev,
             { role: "user", content: text, created_at: now },
-            { role: "assistant", content: "Đang soạn...", created_at: now, isTyping: true },
+            {
+                role: "assistant",
+                content: "Đang soạn...",
+                created_at: now,
+                isTyping: true,
+            },
         ]);
 
-        // Replace typing with mock answer
         setTimeout(() => {
             setMessages((prev) => {
                 const copy = [...prev];
-                const idx = copy.findIndex((m, i) => i === copy.length - 1 && m.isTyping);
+                const idx = copy.findIndex(
+                    (m, i) => i === copy.length - 1 && m.isTyping
+                );
                 if (idx !== -1) {
                     copy[idx] = {
                         role: "assistant",
-                        content: "(mock) Đây là câu trả lời mẫu phù hợp ngữ cảnh kiểm thử.",
+                        content:
+                            "Đây là câu trả lời mẫu phù hợp ngữ cảnh kiểm thử. Tôi có thể giúp bạn với nhiều loại câu hỏi khác nhau và cung cấp thông tin chi tiết theo yêu cầu của bạn.",
                         created_at: new Date().toISOString(),
                     };
                 }
                 return copy;
             });
-        }, 800);
+        }, 1200);
     };
 
     const onSubmit = (e: FormEvent) => {
@@ -101,105 +117,193 @@ export default function ChatMain() {
     const clearConversation = () => setMessages([]);
 
     return (
-        <div className="mx-auto max-w-4xl">
-            <div className="relative border rounded-2xl bg-white shadow-md flex flex-col h-[calc(100vh-240px)] max-h-[720px]">
-                {/* Sub header */}
-                <div className="px-4 py-3 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-t-2xl bg-gray-50/60">
-                    <div>
-                        <div className="text-sm font-semibold text-gray-900">Phiên kiểm thử</div>
-                        <div className="text-xs text-gray-500">Mục tiêu: kiểm tra đáp ứng hội thoại theo tri thức</div>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        {SUGGESTIONS.map((s) => (
-                            <Button
-                                key={s}
-                                variant="outline"
-                                size="sm"
-                                className="h-7 px-2 text-xs bg-white hover:bg-gray-50 border-gray-200"
-                                onClick={() => setMessage(s)}
-                            >
-                                {s}
-                            </Button>
-                        ))}
+        <div className="mx-auto">
+            <div className="relative bg-white rounded-3xl shadow-2xl border border-[#248FCA]/10 flex flex-col h-[calc(100vh-240px)] max-h-[720px] overflow-hidden">
+                {/* Modern Header */}
+                <div className="px-6 py-4 rounded-t-3xl bg-gradient-to-r from-[#248FCA] via-[#1e7bb8] to-[#248FCA]">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
+                                <Bot className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <div className="font-semibold text-lg text-white">
+                                    Phiên kiểm thử AI
+                                </div>
+                                <div className="text-sm text-white/80">
+                                    Kiểm tra đáp ứng hội thoại theo tri thức
+                                </div>
+                            </div>
+                        </div>
                         <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs text-red-600 hover:bg-red-50"
+                            className="bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 rounded-full cursor-pointer"
                             onClick={clearConversation}
                         >
+                            <Trash2 className="w-4 h-4 mr-2" />
                             Xóa cuộc trò chuyện
                         </Button>
                     </div>
                 </div>
 
-                {/* Messages list */}
+                {/* Messages Area */}
                 <div
                     ref={listRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-white"
+                    className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-[#248FCA]/5 to-white"
                 >
                     {messages.length === 0 ? (
-                        <div className="text-sm text-gray-500">
-                            Chưa có tin nhắn. Hãy nhập câu hỏi bên dưới để bắt đầu.
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#248FCA]/20 to-[#248FCA]/10 rounded-full flex items-center justify-center mb-4">
+                                <Bot className="w-8 h-8 text-[#248FCA]" />
+                            </div>
+                            <div className="text-gray-600 text-lg">
+                                Chưa có tin nhắn
+                            </div>
+                            <div className="text-gray-500 text-sm mt-1">
+                                Hãy nhập câu hỏi bên dưới để bắt đầu
+                            </div>
                         </div>
                     ) : (
                         messages.map((m, idx) => (
-                            <div key={idx} className={`max-w-[78%] w-fit ${m.role === "user" ? "ml-auto" : ""}`}>
-                                <div className={`mb-1 text-[11px] ${m.role === "user" ? "text-right text-gray-500" : "text-gray-500"}`}>
-                                    {m.role === "user" ? "Bạn" : "Trợ lý"} • {formatTime(m.created_at)}
-                                </div>
+                            <div
+                                key={idx}
+                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${
+                                    m.role === "user" ? "flex-row-reverse" : ""
+                                }`}
+                            >
+                                {/* Avatar */}
                                 <div
-                                    className={`px-3 py-2 rounded-2xl text-sm leading-relaxed border break-words whitespace-pre-wrap ${m.role === "user"
-                                        ? "bg-gradient-to-br from-blue-600 to-blue-500 text-white border-blue-600 shadow-sm rounded-br-md"
-                                        : "bg-gray-50 text-gray-900 border-gray-200 shadow-sm rounded-bl-md"
-                                        } ${m.isTyping ? "opacity-80" : ""}`}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                        m.role === "user"
+                                            ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8]"
+                                            : "bg-gradient-to-br from-gray-500 to-gray-600"
+                                    }`}
                                 >
-                                    {m.isTyping ? "Đang soạn..." : m.content}
+                                    {m.role === "user" ? (
+                                        <User className="w-4 h-4 text-white" />
+                                    ) : (
+                                        <Bot className="w-4 h-4 text-white" />
+                                    )}
+                                </div>
+
+                                {/* Message Content */}
+                                <div
+                                    className={`max-w-[75%] ${
+                                        m.role === "user"
+                                            ? "items-end"
+                                            : "items-start"
+                                    } flex flex-col`}
+                                >
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs font-medium text-gray-600">
+                                            {m.role === "user"
+                                                ? "Bạn"
+                                                : "Trợ lý AI"}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                            {formatTime(m.created_at)}
+                                        </span>
+                                    </div>
+
+                                    <div
+                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${
+                                            m.role === "user"
+                                                ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8] text-white shadow-[#248FCA]/20 rounded-br-md"
+                                                : "bg-white text-gray-800 border border-[#248FCA]/10 shadow-[#248FCA]/5 rounded-bl-md hover:shadow-md hover:border-[#248FCA]/20"
+                                        } ${m.isTyping ? "animate-pulse" : ""}`}
+                                    >
+                                        {m.isTyping ? (
+                                            <div className="flex items-center gap-1">
+                                                <div className="flex gap-1">
+                                                    <div className="w-2 h-2 bg-[#248FCA]/60 rounded-full animate-bounce"></div>
+                                                    <div
+                                                        className="w-2 h-2 bg-[#248FCA]/60 rounded-full animate-bounce"
+                                                        style={{
+                                                            animationDelay:
+                                                                "0.1s",
+                                                        }}
+                                                    ></div>
+                                                    <div
+                                                        className="w-2 h-2 bg-[#248FCA]/60 rounded-full animate-bounce"
+                                                        style={{
+                                                            animationDelay:
+                                                                "0.2s",
+                                                        }}
+                                                    ></div>
+                                                </div>
+                                                <span className="ml-2 text-[#248FCA]">
+                                                    Đang soạn...
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div className="whitespace-pre-wrap break-words">
+                                                {m.content}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))
                     )}
                 </div>
 
-                {/* Scroll to bottom */}
+                {/* Scroll to Bottom Button */}
                 {!isAtBottom && (
-                    <div className="absolute bottom-24 right-4">
+                    <div className="absolute bottom-32 right-6 z-10">
                         <Button
                             onClick={scrollToBottom}
                             size="sm"
-                            variant="secondary"
-                            className="h-7 px-3 text-xs bg-white border border-gray-200 shadow-sm hover:bg-gray-50"
+                            className="h-10 w-10 p-0 rounded-full bg-white border border-[#248FCA]/20 shadow-lg hover:shadow-xl text-[#248FCA] hover:text-[#1e7bb8] hover:bg-[#248FCA]/5 transition-all duration-200 cursor-pointer"
+                            variant="ghost"
                         >
-                            Xuống cuối
+                            <ChevronDown className="w-4 h-4" />
                         </Button>
                     </div>
                 )}
 
-                {/* Composer */}
-                <form onSubmit={onSubmit} className="border-t p-3 bg-gray-50/60 rounded-b-2xl">
-                    <div className="flex items-end gap-2">
-                        <div className="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm">
+                {/* Input Area */}
+                <div className="p-6 bg-gradient-to-t from-[#248FCA]/5 to-white border-t border-[#248FCA]/10">
+                    {/* Suggestions */}
+                    {messages.length <= 1 && (
+                        <div className="mb-4">
+                            <div className="text-xs font-medium text-[#248FCA] mb-2">
+                                Gợi ý câu hỏi:
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {SUGGESTIONS.map((suggestion, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setMessage(suggestion)}
+                                        className="px-3 py-2 text-xs bg-[#248FCA]/10 hover:bg-[#248FCA]/20 text-[#248FCA] rounded-full transition-colors duration-200 border border-[#248FCA]/20 hover:border-[#248FCA]/30"
+                                    >
+                                        {suggestion}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <form onSubmit={onSubmit} className="flex items-end gap-3">
+                        <div className="flex-1 relative">
                             <Textarea
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 onKeyDown={onKeyDown}
-                                placeholder="Nhập tin nhắn... (Enter gửi, Shift+Enter xuống dòng)"
-                                className="text-sm min-h-[44px] max-h-32 border-0 focus-visible:ring-0 focus-visible:outline-none"
-                                rows={2}
+                                placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"
+                                className="min-h-[52px] max-h-32 resize-none border-2 border-[#248FCA]/20 rounded-2xl px-4 py-3 text-sm focus:border-[#248FCA] focus:ring-0 transition-colors duration-200 pr-12 bg-white/80 backdrop-blur-sm"
+                                rows={1}
                             />
                         </div>
                         <Button
                             type="submit"
                             disabled={!message.trim()}
-                            className="text-sm h-[44px] px-4 bg-[#248fca] hover:bg-[#248fca]/90"
+                            className="h-[52px] w-[52px] p-0 rounded-2xl bg-gradient-to-r from-[#248FCA] to-[#1e7bb8] hover:from-[#1e7bb8] hover:to-[#248FCA] disabled:from-gray-300 disabled:to-gray-400 transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none cursor-pointer"
                         >
-                            Gửi
+                            <Send className="w-5 h-5" />
                         </Button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     );
 }
-
-

@@ -7,6 +7,8 @@ import {
     SquarePen,
     Plus,
     SquareChartGantt,
+    Bot,
+    BotMessageSquare,
 } from "lucide-react";
 export const sidebar_items = [
     {
@@ -40,6 +42,18 @@ export const sidebar_items = [
         href: "/admin/train-ai",
         icon: BrainIcon,
         label: "Huấn luyện AI",
+        subItems: [
+            {
+                label: "Quản lý AI",
+                href: "/admin/train-ai",
+                icon: Bot,
+            },
+            {
+                label: "Kiểm thử AI",
+                href: "/admin/train-ai/chat",
+                icon: BotMessageSquare,
+            },
+        ],
     },
     {
         href: "/mentor/setting",
