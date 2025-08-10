@@ -1,28 +1,44 @@
 declare namespace REQUEST {
-    type CreateConsultation = {
+    type TimeRange = {
         start: string;
         end: string;
     };
 
+    type TimeTemplate = {
+        date: string;
+        times: TimeRange[];
+    };
+
     type TCreateConsultation = {
-        timeTemplates: CreateConsultation[];
+        timeTemplates: TimeTemplate[];
+    };
+
+    type GetConsultationsCursorParams = {
+        cursor?: string;
+        pageSize?: number;
+        fromDate: string;
+        toDate: string;
     };
 }
 
 declare namespace API {
-    type Consultation = {
+    type ConsultationTemplate = {
+        id: string;
         startTime: string;
         endTime: string;
         status: number;
     };
 
+    type ConsultationByDate = {
+        date: string;
+        consultationTemplates: ConsultationTemplate[];
+    };
+
     type TGetConsultations = {
-        items: Consultation[];
-        pageIndex: number;
+        items: ConsultationByDate[];
+        totalItems: number;
         pageSize: number;
-        totalCount: number;
-        totalPages: number;
+        nextCursor: string;
         hasNextPage: boolean;
-        hasPreviousPage: boolean;
     };
 }

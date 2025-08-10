@@ -1,40 +1,58 @@
-import { getConsultations } from "@/services/consultation/api-services";
-import { useQuery } from "@tanstack/react-query";
+import { getConsultationsCursor } from "@/services/consultation/api-services";
+import { useInfiniteQuery, InfiniteData } from "@tanstack/react-query";
 
 export const GET_CONSULTATIONS_QUERY_KEY = "consultations";
 
-export const useGetConsultations = ({ doctorId }: REQUEST.DoctorId) => {
+export const useGetConsultationsCursor = (
+    { doctorId }: REQUEST.DoctorId,
+    params: REQUEST.GetConsultationsCursorParams
+) => {
+    const { pageSize, fromDate, toDate } = params;
+
     const {
-        data: consultations,
-        isPending,
+        data,
+        isLoading,
         isError,
         error,
-    } = useQuery<
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch,
+    } = useInfiniteQuery<
         TResponseData<API.TGetConsultations>,
         TMeta,
-        API.TGetConsultations
+        InfiniteData<TResponseData<API.TGetConsultations>>,
+        [string, string, REQUEST.GetConsultationsCursorParams]
     >({
-        queryKey: [GET_CONSULTATIONS_QUERY_KEY, doctorId],
-        queryFn: async () => {
-            const res = await getConsultations({ doctorId });
-            if (res.data == null) {
-                throw new Error("No data returned from get consultation");
-            }
-            return res as TResponseData<API.TGetConsultations>;
+        queryKey: [GET_CONSULTATIONS_QUERY_KEY, doctorId, params],
+        queryFn: async ({ pageParam = "" }) => {
+            const res = await getConsultationsCursor(
+                { doctorId },
+                {
+                    pageSize,
+                    fromDate,
+                    toDate,
+                    cursor: pageParam as string,
+                }
+            );
+            return res;
         },
-        select: (data) =>
-            data.data ?? {
-                items: [],
-                pageIndex: 0,
-                pageSize: 0,
-                totalCount: 0,
-                totalPages: 0,
-                hasNextPage: false,
-                hasPreviousPage: false,
-            },
-        staleTime: 1000 * 60 * 5,
-        refetchOnWindowFocus: true,
+        initialPageParam: "",
+        getNextPageParam: (lastPage) =>
+            lastPage.data?.hasNextPage ? lastPage.data.nextCursor : undefined,
+        staleTime: 0,
+        refetchOnMount: true,
+        refetchOnWindowFocus: false,
     });
 
-    return { consultations, isPending, isError, error };
+    return {
+        data,
+        isLoading,
+        isError,
+        error,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch,
+    };
 };

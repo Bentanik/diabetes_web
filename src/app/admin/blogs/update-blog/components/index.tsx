@@ -8,7 +8,11 @@ import UpdateBlogForm from "@/app/admin/blogs/update-blog/components/update-blog
 import { BellIcon, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-const Header = ({ blogId }: REQUEST.BlogId) => {
+interface HeaderProp {
+    blogId: string;
+}
+
+const Header = ({ blogId }: HeaderProp) => {
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -45,7 +49,13 @@ const Header = ({ blogId }: REQUEST.BlogId) => {
     );
 };
 
-export default function UpdateBlogComponent({ blogId }: REQUEST.BlogId) {
+interface UpdateBlogComponentProp {
+    blogId: string;
+}
+
+export default function UpdateBlogComponent({
+    blogId,
+}: UpdateBlogComponentProp) {
     return (
         <div>
             {/* Header */}

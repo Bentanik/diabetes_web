@@ -14,7 +14,7 @@ export const useGetDoctors = (params: REQUEST.GetDoctorsParams) => {
         queryFn: async () => {
             const res = await getDoctors(params);
             if (res.data == null) {
-                throw new Error("No data returned from getConversations");
+                throw new Error("No data returned from get doctors");
             }
             return res as TResponseData<API.TGetDoctors>;
         },

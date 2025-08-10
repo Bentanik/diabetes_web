@@ -47,6 +47,21 @@ export default function ReviewPostDialog({ blogId }: ReviewPostDialogProps) {
         }
     };
 
+    const handleApproveBlog = () => {
+        try {
+            const reviewData: REQUEST.ReviewBlog = {
+                isApproved: true,
+                reasonRejected: "",
+            };
+            onSubmit(reviewData);
+            setTimeout(() => {
+                router.push("/admin/blogs");
+            }, 3000);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     return (
         <Dialog open={isOpenDialog} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -107,6 +122,13 @@ export default function ReviewPostDialog({ blogId }: ReviewPostDialogProps) {
                     </form>
                 </Form>
             </DialogContent>
+            <Button
+                onClick={handleApproveBlog}
+                disabled={isPending}
+                className="cursor-pointer px-6 py-6 min-w-[180px] bg-[#248FCA] hover:bg-[#2490cad8] text-white hover:text-white"
+            >
+                {isPending ? "Đang xử lý..." : "Duyệt bài viết"}
+            </Button>
         </Dialog>
     );
 }

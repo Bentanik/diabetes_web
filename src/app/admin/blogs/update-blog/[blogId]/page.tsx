@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { use } from "react";
 import UpdateBlogComponent from "../components";
 
 type BlogDetailPageProps = {
@@ -7,11 +9,20 @@ type BlogDetailPageProps = {
     }>;
 };
 
-export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
-    const { blogId } = await params;
+export default function BlogDetailPage({ params }: BlogDetailPageProps) {
+    const { blogId } = use(params);
+
+    // Kiểm tra blogId có hợp lệ không
+    if (!blogId) {
+        return (
+            <div className="p-4">
+                <h1 className="text-xl text-red-600">Không tìm thấy blog ID</h1>
+            </div>
+        );
+    }
 
     return (
-        <div>
+        <div className="container mx-auto p-4">
             <UpdateBlogComponent blogId={blogId} />
         </div>
     );

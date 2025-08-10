@@ -113,18 +113,6 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
                     user.user?.roles?.includes("SystemAdmin") && (
                         <div className="mt-10 flex justify-end gap-4">
                             <ReviewPostDialog blogId={blogId} />
-                            <Button
-                                onClick={() => {
-                                    const reviewData: REQUEST.ReviewBlog = {
-                                        isApproved: true,
-                                        reasonRejected: "",
-                                    };
-                                    router.push("/admin/blogs");
-                                }}
-                                className="cursor-pointer px-6 py-6 min-w-[180px] bg-[#248FCA] hover:bg-[#2490cad8] text-white hover:text-white"
-                            >
-                                Duyệt bài viết
-                            </Button>
                         </div>
                     )}
             </div>
