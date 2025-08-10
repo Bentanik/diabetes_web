@@ -48,7 +48,7 @@ export default function ModeratorManageBlogComponent() {
     const [selectedOption, setSelectedOption] =
         useState<string>("modifiedDate");
 
-    const [isSortAsc, setIsSortAsc] = useState(true);
+    const [isSortAsc, setIsSortAsc] = useState(false);
 
     const pageSize = 6;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);

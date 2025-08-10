@@ -32,23 +32,7 @@ export const sidebar_items = [
             },
         ],
     },
-    {
-        href: "/admin/hospital-staff",
-        icon: UserRoundCog,
-        label: "Quản lý nhân viên bệnh viện",
-        subItems: [
-            {
-                label: "Quản lý nhân viên",
-                href: "/admin/hospital-staff",
-                icon: SquareChartGantt,
-            },
-            {
-                label: "Tạo nhân viên",
-                href: "/admin/hospital-staff/create-hospital-staff",
-                icon: Plus,
-            },
-        ],
-    },
+
     {
         href: "/admin/users",
         icon: UserIcon,

@@ -12,11 +12,11 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { CalendarDays, ChevronDownIcon } from "lucide-react";
+import { AlertCircle, CalendarDays, ChevronDownIcon } from "lucide-react";
 import { Controller } from "react-hook-form";
 
 interface DateOfBirthPickerProps {
-    control: any; // Thay thế bằng kiểu dữ liệu chính xác nếu có
+    control: any;
     name: string;
 }
 
@@ -31,7 +31,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
         <Controller
             control={control}
             name={name}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
                 <FormItem>
                     <FormControl>
                         <div>
@@ -83,7 +83,11 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
                             </Popover>
                         </div>
                     </FormControl>
-                    <FormMessage className="flex items-center gap-1" />
+                    {fieldState.error && (
+                        <FormMessage className="flex items-center gap-1">
+                            <AlertCircle className="h-4 w-4" />
+                        </FormMessage>
+                    )}
                 </FormItem>
             )}
         />

@@ -7,6 +7,7 @@ import {
     SquareChartGantt,
     User,
     UserCogIcon,
+    UserRoundCog,
     UsersIcon,
 } from "lucide-react";
 export const sidebar_items = [
@@ -38,9 +39,21 @@ export const sidebar_items = [
         label: "Nhóm Chat",
     },
     {
-        href: "/mentor/setting",
-        icon: BarChart,
-        label: "Báo cáo",
+        href: "/hospitals/hospital-staff",
+        icon: UserRoundCog,
+        label: "Quản lý nhân viên bệnh viện",
+        subItems: [
+            {
+                label: "Quản lý nhân viên",
+                href: "/hospitals/hospital-staff",
+                icon: SquareChartGantt,
+            },
+            {
+                label: "Tạo nhân viên",
+                href: "/hospitals/hospital-staff/create-hospital-staff",
+                icon: Plus,
+            },
+        ],
     },
     {
         href: "/mentor/setting",

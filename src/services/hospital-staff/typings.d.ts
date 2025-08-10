@@ -21,7 +21,6 @@ declare namespace REQUEST {
         dateOfBirth: string;
         gender: GenderType;
         avatarId: string;
-        hospitalId: string;
     };
     enum GenderType {
         Male = 0,
