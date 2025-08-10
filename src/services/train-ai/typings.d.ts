@@ -29,13 +29,13 @@ declare namespace REQUEST {
     language: vi;
   };
 
-  type TUpdateSettingsRequest = {
-    system_prompt: string;
-    available_collections: string[];
-  };
-
   type TTrainingDocumentRequest = {
     document_id: string;
+  };
+
+  type TUpdateSettingsRequest = {
+    number_of_passages: number;
+    search_accuracy: number;
   };
 }
 
@@ -76,4 +76,9 @@ declare namespace API {
     created_at: string;
     updated_at: string;
   };
+
+  type TSettings = {
+    number_of_passages: number;
+    search_accuracy: number;
+  }
 }

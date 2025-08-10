@@ -7,6 +7,8 @@ import {
   getKnowledgeListAsync,
   trainDocumentAsync,
   uploadDocumentAsync,
+  updateSettingAsync,
+  getSettingsAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -131,3 +133,19 @@ export const useTrainDocumentService = () => {
     mutationFn: (data) => trainDocumentAsync(data),
   });
 };
+
+export const useUpdateSettingsService = () => {
+  return useMutation<TResponseData, TMeta, REQUEST.TUpdateSettingsRequest>({
+    mutationFn: (data) => updateSettingAsync(data),
+  });
+};
+
+export const useGetSettingService = () => {
+  return useQuery({
+    queryKey: ["settings"],
+    queryFn: () => getSettingsAsync(),
+    select: (data) => data.data,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+  });
+}

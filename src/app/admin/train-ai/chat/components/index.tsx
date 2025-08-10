@@ -9,12 +9,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Trash2, ChevronDown, Bot, User } from "lucide-react";
+import axios from "axios";
 
 type ChatMessage = {
-    role: "user" | "assistant";
+    id?: string;
+    session_id?: string;
+    user_id?: string;
+    role: "user" | "assistant" | "ai";
     content: string;
     created_at: string;
+    updated_at?: string;
     isTyping?: boolean;
+};
+
+type ChatHistoryResponse = {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    data: ChatMessage[];
+};
+
+type SendMessageResponse = {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    data: {
+        id: string;
+        session_id: string;
+        user_id: string;
+        content: string;
+        role: "ai" | "user";
+        created_at: string;
+        updated_at: string;
+    };
 };
 
 const SUGGESTIONS = [
@@ -22,6 +49,10 @@ const SUGGESTIONS = [
     "Gợi ý chế độ ăn tuần này",
     "Danh sách thực phẩm nên hạn chế",
 ];
+
+const API_BASE_URL = "http://localhost:8000/api/v1/rag";
+const FIXED_USER_ID = "admin";
+const FIXED_SESSION_ID = "68985cc37d6ab1c4a497a66d";
 
 const formatTime = (iso: string) =>
     new Date(iso).toLocaleTimeString("vi-VN", {
@@ -31,14 +62,8 @@ const formatTime = (iso: string) =>
 
 export default function ChatMain() {
     const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        {
-            role: "assistant",
-            content:
-                "Xin chào! Đây là khu vực kiểm thử hội thoại của admin. Tôi sẵn sàng hỗ trợ bạn với mọi câu hỏi.",
-            created_at: new Date().toISOString(),
-        },
-    ]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const listRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
 
@@ -64,36 +89,119 @@ export default function ChatMain() {
         el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     };
 
-    const sendMock = (text: string) => {
-        const now = new Date().toISOString();
+    // Load chat history on component mount
+    useEffect(() => {
+        loadChatHistory();
+    }, []);
+
+    const loadChatHistory = async () => {
+        try {
+            setIsLoading(true);
+            const response = await axios.get<ChatHistoryResponse>(
+                `${API_BASE_URL}/chat?session_id=${FIXED_SESSION_ID}`,
+                {
+                    headers: {
+                        accept: "application/json",
+                    },
+                }
+            );
+
+            if (response.data.isSuccess) {
+                const historyMessages = response.data.data.map((msg) => ({
+                    ...msg,
+                    role: msg.role === "ai" ? "assistant" : msg.role,
+                })) as ChatMessage[];
+                setMessages(historyMessages);
+            }
+        } catch (error) {
+            console.error("Error loading chat history:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const sendMessage = async (text: string) => {
+        const userMessage: ChatMessage = {
+            role: "user",
+            content: text,
+            created_at: new Date().toISOString(),
+        };
+
+        // Add user message and typing indicator
         setMessages((prev) => [
             ...prev,
-            { role: "user", content: text, created_at: now },
+            userMessage,
             {
                 role: "assistant",
                 content: "Đang soạn...",
-                created_at: now,
+                created_at: new Date().toISOString(),
                 isTyping: true,
             },
         ]);
 
-        setTimeout(() => {
-            setMessages((prev) => {
-                const copy = [...prev];
-                const idx = copy.findIndex(
-                    (m, i) => i === copy.length - 1 && m.isTyping
-                );
-                if (idx !== -1) {
-                    copy[idx] = {
-                        role: "assistant",
-                        content:
-                            "Đây là câu trả lời mẫu phù hợp ngữ cảnh kiểm thử. Tôi có thể giúp bạn với nhiều loại câu hỏi khác nhau và cung cấp thông tin chi tiết theo yêu cầu của bạn.",
-                        created_at: new Date().toISOString(),
-                    };
+        try {
+            const response = await axios.post<SendMessageResponse>(
+                `${API_BASE_URL}/chat`,
+                {
+                    content: text,
+                    user_id: FIXED_USER_ID,
+                    session_id: FIXED_SESSION_ID,
+                },
+                {
+                    headers: {
+                        accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
                 }
-                return copy;
+            );
+
+            // Remove typing indicator and add AI response from API
+            if (response.data.isSuccess && response.data.data) {
+                const aiMessage = response.data.data;
+                setMessages((prev) => {
+                    const withoutTyping = prev.filter((msg) => !msg.isTyping);
+                    return [
+                        ...withoutTyping,
+                        {
+                            id: aiMessage.id,
+                            session_id: aiMessage.session_id,
+                            user_id: aiMessage.user_id,
+                            role: aiMessage.role === "ai" ? "assistant" : aiMessage.role,
+                            content: aiMessage.content,
+                            created_at: aiMessage.created_at,
+                            updated_at: aiMessage.updated_at,
+                        },
+                    ];
+                });
+            } else {
+                // Handle unsuccessful response
+                setMessages((prev) => {
+                    const withoutTyping = prev.filter((msg) => !msg.isTyping);
+                    return [
+                        ...withoutTyping,
+                        {
+                            role: "assistant",
+                            content: "Xin lỗi, tôi không thể trả lời lúc này.",
+                            created_at: new Date().toISOString(),
+                        },
+                    ];
+                });
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+            // Remove typing indicator and show error
+            setMessages((prev) => {
+                const withoutTyping = prev.filter((msg) => !msg.isTyping);
+                return [
+                    ...withoutTyping,
+                    {
+                        role: "assistant",
+                        content: "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.",
+                        created_at: new Date().toISOString(),
+                    },
+                ];
             });
-        }, 1200);
+        }
     };
 
     const onSubmit = (e: FormEvent) => {
@@ -101,7 +209,7 @@ export default function ChatMain() {
         const text = message.trim();
         if (!text) return;
         setMessage("");
-        sendMock(text);
+        sendMessage(text);
     };
 
     const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -110,11 +218,13 @@ export default function ChatMain() {
             const text = message.trim();
             if (!text) return;
             setMessage("");
-            sendMock(text);
+            sendMessage(text);
         }
     };
 
-    const clearConversation = () => setMessages([]);
+    const clearConversation = () => {
+        setMessages([]);
+    };
 
     return (
         <div className="mx-auto">
@@ -154,7 +264,16 @@ export default function ChatMain() {
                     onScroll={handleScroll}
                     className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-[#248FCA]/5 to-white"
                 >
-                    {messages.length === 0 ? (
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#248FCA]/20 to-[#248FCA]/10 rounded-full flex items-center justify-center mb-4">
+                                <Bot className="w-8 h-8 text-[#248FCA] animate-pulse" />
+                            </div>
+                            <div className="text-gray-600 text-lg">
+                                Đang tải lịch sử...
+                            </div>
+                        </div>
+                    ) : messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center">
                             <div className="w-16 h-16 bg-gradient-to-br from-[#248FCA]/20 to-[#248FCA]/10 rounded-full flex items-center justify-center mb-4">
                                 <Bot className="w-8 h-8 text-[#248FCA]" />
@@ -170,17 +289,15 @@ export default function ChatMain() {
                         messages.map((m, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${
-                                    m.role === "user" ? "flex-row-reverse" : ""
-                                }`}
+                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${m.role === "user" ? "flex-row-reverse" : ""
+                                    }`}
                             >
                                 {/* Avatar */}
                                 <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                        m.role === "user"
-                                            ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8]"
-                                            : "bg-gradient-to-br from-gray-500 to-gray-600"
-                                    }`}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "user"
+                                        ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8]"
+                                        : "bg-gradient-to-br from-gray-500 to-gray-600"
+                                        }`}
                                 >
                                     {m.role === "user" ? (
                                         <User className="w-4 h-4 text-white" />
@@ -191,11 +308,10 @@ export default function ChatMain() {
 
                                 {/* Message Content */}
                                 <div
-                                    className={`max-w-[75%] ${
-                                        m.role === "user"
-                                            ? "items-end"
-                                            : "items-start"
-                                    } flex flex-col`}
+                                    className={`max-w-[75%] ${m.role === "user"
+                                        ? "items-end"
+                                        : "items-start"
+                                        } flex flex-col`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-xs font-medium text-gray-600">
@@ -209,11 +325,10 @@ export default function ChatMain() {
                                     </div>
 
                                     <div
-                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${
-                                            m.role === "user"
-                                                ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8] text-white shadow-[#248FCA]/20 rounded-br-md"
-                                                : "bg-white text-gray-800 border border-[#248FCA]/10 shadow-[#248FCA]/5 rounded-bl-md hover:shadow-md hover:border-[#248FCA]/20"
-                                        } ${m.isTyping ? "animate-pulse" : ""}`}
+                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${m.role === "user"
+                                            ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8] text-white shadow-[#248FCA]/20 rounded-br-md"
+                                            : "bg-white text-gray-800 border border-[#248FCA]/10 shadow-[#248FCA]/5 rounded-bl-md hover:shadow-md hover:border-[#248FCA]/20"
+                                            } ${m.isTyping ? "animate-pulse" : ""}`}
                                     >
                                         {m.isTyping ? (
                                             <div className="flex items-center gap-1">

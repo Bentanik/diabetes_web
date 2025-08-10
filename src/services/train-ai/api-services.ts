@@ -182,3 +182,26 @@ export const trainDocumentAsync = async (
   });
   return response.data;
 };
+
+export const getSettingsAsync = async () => {
+  const response = await request<TResponseData<API.TSettings>>(
+    API_ENDPOINTS.SETTING,
+    {
+      method: "GET",
+    }
+  );
+
+  return response.data;
+}
+
+export const updateSettingAsync = async (data: REQUEST.TUpdateSettingsRequest) => {
+  const response = await request<TResponseData>(
+    API_ENDPOINTS.SETTING,
+    {
+      method: "PUT",
+      data,
+    }
+  );
+
+  return response.data;
+}

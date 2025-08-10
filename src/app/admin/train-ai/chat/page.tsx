@@ -4,10 +4,7 @@ import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
-    BarChartIcon,
     BellIcon,
-    PlusIcon,
-    Settings2,
     SettingsIcon,
 } from "lucide-react";
 import { useState } from "react";
