@@ -1,19 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { use, useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/admin/train-ai/[id]/upload/components/header";
 import UploadArea from "@/app/admin/train-ai/[id]/upload/components/upload_area";
 import ValidationInfo from "@/app/admin/train-ai/[id]/upload/components/validation_info";
 import WarningModal from "@/app/admin/train-ai/[id]/upload/components/warning_modal";
-import FileUploadCard from "@/app/admin/train-ai/[id]/upload/components/file_upload_card";
 import { useNotification } from "@/context/notification_context";
 import { useUploadDocument } from "@/app/admin/train-ai/[id]/upload/hooks/useUploadDocument";
 import { fileForTrainAI } from "@/lib/validations/file_train_ai";
-import { useGetActiveUploadJobService } from "@/services/job/services";
 import HistoryUploadFileDisplay from "@/app/admin/train-ai/[id]/upload/components/history_upload_file_display";
-import { useGetKnowledgeBaseByIdService } from "@/services/train-ai/services";
+import { useGetKnowledgeByIdService } from "@/services/train-ai/services";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,9 +19,8 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import CreateDocumentModal from "@/app/admin/train-ai/[id]/upload/components/create-document";
 import { CreateDocumentFormData } from "@/lib/validations/document.schema";
 
-export default function UploadPageComponent({ params }: { params: Promise<{ id: string }> }) {
+export default function UploadPageComponent({ id }: { id: string }) {
     const router = useRouter();
-    const { id } = use(params);
 
     const [isDragOver, setIsDragOver] = useState(false);
     const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
@@ -33,10 +30,6 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
 
     const [fileToUpload, setFileToUpload] = useState<File | null>(null);
 
-    // Thêm state cho upload UI
-    const [uploadingFile, setUploadingFile] = useState<File | null>(null);
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
-
     // State cho timeout handling
     const [loadingTimeout, setLoadingTimeout] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
@@ -44,10 +37,7 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
     const { handleUploadDocument } = useUploadDocument();
     const { addNotification } = useNotification();
 
-    const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeBaseByIdService(id);
-
-    // Lấy job active (polling)
-    const { job, refetch } = useGetActiveUploadJobService();
+    const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeByIdService(id);
 
     // Timeout handler - 10 giây
     useEffect(() => {
@@ -100,25 +90,17 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
 
     const handleUploadFile = useCallback(
         async (data: CreateDocumentFormData, file: File) => {
-            setUploadingFile(file);
-            setUploadProgress(0);
-
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("kb_id", id);
+            formData.append("knowledge_id", id);
             formData.append("title", data.name);
             formData.append("description", data.description);
 
             try {
                 handleUploadDocument(formData, {
                     onSuccess: () => {
-                        setUploadingFile(null);
-                        setUploadProgress(0);
-                        refetch();
                     },
                     onError: (error) => {
-                        setUploadingFile(null);
-                        setUploadProgress(0);
                         addNotification({
                             title: error.title || "Lỗi tải lên",
                             message: error.detail || "Đã xảy ra lỗi khi tải lên tài liệu",
@@ -129,8 +111,6 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
                     },
                 });
             } catch {
-                setUploadingFile(null);
-                setUploadProgress(0);
                 addNotification({
                     title: "Lỗi tải lên",
                     message: "Đã xảy ra lỗi không xác định khi tải lên tài liệu",
@@ -384,19 +364,12 @@ export default function UploadPageComponent({ params }: { params: Promise<{ id: 
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                             onFileUpload={handleFileUpload}
-                            job={job ?? null}
+                            job={null}
                         />
                         <ValidationInfo />
                     </div>
                     <div className="lg:col-span-2 flex flex-col gap-4">
-                        <FileUploadCard
-                            uploadingFile={uploadingFile}
-                            uploadProgress={uploadProgress}
-                            job={job ?? null}
-                        />
-                        <HistoryUploadFileDisplay
-                            kb_name={knowledgeBase.name}
-                        />
+                        <HistoryUploadFileDisplay />
                     </div>
                 </div>
             </div>

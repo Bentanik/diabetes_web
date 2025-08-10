@@ -1,25 +1,22 @@
 /* eslint-disable import/no-anonymous-default-export */
-const TRAIN_AI = "http://localhost:5023/api/v1/rag";
-const KNOWLEDGE_BASE = TRAIN_AI + "/knowledge-bases";
+const TRAIN_AI = "http://localhost:8000/api/v1/rag";
+const KNOWLEDGES = TRAIN_AI + "/knowledges";
 
-const KNOWLEDGE_BASE_DOCUMENTS = `${KNOWLEDGE_BASE}/documents`;
+const DOCUMENTS = `${TRAIN_AI}/documents`;
 
-const KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID = (id: string) =>
-  `${KNOWLEDGE_BASE}/${id}/documents`;
+const GET_DOCUMENT_BY_ID = (id: string) => `${DOCUMENTS}/${id}`;
 
-const KNOWLEDGE_BASE_UPLOAD_DOCUMENT = `${KNOWLEDGE_BASE_DOCUMENTS}/upload`;
+const DOWNLOAD_DOCUMENT = (id: string) => `${DOCUMENTS}/${id}/download`;
 
-const KNOWLEDGE_BASE_DOWNLOAD_DOCUMENT = (id: string) =>
-  `${KNOWLEDGE_BASE_DOCUMENTS}/${id}/download`;
+const TRAIN_DOCUMENT = `${TRAIN_AI}/train-ai`;
 
-const KNOWLEDGE_BASE_TRAIN_DOCUMENT = (id: string) =>
-  `${KNOWLEDGE_BASE_DOCUMENTS}/${id}/training`;
+const SETTING = `${TRAIN_AI}/setting`;
 
 export default {
-  KNOWLEDGE_BASE,
-  KNOWLEDGE_BASE_DOCUMENTS,
-  KNOWLEDGE_BASE_UPLOAD_DOCUMENT,
-  KNOWLEDGE_BASE_DOWNLOAD_DOCUMENT,
-  KNOWLEDGE_BASE_GET_DOCUMENT_BY_ID,
-  KNOWLEDGE_BASE_TRAIN_DOCUMENT,
+  KNOWLEDGES,
+  DOCUMENTS,
+  GET_DOCUMENT_BY_ID,
+  DOWNLOAD_DOCUMENT,
+  TRAIN_DOCUMENT,
+  SETTING,
 };

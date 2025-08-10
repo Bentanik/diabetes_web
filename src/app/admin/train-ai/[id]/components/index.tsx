@@ -3,7 +3,7 @@
 import DocumentMain from "@/app/admin/train-ai/[id]/components/document_main"
 import { LoadingSkeleton } from "@/app/admin/train-ai/[id]/components/document_main_skeleton"
 import Header from "@/app/admin/train-ai/[id]/components/header"
-import { useGetKnowledgeBaseByIdService } from "@/services/train-ai/services"
+import { useGetKnowledgeByIdService } from "@/services/train-ai/services"
 
 interface KnowledgeBaseDetailProps {
     id: string
@@ -11,7 +11,7 @@ interface KnowledgeBaseDetailProps {
 
 
 export default function KnowledgeBaseDetail({ id }: KnowledgeBaseDetailProps) {
-    const { data: knowledgeBase } = useGetKnowledgeBaseByIdService(id)
+    const { data: knowledgeBase } = useGetKnowledgeByIdService(id)
 
     if (!knowledgeBase) {
         return <LoadingSkeleton />

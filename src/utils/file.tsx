@@ -2,18 +2,17 @@ import { FileTextIcon } from 'lucide-react';
 
 export const getFileIcon = (type: string) => {
   const iconClass = "w-5 h-5";
-  switch (type) {
-    case ".pdf":
+
+  switch (true) {
+    case [".pdf", "application/pdf", "pdf"].includes(type):
       return <FileTextIcon className={`${iconClass} text-red-500`} />;
-    case ".docx":
-    case ".doc":
+    case [".docx", "application/msword", "docx"].includes(type):
       return <FileTextIcon className={`${iconClass} text-blue-500`} />;
-    case ".txt":
-      return <FileTextIcon className={`${iconClass} text-gray-500`} />;
     default:
       return <FileTextIcon className={`${iconClass} text-gray-500`} />;
   }
 };
+
 
 export const formatFileSize = (bytes: number) => {
   if (!bytes) return "0 KB"

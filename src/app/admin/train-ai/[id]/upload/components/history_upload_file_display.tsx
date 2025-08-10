@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,14 +30,15 @@ import {
     ArchiveIcon,
     TrainIcon,
     FileIcon,
+    AlertCircleIcon,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { useGetJobsService } from "@/services/job/services";
+import { useGetJobDocumentHistoryService } from "@/services/job/services";
 import { formatFileSize, getFileIcon } from "@/utils/file";
 import { downloadDocumentAsync } from "@/services/train-ai/api-services";
 import DeleteDocumentModal from "@/app/admin/train-ai/[id]/upload/components/delete_document";
+import { Progress } from "@/components/ui/progress";
 
-// Component để handle description với tooltip thông minh
 const SmartDescription = ({ description }: { description: string }) => {
     const [isOverflowing, setIsOverflowing] = useState(false);
     const textRef = useRef<HTMLParagraphElement>(null);
@@ -189,20 +189,176 @@ const formatDate = (dateString: string) => {
     }).format(date);
 };
 
-interface HistoryUploadFileDisplayProps {
-    kb_name: string;
+interface HistoryDocumentItemProps {
+    document: API.TJob;
+    onDelete: (document: API.TJob) => void;
+    onDownload: (document: API.TJob) => void;
 }
 
-export default function HistoryUploadFileDisplay({
-    kb_name,
-}: HistoryUploadFileDisplayProps) {
-    const { jobs, isPending, isJobError } = useGetJobsService({
+const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocumentItemProps) => {
+    return (
+        <div className="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50/50 hover:border-gray-300 transition-colors">
+            <div className="flex gap-4">
+                {/* Icon file */}
+                <div className="flex-shrink-0 flex items-start mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center">
+                        {getFileIcon(document.file.file_type)}
+                    </div>
+                </div>
+
+                {/* Nội dung chính */}
+                <div className="flex-1 min-w-0 flex flex-col space-y-2">
+                    <div className="flex justify-between items-start gap-3">
+                        <div className="min-w-0 flex-1">
+                            <h4 className="font-medium text-gray-900 text-base mb-1 truncate">{document.title}</h4>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                                <FileIcon className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{document.file.file_name}</span>
+                                <span>•</span>
+                                <span>{formatFileSize(document.file.file_size_bytes)}</span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                            <div className="flex gap-1">
+                                {document.is_document_delete && (
+                                    <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200 text-xs">
+                                        Đã xóa
+                                    </Badge>
+                                )}
+                                {document.is_document_duplicate && (
+                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200 text-xs">
+                                        Đã tồn tại
+                                    </Badge>
+                                )}
+
+                                {document.status.status === "failed" && (
+                                    <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200 text-xs">
+                                        Thất bại
+                                    </Badge>
+                                )}
+                            </div>
+                            {document.status.status === "completed" && !document.is_document_delete && !document.is_document_duplicate && (
+                                <div className="flex gap-2 mt-1">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 px-2.5 text-xs text-[#0d90db] border-[#0d90db]/30 hover:bg-[#0d90db]/5 hover:text-[#0d90db]"
+                                    >
+                                        <TrainIcon className="w-3 h-3 mr-1" />
+                                        Huấn luyện
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 px-2.5 text-xs text-red-600 border-red-300 hover:bg-red-50 hover:text-red-600"
+                                        onClick={() => onDelete(document)}
+                                    >
+                                        <Trash2Icon className="w-3 h-3 mr-1" />
+                                        Xóa
+                                    </Button>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild className="outline-none">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-7 w-7 p-0 text-gray-500 border-gray-300 hover:bg-gray-50"
+                                            >
+                                                <MoreHorizontal className="w-3 h-3" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-40">
+                                            <DropdownMenuItem className="text-sm py-2">
+                                                <EyeIcon className="w-4 h-4 mr-2" />
+                                                Xem chi tiết
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                className="text-sm py-2"
+                                                onClick={() => onDownload(document)}
+                                            >
+                                                <DownloadIcon className="w-4 h-4 mr-2" />
+                                                Tải xuống
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Mô tả nếu có */}
+                    {document.description && document.status.status !== "failed" && (
+                        <div>
+                            <SmartDescription description={document.description} />
+                        </div>
+                    )}
+
+                    {/* Nếu có lỗi */}
+                    {document.status.status === "failed" && (
+                        <div className="bg-red-50 border border-red-200 rounded-md p-2 text-sm text-red-700 flex items-center gap-2">
+                            <AlertCircleIcon className="w-4 h-4" />
+                            <span>{document.status.progress_message}</span>
+                            {document.status.progress !== undefined && (
+                                <span className="ml-auto text-xs font-medium">
+                                    Tiến trình lỗi: {document.status.progress}%
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        {document.status.status === "completed" && getStatusBadge(document.status.status)}
+                        {document.status.status === "completed" &&
+                            !document.is_document_delete &&
+                            getTopicRelevanceBadge(document.priority_diabetes, "Đái tháo đường")}
+                        {(document.status.status === "processing" || document.status.status === "queued") && (
+                            <div className="flex flex-col w-full max-w-xs gap-1">
+                                <div className="flex items-center gap-2">
+                                    <Progress
+                                        value={document.status.progress}
+                                        className="h-2 rounded-full flex-1 bg-[#e7f3fa] [&_[data-slot=progress-indicator]]:bg-[#248fca]"
+                                    />
+                                    {typeof document.status.progress === "number" && (
+                                        <span className="text-xs text-gray-500 font-medium min-w-[32px] text-right">
+                                            {document.status.progress}%
+                                        </span>
+                                    )}
+                                </div>
+                                {document.status.progress_message && (
+                                    <span className="text-xs text-[#248fca] font-medium">
+                                        {document.status.progress_message}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Thông tin phụ */}
+                    <div className="flex gap-4 text-xs text-gray-500 pt-1">
+                        <div className="flex items-center gap-1">
+                            <CalendarIcon className="w-3 h-3" />
+                            <span>{formatDate(document.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <ArchiveIcon className="w-3 h-3" />
+                            <span>{document.file.file_type.toUpperCase()}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+export default function HistoryUploadFileDisplay() {
+    const { data: jobs, isPending, isError } = useGetJobDocumentHistoryService({
         page: 1,
         limit: 3,
-        job_type: "upload",
         sort_by: "created_at",
         sort_order: "desc",
-        kb_name: kb_name,
+        search: "",
+        type: "upload_document",
+        enabled: true,
     });
     const [isDeleteDocumentOpen, setIsDeleteDocumentOpen] = useState(false);
     const [document, setDocument] = useState<API.TJob | null>(null);
@@ -218,244 +374,77 @@ export default function HistoryUploadFileDisplay({
     };
 
     const handleDownloadDocument = async (document: API.TJob) => {
-        await downloadDocumentAsync(document.document_id || "");
+        await downloadDocumentAsync(document.id || "");
     };
 
     return (
-        <Card className="overflow-hidden border-2 border-gray-200 shadow-sm bg-gradient-to-br from-white to-gray-50/50">
-            <CardHeader className="pb-4">
-                <CardTitle className="text-lg text-[#248fca] flex items-center gap-2">
-                    <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-2">
+        <Card className="overflow-hidden border border-gray-200/70 shadow-[0_1px_3px_rgba(0,0,0,0.06)] bg-white">
+            <CardHeader className="pb-4 border-b border-gray-100">
+                <CardTitle className="text-lg flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-[#248fca]/10 text-[#248fca] flex items-center justify-center">
                             <HistoryIcon className="w-5 h-5" />
-                            <span className="text-lg font-medium">
-                                Lịch sử tải tài liệu
-                            </span>
                         </div>
-                        <Link
-                            href={`#`}
-                            className="text-sm text-[#248fca] hover:text-[#248fca]/80"
-                        >
-                            Xem tất cả
-                        </Link>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-gray-900 font-semibold">Lịch sử tải tài liệu</span>
+                            <span className="text-sm text-gray-500">Theo dõi các tài liệu đã tải lên gần đây</span>
+                        </div>
                     </div>
+                    <Link
+                        href={`#`}
+                        className="text-sm text-[#248fca] hover:text-[#1f7fb2] transition-colors"
+                    >
+                        Xem tất cả
+                    </Link>
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex flex-col">
                 {isPending ? (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6">
+                    <div className="flex items-center justify-center p-12">
                         <div className="text-center space-y-3">
-                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center mx-auto">
-                                <Clock className="w-8 h-8 text-gray-400 animate-spin" />
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mx-auto">
+                                <Clock className="w-6 h-6 text-gray-400" />
                             </div>
-                            <div className="space-y-1">
-                                <h3 className="font-medium text-gray-900">
-                                    Đang tải dữ liệu...
-                                </h3>
+                            <p className="text-sm text-gray-500">Đang tải dữ liệu...</p>
+                        </div>
+                    </div>
+                ) : isError ? (
+                    <div className="flex items-center justify-center p-12">
+                        <div className="text-center space-y-3">
+                            <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mx-auto">
+                                <AlertCircle className="w-6 h-6 text-red-400" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-900 mb-1">Lỗi tải dữ liệu</p>
+                                <p className="text-xs text-gray-500">Vui lòng thử lại sau</p>
                             </div>
                         </div>
                     </div>
-                ) : isJobError ? (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6">
-                        <div className="text-center space-y-3">
-                            <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-xl flex items-center justify-center mx-auto">
-                                <AlertCircle className="w-8 h-8 text-red-400" />
-                            </div>
-                            <div className="space-y-1">
-                                <h3 className="font-medium text-gray-900">
-                                    Lỗi tải dữ liệu
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    Vui lòng thử lại sau.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                ) : jobs && jobs.length > 0 ? (
-                    <div className="flex-1 px-6 py-2">
-                        <div className="space-y-4">
-                            {jobs.map((file: any, index: any) => (
-                                <div
-                                    key={file.id || index}
-                                    className="group p-5 rounded-xl border border-gray-100 hover:border-[#248fca]/20 hover:bg-[#f8fcff] transition-all duration-200 hover:shadow-sm"
-                                >
-                                    <div className="flex gap-4">
-                                        {/* File Icon */}
-                                        <div className="h-full flex-shrink-0 p-3 bg-white rounded-xl shadow-sm border border-gray-100 group-hover:border-[#248fca]/20 group-hover:shadow-md transition-all duration-200">
-                                            {getFileIcon(file.file_type)}
-                                        </div>
-
-                                        {/* Content Area */}
-                                        <div className="flex-1 min-w-0 space-y-3">
-                                            {/* Header: Title + Actions */}
-                                            <div className="flex items-start justify-between gap-4 mb-0">
-                                                <div className="flex-1 flex items-center gap-2">
-                                                    {/* Title */}
-                                                    <h4 className="font-semibold text-gray-900 text-base leading-tight truncate">
-                                                        {file.title ||
-                                                            file.file_name}
-                                                    </h4>
-
-                                                    {file.title &&
-                                                        file.title !==
-                                                            file.file_name && (
-                                                            <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
-                                                                <FileIcon className="w-3 h-3" />
-                                                                <span className="truncate">
-                                                                    {
-                                                                        file.file_name
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                </div>
-
-                                                {/* Action Buttons */}
-                                                {file.status === "completed" &&
-                                                    file.is_deleted === false &&
-                                                    file.is_duplicate ===
-                                                        false && (
-                                                        <div className="flex items-center gap-2 flex-shrink-0">
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                className="h-9 px-4 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 bg-white font-medium"
-                                                            >
-                                                                <TrainIcon className="w-4 h-4 mr-2" />
-                                                                Huấn luyện
-                                                            </Button>
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                className="h-9 px-4 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 bg-white font-medium"
-                                                                onClick={() =>
-                                                                    handleDeleteDocument(
-                                                                        file
-                                                                    )
-                                                                }
-                                                            >
-                                                                <Trash2Icon className="w-4 h-4 mr-2" />
-                                                                Xóa
-                                                            </Button>
-                                                            <DropdownMenu>
-                                                                <DropdownMenuTrigger
-                                                                    asChild
-                                                                >
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="icon"
-                                                                        className="h-9 w-9 text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300 bg-transparent"
-                                                                    >
-                                                                        <MoreHorizontal className="w-4 h-4" />
-                                                                    </Button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end">
-                                                                    <DropdownMenuItem className="text-blue-600 cursor-pointer hover:text-blue-600! group">
-                                                                        <EyeIcon className="w-4 h-4 mr-2 group-hover:text-blue-600!" />
-                                                                        Xem chi
-                                                                        tiết
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem
-                                                                        className="text-green-600 cursor-pointer hover:text-green-600! group"
-                                                                        onClick={() =>
-                                                                            handleDownloadDocument(
-                                                                                file
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <DownloadIcon className="w-4 h-4 mr-2 group-hover:text-green-600!" />
-                                                                        Tải
-                                                                        xuống
-                                                                    </DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                            </DropdownMenu>
-                                                        </div>
-                                                    )}
-
-                                                {/* Status badges cho file bị lỗi */}
-                                                {file.is_deleted === true && (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="bg-gray-50 text-red-600 border-red-200 flex-shrink-0"
-                                                    >
-                                                        Đã xóa
-                                                    </Badge>
-                                                )}
-                                                {file.is_duplicate === true && (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="bg-gray-50 text-red-600 border-red-200 flex-shrink-0"
-                                                    >
-                                                        Tài liệu đã tồn tại
-                                                    </Badge>
-                                                )}
-                                            </div>
-
-                                            {/* Description */}
-                                            {file.description && (
-                                                <div className="mb-3">
-                                                    <SmartDescription
-                                                        description={
-                                                            file.description
-                                                        }
-                                                    />
-                                                </div>
-                                            )}
-
-                                            {/* Status badges */}
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                {getStatusBadge(file.status)}
-                                                {file.status === "completed" &&
-                                                    file.is_deleted === false &&
-                                                    file.is_duplicate ===
-                                                        false &&
-                                                    getTopicRelevanceBadge(
-                                                        file.diabetes_score_avg,
-                                                        "Đái tháo đường"
-                                                    )}
-                                            </div>
-
-                                            {/* File metadata */}
-                                            <div className="flex items-center gap-6 text-sm text-gray-500 pt-1">
-                                                <div className="flex items-center gap-1.5">
-                                                    <CalendarIcon className="w-4 h-4" />
-                                                    <span>
-                                                        {formatDate(
-                                                            file.created_at
-                                                        )}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <ArchiveIcon className="w-4 h-4" />
-                                                    <span>
-                                                        {formatFileSize(
-                                                            file.file_size
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                ) : jobs && jobs.items.length > 0 ? (
+                    <div className="p-4">
+                        <div className="space-y-3">
+                            {jobs.items.map((document_job: API.TJob, index: number) => (
+                                <HistoryDocumentItem
+                                    key={document_job.id || index}
+                                    document={document_job}
+                                    onDelete={handleDeleteDocument}
+                                    onDownload={handleDownloadDocument}
+                                />
                             ))}
                         </div>
                     </div>
                 ) : (
-                    /* Empty State */
-                    <div className="flex-1 flex flex-col items-center justify-center p-6">
+                    <div className="flex items-center justify-center p-12">
                         <div className="text-center space-y-3">
-                            <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center mx-auto">
-                                <Clock className="w-8 h-8 text-gray-400" />
+                            <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mx-auto">
+                                <HistoryIcon className="w-8 h-8 text-gray-300" />
                             </div>
-                            <div className="space-y-1">
-                                <h3 className="font-medium text-gray-900">
-                                    Chưa có lịch sử tải nào
-                                </h3>
-                                <p className="text-sm text-gray-500 mb-4">
-                                    Lịch sử tải sẽ hiển thị ở đây
-                                </p>
+                            <div>
+                                <p className="text-sm font-medium text-gray-900 mb-1">Chưa có lịch sử tải nào</p>
+                                <p className="text-xs text-gray-500">Lịch sử tải sẽ hiển thị ở đây</p>
                             </div>
                         </div>
+
                     </div>
                 )}
             </CardContent>
@@ -469,3 +458,5 @@ export default function HistoryUploadFileDisplay({
         </Card>
     );
 }
+
+export { HistoryDocumentItem };

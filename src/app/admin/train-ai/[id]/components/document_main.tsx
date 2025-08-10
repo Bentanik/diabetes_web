@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import DocumentList from "@/app/admin/train-ai/[id]/components/document_list"
 import DocumentSearch from "@/app/admin/train-ai/[id]/components/document_search"
-import { useGetKnowledgeBaseDocumentsService } from "@/services/train-ai/services"
+import { useGetDocumentsService } from "@/services/train-ai/services"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileTextIcon, BrainIcon } from "lucide-react"
-import { useGetActiveTrainingJobService } from "@/services/job/services"
-import DocumentCardTrain from "@/app/admin/train-ai/[id]/components/document_card_train"
+import { useGetJobDocumentHistoryService } from "@/services/job/services"
+import { DocumentCardTrain } from "@/app/admin/train-ai/[id]/components/document_card_train"
 
 type DocumentMainProps = {
     knowledgeBaseId: string
@@ -19,26 +19,32 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<"all" | "completed" | "failed" | "processing" | "queued">("all")
     const [activeTab, setActiveTab] = useState<"documents" | "training">("documents")
-    const ITEMS_PER_PAGE = 3
+    const [itemsPerPage, setItemsPerPage] = useState(12)
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
     // API call cho documents
-    const { data: documentsData, isPending: isDocumentsPending, refetch: refetchDocuments } = useGetKnowledgeBaseDocumentsService(knowledgeBaseId, {
-        search_name: debouncedSearchTerm,
+    const { data: documentsData, isPending: isDocumentsPending, refetch: refetchDocuments } = useGetDocumentsService(knowledgeBaseId, {
+        search: debouncedSearchTerm,
         page: currentPage,
-        limit: ITEMS_PER_PAGE,
+        limit: itemsPerPage,
         sort_by: "updated_at",
         sort_order: "desc",
     })
 
-    // API call cho training jobs - chỉ gọi khi activeTab là "training"
     const {
-        jobs: trainingData,
+        data: trainingData,
         isPending: isTrainingPending,
         refetch: refetchTraining
-    } = useGetActiveTrainingJobService({
-        enabled: activeTab === "training"
+    } = useGetJobDocumentHistoryService({
+        page: currentPage,
+        limit: itemsPerPage,
+        sort_by: "created_at",
+        sort_order: "desc",
+        search: debouncedSearchTerm,
+        type: "training_document",
+        status: "processing",
+        enabled: activeTab === "training",
     })
 
     useEffect(() => {
@@ -51,7 +57,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
 
     const handleSearchChange = (value: string) => {
         setSearchTerm(value)
-        setCurrentPage(1) // Reset về trang đầu khi search
+        setCurrentPage(1)
     }
 
     const handleStatusFilterChange = (status: "all" | "completed" | "failed" | "processing" | "queued") => {
@@ -63,15 +69,24 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
         setCurrentPage(page)
     }
 
+    const handlePerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage)
+        setCurrentPage(1)
+    }
+
+    const handleTrainSuccess = () => {
+        refetchDocuments()
+    }
+
     const handleTabChange = (value: string) => {
         setActiveTab(value as "documents" | "training")
-        setCurrentPage(1) // Reset page khi đổi tab
-        setSearchTerm("") // Reset search khi đổi tab
-        setStatusFilter("all") // Reset filter khi đổi tab
+        setCurrentPage(1)
+        setSearchTerm("")
+        setStatusFilter("all")
     }
 
     // Tính toán training count
-    const trainingCount = trainingData?.length || 0
+    const trainingCount = trainingData?.total || 0
 
     return (
         <div className="space-y-6">
@@ -115,8 +130,9 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
                             knowledgeBaseId={knowledgeBaseId}
                             isPending={isDocumentsPending}
                             documentsData={documentsData}
-                            document_limit={ITEMS_PER_PAGE}
                             onPageChange={handlePageChange}
+                            onPerPageChange={handlePerPageChange}
+                            onTrainSuccess={handleTrainSuccess}
                         />
                     )}
                 </TabsContent>
@@ -142,12 +158,14 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
                                 <p className="text-gray-500">Đang tải dữ liệu huấn luyện...</p>
                             </div>
                         </div>
-                    ) : trainingData && trainingData.length > 0 ? (
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <div className="space-y-4">
-                                {trainingData.map((job: API.TJob, index: number) => (
-                                    <DocumentCardTrain key={index} job={job} />
-                                ))}
+                    ) : trainingData && trainingData.items.length > 0 ? (
+                        <div className="w-full max-w-full overflow-hidden">
+                            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm w-full max-w-full overflow-hidden">
+                                <div className="space-y-4">
+                                    {trainingData.items.map((job: API.TJob, index: number) => (
+                                        <DocumentCardTrain key={index} job={job} />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     ) : (

@@ -21,13 +21,13 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Pagination from "@/components/shared/pagination";
-import { useGetKnowledgeBaseListService } from "@/services/train-ai/services";
+import { useGetKnowledgesService } from "@/services/train-ai/services";
 import { useDebounce } from "@/hooks/use-debounce";
 import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting";
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
 
 interface KnowledgeBaseItemProps {
-    knowledgeBase: API.TKnowledgeBase;
+    knowledgeBase: API.TKnowledge;
     isSelected: boolean;
     onToggle: (id: string) => void;
     onSettings?: (id: string) => void;
@@ -77,19 +77,18 @@ const KnowledgeBaseItem = ({
                     <div className="flex items-center gap-4 text-sm text-gray-500 mt-1 flex-wrap">
                         <span className="flex items-center gap-1">
                             <FileTextIcon className="w-3 h-3" />
-                            {knowledgeBase.document_count.toLocaleString()} tài
+                            {knowledgeBase.stats.document_count.toLocaleString()} tài
                             liệu
                         </span>
                         <span className="flex items-center gap-1">
                             <HardDriveIcon className="w-3 h-3" />
-                            {formatSize(knowledgeBase.total_size_mb)}
+                            {formatSize(knowledgeBase.stats.total_size_bytes)}
                         </span>
                         <span
-                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
-                                knowledgeBase.select_training === true
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-gray-100 text-gray-800"
-                            }`}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${knowledgeBase.select_training === true
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                                }`}
                         >
                             {knowledgeBase.select_training === true ? (
                                 <>
@@ -153,10 +152,10 @@ export default function KnowledgeBaseSetting() {
 
     // API call with optimized parameters
     const {
-        knowledge_bases: data,
+        knowledges: data,
         isPending,
         error,
-    } = useGetKnowledgeBaseListService({
+    } = useGetKnowledgesService({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
         search: debouncedSearchTerm,
@@ -165,7 +164,7 @@ export default function KnowledgeBaseSetting() {
     });
 
     // Extract data from API response
-    const knowledgeBases = data?.knowledge_bases || [];
+    const knowledgeBases = data?.items || [];
     const totalItems = data?.total || 0;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
@@ -181,8 +180,8 @@ export default function KnowledgeBaseSetting() {
     useEffect(() => {
         if (knowledgeBases.length > 0) {
             const preSelectedIds = knowledgeBases
-                .filter((kb) => kb.select_training)
-                .map((kb) => kb.id);
+                .filter((kb: API.TKnowledge) => kb.select_training)
+                .map((kb: API.TKnowledge) => kb.id);
 
             // Chỉ update nếu có sự khác biệt để tránh re-render không cần thiết
             setSelectedKnowledgeBases((prev) => {
@@ -253,7 +252,7 @@ export default function KnowledgeBaseSetting() {
     // Get selected knowledge bases info
     const selectedKnowledgeBasesInfo = useMemo(() => {
         return selectedKnowledgeBases
-            .map((id) => knowledgeBases.find((kb) => kb.id === id))
+            .map((id) => knowledgeBases.find((kb: API.TKnowledge) => kb.id === id))
             .filter(Boolean);
     }, [selectedKnowledgeBases, knowledgeBases]);
 
@@ -386,7 +385,7 @@ export default function KnowledgeBaseSetting() {
                                 )}
                             </div>
                         ) : (
-                            knowledgeBases.map((knowledgeBase) => (
+                            knowledgeBases.map((knowledgeBase: API.TKnowledge) => (
                                 <KnowledgeBaseItem
                                     key={knowledgeBase.id}
                                     knowledgeBase={knowledgeBase}
@@ -445,7 +444,7 @@ export default function KnowledgeBaseSetting() {
                                         </span>
                                         <div className="text-xs text-blue-600 flex items-center gap-1">
                                             <FileTextIcon className="w-3 h-3" />
-                                            {knowledgeBase?.document_count.toLocaleString()}{" "}
+                                            {knowledgeBase?.stats.document_count.toLocaleString()}{" "}
                                             tài liệu
                                         </div>
                                     </div>

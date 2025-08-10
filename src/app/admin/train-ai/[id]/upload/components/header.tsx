@@ -5,7 +5,7 @@ import ProfileHospitalMenu from "@/components/profile_hospital_menu"
 import Link from "next/link"
 
 interface HeaderProps {
-    knowledgeBase: API.TKnowledgeBase
+    knowledgeBase: API.TKnowledge
     onGoBack: () => void
     // onAddToKB: () => void; // Đã loại bỏ prop không sử dụng
 }

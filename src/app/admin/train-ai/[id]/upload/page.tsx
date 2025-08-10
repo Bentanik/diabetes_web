@@ -1,13 +1,21 @@
 import UploadPageComponent from "@/app/admin/train-ai/[id]/upload/components"
 import { Metadata } from "next"
+import { use } from "react";
 
 export const metadata: Metadata = {
     title: "Tải lên tài liệu",
     description: "Tải lên tài liệu",
 }
 
-export default function UploadPage({ params }: { params: Promise<{ id: string }> }) {
+type UploadPageProps = {
+    params: Promise<{
+        id: string;
+    }>;
+};
+
+export default function UploadPage({ params }: UploadPageProps) {
+    const { id } = use(params);
     return (
-        <UploadPageComponent params={params} />
+        <UploadPageComponent id={id} />
     )
 }
