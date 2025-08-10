@@ -48,6 +48,7 @@ import useCreateDoctor, {
 } from "@/app/hospitals/doctor/create-doctor/hooks/use-create-doctor";
 import { useRouter } from "next/navigation";
 import PhonePreview from "./phone-preview";
+import DateOfBirthPicker from "./date-picker";
 
 export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const { form, onSubmit } = useCreateDoctor();
@@ -481,97 +482,10 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                     </div>
 
                                     {/* Ngày sinh */}
-                                    <div>
-                                        <FormField
-                                            control={form.control}
-                                            name="dateOfBirth"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormControl>
-                                                        <div>
-                                                            <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800 mb-2">
-                                                                <CalendarDays className="h-5 w-5 text-[#248fca]" />
-                                                                Ngày sinh
-                                                            </FormLabel>
-                                                            <Popover
-                                                                open={open}
-                                                                onOpenChange={
-                                                                    setOpen
-                                                                }
-                                                            >
-                                                                <PopoverTrigger
-                                                                    asChild
-                                                                >
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        id="date"
-                                                                        className="w-[250px] h-[50px] justify-between font-normal"
-                                                                    >
-                                                                        {date ? (
-                                                                            date.toLocaleDateString()
-                                                                        ) : (
-                                                                            <div className="text-[#626874]">
-                                                                                Chọn
-                                                                                ngày
-                                                                                sinh
-                                                                            </div>
-                                                                        )}
-                                                                        <ChevronDownIcon />
-                                                                    </Button>
-                                                                </PopoverTrigger>
-                                                                <PopoverContent
-                                                                    className="w-auto overflow-hidden p-0"
-                                                                    align="start"
-                                                                >
-                                                                    <Calendar
-                                                                        mode="single"
-                                                                        selected={
-                                                                            date
-                                                                        }
-                                                                        captionLayout="dropdown"
-                                                                        onSelect={(
-                                                                            selectedDate
-                                                                        ) => {
-                                                                            setDate(
-                                                                                selectedDate
-                                                                            );
-                                                                            if (
-                                                                                selectedDate
-                                                                            ) {
-                                                                                const offsetDate =
-                                                                                    new Date(
-                                                                                        selectedDate.getTime() +
-                                                                                            7 *
-                                                                                                60 *
-                                                                                                60 *
-                                                                                                1000
-                                                                                    );
-                                                                                const isoDate =
-                                                                                    offsetDate.toISOString();
-                                                                                field.onChange(
-                                                                                    isoDate
-                                                                                );
-                                                                            } else {
-                                                                                field.onChange(
-                                                                                    null
-                                                                                );
-                                                                            }
-                                                                            setOpen(
-                                                                                false
-                                                                            );
-                                                                        }}
-                                                                    />
-                                                                </PopoverContent>
-                                                            </Popover>
-                                                        </div>
-                                                    </FormControl>
-                                                    <FormMessage className="flex items-center gap-1">
-                                                        <AlertCircle className="h-4 w-4" />
-                                                    </FormMessage>
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
+                                    <DateOfBirthPicker
+                                        control={form.control}
+                                        name="dateOfBirth"
+                                    />
                                 </div>
                             </div>
 

@@ -3,16 +3,16 @@ import Select, { SingleValue } from "react-select";
 
 interface BlogStatusDropdownProps {
     onSortChange: (sortType: string) => void;
+    selectedOption: string;
 }
 
 export default function BlogSortDropdown({
     onSortChange,
+    selectedOption,
 }: BlogStatusDropdownProps) {
-    const [selectedOption, setSelectedOption] = useState<string | null>();
-
     const options = [
         { value: "id", label: "Mặc định" },
-        { value: "createdDate", label: "Ngày tạo" },
+        { value: "modifiedDate", label: "Ngày tạo" },
         { value: "like", label: "Lượt thích" },
         { value: "view", label: "Người xem" },
         { value: "title ", label: "Tiêu đề" },
@@ -21,11 +21,8 @@ export default function BlogSortDropdown({
     const handleChange = (
         newValue: SingleValue<{ value: string; label: string }>
     ) => {
-        const statusValue = newValue?.value || "createdDate";
-        setSelectedOption(newValue?.label || "Ngày tạo");
-        const sortBy =
-            statusValue === "createdDate" ? "createdDate" : statusValue;
-        onSortChange(sortBy);
+        const sortBy = newValue ? newValue.value : "modifiedDate";
+        onSortChange(sortBy || "modifiedDate");
     };
 
     return (
@@ -33,7 +30,7 @@ export default function BlogSortDropdown({
             <Select
                 options={options}
                 value={
-                    options.find((option) => option.label === selectedOption) ||
+                    options.find((option) => option.value === selectedOption) ||
                     options[1]
                 }
                 onChange={handleChange}

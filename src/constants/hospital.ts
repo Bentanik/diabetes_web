@@ -48,7 +48,7 @@ export const sidebar_items = [
         label: "Quản lí tài khoản",
     },
     {
-        href: "/hospitals/consultation",
+        href: "/hospitals/consultation/create-consultation",
         icon: MessageCircle,
         label: "Quản lí cuộc tư vấn",
         subItems: [

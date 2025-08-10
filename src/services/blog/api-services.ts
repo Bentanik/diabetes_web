@@ -120,7 +120,7 @@ export const getAllBlogs = async ({
     // Xử lý categoryIds riêng biệt
     if (categoryIds && categoryIds.length > 0) {
         const categoryQuery = categoryIds
-            .map((id) => `CategoryIds=${encodeURIComponent(id)}`)
+            .map((id) => `categoryIds=${encodeURIComponent(id)}`)
             .join("&");
         queryString = queryString
             ? `${queryString}&${categoryQuery}`
@@ -135,3 +135,55 @@ export const getAllBlogs = async ({
     );
     return response.data;
 };
+
+// export const getAllBlogs = async ({
+//     searchContent = "",
+//     categoryIds = [],
+//     status,
+//     moderatorId = "",
+//     doctorId = "",
+//     pageIndex = 1,
+//     pageSize = 10,
+//     sortType = "",
+//     isSortAsc,
+// }: REQUEST.BlogRequestParam) => {
+//     const params: Record<
+//         string,
+//         string | number | boolean | string[] | undefined
+//     > = {};
+//     params.pageIndex = pageIndex;
+//     params.pageSize = pageSize;
+
+//     if (searchContent && searchContent.trim() !== "") {
+//         params.searchContent = searchContent.trim();
+//     }
+//     if (status !== undefined && status !== null) {
+//         params.status = status;
+//     }
+//     if (moderatorId && moderatorId.trim() !== "") {
+//         params.moderatorId = moderatorId.trim();
+//     }
+//     if (doctorId && doctorId.trim() !== "") {
+//         params.doctorId = doctorId.trim();
+//     }
+//     if (sortType && sortType.trim() !== "") {
+//         params.sortType = sortType.trim();
+//     }
+//     if (isSortAsc !== undefined) {
+//         params.isSortAsc = isSortAsc;
+//     }
+//     if (categoryIds && categoryIds.length > 0) {
+//         categoryIds.forEach((id, index) => {
+//             params[`CategoryIds[${index}]`] = id;
+//         });
+//     }
+
+//     const response = await request<TResponseData<API.TGetBlogs>>(
+//         API_ENDPOINTS.GET_POSTS,
+//         {
+//             method: "GET",
+//             params: Object.keys(params).length > 0 ? params : undefined,
+//         }
+//     );
+//     return response.data;
+// };

@@ -252,7 +252,7 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                             {/* </Form> */}
                                         </DialogContent>
                                     </Dialog>
-                                    <Link
+                                    {/* <Link
                                         href={`/hospital/doctor/create-doctor`}
                                     >
                                         <Button
@@ -261,7 +261,7 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
                                         >
                                             Chỉnh sửa bác sĩ
                                         </Button>
-                                    </Link>
+                                    </Link> */}
                                 </div>
                             </div>
                         </div>
