@@ -61,3 +61,12 @@ export const loginSchema = z.object({
 });
 
 export type LoginSchemaFormData = z.infer<typeof loginSchema>;
+
+export const forgotPasswordEmailBody = z.object({
+  email: z
+    .string()
+    .nonempty({ message: validationMessages.email.required })
+    .email({ message: validationMessages.email.invalid }),
+});
+
+export type ForgotPasswordEmailBodyType = z.infer<typeof forgotPasswordEmailBody>;
