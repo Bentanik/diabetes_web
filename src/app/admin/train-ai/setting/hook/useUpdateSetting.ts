@@ -3,7 +3,7 @@ import {
   CHAT_SETTING_QUERY_KEY,
   useUpdateChatSettingService,
 } from "@/services/setting/services";
-import { KNOWLEDGE_BASE_QUERY_KEY } from "@/services/train-ai/services";
+import { KNOWLEDGE_QUERY_KEY } from "@/services/train-ai/services";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function useUpdateSetting() {
@@ -21,7 +21,7 @@ export default function useUpdateSetting() {
         });
 
         await queryClient.invalidateQueries({
-          queryKey: [KNOWLEDGE_BASE_QUERY_KEY],
+          queryKey: [KNOWLEDGE_QUERY_KEY],
         });
       },
       onError: () => {

@@ -1,5 +1,5 @@
 declare namespace REQUEST {
-  type TCreateKnowledgeBaseRequest = {
+  type TCreateKnowledgeRequest = {
     name: string;
     description: string;
   };
@@ -29,54 +29,56 @@ declare namespace REQUEST {
     language: vi;
   };
 
+  type TTrainingDocumentRequest = {
+    document_id: string;
+  };
+
   type TUpdateSettingsRequest = {
-    system_prompt: string;
-    available_collections: string[];
+    number_of_passages: number;
+    search_accuracy: number;
   };
 }
 
 declare namespace API {
-  type TKnowledgeBase = {
+  type TKnowledgeStats = {
+    total_size_bytes: number;
+    document_count: number;
+  };
+
+  type TKnowledge = {
     id: string;
     name: string;
     description: string;
-    document_count: number;
+    stats: TKnowledgeStats;
+    select_training: boolean;
     created_at: string;
     updated_at: string;
-    total_size_mb: number;
-    select_training: boolean;
   };
 
-  type TGetKnowledgeBaseListResponse = {
-    knowledge_bases: TKnowledgeBase[];
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
-  };
+  type TDocumentType = "upload_document" | "training_document";
 
-  type TKnowledgeBaseDocument = {
-    id: string;
-    kb_name: string;
-    status: "uploaded" | "training" | "trained";
-    file_name: string;
+  type TDocumentFile = {
+    path: string;
+    size_bytes: number;
+    hash: string;
     file_type: string;
-    file_size: number;
+  };
+
+  type TDocument = {
+    id: string;
+    knowledge_id: string;
     title: string;
     description: string;
+    file: TDocumentFile;
+    progress: number;
+    type: TDocumentType;
+    priority_diabetes: number;
     created_at: string;
     updated_at: string;
-    metadata: {
-      diabetes_score_avg: number;
-      is_training: boolean;
-    };
   };
 
-  type TGetKnowledgeBaseDocumentsResponse = {
-    documents: TKnowledgeBaseDocument[];
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
-  };
+  type TSettings = {
+    number_of_passages: number;
+    search_accuracy: number;
+  }
 }

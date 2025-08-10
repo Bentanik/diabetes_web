@@ -1,30 +1,34 @@
-"use client"
+"use client";
 
-import useCreateKnowlegeBase from "@/app/admin/train-ai/hooks/useCreateKnowlegeBase"
-import { Modal } from "@/components/shared/Modal"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import TextAreaComponent from "@/components/textarea"
-import { Label } from "@/components/ui/label"
-import { FolderPlus, Loader2 } from "lucide-react"
-import InputTrainAI from "@/components/input_train_ai"
+import useCreateKnowlegeBase from "@/app/admin/train-ai/hooks/useCreateKnowlegeBase";
+import { Modal } from "@/components/shared/Modal";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import TextAreaComponent from "@/components/textarea";
+import { Label } from "@/components/ui/label";
+import { FolderPlus, Loader2 } from "lucide-react";
+import InputTrainAI from "@/components/input_train_ai";
 
 interface CreateKnowlegeModalProps {
-    isOpen: boolean
-    onClose: () => void
+    isOpen: boolean;
+    onClose: () => void;
 }
 
 /**
  * Component hiển thị modal tạo thư mục kiến thức
  * Bao gồm tên, mô tả, checkbox sử dụng mô tả để kiểm tra
  */
-export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeModalProps) {
-    const { register, handleSubmit, errors, onSubmit, isCreating, reset } = useCreateKnowlegeBase()
+export default function CreateKnowlegeModal({
+    isOpen,
+    onClose,
+}: CreateKnowlegeModalProps) {
+    const { register, handleSubmit, errors, onSubmit, isCreating, reset } =
+        useCreateKnowlegeBase();
 
     const handleClose = () => {
-        reset()
-        onClose()
-    }
+        reset();
+        onClose();
+    };
 
     return (
         <Modal
@@ -45,7 +49,11 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                         <motion.div
                             initial={{ scale: 0, rotate: -180 }}
                             animate={{ scale: 1, rotate: 0 }}
-                            transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                            transition={{
+                                delay: 0.3,
+                                type: "spring",
+                                stiffness: 200,
+                            }}
                             className="p-3 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30"
                         >
                             <FolderPlus className="w-7 h-7 text-white" />
@@ -77,13 +85,24 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                         whileTap={!isCreating ? { scale: 0.9 } : {}}
                         onClick={!isCreating ? onClose : undefined}
                         disabled={isCreating}
-                        className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-200 z-20 ${isCreating
-                            ? "text-white/40 cursor-not-allowed"
-                            : "hover:bg-white/20 text-white/80 hover:text-white cursor-pointer"
-                            }`}
+                        className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-200 z-20 ${
+                            isCreating
+                                ? "text-white/40 cursor-not-allowed"
+                                : "hover:bg-white/20 text-white/80 hover:text-white cursor-pointer"
+                        }`}
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                            />
                         </svg>
                     </motion.button>
                 </div>
@@ -94,7 +113,9 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.6 }}
-                        onSubmit={handleSubmit((data) => onSubmit(data, handleClose))}
+                        onSubmit={handleSubmit((data) =>
+                            onSubmit(data, handleClose)
+                        )}
                         className="space-y-6"
                     >
                         {/* Input tên thư mục */}
@@ -105,7 +126,10 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                             className="space-y-3"
                         >
                             <div className="flex items-center gap-2">
-                                <Label htmlFor="name" className="text-sm font-semibold text-gray-800">
+                                <Label
+                                    htmlFor="name"
+                                    className="text-sm font-semibold text-gray-800"
+                                >
                                     Tên thư mục
                                 </Label>
                                 <span className="text-red-500 text-sm">*</span>
@@ -127,7 +151,10 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                             className="space-y-3"
                         >
                             <div className="flex items-center gap-2">
-                                <Label htmlFor="description" className="text-sm font-semibold text-gray-800">
+                                <Label
+                                    htmlFor="description"
+                                    className="text-sm font-semibold text-gray-800"
+                                >
                                     Mô tả
                                 </Label>
                                 <span className="text-red-500 text-sm">*</span>
@@ -153,19 +180,28 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                                 <div className="space-y-2">
                                     <Label
                                         htmlFor="useDescriptionForLLMCheck"
-                                        className={`text-sm font-semibold text-gray-800 flex items-center gap-2 ${!isCreating ? "cursor-pointer" : "cursor-not-allowed opacity-50"
-                                            }`}
+                                        className={`text-sm font-semibold text-gray-800 flex items-center gap-2 ${
+                                            !isCreating
+                                                ? "cursor-pointer"
+                                                : "cursor-not-allowed opacity-50"
+                                        }`}
                                     >
                                         Chú ý
                                     </Label>
                                     <ul className="space-y-2">
                                         <li className="text-xs text-gray-600 leading-relaxed flex items-start gap-2">
-                                            <span className="text-[#248fca] mt-0.5">•</span>
-                                            Tên thư mục không được trùng với các thư mục khác trong hệ thống.
+                                            <span className="text-[#248fca] mt-0.5">
+                                                •
+                                            </span>
+                                            Tên thư mục không được trùng với các
+                                            thư mục khác trong hệ thống.
                                         </li>
                                         <li className="text-xs text-gray-600 leading-relaxed flex items-start gap-2">
-                                            <span className="text-[#248fca] mt-0.5">•</span>
-                                            Đặt tên thư mục và mô tả rõ ràng, phù hợp với mục đích sử dụng.
+                                            <span className="text-[#248fca] mt-0.5">
+                                                •
+                                            </span>
+                                            Đặt tên thư mục và mô tả rõ ràng,
+                                            phù hợp với mục đích sử dụng.
                                         </li>
                                     </ul>
                                 </div>
@@ -207,5 +243,5 @@ export default function CreateKnowlegeModal({ isOpen, onClose }: CreateKnowlegeM
                 </div>
             </div>
         </Modal>
-    )
+    );
 }

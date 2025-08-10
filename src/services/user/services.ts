@@ -24,7 +24,7 @@ export default function useUploadImageService() {
         onError: (err) => {
             addToast({
                 type: "error",
-                description: err.errorCode,
+                description: err.errorCode || "",
                 duration: 5000,
             });
         },

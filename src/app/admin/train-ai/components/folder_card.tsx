@@ -12,7 +12,7 @@ import { useClickOutside } from "@/hooks/use-click-outside"
 import DeleteKnowledgeModal from "@/app/admin/train-ai/components/delete_knowlege"
 
 interface FolderCardProps {
-    folder: API.TKnowledgeBase
+    folder: API.TKnowledge
 }
 
 export default function FolderCard({ folder }: FolderCardProps) {
@@ -51,7 +51,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
                 className="group cursor-pointer h-full"
                 onClick={handleCardClick}
             >
-                <Card className="p-6 hover:shadow-lg transition-all duration-300 border border-gray-200 bg-white h-full flex flex-col">
+                <Card className="p-6 hover:shadow-md transition-all duration-300 border border-gray-100 bg-white h-full min-h-[200px] rounded-2xl flex flex-col">
                     {/* Header của card */}
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -59,11 +59,14 @@ export default function FolderCard({ folder }: FolderCardProps) {
                             <div className="w-12 h-12 bg-gradient-to-br from-[#248fca] to-[#1e7bb8] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
                                 <FolderIcon className="w-6 h-6 text-white" />
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900 group-hover:text-[#248fca] transition-colors">
+                            <div className="min-w-0">
+                                <h3
+                                    className="font-semibold text-gray-900 group-hover:text-[#248fca] transition-colors truncate"
+                                    title={folder.name}
+                                >
                                     {folder.name}
                                 </h3>
-                                <p className="text-sm text-gray-500">{folder.document_count} tài liệu</p>
+                                <p className="text-sm text-gray-500">{folder.stats.document_count} tài liệu</p>
                             </div>
                         </div>
                         {/* Menu dropdown */}
@@ -108,18 +111,11 @@ export default function FolderCard({ folder }: FolderCardProps) {
                         </div>
                     </div>
 
-                    {/* Mô tả thư mục - flex-1 để chiếm không gian còn lại */}
+                    {/* Mô tả thư mục - hiển thị 1 dòng, dài thì "..." */}
                     <div className="flex-1 mb-4">
                         <p
-                            className="text-sm text-gray-600 leading-relaxed overflow-hidden text-ellipsis"
-                            style={{
-                                display: "-webkit-box",
-                                WebkitLineClamp: 3,
-                                WebkitBoxOrient: "vertical",
-                                lineHeight: "1.5rem",
-                                maxHeight: "4.5rem", // 3 lines * 1.5rem line-height
-                            }}
-                            title={folder.description} // Tooltip để hiển thị full text khi hover
+                            className="text-sm text-gray-600 leading-relaxed whitespace-nowrap overflow-hidden text-ellipsis"
+                            title={folder.description}
                         >
                             {folder.description || "Không có mô tả"}
                         </p>
@@ -130,7 +126,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
                         <span>Cập nhật {new Date(folder.updated_at).toLocaleString()}</span>
                         <div className="flex items-center gap-1">
                             <FileTextIcon className="w-3 h-3" />
-                            <span>{folder.document_count}</span>
+                            <span>{folder.stats.document_count}</span>
                         </div>
                     </div>
                 </Card>
@@ -144,7 +140,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
                     id: folder.id,
                     name: folder.name,
                     description: folder.description,
-                    document_count: folder.document_count,
+                    document_count: folder.stats.document_count,
                 }}
             />
         </div>

@@ -45,23 +45,38 @@ export default function useLogin() {
                         hideBackdrop();
                         reset();
                         dispatch(clearAllRegister());
-                        router.push("/admin/home");
+                        if (
+                            data.data?.authUser.roles?.includes(
+                                "SystemAdmin"
+                            ) ||
+                            data.data?.authUser.roles?.includes("Moderator")
+                        )
+                            return router.push("/admin/home");
+                        if (
+                            data.data?.authUser.roles?.includes("HospitalStaff")
+                        )
+                            return router.push("/hospitals/home");
+                        return router.push("/");
                     }
                 },
                 onError: (error) => {
                     hideBackdrop();
-                    if (error.title === "auth13") {
-                        setError("email", {
-                            type: "manual",
-                            message:
-                                "Xin vui lòng kiểm tra lại địa chỉ email và mật khẩu",
-                        });
-                        setError("password", {
-                            type: "manual",
-                            message:
-                                "Xin vui lòng kiểm tra lại địa chỉ email và mật khẩu",
-                        });
-                    }
+                    error.errors?.forEach((error) => {
+                        console.log(error);
+
+                        if (error.code === "auth_error_13") {
+                            setError("email", {
+                                type: "manual",
+                                message: error.message,
+                            });
+                        }
+                        if (error.code === "auth_error_04") {
+                            setError("password", {
+                                type: "manual",
+                                message: error.message,
+                            });
+                        }
+                    });
                 },
             });
         } catch (err) {

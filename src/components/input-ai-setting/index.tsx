@@ -1,23 +1,33 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import type { UseFormRegisterReturn } from "react-hook-form";
+// import type { UseFormRegisterReturn } from "react-hook-form";
 
-interface InputTrainAIProps {
-    type: "text";
-    register: UseFormRegisterReturn;
+interface InputSettingProps {
+    type?: "text" | "number" | "email" | "password" | "tel" | "url";
+    // register: UseFormRegisterReturn;
     error?: string;
     placeholder?: string;
     disabled?: boolean;
+    min?: string | number;
+    max?: string | number;
+    step?: string | number;
+    className?: string;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default function InputTrainAI({
-    type,
-    register,
+export default function InputSettingAI({
+    type = "text",
+    // register,
     error,
     placeholder = "",
     disabled = false,
-}: InputTrainAIProps) {
+    min,
+    max,
+    step,
+    className = "",
+}: InputSettingProps) {
     return (
         <div className="w-full">
             <div className="relative">
@@ -32,14 +42,17 @@ export default function InputTrainAI({
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus-visible:border-[#248fca]"
             }
+            ${className}
           `}
                     autoComplete="off"
                     placeholder={placeholder}
-                    {...register}
+                    min={min}
+                    max={max}
+                    step={step}
+                    // {...register}
                     disabled={disabled}
                 />
             </div>
-
             {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
     );

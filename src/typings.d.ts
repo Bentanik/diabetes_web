@@ -1,6 +1,13 @@
+declare type TErrorCodes = {
+    errorType: string;
+    code: string;
+    message: string;
+};
+
 declare type TMeta = {
     detail: string;
-    errorCode: string;
+    errorCode?: string | null;
+    errors?: TErrorCodes[] | null;
     status: number;
     title: string;
 };
@@ -29,4 +36,12 @@ declare type TResponseData<T = object | null> = {
         code: string;
         message: string;
     };
+};
+
+declare type TPagination<T = object | null> = {
+    items: T[];
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
 };

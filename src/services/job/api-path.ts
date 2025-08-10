@@ -1,11 +1,9 @@
 /* eslint-disable import/no-anonymous-default-export */
-const JOB = "http://localhost:5023/api/v1/job";
+const JOB = "http://localhost:8000/api/v1/jobs";
 
-const ACTIVE_UPLOAD = `${JOB}/active/upload`;
-const ACTIVE_TRAINING = `${JOB}/active/training`;
+const JOB_DOCUMENT_HISTORY = `${JOB}/documents/history`;
 
 export default {
   JOB,
-  ACTIVE_UPLOAD,
-  ACTIVE_TRAINING,
+  JOB_DOCUMENT_HISTORY,
 };

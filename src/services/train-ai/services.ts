@@ -1,19 +1,21 @@
 import {
-  createKnowledgeBaseAsync,
+  createKnowledgeAsync,
   deleteDocumentAsync,
-  deleteKnowledgeBaseAsync,
-  getKnowledgeBaseByIdAsync,
-  getKnowledgeBaseDocumentsAsync,
-  getKnowledgeBaseListAsync,
+  deleteKnowledgeAsync,
+  getKnowledgeByIdAsync,
+  getDocumentsAsync,
+  getKnowledgeListAsync,
   trainDocumentAsync,
   uploadDocumentAsync,
+  updateSettingAsync,
+  getSettingsAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-export const KNOWLEDGE_BASE_QUERY_KEY = "knowledge-base";
-export const KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY = "knowledge-base-documents";
+export const KNOWLEDGE_QUERY_KEY = "knowledge";
+export const DOCUMENTS_QUERY_KEY = "documents";
 
-interface IGetKnowledgeBaseListService {
+interface IGetKnowledgesService {
   search: string;
   sort_by: "updated_at";
   sort_order: "asc" | "desc";
@@ -21,21 +23,21 @@ interface IGetKnowledgeBaseListService {
   limit: number;
 }
 
-export const useGetKnowledgeBaseListService = ({
+export const useGetKnowledgesService = ({
   search = "",
   sort_by = "updated_at",
   sort_order = "desc",
   page = 1,
   limit = 10,
-}: IGetKnowledgeBaseListService) => {
+}: IGetKnowledgesService) => {
   const {
-    data: knowledge_bases,
+    data: knowledges,
     isPending,
     isError,
     error,
   } = useQuery({
     queryKey: [
-      KNOWLEDGE_BASE_QUERY_KEY,
+      KNOWLEDGE_QUERY_KEY,
       search.trim(),
       sort_by,
       sort_order,
@@ -43,73 +45,73 @@ export const useGetKnowledgeBaseListService = ({
       limit,
     ],
     queryFn: () =>
-      getKnowledgeBaseListAsync(
-        search.trim(),
-        sort_by,
-        sort_order,
-        page,
-        limit
-      ),
-    select: (data) => data.value.data,
+      getKnowledgeListAsync(search.trim(), sort_by, sort_order, page, limit),
+    select: (data) => {
+      return (
+        data.data || {
+          items: [],
+          total: 0,
+          page: 0,
+          limit: 0,
+          total_pages: 0,
+        }
+      );
+    },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });
 
-  return { knowledge_bases, isPending, isError, error };
+  return { knowledges, isPending, isError, error };
 };
 
-export const useGetKnowledgeBaseByIdService = (id: string) => {
+export const useGetKnowledgeByIdService = (id: string) => {
   return useQuery({
-    queryKey: [KNOWLEDGE_BASE_QUERY_KEY, id],
-    queryFn: () => getKnowledgeBaseByIdAsync(id),
-    select: (data) => data.value.data,
+    queryKey: [KNOWLEDGE_QUERY_KEY, id],
+    queryFn: () => getKnowledgeByIdAsync(id),
+    select: (data) => data.data,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });
 };
 
-export const useCreateKnowledgeBaseService = () => {
+export const useCreateKnowledgeService = () => {
   return useMutation<
-    TResponse<API.TKnowledgeBase>,
+    TResponseData<API.TKnowledge>,
     TMeta,
-    REQUEST.TCreateKnowledgeBaseRequest
+    REQUEST.TCreateKnowledgeRequest
   >({
-    mutationFn: createKnowledgeBaseAsync,
+    mutationFn: createKnowledgeAsync,
   });
 };
 
-export const useDeleteKnowledgeBaseService = () => {
-  return useMutation<TResponse<API.TKnowledgeBase>, TMeta, string>({
-    mutationFn: (name) => deleteKnowledgeBaseAsync(name),
+export const useDeleteKnowledgeService = () => {
+  return useMutation<TResponseData<API.TKnowledge>, TMeta, string>({
+    mutationFn: (name) => deleteKnowledgeAsync(name),
   });
 };
 
 export const useUploadDocumentService = () => {
-  return useMutation<TResponse, TMeta, FormData>({
+  return useMutation<TResponseData, TMeta, FormData>({
     mutationFn: (data) => uploadDocumentAsync(data),
   });
 };
 
-export const useGetKnowledgeBaseDocumentsService = (
+export const useGetDocumentsService = (
   id: string,
   params: {
-    search_name?: string;
+    search?: string;
     sort_by?: string;
     sort_order?: string;
     page?: number;
     limit?: number;
   } = {}
 ) => {
-  return useQuery<
-    TResponse<API.TGetKnowledgeBaseDocumentsResponse>,
-    TMeta,
-    API.TGetKnowledgeBaseDocumentsResponse
-  >({
-    queryKey: [KNOWLEDGE_BASE_DOCUMENTS_QUERY_KEY, id, params],
-    queryFn: () => getKnowledgeBaseDocumentsAsync(id, params),
+  return useQuery({
+    queryKey: [DOCUMENTS_QUERY_KEY, id, params],
+    queryFn: () => getDocumentsAsync(id, params),
     select: (data) =>
-      data.value.data || {
-        documents: [],
+      data.data || {
+        items: [],
         total: 0,
         page: 0,
         limit: 0,
@@ -121,13 +123,29 @@ export const useGetKnowledgeBaseDocumentsService = (
 };
 
 export const useDeleteDocumentService = () => {
-  return useMutation<TResponse, TMeta, string>({
+  return useMutation<TResponseData, TMeta, string>({
     mutationFn: (id) => deleteDocumentAsync(id),
   });
 };
 
 export const useTrainDocumentService = () => {
-  return useMutation<TResponse, TMeta, string>({
-    mutationFn: (id) => trainDocumentAsync(id),
+  return useMutation<TResponseData, TMeta, REQUEST.TTrainingDocumentRequest>({
+    mutationFn: (data) => trainDocumentAsync(data),
   });
 };
+
+export const useUpdateSettingsService = () => {
+  return useMutation<TResponseData, TMeta, REQUEST.TUpdateSettingsRequest>({
+    mutationFn: (data) => updateSettingAsync(data),
+  });
+};
+
+export const useGetSettingService = () => {
+  return useQuery({
+    queryKey: ["settings"],
+    queryFn: () => getSettingsAsync(),
+    select: (data) => data.data,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+  });
+}
