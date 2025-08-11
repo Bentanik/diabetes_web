@@ -38,6 +38,12 @@ declare namespace REQUEST {
     search_accuracy?: number;
     list_knowledge_id?: string[];
   };
+
+  type TGetDocumentParserRequest = {
+    document_id: string;
+    page?: number;
+    limit?: number;
+  };
 }
 
 declare namespace API {
@@ -81,5 +87,29 @@ declare namespace API {
   type TSettings = {
     number_of_passages: number;
     search_accuracy: number;
+  }
+
+  type TBbox = {
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  }
+
+  type TLocation = {
+    page: string;
+    bbox: TBbox;
+    block_index: number;
+    doc_type: string;
+  }
+
+  type TDocumentParser = {
+    id: string;
+    document_id: string;
+    content: string;
+    location: TLocation;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
   }
 }

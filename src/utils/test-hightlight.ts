@@ -1,25 +1,25 @@
 export const testHightLights = [
   {
     content: {
-      text: " Type Checking for JavaScript",
+      text: "Jackson vào năm Sinh Michael Joseph Jackson 29 tháng 8, Gary, Indiana, Hoa Kỳ Mất 25 tháng 6, 2009 (50 tuổi) Los Angeles, California, Hoa Nguyên nhân mất Ngộ độc propofol cấp tính An táng Nghĩa trang Forest Lawn, Glendale, California, Hoa Kỳ Tên khác Michael Joe Jackson Nghề nghiệp Ca sĩ · nhạc sĩ · vũ công · nhà sản xuất thu âm Phối ngẫu Lisa Marie Presley (cưới 1994⁠–⁠ld.1996) Debbie Rowe (cưới 1996⁠–⁠ld.1999) Con cái Cha mẹ Joe Jackson Katherine Jackson Gia đình Gia đình Jackson",
     },
     position: {
       boundingRect: {
-        x1: 255.73419189453125,
-        y1: 139.140625,
-        x2: 574.372314453125,
-        y2: 165.140625,
-        width: 809.9999999999999,
-        height: 1200,
+        x1: 333.796875,
+        y1: 403.6903076171875,
+        x2: 549.2501220703125,
+        y2: 778.48779296875,
+        width: 215.45324707,
+        height: 374.797485352,
       },
       rects: [
         {
-          x1: 255.73419189453125,
-          y1: 139.140625,
-          x2: 574.372314453125,
-          y2: 165.140625,
-          width: 809.9999999999999,
-          height: 1200,
+          x1: 333.796875,
+          y1: 403.6903076171875,
+          x2: 549.2501220703125,
+          y2: 778.48779296875,
+          width: 215.45324707,
+          height: 374.797485352,
         },
       ],
       pageNumber: 1,

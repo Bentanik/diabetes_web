@@ -1,21 +1,24 @@
 'use client'
 import { useState } from 'react'
 import Header from '@/app/admin/train-ai/setting/components/header'
-import { FolderIcon, MessageCircleIcon } from 'lucide-react'
+import { BrainIcon, FolderIcon } from 'lucide-react'
 import KnowledgeSetting from '@/app/admin/train-ai/setting/components/knowledge_setting'
+import AISettings from '@/app/admin/train-ai/setting/components/ai_settings'
 
 export default function SettingTrainAIComponent() {
     const [activeTab, setActiveTab] = useState('knowledgebases')
 
     const tabs = [
-        { id: 'knowledgebases', label: 'Thư mục', icon: <FolderIcon /> },
-        { id: 'prompts', label: 'Prompt Settings', icon: <MessageCircleIcon /> }
+        { id: 'knowledgebases', label: 'Cơ sở tri thức', icon: <FolderIcon /> },
+        { id: 'ai-settings', label: 'Cài đặt AI', icon: <BrainIcon /> }
     ]
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 'knowledgebases':
                 return <KnowledgeSetting />
+            case 'ai-settings':
+                return <AISettings />
             default:
                 return <KnowledgeSetting />
         }

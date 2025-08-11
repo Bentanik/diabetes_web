@@ -23,12 +23,14 @@ import { useGetKnowledgesService } from "@/services/train-ai/services";
 import { useDebounce } from "@/hooks/use-debounce";
 import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting";
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
+import { formatFileSize } from "@/utils/file";
+import DeleteKnowledgeModal from "@/app/admin/train-ai/components/delete_knowlege";
 
 interface KnowledgeItemProps {
     knowledgeBase: API.TKnowledge;
     isSelected: boolean;
     onToggle: (id: string) => void;
-    onDelete?: (id: string) => void;
+    onDelete?: (folder: API.TKnowledge) => void;
 }
 
 const KnowledgeItem = ({
@@ -37,20 +39,13 @@ const KnowledgeItem = ({
     onToggle,
     onDelete,
 }: KnowledgeItemProps) => {
-    const formatSize = useCallback((sizeInMB: number) => {
-        if (sizeInMB >= 1024) {
-            return `${(sizeInMB / 1024).toFixed(2)} GB`;
-        }
-        return `${sizeInMB.toFixed(2)} MB`;
-    }, []);
-
     const formatDate = useCallback((dateString: string) => {
         return new Date(dateString).toLocaleDateString("vi-VN");
     }, []);
 
     return (
         <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-6">
                 <input
                     type="checkbox"
                     id={knowledgeBase.id}
@@ -78,7 +73,11 @@ const KnowledgeItem = ({
                         </span>
                         <span className="flex items-center gap-1">
                             <HardDriveIcon className="w-3 h-3" />
-                            {formatSize(knowledgeBase.stats.total_size_bytes)}
+                            {formatFileSize(knowledgeBase.stats.total_size_bytes)}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs">
+                            <CalendarIcon className="w-3 h-3" />
+                            Cập nhật: {formatDate(knowledgeBase.updated_at)}
                         </span>
                         <span
                             className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${knowledgeBase.select_training === true
@@ -98,17 +97,13 @@ const KnowledgeItem = ({
                                 </>
                             )}
                         </span>
-                        <span className="flex items-center gap-1 text-xs">
-                            <CalendarIcon className="w-3 h-3" />
-                            Cập nhật: {formatDate(knowledgeBase.updated_at)}
-                        </span>
                     </div>
                 </div>
             </div>
             <div className="flex items-center gap-2 ml-4">
                 {onDelete && (
                     <button
-                        onClick={() => onDelete(knowledgeBase.id)}
+                        onClick={() => onDelete(knowledgeBase)}
                         className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                         title="Xóa"
                         type="button"
@@ -125,9 +120,14 @@ export default function KnowledgeSetting() {
     const [isOpenCreateKnowlegeModal, setIsOpenCreateKnowlegeModal] =
         useState(false);
 
+    const [isOpenDeleteKnowlegeModal, setIsOpenDeleteKnowlegeModal] =
+        useState(false);
+
     const [selectedKnowledgeBases, setSelectedKnowledgeBases] = useState<
         string[]
     >([]);
+
+    const [folderDelete, setFolderDelete] = useState<API.TKnowledge | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -160,6 +160,14 @@ export default function KnowledgeSetting() {
 
     const handleCloseCreateKnowlegeModal = useCallback(() => {
         setIsOpenCreateKnowlegeModal(false);
+    }, []);
+
+    const handleOpenDeleteKnowlegeModal = useCallback(() => {
+        setIsOpenDeleteKnowlegeModal(true);
+    }, []);
+
+    const handleCloseDeleteKnowlegeModal = useCallback(() => {
+        setIsOpenDeleteKnowlegeModal(false);
     }, []);
 
     // Sync selectedKnowledgeBases với select_training từ backend
@@ -200,9 +208,9 @@ export default function KnowledgeSetting() {
         );
     }, []);
 
-    const handleDelete = useCallback((id: string) => {
-        console.log("Delete:", id);
-        // Implement delete logic
+    const handleDelete = useCallback((folder: API.TKnowledge) => {
+        setFolderDelete(folder);
+        handleOpenDeleteKnowlegeModal();
     }, []);
 
     const handleAddKnowledgeBase = useCallback(() => {
@@ -269,7 +277,7 @@ export default function KnowledgeSetting() {
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-medium text-[#248fca] flex items-center gap-2">
                             <BookOpenIcon className="w-5 h-5" />
-                            Chọn nội dung
+                            Chọn cơ sở tri thức để AI trả lời
                         </h3>
                         <Button
                             variant="outline"
@@ -277,7 +285,7 @@ export default function KnowledgeSetting() {
                             onClick={handleAddKnowledgeBase}
                         >
                             <PlusIcon className="w-5 h-5" />
-                            Thêm nội dung
+                            Thêm cơ sở tri thức
                         </Button>
                     </div>
 
@@ -287,7 +295,7 @@ export default function KnowledgeSetting() {
                             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
-                                placeholder="Tìm kiếm nội dung..."
+                                placeholder="Tìm kiếm cơ sở tri thức..."
                                 value={searchTerm}
                                 onChange={(e) =>
                                     handleSearchChange(e.target.value)
@@ -461,6 +469,16 @@ export default function KnowledgeSetting() {
             <CreateKnowlegeModal
                 isOpen={isOpenCreateKnowlegeModal}
                 onClose={handleCloseCreateKnowlegeModal}
+            />
+            <DeleteKnowledgeModal
+                isOpen={isOpenDeleteKnowlegeModal}
+                onClose={handleCloseDeleteKnowlegeModal}
+                folder={{
+                    id: folderDelete?.id || "",
+                    name: folderDelete?.name || "",
+                    description: folderDelete?.description || "",
+                    document_count: folderDelete?.stats.document_count || 0,
+                }}
             />
         </div>
     );
