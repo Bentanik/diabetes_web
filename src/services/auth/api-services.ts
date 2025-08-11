@@ -85,3 +85,13 @@ export const verifyForgotPasswordAsync = async (body: REQUEST.TVerifyForgotPassw
     );
     return response.data;
 };
+
+export const logoutAsync = async () => {
+    const response = await request<TResponseData>(
+        API_ENDPOINTS.LOGOUT,
+        {
+            method: "DELETE",
+        }
+    );
+    return response.data;
+};

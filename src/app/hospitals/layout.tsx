@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { sidebar_items } from "@/constants/hospital";
-import { LogOutIcon, ChevronDownIcon, ChevronRightIcon } from "lucide-react";
+import { LogOutIcon, ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import useLogout from "@/hooks/use-logout";
 
 // Định nghĩa type cho sidebar item với submenu
 interface SidebarSubItem {
@@ -51,6 +53,7 @@ export default function HospitalLayout({
     };
 
     const isSubItemActive = (href: string) => pathname === href;
+    const { handleLogout } = useLogout();
 
     return (
         <div className="min-h-screen w-full font-be-vietnam-pro flex bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -315,6 +318,7 @@ export default function HospitalLayout({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.5 }}
+                    onClick={handleLogout}
                 >
                     <motion.div
                         whileHover={{ x: 4 }}

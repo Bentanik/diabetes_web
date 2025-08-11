@@ -4,6 +4,7 @@ import useToast from "@/hooks/use-toast";
 import {
     forgotPasswordAsync,
     loginAsync,
+    logoutAsync,
     registerEmailAsync,
     sendRegisterEmailAsync,
     verifyForgotPasswordAsync,
@@ -117,5 +118,11 @@ export const useServiceForgotPasswordEmail = () => {
 export const useServiceVerifyForgotPassword = () => {
     return useMutation<TResponseData, TMeta, REQUEST.TVerifyForgotPassword>({
         mutationFn: verifyForgotPasswordAsync,
+    });
+};
+
+export const useServiceLogout = () => {
+    return useMutation<TResponseData, TMeta, void>({
+        mutationFn: logoutAsync,
     });
 };

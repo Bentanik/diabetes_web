@@ -34,8 +34,9 @@ declare namespace REQUEST {
   };
 
   type TUpdateSettingsRequest = {
-    number_of_passages: number;
-    search_accuracy: number;
+    number_of_passages?: number;
+    search_accuracy?: number;
+    list_knowledge_id?: string[];
   };
 }
 

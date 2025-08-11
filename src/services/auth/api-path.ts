@@ -8,6 +8,8 @@ const REGISTER_EMAIL = AUTH + "/register-email";
 const REFRESH_TOKEN = AUTH + "/refresh-token";
 const FORGOT_PASSWORD = AUTH + "/forgot-password";
 const VERIFY_FORGOT_PASSWORD = AUTH + "/verify-forgot-password";
+const LOGOUT = AUTH + "/logout";
+
 
 export default {
     LOGIN,
@@ -16,5 +18,6 @@ export default {
     REGISTER_EMAIL,
     REFRESH_TOKEN,
     FORGOT_PASSWORD,
-    VERIFY_FORGOT_PASSWORD
+    VERIFY_FORGOT_PASSWORD,
+    LOGOUT,
 };

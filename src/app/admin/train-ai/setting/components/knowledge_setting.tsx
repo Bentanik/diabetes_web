@@ -26,21 +26,19 @@ import { useDebounce } from "@/hooks/use-debounce";
 import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting";
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
 
-interface KnowledgeBaseItemProps {
+interface KnowledgeItemProps {
     knowledgeBase: API.TKnowledge;
     isSelected: boolean;
     onToggle: (id: string) => void;
-    onSettings?: (id: string) => void;
     onDelete?: (id: string) => void;
 }
 
-const KnowledgeBaseItem = ({
+const KnowledgeItem = ({
     knowledgeBase,
     isSelected,
     onToggle,
-    onSettings,
     onDelete,
-}: KnowledgeBaseItemProps) => {
+}: KnowledgeItemProps) => {
     const formatSize = useCallback((sizeInMB: number) => {
         if (sizeInMB >= 1024) {
             return `${(sizeInMB / 1024).toFixed(2)} GB`;
@@ -110,16 +108,6 @@ const KnowledgeBaseItem = ({
                 </div>
             </div>
             <div className="flex items-center gap-2 ml-4">
-                {onSettings && (
-                    <button
-                        onClick={() => onSettings(knowledgeBase.id)}
-                        className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                        title="Cài đặt"
-                        type="button"
-                    >
-                        <SettingsIcon className="w-4 h-4" />
-                    </button>
-                )}
                 {onDelete && (
                     <button
                         onClick={() => onDelete(knowledgeBase.id)}
@@ -135,7 +123,7 @@ const KnowledgeBaseItem = ({
     );
 };
 
-export default function KnowledgeBaseSetting() {
+export default function KnowledgeSetting() {
     const [isOpenCreateKnowlegeModal, setIsOpenCreateKnowlegeModal] =
         useState(false);
 
@@ -183,12 +171,10 @@ export default function KnowledgeBaseSetting() {
                 .filter((kb: API.TKnowledge) => kb.select_training)
                 .map((kb: API.TKnowledge) => kb.id);
 
-            // Chỉ update nếu có sự khác biệt để tránh re-render không cần thiết
             setSelectedKnowledgeBases((prev) => {
                 const prevSet = new Set(prev);
                 const newSet = new Set(preSelectedIds);
 
-                // So sánh 2 sets
                 if (prevSet.size !== newSet.size) return preSelectedIds;
                 for (const id of preSelectedIds) {
                     if (!prevSet.has(id)) return preSelectedIds;
@@ -216,11 +202,6 @@ export default function KnowledgeBaseSetting() {
         );
     }, []);
 
-    const handleSettings = useCallback((id: string) => {
-        console.log("Settings for:", id);
-        // Implement settings logic
-    }, []);
-
     const handleDelete = useCallback((id: string) => {
         console.log("Delete:", id);
         // Implement delete logic
@@ -233,10 +214,8 @@ export default function KnowledgeBaseSetting() {
     // Hàm lưu cài đặt - gửi selectedKnowledgeBases về backend
     const handleSaveSettings = useCallback(async () => {
         try {
-            const request: REQUEST.TUpdateChatSettingRequest = {
-                config: {
-                    enabled_kb_ids: selectedKnowledgeBases,
-                },
+            const request: REQUEST.TUpdateSettingsRequest = {
+                list_knowledge_id: selectedKnowledgeBases,
             };
 
             handleUpdateChatSetting(request);
@@ -290,17 +269,17 @@ export default function KnowledgeBaseSetting() {
             <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                        <h3 className="text-lg font-medium text-[#248fca] flex items-center gap-2">
                             <BookOpenIcon className="w-5 h-5" />
-                            Chọn Nội dung
+                            Chọn nội dung
                         </h3>
                         <Button
                             variant="outline"
-                            className="gap-2"
+                            className="gap-2 bg-transparent text-[#248fca] hover:text-[#248fca]"
                             onClick={handleAddKnowledgeBase}
                         >
-                            <PlusIcon className="w-4 h-4" />
-                            Thêm Nội dung
+                            <PlusIcon className="w-5 h-5" />
+                            Thêm nội dung
                         </Button>
                     </div>
 
@@ -386,14 +365,13 @@ export default function KnowledgeBaseSetting() {
                             </div>
                         ) : (
                             knowledgeBases.map((knowledgeBase: API.TKnowledge) => (
-                                <KnowledgeBaseItem
+                                <KnowledgeItem
                                     key={knowledgeBase.id}
                                     knowledgeBase={knowledgeBase}
                                     isSelected={selectedKnowledgeBases.includes(
                                         knowledgeBase.id
                                     )}
                                     onToggle={handleKnowledgeBaseToggle}
-                                    onSettings={handleSettings}
                                     onDelete={handleDelete}
                                 />
                             ))
