@@ -369,7 +369,7 @@ export default function UploadPageComponent({ id }: { id: string }) {
                         <ValidationInfo />
                     </div>
                     <div className="lg:col-span-2 flex flex-col gap-4">
-                        <HistoryUploadFileDisplay />
+                        <HistoryUploadFileDisplay knowledgeId={id} />
                     </div>
                 </div>
             </div>

@@ -13,6 +13,7 @@ export const useGetJobDocumentHistoryService = (
     type: "upload_document" | "training_document";
     status?: "completed" | "failed" | "processing" | "queued";
     enabled?: boolean;
+    knowledge_id?: string;
   } = {
     search: "",
     sort_by: "created_at",
@@ -22,6 +23,7 @@ export const useGetJobDocumentHistoryService = (
     type: "upload_document",
     status: undefined,
     enabled: true,
+    knowledge_id: undefined,
   }
 ) => {
   const { enabled, ...apiParams } = params;

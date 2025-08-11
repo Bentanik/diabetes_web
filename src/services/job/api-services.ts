@@ -10,6 +10,7 @@ export const getJobDocumentHistoryAsync = async (
     limit: number;
     type: "upload_document" | "training_document";
     status?: "completed" | "failed" | "processing" | "queued";
+    knowledge_id?: string;
   } = {
     search: "",
     sort_by: "created_at",
@@ -18,6 +19,7 @@ export const getJobDocumentHistoryAsync = async (
     limit: 10,
     type: "upload_document",
     status: undefined,
+    knowledge_id: undefined,
   }
 ) => {
   const response = await request<TResponseData<TPagination<API.TJob>>>(

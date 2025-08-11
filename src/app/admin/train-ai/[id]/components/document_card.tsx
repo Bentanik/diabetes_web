@@ -83,7 +83,7 @@ export default function DocumentCard({
     }
 
     return (
-        <div className="rounded-xl border border-gray-200 bg-white py-5 px-4 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 w-[260px] h-[260px]">
+        <div className="rounded-xl border border-gray-200 bg-white py-5 px-4 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 w-[360px] h-[280px]">
             {/* Header với file type và actions */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-xs text-gray-500">
