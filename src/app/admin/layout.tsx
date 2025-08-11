@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { sidebar_items } from "@/constants/admin";
@@ -8,6 +10,7 @@ import { LogOutIcon, ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useAppSelector } from "@/stores";
+import useLogout from "@/hooks/use-logout";
 
 interface SidebarSubItem {
     label: string;
@@ -22,7 +25,7 @@ interface SidebarItem {
     subItems?: SidebarSubItem[];
 }
 
-export default function HospitalLayout({
+export default function AdminLayout({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
     const [open, setOpen] = useState(true);
@@ -60,6 +63,8 @@ export default function HospitalLayout({
     };
 
     const isSubItemActive = (href: string) => pathname === href;
+
+    const { handleLogout } = useLogout();
 
     return (
         <div className="min-h-screen w-full font-be-vietnam-pro flex bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -331,6 +336,7 @@ export default function HospitalLayout({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.5 }}
+                    onClick={handleLogout}
                 >
                     <motion.div
                         whileHover={{ x: 4 }}

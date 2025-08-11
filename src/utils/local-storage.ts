@@ -37,4 +37,5 @@ export const getAuthStorage = (): API.TAuthTokenDto | null => {
 
 export const removeAuthStorage = () => {
   removeStorageItem("accessToken");
+  removeStorageItem("refreshToken");
 };

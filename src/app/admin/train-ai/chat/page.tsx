@@ -3,19 +3,9 @@ import ChatMain from "@/app/admin/train-ai/chat/components";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import {
-    BellIcon,
-    SettingsIcon,
-} from "lucide-react";
-import { useState } from "react";
-import SettingDialog from "./components/setting-dialog";
+import { BellIcon } from "lucide-react";
 
 export default function ChatPage() {
-    const [modalOpen, setModalOpen] = useState(false);
-
-    const handleCloseModal = () => {
-        setModalOpen(false);
-    };
 
     return (
         <div className="">
@@ -35,15 +25,6 @@ export default function ChatPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="gap-2 bg-transparent"
-                            onClick={() => setModalOpen(true)}
-                        >
-                            <SettingsIcon className="w-4 h-4" />
-                            Cài đặt
-                        </Button>
                         <Button variant="ghost" size="icon">
                             <BellIcon className="w-5 h-5" />
                         </Button>
@@ -53,8 +34,6 @@ export default function ChatPage() {
                     </div>
                 </div>
             </motion.div>
-            <SettingDialog isOpen={modalOpen} onClose={handleCloseModal} />
-
             <ChatMain />
         </div>
     );

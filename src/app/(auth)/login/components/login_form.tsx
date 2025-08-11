@@ -5,6 +5,7 @@ import InputAuth from "@/components/input_auth";
 import useLogin from "@/app/(auth)/login/hooks/useLogin";
 import useToast from "@/hooks/use-toast";
 import { LogIn, Lock } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginForm() {
     const { addToast } = useToast();
@@ -68,13 +69,14 @@ export default function LoginForm() {
 
                     {/* Forgot Password Link */}
                     <div className="flex justify-end">
-                        <button
+                        <Link
+                            href="/forgot-password"
                             type="button"
                             onClick={handleForgotPassword}
                             className="text-sm text-[#248fca] hover:text-[#1e7bb8] font-medium transition-colors duration-200 hover:underline cursor-pointer"
                         >
                             Quên mật khẩu?
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Login Button */}

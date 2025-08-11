@@ -21,6 +21,16 @@ declare namespace REQUEST {
     type TRereshToken = {
         refreshToken: string;
     };
+
+    type TForgotPasswordEmail = {
+        email: string;
+    };
+
+    type TVerifyForgotPassword = {
+        email: string;
+        otp: string;
+        password: string;
+    }
 }
 
 declare namespace API {

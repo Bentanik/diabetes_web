@@ -13,7 +13,6 @@ const HomeFAQ = React.lazy(() => import("@/components/home_faq"));
 
 export default function HomepageComponent() {
     const userState = useAppSelector((state) => state.userSlice);
-
     if (
         userState.user?.roles?.includes("SystemAdmin") ||
         userState.user?.roles?.includes("Moderator")
