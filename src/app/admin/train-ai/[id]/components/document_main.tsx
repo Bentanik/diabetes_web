@@ -45,6 +45,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
         type: "training_document",
         status: "processing",
         enabled: activeTab === "training",
+        knowledge_id: knowledgeBaseId,
     })
 
     useEffect(() => {

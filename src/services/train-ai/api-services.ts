@@ -101,6 +101,7 @@ export const getDocumentsAsync = async (
     sort_order: "desc",
     page: 1,
     limit: 10,
+    knowledge_id: id,
     ...params,
   };
 
