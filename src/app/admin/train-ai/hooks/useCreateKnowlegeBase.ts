@@ -60,7 +60,7 @@ export default function useCreateKnowlegeBase() {
           }
         },
         onError: (data: TMeta) => {
-          if (data.errorCode === "KB001") {
+          if (data.errorCode === "KNOWLEDGE_NAME_EXISTS") {
             setError("name", { message: "Thư mục đã tồn tại" });
           }
           setIsCreating(false);
