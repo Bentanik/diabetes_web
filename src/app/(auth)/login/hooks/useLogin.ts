@@ -45,13 +45,10 @@ export default function useLogin() {
                         hideBackdrop();
                         reset();
                         dispatch(clearAllRegister());
-                        if (
-                            data.data?.authUser.roles?.includes(
-                                "SystemAdmin"
-                            ) ||
-                            data.data?.authUser.roles?.includes("Moderator")
-                        )
+                        if (data.data?.authUser.roles?.includes("SystemAdmin"))
                             return router.push("/admin/home");
+                        if (data.data?.authUser.roles?.includes("Moderator"))
+                            return router.push("/admin/blogs");
                         if (
                             data.data?.authUser.roles?.includes(
                                 "HospitalStaff"

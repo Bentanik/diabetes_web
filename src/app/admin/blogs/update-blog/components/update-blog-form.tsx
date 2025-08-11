@@ -77,8 +77,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         null
     );
     const router = useRouter();
-
-    console.log("thumnail preview console" + thumbnailPreview);
     //HANDLE SUBMIT UPLOAD IMAGES
     const handleImageChange = async (
         e: React.ChangeEvent<HTMLInputElement>
@@ -193,10 +191,11 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         setIsDialogOpen(false);
     };
 
-    if (blog_detail?.status !== -2) {
-        router.push("/admin/blogs");
-        return null;
-    }
+    useEffect(() => {
+        if (blog_detail && blog_detail.status !== -2) {
+            router.push("/admin/blogs");
+        }
+    }, [blog_detail, router]);
 
     return (
         <div className="min-h-screen">
