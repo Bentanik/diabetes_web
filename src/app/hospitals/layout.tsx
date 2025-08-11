@@ -7,6 +7,7 @@ import { sidebar_items } from "@/constants/hospital";
 import { LogOutIcon, ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useAppSelector } from "@/stores";
 
 // Định nghĩa type cho sidebar item với submenu
 interface SidebarSubItem {
@@ -29,6 +30,8 @@ export default function HospitalLayout({
     const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
     const pathname = usePathname();
     const router = useRouter();
+
+    const userState = useAppSelector((state) => state.userSlice);
 
     const sidebarWidth = open ? 280 : 80;
 
@@ -106,7 +109,12 @@ export default function HospitalLayout({
                         const isExpanded = expandedItems.has(index);
                         const hasSubItems =
                             item.subItems && item.subItems.length > 0;
-
+                        if (
+                            userState.user?.roles?.includes("HospitalAdmin") &&
+                            item.href !== "/hospitals/hospital-staff"
+                        ) {
+                            return null;
+                        }
                         return (
                             <motion.div
                                 key={index}
