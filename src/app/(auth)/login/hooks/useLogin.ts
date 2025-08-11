@@ -56,7 +56,7 @@ export default function useLogin() {
                             data.data?.authUser.roles?.includes("HospitalAdmin")
                         )
                             return router.push("/hospitals/home");
-                        return router.push("/hospitals/home");
+                        return router.push("/");
                     }
                 },
                 onError: (error) => {
