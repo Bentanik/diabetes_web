@@ -349,8 +349,11 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
     );
 };
 
+interface HistoryUploadFileDisplayProps {
+    knowledgeId: string;
+}
 
-export default function HistoryUploadFileDisplay() {
+export default function HistoryUploadFileDisplay({ knowledgeId }: HistoryUploadFileDisplayProps) {
     const { data: jobs, isPending, isError } = useGetJobDocumentHistoryService({
         page: 1,
         limit: 3,
@@ -359,6 +362,7 @@ export default function HistoryUploadFileDisplay() {
         search: "",
         type: "upload_document",
         enabled: true,
+        knowledge_id: knowledgeId,
     });
     const [isDeleteDocumentOpen, setIsDeleteDocumentOpen] = useState(false);
     const [document, setDocument] = useState<API.TJob | null>(null);
@@ -374,7 +378,7 @@ export default function HistoryUploadFileDisplay() {
     };
 
     const handleDownloadDocument = async (document: API.TJob) => {
-        await downloadDocumentAsync(document.id || "");
+        await downloadDocumentAsync(document.document_id || "");
     };
 
     return (

@@ -15,8 +15,6 @@ import {
     BookOpenIcon,
     FileIcon,
     SaveIcon,
-    FlaskConicalIcon,
-    TrendingUpIcon,
     XIcon,
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
@@ -456,17 +454,6 @@ export default function KnowledgeSetting() {
                         >
                             <SaveIcon className="w-4 h-4" />
                             Lưu cài đặt
-                        </Button>
-                        <Button
-                            className="w-full bg-green-600 hover:bg-green-700 gap-2"
-                            disabled={selectedKnowledgeBases.length === 0}
-                        >
-                            <FlaskConicalIcon className="w-4 h-4" />
-                            Kiểm tra Tìm kiếm
-                        </Button>
-                        <Button variant="outline" className="w-full gap-2">
-                            <TrendingUpIcon className="w-4 h-4" />
-                            Xem Hiệu suất
                         </Button>
                     </div>
                 </div>
