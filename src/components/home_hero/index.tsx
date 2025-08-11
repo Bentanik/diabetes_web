@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import React from 'react'
+import React from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Heart, Shield, Users, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
-import BlurText from '@/components/ui/blur-text';
+import { ChevronRight, Heart, Shield, Users, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import BlurText from "@/components/ui/blur-text";
 
 export default function HomeHero() {
     return (
@@ -55,8 +55,10 @@ export default function HomeHero() {
                             DbDoctor
                         </span>
                         {" - "}
-                        Ứng dụng kết nối bác sĩ, bệnh nhân và trí tuệ nhân tạo để chăm sóc người bệnh đái tháo đường toàn diện hơn.
-                        Không chỉ là công nghệ, mà là người bạn đồng hành trong hành trình vì sức khỏe.
+                        Ứng dụng kết nối bác sĩ, bệnh nhân và trí tuệ nhân tạo
+                        để chăm sóc người bệnh đái tháo đường toàn diện hơn.
+                        Không chỉ là công nghệ, mà là người bạn đồng hành trong
+                        hành trình vì sức khỏe.
                     </motion.p>
 
                     {/* Feature highlights */}
@@ -70,19 +72,25 @@ export default function HomeHero() {
                             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <Heart className="w-4 h-4 text-blue-600" />
                             </div>
-                            <span className="text-sm font-medium text-gray-700">Chăm sóc 24/7</span>
+                            <span className="text-sm font-medium text-gray-700">
+                                Chăm sóc 24/7
+                            </span>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-white/60 backdrop-blur-sm rounded-xl border border-blue-100">
                             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <Shield className="w-4 h-4 text-blue-600" />
                             </div>
-                            <span className="text-sm font-medium text-gray-700">Bảo mật tuyệt đối</span>
+                            <span className="text-sm font-medium text-gray-700">
+                                Bảo mật tuyệt đối
+                            </span>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-white/60 backdrop-blur-sm rounded-xl border border-blue-100">
                             <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <Users className="w-4 h-4 text-blue-600" />
                             </div>
-                            <span className="text-sm font-medium text-gray-700">Kết nối bác sĩ</span>
+                            <span className="text-sm font-medium text-gray-700">
+                                Kết nối bác sĩ
+                            </span>
                         </div>
                     </motion.div>
 
@@ -100,7 +108,10 @@ export default function HomeHero() {
                             </span>
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-700 to-cyan-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </Button>
-                        <Button variant="outline" className="px-8 py-4 h-[40px] border-2 border-blue-200 text-lg text-gray-600 font-semibold rounded-xl hover:bg-blue-50 hover:border-blue-300 hover:text-[#248fca] transition-all duration-300 cursor-pointer">
+                        <Button
+                            variant="outline"
+                            className="px-8 py-4 h-[40px] border-2 border-blue-200 text-lg text-gray-600 font-semibold rounded-xl hover:bg-blue-50 hover:border-blue-300 hover:text-[#248fca] transition-all duration-300 cursor-pointer"
+                        >
                             Tìm hiểu thêm
                         </Button>
                     </motion.div>
@@ -126,7 +137,7 @@ export default function HomeHero() {
                                 transition={{ delay: 0.4, duration: 0.6 }}
                             >
                                 <Image
-                                    src="/images/home.jpg"
+                                    src="/images/home_diabet.jpg"
                                     alt="Healthcare professional"
                                     width={320}
                                     height={500}
@@ -142,7 +153,7 @@ export default function HomeHero() {
                                 transition={{ delay: 0.6, duration: 0.6 }}
                             >
                                 <Image
-                                    src="/images/home1.jpg"
+                                    src="/images/home_diabet1.jpg"
                                     alt="Medical consultation"
                                     width={280}
                                     height={320}
@@ -164,8 +175,12 @@ export default function HomeHero() {
                                     <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-800">24/7 Hỗ trợ</p>
-                                    <p className="text-xs text-gray-600">Luôn sẵn sàng</p>
+                                    <p className="text-sm font-semibold text-gray-800">
+                                        24/7 Hỗ trợ
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                        Luôn sẵn sàng
+                                    </p>
                                 </div>
                             </div>
                         </motion.div>
@@ -181,8 +196,12 @@ export default function HomeHero() {
                                     <Shield className="w-4 h-4 text-blue-600" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-800">An toàn 100%</p>
-                                    <p className="text-xs text-gray-600">Bảo mật tối đa</p>
+                                    <p className="text-sm font-semibold text-gray-800">
+                                        An toàn 100%
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                        Bảo mật tối đa
+                                    </p>
                                 </div>
                             </div>
                         </motion.div>
