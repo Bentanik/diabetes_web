@@ -15,7 +15,6 @@ export default function useCreateBlog() {
         showBackdrop();
         mutate(undefined, {
             onSuccess: async (res) => {
-                hideBackdrop();
                 await queryClient.invalidateQueries({
                     queryKey: [GET_POSTS_QUERY_KEY],
                 });
@@ -24,6 +23,7 @@ export default function useCreateBlog() {
                 if (blogId) {
                     router.push(`/admin/blogs/update-blog/${blogId}`);
                 }
+                hideBackdrop();
             },
             onError: (err) => {
                 hideBackdrop();

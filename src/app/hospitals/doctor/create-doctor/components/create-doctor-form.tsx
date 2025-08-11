@@ -27,12 +27,6 @@ import {
     CalendarDays,
     Info,
 } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 import {
     Form,
     FormControl,
@@ -234,7 +228,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     />
                                                 </FormControl>
                                                 <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
+                                                    {/* <AlertCircle className="h-4 w-4" /> */}
                                                 </FormMessage>
                                             </FormItem>
                                         )}
@@ -259,7 +253,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     />
                                                 </FormControl>
                                                 <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
+                                                    {/* <AlertCircle className="h-4 w-4" /> */}
                                                 </FormMessage>
                                             </FormItem>
                                         )}
@@ -284,7 +278,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     />
                                                 </FormControl>
                                                 <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
+                                                    {/* <AlertCircle className="h-4 w-4" /> */}
                                                 </FormMessage>
                                             </FormItem>
                                         )}
@@ -312,7 +306,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     />
                                                 </FormControl>
                                                 <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
+                                                    {/* <AlertCircle className="h-4 w-4" /> */}
                                                 </FormMessage>
                                             </FormItem>
                                         )}
@@ -351,7 +345,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                         />
                                                     </FormControl>
                                                     <FormMessage className="flex items-center gap-1">
-                                                        <AlertCircle className="h-4 w-4" />
+                                                        {/* <AlertCircle className="h-4 w-4" /> */}
                                                     </FormMessage>
                                                 </FormItem>
                                             )}
@@ -419,7 +413,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage className="flex items-center gap-1">
-                                                        <AlertCircle className="h-4 w-4" />
+                                                        {/* <AlertCircle className="h-4 w-4" /> */}
                                                     </FormMessage>
                                                 </FormItem>
                                             )}
@@ -474,7 +468,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage className="flex items-center gap-1">
-                                                        <AlertCircle className="h-4 w-4" />
+                                                        {/* <AlertCircle className="h-4 w-4" /> */}
                                                     </FormMessage>
                                                 </FormItem>
                                             )}
@@ -511,7 +505,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     />
                                                 </FormControl>
                                                 <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
+                                                    {/* <AlertCircle className="h-4 w-4" /> */}
                                                 </FormMessage>
                                             </FormItem>
                                         )}
