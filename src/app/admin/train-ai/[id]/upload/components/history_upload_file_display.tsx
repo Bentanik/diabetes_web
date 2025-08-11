@@ -28,7 +28,6 @@ import {
     Activity,
     CalendarIcon,
     ArchiveIcon,
-    TrainIcon,
     FileIcon,
     AlertCircleIcon,
 } from "lucide-react";
@@ -239,14 +238,14 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                             </div>
                             {document.status.status === "completed" && !document.is_document_delete && !document.is_document_duplicate && (
                                 <div className="flex gap-2 mt-1">
-                                    <Button
+                                    {/* <Button
                                         variant="outline"
                                         size="sm"
                                         className="h-7 px-2.5 text-xs text-[#0d90db] border-[#0d90db]/30 hover:bg-[#0d90db]/5 hover:text-[#0d90db]"
                                     >
                                         <TrainIcon className="w-3 h-3 mr-1" />
                                         Huấn luyện
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         variant="outline"
                                         size="sm"

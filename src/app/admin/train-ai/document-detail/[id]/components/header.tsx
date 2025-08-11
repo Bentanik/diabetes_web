@@ -1,29 +1,28 @@
 "use client"
+import { formatFileSize, getFileIcon } from "@/utils/file";
 import { motion } from "framer-motion"
-import { ArrowLeftIcon, FileText, Calendar, Clock } from "lucide-react"
+import { ArrowLeftIcon, FileText, Calendar, Clock, ArchiveIcon } from "lucide-react"
 import Link from "next/link"
 
-interface DocumentData {
-    title: string;
-    description: string;
-    uploadDate: string;
-    lastModified: string;
-    category: string;
-    status: string;
-    confidentiality: string;
-    fileSize: string;
-    pages: number;
-    version: string;
+interface HeaderProps {
+    documentData: API.TDocument;
 }
 
-interface HeaderProps {
-    documentData?: DocumentData;
-    documentId?: string;
-}
+
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("vi-VN", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(date);
+};
+
 
 export default function Header({
     documentData,
-    documentId,
 }: HeaderProps) {
     return (
         <motion.div
@@ -50,7 +49,7 @@ export default function Header({
 
                     <div className="flex items-start gap-3 flex-1">
                         <div className="p-2 bg-[#248fca]/10 rounded-lg mt-1">
-                            <FileText className="w-5 h-5 text-[#248fca]" />
+                            {getFileIcon(documentData?.file.file_type || 'file')}
                         </div>
                         <div className="flex-1">
                             {documentData ? (
@@ -66,21 +65,20 @@ export default function Header({
                                     <div className="flex items-center gap-6 text-xs text-gray-500">
                                         <div className="flex items-center gap-2">
                                             <Calendar className="w-3 h-3" />
-                                            <span>Tải lên: {documentData.uploadDate}</span>
+                                            <span>Tải lên: {formatDate(documentData.updated_at)}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-3 h-3" />
-                                            <span>Cập nhật: {documentData.lastModified}</span>
+                                            <span>Cập nhật: {formatDate(documentData.created_at)}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <FileText className="w-3 h-3" />
-                                            <span>{documentData.fileSize} • {documentData.pages} trang</span>
+                                            <span>{formatFileSize(documentData.file.size_bytes)}</span>
                                         </div>
-                                        {documentId && (
-                                            <div className="flex items-center gap-2">
-                                                <span>ID: {documentId}</span>
-                                            </div>
-                                        )}
+                                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                                            <ArchiveIcon className="w-3 h-3" />
+                                            <span>{documentData.file?.file_type?.toUpperCase() || 'FILE'}</span>
+                                        </div>
                                     </div>
                                 </>
                             ) : (
@@ -96,11 +94,11 @@ export default function Header({
                 <div className="flex items-center gap-3 ml-4">
                     {/* Status Badge */}
                     {documentData && (
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${documentData.status === 'Đã phê duyệt'
-                            ? 'bg-green-100 text-green-700 border-green-200'
-                            : 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${documentData.type === 'upload_document'
+                            ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
+                            : 'bg-green-100 text-green-700 border-green-200'
                             }`}>
-                            {documentData.status}
+                            {documentData.type === 'upload_document' ? 'Chưa được huấn luyện' : 'Đã huấn luyện'}
                         </span>
                     )}
                 </div>

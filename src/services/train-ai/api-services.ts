@@ -115,6 +115,17 @@ export const getDocumentsAsync = async (
   return response.data;
 };
 
+export const getDocumentByIdAsync = async (id: string) => {
+  const response = await request<TResponseData<API.TDocument>>(
+    API_ENDPOINTS.GET_DOCUMENT_BY_ID(id),
+    {
+      method: "GET",
+    }
+  );
+
+  return response.data;
+}
+
 export const downloadDocumentAsync = async (id: string) => {
   try {
     const response = await axios({
@@ -201,6 +212,18 @@ export const updateSettingAsync = async (data: REQUEST.TUpdateSettingsRequest) =
     {
       method: "PUT",
       data,
+    }
+  );
+
+  return response.data;
+}
+
+export const getViewFileAsync = async (id: string) => {
+  const response = await request<Blob>(
+    API_ENDPOINTS.DOCUMENTS + "/" + id + "/view-file",
+    {
+      method: "GET",
+      responseType: "blob",
     }
   );
 

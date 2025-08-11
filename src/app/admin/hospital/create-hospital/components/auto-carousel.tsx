@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { BrushCleaning, Divide } from "lucide-react";
+import { BrushCleaning } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
 const AutoCarouselMobile = ({

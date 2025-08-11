@@ -24,6 +24,7 @@ import { formatFileSize, getFileIcon } from "@/utils/file";
 import { useTrainDocumentService } from "@/services/train-ai/services";
 import { useNotification } from "@/context/notification_context";
 import { downloadDocumentAsync } from "@/services/train-ai/api-services";
+import { useRouter } from "next/navigation";
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -50,6 +51,8 @@ export default function DocumentCard({
     const isUploadDoc = document.type === "upload_document";
     const { mutate: trainDocument, isPending: isTraining } = useTrainDocumentService();
     const { addNotification } = useNotification();
+
+    const router = useRouter();
 
     const handleTrainDocument = () => {
         trainDocument(
@@ -101,7 +104,7 @@ export default function DocumentCard({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem className="text-sm py-2">
+                        <DropdownMenuItem className="text-sm py-2" onClick={() => router.push(`/admin/train-ai/document-detail/${document.id}`)}>
                             <EyeIcon className="w-4 h-4 mr-2" />
                             Xem chi tiết
                         </DropdownMenuItem>

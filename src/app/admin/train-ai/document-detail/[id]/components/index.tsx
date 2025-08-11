@@ -13,6 +13,8 @@ import {
     Minimize2,
     Maximize2,
 } from "lucide-react";
+import { useGetDocumentByIdService } from "@/services/train-ai/services";
+import { getViewFileAsync } from "@/services/train-ai/api-services";
 
 const DocumentViewPdf = dynamic(
     () =>
@@ -73,51 +75,68 @@ interface DocumentDetailComponentProps {
 }
 
 // Mock document data based on ID
-const getDocumentData = (id: string) => {
-    const mockDocuments = {
-        "123": {
-            title: "Nghiên cứu về Đái tháo đường Type 2",
-            description:
-                "Tài liệu nghiên cứu chi tiết về bệnh đái tháo đường type 2, các phương pháp điều trị và phòng ngừa hiện đại trong y học.",
-            uploadDate: "15/12/2023",
-            lastModified: "20/12/2023",
-            category: "Nội tiết - Đái tháo đường",
-            status: "Đã phê duyệt",
-            confidentiality: "Công khai",
-            fileSize: "2.4 MB",
-            pages: 24,
-            version: "1.2",
-        },
-        default: {
-            title: "Fast and Precise Type Checking for JavaScript",
-            description:
-                "Nghiên cứu về hệ thống kiểm tra kiểu dữ liệu cho JavaScript, phát triển bởi Facebook Inc. Tài liệu kỹ thuật chi tiết.",
-            uploadDate: "20/11/2023",
-            lastModified: "25/11/2023",
-            category: "Công nghệ - Lập trình",
-            status: "Đang xử lý",
-            confidentiality: "Nội bộ",
-            fileSize: "1.8 MB",
-            pages: 12,
-            version: "2.0",
-        },
-    };
+// const getDocumentData = (id: string) => {
+//     const mockDocuments = {
+//         "123": {
+//             title: "Nghiên cứu về Đái tháo đường Type 2",
+//             description:
+//                 "Tài liệu nghiên cứu chi tiết về bệnh đái tháo đường type 2, các phương pháp điều trị và phòng ngừa hiện đại trong y học.",
+//             uploadDate: "15/12/2023",
+//             lastModified: "20/12/2023",
+//             category: "Nội tiết - Đái tháo đường",
+//             status: "Đã phê duyệt",
+//             confidentiality: "Công khai",
+//             fileSize: "2.4 MB",
+//             pages: 24,
+//             version: "1.2",
+//         },
+//         default: {
+//             title: "Fast and Precise Type Checking for JavaScript",
+//             description:
+//                 "Nghiên cứu về hệ thống kiểm tra kiểu dữ liệu cho JavaScript, phát triển bởi Facebook Inc. Tài liệu kỹ thuật chi tiết.",
+//             uploadDate: "20/11/2023",
+//             lastModified: "25/11/2023",
+//             category: "Công nghệ - Lập trình",
+//             status: "Đang xử lý",
+//             confidentiality: "Nội bộ",
+//             fileSize: "1.8 MB",
+//             pages: 12,
+//             version: "2.0",
+//         },
+//     };
 
-    return (
-        mockDocuments[id as keyof typeof mockDocuments] || mockDocuments.default
-    );
-};
+//     return (
+//         mockDocuments[id as keyof typeof mockDocuments] || mockDocuments.default
+//     );
+// };
 
 const DocumentDetailComponent: React.FC<DocumentDetailComponentProps> = ({
     id,
 }) => {
+
+    const { data: documentData } = useGetDocumentByIdService(id);
+
     const pdfViewerRef = useRef<{
         scrollToHighlight: (highlightId: string) => void;
     }>(null);
 
-    // Mock document data
-    const documentData = getDocumentData(id);
-    const pdfUrl = "https://arxiv.org/pdf/1708.08021";
+    const [pdfUrl, setPdfUrl] = useState<string>("");
+
+    useEffect(() => {
+    if (documentData) {
+        getViewFileAsync(documentData.id).then((blob) => {
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+        });
+
+        return () => {
+        if (pdfUrl) {
+            URL.revokeObjectURL(pdfUrl);
+        }
+        };
+    }
+    }, [documentData]);
+
 
     const [highlights, setHighlights] = useState<HighlightData[]>(() => {
         return testHightLights.map((highlight) => ({
@@ -185,30 +204,27 @@ const DocumentDetailComponent: React.FC<DocumentDetailComponentProps> = ({
     };
 
     const selectedHighlights = highlights.filter((h) => h.selected);
-    const totalPages = documentData.pages;
+    // const totalPages = documentData.pages;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            <Header documentData={documentData} documentId={id} />
+            {documentData && <Header documentData={documentData} />}
 
             {/* Main Content */}
             <div
-                className={`transition-all duration-300 ${
-                    isFullscreen ? "fixed inset-0 z-50 bg-white pt-4 px-3" : ""
-                }`}
+                className={`transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-50 bg-white pt-4 px-3" : ""
+                    }`}
             >
                 <div
-                    className={`flex gap-6 transition-all duration-300 ${
-                        isFullscreen
+                    className={`flex gap-6 transition-all duration-300 ${isFullscreen
                             ? "h-[calc(100vh-2rem)]"
                             : "h-[calc(100vh-140px)]"
-                    }`}
+                        }`}
                 >
                     {/* Left Panel - Document Chunks */}
                     <div
-                        className={`transition-all duration-300 ${
-                            isFullscreen ? "w-[35%]" : "w-[45.5%]"
-                        } h-full`}
+                        className={`transition-all duration-300 ${isFullscreen ? "w-[35%]" : "w-[45.5%]"
+                            } h-full`}
                     >
                         <DocumentChunks
                             highlights={highlights}
@@ -219,9 +235,8 @@ const DocumentDetailComponent: React.FC<DocumentDetailComponentProps> = ({
 
                     {/* Right Panel - PDF Viewer */}
                     <div
-                        className={`transition-all duration-300 ${
-                            isFullscreen ? "w-[65%]" : "w-[54.5%]"
-                        } h-full bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-lg relative`}
+                        className={`transition-all duration-300 ${isFullscreen ? "w-[65%]" : "w-[54.5%]"
+                            } h-full bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-lg relative`}
                         style={{
                             boxShadow: "rgba(0, 0, 0, 0.08) 0px 4px 12px",
                         }}
@@ -248,7 +263,7 @@ const DocumentDetailComponent: React.FC<DocumentDetailComponentProps> = ({
                                                     selectedHighlights[0]
                                                         .position.pageNumber
                                                 }{" "}
-                                                / {totalPages}
+                                                / {100}
                                             </span>
                                         </div>
                                     )}
