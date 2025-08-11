@@ -264,7 +264,7 @@ export default function WeeklySchedule({
                         )}
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="h-[500px] overflow-y-auto">
                     <div className="grid grid-cols-7 gap-px bg-gray-200">
                         {DAYS_OF_WEEK.map((day, dayIndex) => {
                             const dayDate = selectedWeekData.dates[dayIndex];
