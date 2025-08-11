@@ -32,7 +32,7 @@ const AutoCarouselMobile = ({
                     setImagesLoaded(true);
                 })
                 .catch(() => {
-                    setImagesLoaded(true); // Vẫn hiển thị dù có lỗi
+                    setImagesLoaded(true);
                 });
         }
     }, [imagesPreview]);
@@ -98,9 +98,9 @@ const AutoCarouselMobile = ({
             {imagesPreview.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
                     {imagesPreview.map((_, index) => (
-                        <button
+                        <div
                             key={index}
-                            onClick={() => setCurrentIndex(index)}
+                            // onClick={() => setCurrentIndex(index)}
                             className={`w-4 h-1 rounded-full transition-all ${
                                 index === currentIndex
                                     ? "bg-[#bbb8b8]"

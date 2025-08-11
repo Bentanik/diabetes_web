@@ -109,7 +109,7 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                 form.reset();
                 setTimeout(() => {
                     router.push("/admin/hospital");
-                }, 2000);
+                }, 1000);
             });
         } catch (error) {
             console.error("Error updating post:", error);

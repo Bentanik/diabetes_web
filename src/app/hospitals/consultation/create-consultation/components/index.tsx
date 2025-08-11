@@ -237,11 +237,9 @@ export default function CreateDoctorSchedule() {
             onSubmit(formData, () => {
                 form.reset();
                 setScheduleData({ timeTemplates: [] });
-                toast.success("Lưu lịch tuần thành công!");
             });
         } catch (error) {
             console.error("Error submitting schedule data:", error);
-            toast.error("Có lỗi xảy ra khi lưu lịch tuần.");
         }
     };
 
