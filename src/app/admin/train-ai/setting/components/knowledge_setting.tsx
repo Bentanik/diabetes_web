@@ -221,10 +221,10 @@ export default function KnowledgeSetting() {
     const handleSaveSettings = useCallback(async () => {
         try {
             const request: REQUEST.TUpdateSettingsRequest = {
-                list_knowledge_id: selectedKnowledgeBases,
+                list_knowledge_ids: selectedKnowledgeBases,
             };
 
-            handleUpdateChatSetting(request);
+            handleUpdateChatSetting(request, () => {});
         } catch (error) {
             console.error("Error saving settings:", error);
         }
@@ -457,7 +457,7 @@ export default function KnowledgeSetting() {
                     </h3>
                     <div className="space-y-3">
                         <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
+                            className="w-full bg-[#248fca] hover:bg-[#248fca]/80 gap-2"
                             onClick={handleSaveSettings}
                         >
                             <SaveIcon className="w-4 h-4" />
