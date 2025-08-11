@@ -1,13 +1,25 @@
-"use client";
+'use client'
 
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Mail, ArrowLeft } from "lucide-react";
 import useForgotPasswordEmail from "@/app/(auth)/forgot-password/hooks/useForgotPasswordEmail";
 import InputAuth from "@/components/input_auth";
-import { Mail, ArrowRight, ArrowLeft } from "lucide-react";
+import React from "react";
 
-export default function ForgotPasswordSendMail() {
-  const { register, errors, handleSubmit, onSubmit } = useForgotPasswordEmail();
+interface ForgotPasswordSendMailProps {
+  onSuccess: (step: 'sendmail' | 'otp', email: string) => void;
+}
+
+export default function ForgotPasswordSendMail({ onSuccess }: ForgotPasswordSendMailProps) {
+  const { register, errors, handleSubmit, onSubmit, isSuccess, email } = useForgotPasswordEmail();
+
+  // Call onSuccess when email is sent successfully
+  React.useEffect(() => {
+    if (isSuccess && email) {
+      onSuccess('otp', email);
+    }
+  }, [isSuccess, email, onSuccess]);
 
   return (
     <div className="flex items-center justify-center px-6 py-12">
@@ -19,6 +31,7 @@ export default function ForgotPasswordSendMail() {
       >
         {/* Header Section */}
         <div className="text-center mb-8">
+          {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -39,9 +52,9 @@ export default function ForgotPasswordSendMail() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6"
+          className="space-y-8"
         >
-          <div className="space-y-5">
+          <div className="space-y-6">
             <InputAuth
               type="text"
               title="Email"
@@ -51,47 +64,34 @@ export default function ForgotPasswordSendMail() {
           </div>
 
           {/* Submit Button */}
-          <motion.button
-            whileHover={{ scale: 1.02, y: -1 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             type="submit"
             disabled={Object.keys(errors).length > 0}
-            className={`w-full mt-8 px-8 py-4 text-white text-base font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-3 group cursor-pointer ${
+            className={`w-full mt-6 px-6 py-3 text-white text-base font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-3 cursor-pointer ${
               Object.keys(errors).length === 0
                 ? "bg-gradient-to-r from-[#248fca] to-[#1e7bb8] hover:opacity-90"
                 : "bg-gray-400 cursor-not-allowed"
             }`}
           >
-            <Mail className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-            Gửi yêu cầu
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-          </motion.button>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Hoặc</span>
-            </div>
-          </div>
-
-          {/* Back to Login */}
-          <div className="text-center">
-            <Link href="/login">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="button"
-                className="inline-flex items-center gap-2 text-[#248fca] hover:text-[#1e7bb8] font-medium transition-colors duration-200 hover:underline cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Quay lại đăng nhập
-              </motion.button>
-            </Link>
-          </div>
+            <Mail className="w-4 h-4" />
+            Gửi email khôi phục
+          </button>
         </motion.form>
+
+        {/* Back to Login */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="text-center mt-8"
+        >
+          <Link href="/login">
+            <button className="inline-flex items-center gap-2 text-[#248fca] hover:text-[#1e7bb8] font-semibold text-lg transition-colors duration-200 cursor-pointer">
+              <ArrowLeft className="w-5 h-5" />
+              Quay lại đăng nhập
+            </button>
+          </Link>
+        </motion.div>
       </motion.div>
     </div>
   );

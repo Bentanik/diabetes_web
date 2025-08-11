@@ -2,9 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import useToast from "@/hooks/use-toast";
 import {
+    forgotPasswordAsync,
     loginAsync,
     registerEmailAsync,
     sendRegisterEmailAsync,
+    verifyForgotPasswordAsync,
     verifyRegisterEmailAsync,
 } from "@/services/auth/api-services";
 import { useAppDispatch } from "@/stores";
@@ -103,5 +105,17 @@ export const useServiceLogin = () => {
                 removeAuthStorage();
             }
         },
+    });
+};
+
+export const useServiceForgotPasswordEmail = () => {
+    return useMutation<TResponseData, TMeta, REQUEST.TForgotPasswordEmail>({
+        mutationFn: forgotPasswordAsync,
+    });
+};
+
+export const useServiceVerifyForgotPassword = () => {
+    return useMutation<TResponseData, TMeta, REQUEST.TVerifyForgotPassword>({
+        mutationFn: verifyForgotPasswordAsync,
     });
 };

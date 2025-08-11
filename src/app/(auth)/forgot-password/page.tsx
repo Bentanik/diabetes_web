@@ -1,18 +1,27 @@
-import React from 'react'
+'use client'
 
-import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
-import ForgotPasswordForm from '@/app/(auth)/forgot-password/components/forgot-password-form';
-
-export const metadata: Metadata = {
-    title: "Forgot password",
-    description: "Forgot password for PawFund",
-};
-
+import React, { useState } from 'react'
+import ForgotPasswordSendMail from '@/app/(auth)/forgot-password/components/forgot-password-sendmail';
+import ForgotPasswordOtp from '@/app/(auth)/forgot-password/components/forgot-password-otp';
 
 export default function ForgotPasswordPage() {
+    const [currentStep, setCurrentStep] = useState<'sendmail' | 'otp'>('sendmail');
+    const [email, setEmail] = useState('');
+
+    const handleStepChange = (step: 'sendmail' | 'otp', userEmail?: string) => {
+        setCurrentStep(step);
+        if (userEmail) {
+            setEmail(userEmail);
+        }
+    };
+
     return (
         <div className='w-full'>
-            <ForgotPasswordForm />
+            {currentStep === 'sendmail' ? (
+                <ForgotPasswordSendMail onSuccess={handleStepChange} />
+            ) : (
+                <ForgotPasswordOtp email={email} onBack={() => handleStepChange('sendmail')} />
+            )}
         </div>
     )
 }

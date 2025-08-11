@@ -1,76 +1,98 @@
-// import useToast from "@/hooks/use-toast";
-// import { useServiceForgotPasswordOtp } from "@/services/auth/services";
-// import {
-//   setForgotPasswordOtp,
-// } from "@/stores/auth-slice";
-// import { useAppDispatch, useAppSelector } from "@/stores/store";
-// import { useState } from "react";
+'use client'
 
-// const useForgotPasswordOtp = () => {
-//   const dispatch = useAppDispatch();
-//   const forgotPasswordState = useAppSelector(
-//     (state) => state.authSlice.forgotPassword
-//   );
-//   const { addToast } = useToast();
-//   const [error, setError] = useState<string>("");
-//   const [value, setValue] = useState<string>("");
+import { useBackdrop } from "@/context/backdrop_context";
+import {
+    verifyForgotPasswordSchema,
+    VerifyForgotPasswordFormData,
+} from "@/lib/validations/auth.schema";
+import { useServiceVerifyForgotPassword } from "@/services/auth/services";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-//   const { mutate, isPending } = useServiceForgotPasswordOtp();
+interface UseForgotPasswordOtpProps {
+    email: string;
+}
 
-//   const handleChange = (value: string) => {
-//     setValue(value);
-//   };
+export default function useForgotPasswordOtp({ email }: UseForgotPasswordOtpProps) {
+    const [otpValue, setOtpValue] = useState<string>("");
+    const router = useRouter();
+    
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setError,
+        setValue,
+        reset,
+    } = useForm<VerifyForgotPasswordFormData>({
+        resolver: zodResolver(verifyForgotPasswordSchema),
+        defaultValues: {
+            otp: "",
+            password: "",
+            confirm_password: "",
+        },
+    });
 
-//   const handleReset = () => {
-//     setValue("");
-//     setError("");
-//   };
+    const { mutate: verifyForgotPassword } = useServiceVerifyForgotPassword();
+    const { showBackdrop, hideBackdrop } = useBackdrop();
 
-//   const handleSubmitVerifyOtp = (otp: string) => {
-//     dispatch(
-//       setForgotPasswordOtp({
-//         otp: otp,
-//         email: forgotPasswordState.email,
-//       })
-//     );
-//   };
+    const handleOtpChange = (value: string) => {
+        setOtpValue(value);
+        setValue("otp", value);
+    };
 
-//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     if (value.length < 5) return setError("Please fill in completely");
-//     else {
-//       setError("");
-//       const data = {
-//         email: forgotPasswordState.email,
-//         otp: value,
-//       };
-//       mutate(data, {
-//         onSuccess: async (data) => {
-//           if (data) {
-//             console.log(data);
-//             handleSubmitVerifyOtp(`${data.value.data}`);
-//             handleReset();
-//           }
-//         },
-//         onError: (error) => {
-//           if (error.errorCode.includes("auth_otp")) {
-//             setError(error.detail);
-//           }
-//         },
-//       });
-//     }
+    const onSubmit = async (data: VerifyForgotPasswordFormData) => {
+        try {
+            const request: REQUEST.TVerifyForgotPassword = {
+                email: email,
+                otp: data.otp,
+                password: data.password,
+            };
 
-//     // onSubmitForm(value);
-//   };
+            showBackdrop();
+            verifyForgotPassword(request, {
+                onSuccess: async (data) => {
+                    if (data) {
+                        hideBackdrop();
+                        reset();
+                        setOtpValue("");
+                        // Redirect to login page after successful password reset
+                        router.push("/login");
+                    }
+                },
+                onError: (error) => {
+                    hideBackdrop();
+                    error.errors?.forEach((error) => {
+                        if (error.code === "auth_error_11") {
+                            setError("otp", {
+                                type: "manual",
+                                message: error.message,
+                            });
+                        }
+                        if (error.code === "auth_error_13") {
+                            setError("password", {
+                                type: "manual",
+                                message: error.message,
+                            });
+                        }
+                    });
+                },
+            });
+        } catch (err) {
+            console.log("err: ", err);
+        }
+    };
 
-//   return {
-//     error,
-//     value,
-//     handleChange,
-//     handleSubmit,
-//     setError,
-//     isPending,
-//   };
-// };
-
-// export default useForgotPasswordOtp;
+    return {
+        register,
+        handleSubmit,
+        errors,
+        onSubmit,
+        setValue,
+        setError,
+        otpValue,
+        handleOtpChange,
+    };
+}
