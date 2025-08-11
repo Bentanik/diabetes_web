@@ -32,7 +32,6 @@ export const createHospitalStaffAsync = async (
 export const getHospitalStaffs = async ({
     pageIndex = 1,
     sortBy = "createdDate",
-    hospitalId = "",
     sortDirection = 1,
     pageSize = 10,
     gender = 1,
@@ -50,9 +49,6 @@ export const getHospitalStaffs = async ({
     }
     if (search && search.trim() !== "") {
         params.search = search.trim();
-    }
-    if (hospitalId && hospitalId.trim() !== "") {
-        params.hospitalId = hospitalId.trim();
     }
     if (gender !== null) {
         params.gender = gender;

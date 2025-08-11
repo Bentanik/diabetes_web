@@ -15,7 +15,6 @@ export const useServiceCreateHospitalStaff = () => {
                 dateOfBirth: data.dateOfBirth,
                 gender: data.gender,
                 avatarId: data.avatarId,
-                hospitalId: data.hospitalId,
             });
             return response as TResponse;
         },

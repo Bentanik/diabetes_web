@@ -1,6 +1,6 @@
+import { useGetHospitalsCursor } from "@/app/hospitals/hospital-staff/hooks/use-get-hospital-cursor";
 import React, { useState, useCallback } from "react";
 import Select, { SingleValue } from "react-select";
-import { useGetHospitalsCursor } from "@/app/admin/hospital-staff/hooks/use-get-hospital-cursor";
 
 type HospitalsSelectFilterProps = {
     onHospitalChange: (hospitalId: string) => void;

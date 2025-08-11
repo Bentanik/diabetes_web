@@ -12,10 +12,10 @@ interface HospitalStaffFiltersProps {
     setSearchTerm: (value: string) => void;
     selectSortBy: string;
     setSelectSortBy: (value: string) => void;
-    selectHospital: string;
+    // selectHospital: string;
     selectGender: number | null;
     setSelectGender: (value: number | null) => void;
-    setSelectHospital: (value: string) => void;
+    // setSelectHospital: (value: string) => void;
     isSortAsc: boolean;
     setIsSortAsc: (value: boolean) => void;
 }
@@ -41,15 +41,15 @@ export default function HospitalStaffFilters({
     setSelectSortBy,
     selectGender,
     setSelectGender,
-    selectHospital,
-    setSelectHospital,
+    // selectHospital,
+    // setSelectHospital,
     isSortAsc,
     setIsSortAsc,
 }: HospitalStaffFiltersProps) {
     const handleClearFilter = () => {
         setSearchTerm("");
         setSelectSortBy("createdDate");
-        setSelectHospital("");
+        // setSelectHospital("");
     };
     return (
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
@@ -96,10 +96,10 @@ export default function HospitalStaffFilters({
                 </select>
 
                 {/* Select Hospital */}
-                <HospitalsSelectFilter
+                {/* <HospitalsSelectFilter
                     onHospitalChange={setSelectHospital}
                     selectHospital={selectHospital}
-                />
+                /> */}
 
                 <Toggle
                     pressed={isSortAsc}

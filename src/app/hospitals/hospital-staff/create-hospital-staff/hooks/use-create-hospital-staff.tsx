@@ -13,7 +13,6 @@ export const hospitalStaffSchema = z.object({
     dateOfBirth: z.string().min(1, "Vui lòng chọn ngày sinh cho nhân viên"),
     gender: z.number(),
     avatarId: z.string().nonempty("Avatar là bắt buộc"),
-    hospitalId: z.string().min(1, "Vui lòng chọn bệnh viện"),
     email: z.string().email("Email không hợp lệ"),
 });
 
@@ -28,7 +27,6 @@ export default function useCreateHospitalStaff() {
             dateOfBirth: "",
             gender: 0,
             avatarId: "",
-            hospitalId: "",
             email: "",
         },
     });

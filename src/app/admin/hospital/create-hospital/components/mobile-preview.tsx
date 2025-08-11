@@ -61,7 +61,7 @@ export default function MobilePreview({
                                         className="rounded-2xl object-cover h-[100px]"
                                     />
                                     <div>
-                                        <h2 className="font-medium text-[1.2rem] mt-5 line-clamp-2">
+                                        <h2 className="font-medium text-[1.2rem] mt-5 line-clamp-2 max-w-[150px]">
                                             {name || "Tên Bệnh Viện"}
                                         </h2>
                                     </div>

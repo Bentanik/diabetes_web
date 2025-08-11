@@ -43,7 +43,6 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
     const { addToast } = useToast();
 
     const images = form.watch("images");
-    const thumbnail = form.watch("thumbnail");
     const name = form.watch("name");
     const email = form.watch("email");
     const phoneNumber = form.watch("phoneNumber");
