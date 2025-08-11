@@ -14,6 +14,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const KNOWLEDGE_QUERY_KEY = "knowledge";
 export const DOCUMENTS_QUERY_KEY = "documents";
+export const SETTINGS_DOCUMENT_QUERY_KEY = "setting_documents";
 
 interface IGetKnowledgesService {
   search: string;
@@ -142,7 +143,7 @@ export const useUpdateSettingsService = () => {
 
 export const useGetSettingService = () => {
   return useQuery({
-    queryKey: ["settings"],
+    queryKey: [SETTINGS_DOCUMENT_QUERY_KEY],
     queryFn: () => getSettingsAsync(),
     select: (data) => data.data,
     staleTime: 1000 * 60 * 5,

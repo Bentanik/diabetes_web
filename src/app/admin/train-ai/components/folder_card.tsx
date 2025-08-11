@@ -56,7 +56,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
                             {/* Icon thư mục với gradient */}
-                            <div className="w-12 h-12 bg-gradient-to-br from-[#248fca] to-[#1e7bb8] rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                            <div className="w-12 h-12 bg-gradient-to-br from-[#248fca] to-[#1e7bb8] rounded-xl flex items-center justify-center">
                                 <FolderIcon className="w-6 h-6 text-white" />
                             </div>
                             <div className="min-w-0">

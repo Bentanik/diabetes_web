@@ -61,3 +61,38 @@ export const loginSchema = z.object({
 });
 
 export type LoginSchemaFormData = z.infer<typeof loginSchema>;
+
+export const forgotPasswordEmailSchema = z.object({
+  email: z
+    .string()
+    .nonempty({ message: validationMessages.email.required })
+    .email({ message: validationMessages.email.invalid }),
+});
+
+export type ForgotPasswordEmailSchemaFormData = z.infer<typeof forgotPasswordEmailSchema>;
+
+
+export const verifyForgotPasswordSchema = z
+  .object({
+    otp: z
+      .string()
+      .nonempty({ message: validationMessages.otp.required })
+      .length(6, validationMessages.otp.length)
+      .regex(/^\d+$/, validationMessages.otp.invalid),
+    password: z
+      .string()
+      .nonempty({ message: validationMessages.password.required })
+      .min(6, validationMessages.password.min_length)
+      .max(50, validationMessages.password.max_length),
+    confirm_password: z
+      .string()
+      .nonempty({ message: validationMessages.confirm_password.required })
+      .min(6, validationMessages.confirm_password.min_length)
+      .max(50, validationMessages.confirm_password.max_length),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: validationMessages.confirm_password.not_match,
+    path: ["confirm_password"],
+  });
+
+export type VerifyForgotPasswordFormData = z.infer<typeof verifyForgotPasswordSchema>;
