@@ -27,7 +27,7 @@ export default function HospitalStaffComponent() {
     const { hospital_staffs, isPending, isError, error } = useGetHospitalStaffs(
         {
             search: debouncedSearchTerm,
-            hospitalId: selectedHospital,
+            // hospitalId: selectedHospital,
             gender: selectGender,
             pageSize: pageSize,
             pageIndex: currentPage,
@@ -82,8 +82,8 @@ export default function HospitalStaffComponent() {
                     setSelectSortBy={setSelectSortBy}
                     selectGender={selectGender}
                     setSelectGender={setSelectGender}
-                    setSelectHospital={setSelectedHospital}
-                    selectHospital={selectedHospital}
+                    // setSelectHospital={setSelectedHospital}
+                    // selectHospital={selectedHospital}
                     isSortAsc={isSortAsc}
                     setIsSortAsc={setIsSortAsc}
                 />

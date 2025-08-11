@@ -1,4 +1,4 @@
-import HospitalStaffComponent from "@/app/admin/hospital-staff/components";
+import HospitalStaffComponent from "./components";
 
 export default function HospitalStaffComponentPage() {
     return (

@@ -193,6 +193,11 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         setIsDialogOpen(false);
     };
 
+    if (blog_detail?.status !== -2) {
+        router.push("/admin/blogs");
+        return null;
+    }
+
     return (
         <div className="min-h-screen">
             <Toaster position="top-right" toastOptions={{ duration: 5000 }} />

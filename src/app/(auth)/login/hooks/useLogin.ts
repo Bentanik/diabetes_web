@@ -53,7 +53,10 @@ export default function useLogin() {
                         )
                             return router.push("/admin/home");
                         if (
-                            data.data?.authUser.roles?.includes("HospitalStaff")
+                            data.data?.authUser.roles?.includes(
+                                "HospitalStaff"
+                            ) ||
+                            data.data?.authUser.roles?.includes("HospitalAdmin")
                         )
                             return router.push("/hospitals/home");
                         return router.push("/");

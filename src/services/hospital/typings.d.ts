@@ -94,7 +94,7 @@ declare namespace API {
         address: string;
         introduction: string;
         thumbnail: string;
-        images: string[];
+        images: [];
         createdDate: string;
     };
 

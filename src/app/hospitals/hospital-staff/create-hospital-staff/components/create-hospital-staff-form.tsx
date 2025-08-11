@@ -41,6 +41,7 @@ export default function CreateHospitalStaffForm() {
     const [avatarPreview, setAvatarPreview] = useState<string>();
 
     const handleFormSubmit = async (data: HospitalStaffFormData) => {
+        console.log(form.watch("dateOfBirth"));
         try {
             const formData: REQUEST.TCreateHospitalStaff = {
                 email: data.email,
@@ -50,7 +51,6 @@ export default function CreateHospitalStaffForm() {
                 dateOfBirth: data.dateOfBirth || "",
                 gender: data.gender,
                 avatarId: data.avatarId || "",
-                hospitalId: data.hospitalId,
             };
             onSubmit(formData, () => {
                 form.reset();
@@ -83,7 +83,7 @@ export default function CreateHospitalStaffForm() {
                                     <FormField
                                         control={form.control}
                                         name="lastName"
-                                        render={({ field }) => (
+                                        render={({ field, fieldState }) => (
                                             <FormItem className="mb-5">
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                                     <UserPen className="h-5 w-5 text-[#248fca]" />
@@ -99,16 +99,18 @@ export default function CreateHospitalStaffForm() {
                                                         }
                                                     />
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
-                                                </FormMessage>
+                                                {fieldState.error && (
+                                                    <FormMessage className="flex items-center gap-1">
+                                                        <AlertCircle className="h-4 w-4" />
+                                                    </FormMessage>
+                                                )}
                                             </FormItem>
                                         )}
                                     />
                                     <FormField
                                         control={form.control}
                                         name="middleName"
-                                        render={({ field }) => (
+                                        render={({ field, fieldState }) => (
                                             <FormItem className="mb-5">
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                                     <UserPen className="h-5 w-5 text-[#248fca]" />
@@ -124,16 +126,18 @@ export default function CreateHospitalStaffForm() {
                                                         }
                                                     />
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
-                                                </FormMessage>
+                                                {fieldState.error && (
+                                                    <FormMessage className="flex items-center gap-1">
+                                                        <AlertCircle className="h-4 w-4" />
+                                                    </FormMessage>
+                                                )}
                                             </FormItem>
                                         )}
                                     />
                                     <FormField
                                         control={form.control}
                                         name="firstName"
-                                        render={({ field }) => (
+                                        render={({ field, fieldState }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                                     <UserPen className="h-5 w-5 text-[#248fca]" />
@@ -149,9 +153,11 @@ export default function CreateHospitalStaffForm() {
                                                         }
                                                     />
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
-                                                </FormMessage>
+                                                {fieldState.error && (
+                                                    <FormMessage className="flex items-center gap-1">
+                                                        <AlertCircle className="h-4 w-4" />
+                                                    </FormMessage>
+                                                )}
                                             </FormItem>
                                         )}
                                     />
@@ -161,7 +167,7 @@ export default function CreateHospitalStaffForm() {
                                     <FormField
                                         control={form.control}
                                         name="email"
-                                        render={({ field }) => (
+                                        render={({ field, fieldState }) => (
                                             <FormItem className="mb-5">
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
                                                     <Mail className="h-5 w-5 text-[#248fca]" />
@@ -177,9 +183,11 @@ export default function CreateHospitalStaffForm() {
                                                         }
                                                     />
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
-                                                </FormMessage>
+                                                {fieldState.error && (
+                                                    <FormMessage className="flex items-center gap-1">
+                                                        <AlertCircle className="h-4 w-4" />
+                                                    </FormMessage>
+                                                )}
                                             </FormItem>
                                         )}
                                     />
@@ -190,7 +198,10 @@ export default function CreateHospitalStaffForm() {
                                             <FormField
                                                 control={form.control}
                                                 name="gender"
-                                                render={({ field }) => (
+                                                render={({
+                                                    field,
+                                                    fieldState,
+                                                }) => (
                                                     <FormItem>
                                                         <FormControl>
                                                             <div>
@@ -210,7 +221,7 @@ export default function CreateHospitalStaffForm() {
                                                                     }
                                                                     value={field.value?.toString()}
                                                                 >
-                                                                    <SelectTrigger className="w-[250px] min-h-[px]">
+                                                                    <SelectTrigger className="w-[250px] min-h-[48px]">
                                                                         <SelectValue placeholder="Chọn giới tính" />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
@@ -231,9 +242,11 @@ export default function CreateHospitalStaffForm() {
                                                                 </Select>
                                                             </div>
                                                         </FormControl>
-                                                        <FormMessage className="flex items-center gap-1">
-                                                            <AlertCircle className="h-4 w-4" />
-                                                        </FormMessage>
+                                                        {fieldState.error && (
+                                                            <FormMessage className="flex items-center gap-1">
+                                                                <AlertCircle className="h-4 w-4" />
+                                                            </FormMessage>
+                                                        )}
                                                     </FormItem>
                                                 )}
                                             />
@@ -245,23 +258,6 @@ export default function CreateHospitalStaffForm() {
                                             name="dateOfBirth"
                                         />
                                     </div>
-                                    {/* Select Doctor */}
-                                    <FormField
-                                        control={form.control}
-                                        name="hospitalId"
-                                        render={() => (
-                                            <FormItem>
-                                                <FormControl>
-                                                    <HospitalSelect
-                                                        control={form.control}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    <AlertCircle className="h-4 w-4" />
-                                                </FormMessage>
-                                            </FormItem>
-                                        )}
-                                    />
                                 </div>
                             </div>
 

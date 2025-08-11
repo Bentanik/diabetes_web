@@ -151,7 +151,7 @@ export default function DateSelector({
                     <SelectTrigger className="h-12">
                         <SelectValue placeholder="Chọn năm..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[250px]">
                         {yearOptions.map((year) => (
                             <SelectItem key={year.value} value={year.value}>
                                 {year.label}
@@ -177,7 +177,7 @@ export default function DateSelector({
                     <SelectTrigger className="h-12">
                         <SelectValue placeholder="Chọn tháng..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[250px]">
                         {monthOptions.map((month) => (
                             <SelectItem key={month.value} value={month.value}>
                                 {month.label}

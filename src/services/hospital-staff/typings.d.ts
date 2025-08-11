@@ -6,7 +6,7 @@ declare namespace REQUEST {
     type GetHospitalStaffsParams = {
         search?: string | null;
         gender?: GenderType | null;
-        hospitalId: string;
+        // hospitalId: string;
         pageSize?: number;
         pageIndex?: number | null;
         sortBy: string;
@@ -21,7 +21,6 @@ declare namespace REQUEST {
         dateOfBirth: string;
         gender: GenderType;
         avatarId: string;
-        hospitalId: string;
     };
     enum GenderType {
         Male = 0,
