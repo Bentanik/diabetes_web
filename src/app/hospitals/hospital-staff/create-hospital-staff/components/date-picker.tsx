@@ -74,7 +74,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
                                                     offsetDate.toISOString();
                                                 field.onChange(isoDate);
                                             } else {
-                                                field.onChange(null);
+                                                field.onChange("");
                                             }
                                             setOpen(false);
                                         }}
@@ -84,9 +84,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
                         </div>
                     </FormControl>
                     {fieldState.error && (
-                        <FormMessage className="flex items-center gap-1">
-                            <AlertCircle className="h-4 w-4" />
-                        </FormMessage>
+                        <FormMessage className="flex items-center gap-1"></FormMessage>
                     )}
                 </FormItem>
             )}

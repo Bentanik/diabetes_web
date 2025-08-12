@@ -186,7 +186,7 @@ export default function CreateConversation({
                                             />
                                         </FormControl>
                                         <FormMessage className="flex items-center gap-1">
-                                            <AlertCircle className="h-4 w-4" />
+                                            {/* <AlertCircle className="h-4 w-4" /> */}
                                         </FormMessage>
                                     </FormItem>
                                 )}

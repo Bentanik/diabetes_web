@@ -101,7 +101,7 @@ export default function HospitalStaffComponent() {
                         className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                     >
                         <Link
-                            href={`/admin/hospital-staff/hospital-staff-detail/${hospital_staff.id}`}
+                            href={`/hospitals/hospital-staff/hospital-staff-detail/${hospital_staff.id}`}
                         >
                             {/* Header */}
                             <div className="flex items-start justify-between mb-6">

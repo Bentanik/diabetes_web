@@ -118,6 +118,12 @@ export default function HospitalLayout({
                         ) {
                             return null;
                         }
+                        if (
+                            userState.user?.roles?.includes("HospitalStaff") &&
+                            item.href === "/hospitals/hospital-staff"
+                        ) {
+                            return null;
+                        }
                         return (
                             <motion.div
                                 key={index}

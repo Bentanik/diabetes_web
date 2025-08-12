@@ -14,7 +14,6 @@ import DeletePostDialog from "./delete-post-dialog";
 import ReviewPostDialog from "./review-post-dialog";
 
 export default function BlogDetail({ blogId }: REQUEST.BlogId) {
-    const router = useRouter();
     const user = useAppSelector((state) => state.userSlice);
     const { blog_detail, isPending: blogPending } = useGetBlogDetail({
         blogId,
