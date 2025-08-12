@@ -153,11 +153,11 @@ export default function HomeHero() {
                                 transition={{ delay: 0.6, duration: 0.6 }}
                             >
                                 <Image
-                                    src="/images/home_diabet1.jpg"
+                                    src="/images/home_diabet2.jpg"
                                     alt="Medical consultation"
                                     width={280}
                                     height={320}
-                                    className="rounded-2xl object-cover shadow-xl border border-white/20"
+                                    className="rounded-2xl object-cover shadow-xl border border-white/20 h-[320px]"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/20 to-transparent rounded-2xl"></div>
                             </motion.div>

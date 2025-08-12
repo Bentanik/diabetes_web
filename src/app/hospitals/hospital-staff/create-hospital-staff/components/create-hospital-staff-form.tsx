@@ -41,7 +41,6 @@ export default function CreateHospitalStaffForm() {
     const [avatarPreview, setAvatarPreview] = useState<string>();
 
     const handleFormSubmit = async (data: HospitalStaffFormData) => {
-        console.log(form.watch("dateOfBirth"));
         try {
             const formData: REQUEST.TCreateHospitalStaff = {
                 email: data.email,
@@ -127,9 +126,7 @@ export default function CreateHospitalStaffForm() {
                                                     />
                                                 </FormControl>
                                                 {fieldState.error && (
-                                                    <FormMessage className="flex items-center gap-1">
-                                                        <AlertCircle className="h-4 w-4" />
-                                                    </FormMessage>
+                                                    <FormMessage className="flex items-center gap-1"></FormMessage>
                                                 )}
                                             </FormItem>
                                         )}
@@ -154,9 +151,7 @@ export default function CreateHospitalStaffForm() {
                                                     />
                                                 </FormControl>
                                                 {fieldState.error && (
-                                                    <FormMessage className="flex items-center gap-1">
-                                                        <AlertCircle className="h-4 w-4" />
-                                                    </FormMessage>
+                                                    <FormMessage className="flex items-center gap-1"></FormMessage>
                                                 )}
                                             </FormItem>
                                         )}
@@ -184,9 +179,7 @@ export default function CreateHospitalStaffForm() {
                                                     />
                                                 </FormControl>
                                                 {fieldState.error && (
-                                                    <FormMessage className="flex items-center gap-1">
-                                                        <AlertCircle className="h-4 w-4" />
-                                                    </FormMessage>
+                                                    <FormMessage className="flex items-center gap-1"></FormMessage>
                                                 )}
                                             </FormItem>
                                         )}
@@ -243,9 +236,7 @@ export default function CreateHospitalStaffForm() {
                                                             </div>
                                                         </FormControl>
                                                         {fieldState.error && (
-                                                            <FormMessage className="flex items-center gap-1">
-                                                                <AlertCircle className="h-4 w-4" />
-                                                            </FormMessage>
+                                                            <FormMessage className="flex items-center gap-1"></FormMessage>
                                                         )}
                                                     </FormItem>
                                                 )}

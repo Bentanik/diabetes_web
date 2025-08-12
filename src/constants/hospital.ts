@@ -66,7 +66,7 @@ export const sidebar_items = [
         label: "Quản lí cuộc tư vấn",
         subItems: [
             {
-                label: "Quản lý lịch bác sĩ",
+                label: "Quản lý cuộc tư vấn",
                 href: "/hospitals/consultation/schedule",
                 icon: SquareChartGantt,
             },
