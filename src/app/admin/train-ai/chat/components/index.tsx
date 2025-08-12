@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Trash2, ChevronDown, Bot, User } from "lucide-react";
 import axios from "axios";
+import { useBackdrop } from "@/context/backdrop_context";
 
 type ChatMessage = {
     id?: string;
@@ -44,15 +45,8 @@ type SendMessageResponse = {
     };
 };
 
-const SUGGESTIONS = [
-    "Tóm tắt tài liệu số 5",
-    "Gợi ý chế độ ăn tuần này",
-    "Danh sách thực phẩm nên hạn chế",
-];
-
 const API_BASE_URL = "http://localhost:8000/api/v1/rag";
 const FIXED_USER_ID = "admin";
-const FIXED_SESSION_ID = "68985cc37d6ab1c4a497a66d";
 
 const formatTime = (iso: string) =>
     new Date(iso).toLocaleTimeString("vi-VN", {
@@ -66,6 +60,8 @@ export default function ChatMain() {
     const [isLoading, setIsLoading] = useState(false);
     const listRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
+
+    const {showBackdrop, hideBackdrop} = useBackdrop()
 
     useEffect(() => {
         if (!listRef.current) return;
@@ -98,7 +94,7 @@ export default function ChatMain() {
         try {
             setIsLoading(true);
             const response = await axios.get<ChatHistoryResponse>(
-                `${API_BASE_URL}/chat?session_id=${FIXED_SESSION_ID}`,
+                `${API_BASE_URL}/chat?user_id=${FIXED_USER_ID}`,
                 {
                     headers: {
                         accept: "application/json",
@@ -145,7 +141,6 @@ export default function ChatMain() {
                 {
                     content: text,
                     user_id: FIXED_USER_ID,
-                    session_id: FIXED_SESSION_ID,
                 },
                 {
                     headers: {
@@ -222,8 +217,13 @@ export default function ChatMain() {
         }
     };
 
-    const clearConversation = () => {
+    const clearConversation = async () => {
+        showBackdrop();
+        await axios.delete(
+            `${API_BASE_URL}/chat/delete-chat-admin?user_id=${FIXED_USER_ID}`,
+        );
         setMessages([]);
+        hideBackdrop();
     };
 
     return (
@@ -381,26 +381,6 @@ export default function ChatMain() {
 
                 {/* Input Area */}
                 <div className="p-6 bg-gradient-to-t from-[#248FCA]/5 to-white border-t border-[#248FCA]/10">
-                    {/* Suggestions */}
-                    {messages.length <= 1 && (
-                        <div className="mb-4">
-                            <div className="text-xs font-medium text-[#248FCA] mb-2">
-                                Gợi ý câu hỏi:
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {SUGGESTIONS.map((suggestion, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setMessage(suggestion)}
-                                        className="px-3 py-2 text-xs bg-[#248FCA]/10 hover:bg-[#248FCA]/20 text-[#248FCA] rounded-full transition-colors duration-200 border border-[#248FCA]/20 hover:border-[#248FCA]/30"
-                                    >
-                                        {suggestion}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
                     <form onSubmit={onSubmit} className="flex items-end gap-3">
                         <div className="flex-1 relative">
                             <Textarea

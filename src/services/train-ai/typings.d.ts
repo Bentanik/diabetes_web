@@ -34,9 +34,19 @@ declare namespace REQUEST {
   };
 
   type TUpdateSettingsRequest = {
-    number_of_passages?: number;
-    search_accuracy?: number;
-    list_knowledge_id?: string[];
+    top_k?: number;
+    accuracy_threshold?: number;
+    system_prompt?: string;
+    context_prompt?: string;
+    max_tokens?: number;
+    temperature?: number;
+    list_knowledge_ids?: string[];
+  };
+
+  type TGetDocumentParserRequest = {
+    document_id: string;
+    page?: number;
+    limit?: number;
   };
 }
 
@@ -79,7 +89,35 @@ declare namespace API {
   };
 
   type TSettings = {
-    number_of_passages: number;
+    top_k: number;
+    temperature: number;
+    max_tokens: number;
     search_accuracy: number;
+    system_prompt: string;
+    context_prompt: string;
+  }
+
+  type TBbox = {
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  }
+
+  type TLocation = {
+    page: string;
+    bbox: TBbox;
+    block_index: number;
+    doc_type: string;
+  }
+
+  type TDocumentParser = {
+    id: string;
+    document_id: string;
+    content: string;
+    location: TLocation;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
   }
 }

@@ -10,13 +10,14 @@ export default function useUpdateSetting() {
   const backdrop = useBackdrop();
   const queryClient = useQueryClient();
 
-  const handleUpdateChatSetting = (data: REQUEST.TUpdateSettingsRequest) => {
+  const handleUpdateChatSetting = (data: REQUEST.TUpdateSettingsRequest, handleSuccess: () => void) => {
     backdrop.showBackdrop();
     mutate(data, {
       onSuccess: async () => {
         await queryClient.invalidateQueries({
           queryKey: [KNOWLEDGE_QUERY_KEY],
         });
+        handleSuccess();
       },
       onError: () => {
       },
