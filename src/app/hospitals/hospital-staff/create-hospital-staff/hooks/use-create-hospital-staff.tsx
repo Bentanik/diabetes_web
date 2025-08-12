@@ -10,7 +10,11 @@ export const hospitalStaffSchema = z.object({
     firstName: z.string().min(1, "Vui lòng nhập họ"),
     middleName: z.string().optional(),
     lastName: z.string().min(1, "Vui lòng nhập tên"),
-    dateOfBirth: z.string().min(1, "Vui lòng chọn ngày sinh cho nhân viên"),
+    dateOfBirth: z
+        .string({
+            required_error: "Vui lòng chọn ngày sinh cho nhân viên",
+        })
+        .min(1, "Vui lòng chọn ngày sinh cho nhân viên"),
     gender: z.number(),
     avatarId: z.string().nonempty("Avatar là bắt buộc"),
     email: z.string().email("Email không hợp lệ"),
