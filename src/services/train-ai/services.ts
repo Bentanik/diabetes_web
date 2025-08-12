@@ -9,11 +9,13 @@ import {
   uploadDocumentAsync,
   updateSettingAsync,
   getSettingsAsync,
+  getDocumentByIdAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const KNOWLEDGE_QUERY_KEY = "knowledge";
 export const DOCUMENTS_QUERY_KEY = "documents";
+export const DOCUMENT_QUERY_KEY = "document";
 export const SETTINGS_DOCUMENT_QUERY_KEY = "setting_documents";
 
 interface IGetKnowledgesService {
@@ -118,6 +120,16 @@ export const useGetDocumentsService = (
         limit: 0,
         total_pages: 0,
       },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const useGetDocumentByIdService = (id: string) => {
+  return useQuery({
+    queryKey: [DOCUMENT_QUERY_KEY, id],
+    queryFn: () => getDocumentByIdAsync(id),
+    select: (data) => data.data,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });
