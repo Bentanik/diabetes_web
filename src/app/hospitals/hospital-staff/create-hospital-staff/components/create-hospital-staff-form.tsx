@@ -81,7 +81,7 @@ export default function CreateHospitalStaffForm() {
                                     {/* Họ và tên */}
                                     <FormField
                                         control={form.control}
-                                        name="firstName"
+                                        name="lastName"
                                         render={({ field, fieldState }) => (
                                             <FormItem className="mb-5">
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
@@ -133,7 +133,7 @@ export default function CreateHospitalStaffForm() {
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="lastName"
+                                        name="firstName"
                                         render={({ field, fieldState }) => (
                                             <FormItem>
                                                 <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
