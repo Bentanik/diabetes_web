@@ -199,7 +199,7 @@ export default function DocumentCard({
                     {/* Phải: Date */}
                     <div className="flex items-center gap-1 text-xs text-gray-400">
                         <CalendarIcon className="w-3 h-3" />
-                        <span>{formatDate(document.created_at).split(" ")[1]}</span>
+                        <span>{formatDate(document.updated_at).split(" ")[1]}</span>
                     </div>
                 </div>
             </div>
