@@ -51,9 +51,9 @@ declare namespace REQUEST {
     };
 
     type GetHospitalsParams = {
-        search?: string | null;
-        pageSize?: number;
-        pageIndex?: number | null;
+        search: string;
+        pageSize: number;
+        pageIndex: number;
         sortBy: string;
         sortDirection: number;
     };

@@ -18,6 +18,23 @@ export const createConsultationAsync = async (
     return response.data;
 };
 
+export const updateConsultationAsync = async (
+    { doctorId }: REQUEST.DoctorId,
+    body: REQUEST.TUpdateTimeTemplateRequest
+) => {
+    const response = await request<TResponse>(
+        API_ENDPOINTS.UPDATE_CONSULTATION(doctorId),
+        {
+            method: "PATCH",
+            data: body,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const getConsultationsCursor = async (
     { doctorId }: REQUEST.DoctorId,
     {

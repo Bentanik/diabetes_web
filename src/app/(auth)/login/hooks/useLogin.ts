@@ -47,9 +47,11 @@ export default function useLogin() {
                         dispatch(clearAllRegister());
                         if (data.data?.authUser.roles?.includes("SystemAdmin"))
                             return router.push("/admin/home");
-                        if (data.data?.authUser.roles?.includes("Moderator"))
+                        else if (
+                            data.data?.authUser.roles?.includes("Moderator")
+                        )
                             return router.push("/admin/blogs");
-                        if (
+                        else if (
                             data.data?.authUser.roles?.includes(
                                 "HospitalStaff"
                             ) ||
@@ -59,6 +61,7 @@ export default function useLogin() {
                         return router.push("/");
                     }
                 },
+
                 onError: (error) => {
                     hideBackdrop();
                     error.errors?.forEach((error) => {

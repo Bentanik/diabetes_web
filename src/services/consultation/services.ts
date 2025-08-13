@@ -1,5 +1,8 @@
 import useToast from "@/hooks/use-toast";
-import { createConsultationAsync } from "@/services/consultation/api-services";
+import {
+    createConsultationAsync,
+    updateConsultationAsync,
+} from "@/services/consultation/api-services";
 import { useMutation } from "@tanstack/react-query";
 
 export const useServiceCreateConsultation = ({
@@ -28,6 +31,32 @@ export const useServiceCreateConsultation = ({
             addToast({
                 type: "error",
                 description: "Tạo cuộc tư vấn thất bại!",
+                duration: 5000,
+            });
+        },
+    });
+};
+
+export const useServiceUpdateConsultation = ({
+    doctorId,
+}: REQUEST.DoctorId) => {
+    const { addToast } = useToast();
+
+    return useMutation<TResponse, TMeta, REQUEST.TUpdateTimeTemplateRequest>({
+        mutationFn: async (data: REQUEST.TUpdateTimeTemplateRequest) => {
+            return await updateConsultationAsync({ doctorId }, data);
+        },
+        onSuccess: () => {
+            addToast({
+                type: "success",
+                description: "Cập nhật cuộc tư vấn thành công",
+                duration: 5000,
+            });
+        },
+        onError: (err) => {
+            addToast({
+                type: "error",
+                description: err.title,
                 duration: 5000,
             });
         },

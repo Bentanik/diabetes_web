@@ -26,6 +26,9 @@ import WeeklySchedule, { TimeSlot } from "./weekly-schedule";
 import Header from "./header";
 import DateSelector from "./date-selector";
 import { useGetConsultationsCursor } from "@/app/hospitals/consultation/create-consultation/hooks/use-get-consultation";
+import useUpdateConsultation, {
+    TimeTemplateFormData,
+} from "../hooks/use-update-consultation";
 
 interface DaySchedule {
     date: string;
@@ -128,6 +131,8 @@ export default function CreateDoctorSchedule() {
         timeTemplates: [],
     });
 
+    const [hasChanges, setHasChanges] = useState(false);
+
     // Compute week options and selectedWeekData from year/month/week
     const weekOptions = useMemo(() => {
         if (!selectedYear || !selectedMonth) return [];
@@ -172,6 +177,7 @@ export default function CreateDoctorSchedule() {
     // Clear scheduleData when doctor or week changes
     useEffect(() => {
         setScheduleData({ timeTemplates: [] });
+        setHasChanges(false);
     }, [selectedDoctorId, selectedWeek]);
 
     // Transform API data into scheduleData when data pages arrive
@@ -205,11 +211,9 @@ export default function CreateDoctorSchedule() {
                 // No items returned for this week
                 setScheduleData({ timeTemplates: [] });
             }
+            setHasChanges(false);
         }
     }, [consultationData?.pages]);
-
-    // Reset scheduleData before calling API (already handled by above effect)
-    // (The useEffect above takes care of updating scheduleData when data arrives.)
 
     const selectedDoctor = mockDoctors.items.find(
         (d) => d.id === selectedDoctorId
@@ -219,13 +223,47 @@ export default function CreateDoctorSchedule() {
         doctorId: selectedDoctorId,
     });
 
+    const { form: updateForm, onSubmit: UpdateSubmit } = useUpdateConsultation({
+        doctorId: selectedDoctorId,
+    });
+
     const handleFormSubmit = async (formData: any) => {
         if (!onSubmit) return;
         try {
             await onSubmit(formData, () => {});
         } catch (error) {
             console.error("Error creating consultation:", error);
-            toast.error("Có lỗi xảy ra khi tạo cuộc tư vấn.");
+        }
+    };
+
+    const formatTimeToHMS = (time: string): string => {
+        if (time.includes(":") && time.split(":").length === 2) {
+            return `${time}:00`;
+        }
+        return time;
+    };
+
+    const handleUpdateScheduleSubmit = async () => {
+        try {
+            const formData: TimeTemplateFormData = {
+                status: updateForm.getValues("status") || 1,
+                upsertTimeTemplates: scheduleData.timeTemplates.flatMap((day) =>
+                    day.times.map((time) => ({
+                        timeTemplateId: time.id || "",
+                        date: day.date,
+                        timeRange: {
+                            start: formatTimeToHMS(time.start),
+                            end: formatTimeToHMS(time.end),
+                        },
+                    }))
+                ),
+                templateIdsToDelete: [],
+            };
+            UpdateSubmit(formData);
+            updateForm.reset();
+            setHasChanges(false);
+        } catch (error) {
+            console.error("Error submitting schedule data:", error);
         }
     };
 
@@ -237,6 +275,7 @@ export default function CreateDoctorSchedule() {
             onSubmit(formData, () => {
                 form.reset();
                 setScheduleData({ timeTemplates: [] });
+                setHasChanges(false);
             });
         } catch (error) {
             console.error("Error submitting schedule data:", error);
@@ -276,6 +315,14 @@ export default function CreateDoctorSchedule() {
             setLoading(false);
         }
     };
+
+    const hasConsultationData = useMemo(() => {
+        if (!consultationData?.pages) return false;
+        const allItems = consultationData.pages.flatMap(
+            (page) => page.data?.items ?? []
+        );
+        return allItems.length > 0;
+    }, [consultationData]);
 
     const handleWeekChange = (newWeek: string) => {
         setSelectedWeek(newWeek);
@@ -448,21 +495,42 @@ export default function CreateDoctorSchedule() {
 
                             <div className="flex items-center gap-4">
                                 <div className="flex gap-2">
-                                    <Button
-                                        onClick={handleScheduleSubmit}
-                                        disabled={
-                                            loading || isLoadingConsultations
-                                        }
-                                        size="sm"
-                                        className="bg-[#248FCA] hover:bg-[#248FCA]/90"
-                                    >
-                                        {loading ? (
-                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                                        ) : (
-                                            <Save className="h-4 w-4 mr-2" />
-                                        )}
-                                        Lưu lịch tuần
-                                    </Button>
+                                    {hasConsultationData ? (
+                                        <Button
+                                            onClick={handleUpdateScheduleSubmit}
+                                            disabled={
+                                                loading ||
+                                                isLoadingConsultations ||
+                                                !hasChanges
+                                            }
+                                            size="sm"
+                                            className="bg-[#248FCA] hover:bg-[#248FCA]/90"
+                                        >
+                                            {loading ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                            ) : (
+                                                <Save className="h-4 w-4 mr-2" />
+                                            )}
+                                            Cập nhật lịch tuần
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={handleScheduleSubmit}
+                                            disabled={
+                                                loading ||
+                                                isLoadingConsultations
+                                            }
+                                            size="sm"
+                                            className="bg-[#248FCA] hover:bg-[#248FCA]/90"
+                                        >
+                                            {loading ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                                            ) : (
+                                                <Save className="h-4 w-4 mr-2" />
+                                            )}
+                                            Lưu lịch tuần
+                                        </Button>
+                                    )}
 
                                     {/* Load More Button nếu có hasNextPage */}
                                     {hasNextPage && (
@@ -491,6 +559,7 @@ export default function CreateDoctorSchedule() {
                             editingSlot={editingSlot}
                             setEditingSlot={setEditingSlot}
                             isLoading={isLoadingConsultations}
+                            onStatusUpdate={() => setHasChanges(true)}
                         />
                     </motion.div>
                 )}

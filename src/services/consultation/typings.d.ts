@@ -4,6 +4,18 @@ declare namespace REQUEST {
         end: string;
     };
 
+    type UpsertTimeTemplate = {
+        timeTemplateId: string;
+        date: string;
+        timeRange: TimeRange;
+    };
+
+    type TUpdateTimeTemplateRequest = {
+        status: number;
+        upsertTimeTemplates: UpsertTimeTemplate[];
+        templateIdsToDelete: string[];
+    };
+
     type TimeTemplate = {
         date: string;
         times: TimeRange[];

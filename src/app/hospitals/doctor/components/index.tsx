@@ -13,7 +13,6 @@ import {
     FileBadge,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetDoctors } from "../hooks/use-get-doctors";
@@ -23,6 +22,7 @@ import { Toaster } from "sonner";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import Header from "./header";
 import DoctorFilters from "./doctor-filter";
+import Pagination from "@/components/shared/pagination";
 
 export default function DoctorComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
@@ -31,6 +31,7 @@ export default function DoctorComponent() {
     const [selectGender, setSelectGender] = useState<number | null>(null);
     const [selectPosition, setSelectPosition] = useState<number | null>(null);
     const [isSortAsc, setIsSortAsc] = useState(false);
+    const [itemsPerPage, setItemsPerPage] = useState(6);
 
     const pageSize = 6;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -44,6 +45,11 @@ export default function DoctorComponent() {
         sortBy: selectSortBy,
         sortDirection: isSortAsc ? 0 : 1,
     });
+
+    const handlePerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage);
+        setCurrentPage(1);
+    };
 
     const getPositionName = (position: number) => {
         switch (position) {
@@ -188,13 +194,20 @@ export default function DoctorComponent() {
                 ))}
             </div>
 
-            {doctors?.items.length !== 0 && !isPending && (
+            {doctors && doctors?.items.length !== 0 && !isPending && (
                 <div className="my-10">
                     <div className="mt-5">
-                        <PaginatedComponent
-                            totalPages={doctors?.totalPages || 0}
+                        <Pagination
                             currentPage={currentPage}
+                            totalPages={doctors.totalPages}
+                            totalItems={doctors.totalCount}
+                            perPage={itemsPerPage}
+                            hasNext={doctors.hasNextPage}
+                            hasPrev={doctors.hasPreviousPage}
                             onPageChange={handlePageChange}
+                            isLoading={isPending}
+                            perPageOptions={[6, 9, 12, 18, 24]}
+                            onPerPageChange={handlePerPageChange}
                         />
                     </div>
                 </div>
