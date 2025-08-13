@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-undef */
 "use client";
 import {
     type FormEvent,
@@ -11,12 +12,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Trash2, ChevronDown, Bot, User } from "lucide-react";
 import axios from "axios";
 import { useBackdrop } from "@/context/backdrop_context";
+import ReactMarkdown from 'react-markdown';
+
 
 type ChatMessage = {
     id?: string;
     session_id?: string;
     user_id?: string;
-    role: "user" | "assistant" | "ai";
+    role: "human" | "assistant" | "ai";
     content: string;
     created_at: string;
     updated_at?: string;
@@ -39,7 +42,7 @@ type SendMessageResponse = {
         session_id: string;
         user_id: string;
         content: string;
-        role: "ai" | "user";
+        role: "ai" | "human";
         created_at: string;
         updated_at: string;
     };
@@ -61,7 +64,7 @@ export default function ChatMain() {
     const listRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
 
-    const {showBackdrop, hideBackdrop} = useBackdrop()
+    const { showBackdrop, hideBackdrop } = useBackdrop()
 
     useEffect(() => {
         if (!listRef.current) return;
@@ -118,7 +121,7 @@ export default function ChatMain() {
 
     const sendMessage = async (text: string) => {
         const userMessage: ChatMessage = {
-            role: "user",
+            role: "human",
             content: text,
             created_at: new Date().toISOString(),
         };
@@ -289,17 +292,17 @@ export default function ChatMain() {
                         messages.map((m, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${m.role === "user" ? "flex-row-reverse" : ""
+                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${m.role === "human" ? "flex-row-reverse" : ""
                                     }`}
                             >
                                 {/* Avatar */}
                                 <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "user"
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "human"
                                         ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8]"
                                         : "bg-gradient-to-br from-gray-500 to-gray-600"
                                         }`}
                                 >
-                                    {m.role === "user" ? (
+                                    {m.role === "human" ? (
                                         <User className="w-4 h-4 text-white" />
                                     ) : (
                                         <Bot className="w-4 h-4 text-white" />
@@ -308,14 +311,14 @@ export default function ChatMain() {
 
                                 {/* Message Content */}
                                 <div
-                                    className={`max-w-[75%] ${m.role === "user"
+                                    className={`max-w-[75%] ${m.role === "human"
                                         ? "items-end"
                                         : "items-start"
                                         } flex flex-col`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-xs font-medium text-gray-600">
-                                            {m.role === "user"
+                                            {m.role === "human"
                                                 ? "Bạn"
                                                 : "Trợ lý AI"}
                                         </span>
@@ -325,7 +328,7 @@ export default function ChatMain() {
                                     </div>
 
                                     <div
-                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${m.role === "user"
+                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${m.role === "human"
                                             ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8] text-white shadow-[#248FCA]/20 rounded-br-md"
                                             : "bg-white text-gray-800 border border-[#248FCA]/10 shadow-[#248FCA]/5 rounded-bl-md hover:shadow-md hover:border-[#248FCA]/20"
                                             } ${m.isTyping ? "animate-pulse" : ""}`}
@@ -355,7 +358,9 @@ export default function ChatMain() {
                                             </div>
                                         ) : (
                                             <div className="whitespace-pre-wrap break-words">
-                                                {m.content}
+                                                <ReactMarkdown>
+                                                    {m.content}
+                                                </ReactMarkdown>
                                             </div>
                                         )}
                                     </div>
