@@ -105,20 +105,20 @@ export default function ChatMain() {
     }, []);
 
     useEffect(() => {
-        updateSession(session, isExternal)
+        updateSession(session)
     }, [isExternal])
 
 
-    const updateSession = async (data?: API.TChatSession | null, external?: boolean | null) => {
+    const updateSession = async (data?: API.TChatSession | null) => {
         try {
-            if(data == null || external == null) return;
+            if(data == null) return;
 
             await axios.put(
                 `${API_BASE_URL}/session-chat`,
                 {
                     "session_id": data.id,
                     "title": data.title,
-                    "external_knowledge": external
+                    "external_knowledge": isExternal
                 },
                 {
                     headers: {
