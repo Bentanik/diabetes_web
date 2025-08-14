@@ -65,10 +65,22 @@ const generateWeekOptionsForMonth = (year: number, month: number) => {
     const firstDay = new Date(year, month - 1, 1);
     const lastDay = new Date(year, month, 0);
 
+    // Tìm ngày Thứ 2 đầu tiên của tuần chứa ngày 1
     let currentWeekStart = new Date(firstDay);
-    currentWeekStart.setDate(
-        firstDay.getDate() - ((firstDay.getDay() + 6) % 7)
-    );
+
+    // getDay(): 0=Chủ nhật, 1=Thứ 2, 2=Thứ 3, ..., 6=Thứ 7
+    const dayOfWeek = firstDay.getDay();
+
+    // Tính số ngày cần lùi về để đến Thứ 2
+    let daysToMonday;
+    if (dayOfWeek === 0) {
+        // Chủ nhật
+        daysToMonday = 6; // Lùi 6 ngày về Thứ 2
+    } else {
+        daysToMonday = dayOfWeek - 1; // Thứ 2 = 0, Thứ 3 = 1, ..., Thứ 7 = 5
+    }
+
+    currentWeekStart.setDate(firstDay.getDate() - daysToMonday);
 
     let weekNumber = 1;
 
@@ -76,12 +88,27 @@ const generateWeekOptionsForMonth = (year: number, month: number) => {
         const weekEnd = new Date(currentWeekStart);
         weekEnd.setDate(currentWeekStart.getDate() + 6);
 
+        // Chỉ thêm tuần nếu có ít nhất 1 ngày trong tháng
         if (weekEnd >= firstDay && currentWeekStart <= lastDay) {
-            const startStr = currentWeekStart.toLocaleDateString("vi-VN", {
+            // Tạo mảng dates từ Thứ 2 đến Chủ nhật
+            const dates = Array.from({ length: 7 }, (_, index) => {
+                const date = new Date(currentWeekStart);
+                date.setDate(currentWeekStart.getDate() + index);
+                return date.toISOString().split("T")[0];
+            });
+
+            console.log(`Week ${weekNumber} dates (T2-CN):`, dates);
+
+            // Tính ngày bắt đầu và kết thúc trong tháng để hiển thị label
+            const weekStartInMonth =
+                currentWeekStart < firstDay ? firstDay : currentWeekStart;
+            const weekEndInMonth = weekEnd > lastDay ? lastDay : weekEnd;
+
+            const startStr = weekStartInMonth.toLocaleDateString("vi-VN", {
                 day: "2-digit",
                 month: "2-digit",
             });
-            const endStr = weekEnd.toLocaleDateString("vi-VN", {
+            const endStr = weekEndInMonth.toLocaleDateString("vi-VN", {
                 day: "2-digit",
                 month: "2-digit",
             });
@@ -89,11 +116,7 @@ const generateWeekOptionsForMonth = (year: number, month: number) => {
             weeks.push({
                 label: `Tuần ${weekNumber} (${startStr} - ${endStr})`,
                 value: `week-${year}-${month}-${weekNumber}`,
-                dates: Array.from({ length: 7 }, (_, index) => {
-                    const date = new Date(currentWeekStart);
-                    date.setDate(currentWeekStart.getDate() + index);
-                    return date.toISOString().split("T")[0];
-                }),
+                dates, // Mảng 7 ngày từ T2 đến CN
                 weekStart: new Date(currentWeekStart),
                 weekEnd: new Date(weekEnd),
             });

@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/stores";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Select, { SingleValue } from "react-select";
 
 const getStatusText = (status: number) => {
@@ -27,7 +27,7 @@ export default function BlogStatusDropdown({
     onStatusChange,
 }: BlogStatusDropdownProps) {
     const [selectedOption, setSelectedOption] = useState<string>(
-        getStatusText(selectedStatus) || "Chờ xác thực"
+        getStatusText(selectedStatus)
     );
 
     const user = useAppSelector((state) => state.userSlice);
@@ -41,12 +41,16 @@ export default function BlogStatusDropdown({
             : []),
     ];
 
+    useEffect(() => {
+        setSelectedOption(getStatusText(selectedStatus));
+    }, [selectedStatus]);
+
     const handleChange = (
         newValue: SingleValue<{ value: string; label: string }>
     ) => {
-        const statusValue = newValue?.value || "0";
-        setSelectedOption(newValue?.label || "Chờ xác thực");
-        const status = parseInt(statusValue);
+        const statusValue = newValue?.value;
+        setSelectedOption(newValue?.label || "Đã duyệt");
+        const status = parseInt(statusValue!);
         onStatusChange(status);
     };
 
@@ -54,10 +58,9 @@ export default function BlogStatusDropdown({
         <div>
             <Select
                 options={options}
-                value={
-                    options.find((option) => option.label === selectedOption) ||
-                    options[0]
-                }
+                value={options.find(
+                    (option) => option.label === selectedOption
+                )}
                 onChange={handleChange}
                 placeholder="Chọn trạng thái"
                 className="w-[210px]"

@@ -54,8 +54,8 @@ export default function CreateHospitalStaffForm() {
             onSubmit(formData, () => {
                 form.reset();
                 setTimeout(() => {
-                    router.push("/admin/hospital-staff");
-                }, 2000);
+                    router.push("/hospitals/hospital-staff");
+                }, 500);
             });
         } catch (error) {
             console.error("Error:", error);

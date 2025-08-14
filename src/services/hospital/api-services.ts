@@ -74,16 +74,11 @@ export const getHospitals = async ({
     pageSize = 10,
     search = "",
 }: REQUEST.GetHospitalsParams) => {
-    const params: Record<
-        string,
-        string | number | boolean | string[] | undefined
-    > = {};
-    if (pageIndex !== null) {
-        params.pageIndex = pageIndex;
-    }
-    if (pageSize !== null) {
-        params.pageSize = pageSize;
-    }
+    const params: Record<string, string | number | boolean | string[]> = {};
+
+    params.pageSize = pageSize;
+    params.pageIndex = pageIndex;
+
     if (search && search.trim() !== "") {
         params.search = search.trim();
     }

@@ -18,7 +18,8 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import PaginatedComponent from "@/components/paginated";
+// import PaginatedComponent from "@/components/paginated";
+import Pagination from "@/components/shared/pagination";
 import BlogStatusDropdown from "./select-status";
 import DoctorSelectFilter from "@/components/select_doctor";
 import MultiSelectCategoriesFilter from "@/components/select-category";
@@ -30,27 +31,93 @@ import { useGetCategories } from "../update-blog/hooks/use-get-categories";
 import { useGetBlogs } from "../hooks/use-get-blogs";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import Header from "./header";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function ModeratorManageBlogComponent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const user = useAppSelector((state) => state.userSlice);
     const isSystemAdmin = user.user?.roles?.includes("SystemAdmin");
-
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const [itemsPerPage, setItemsPerPage] = useState(6);
+
+    const initialStatus = Number(searchParams.get("status") || "1");
+    const initialDoctor = searchParams.get("doctorId");
+    const initialModerator = searchParams.get("moderatorId");
+    const initialCategories = searchParams.getAll("categoryIds");
+    const initialSort = searchParams.get("sortType") || "modifiedDate";
+    const initialPage = Number(searchParams.get("pageIndex") || "1");
+
     const [selectedStatus, setSelectedStatus] = useState<number>(
-        isSystemAdmin ? 1 : 0
+        Number(initialStatus)
     );
-    const [selectedDoctor, setSelectedDoctor] = useState<string>("");
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [selectModerator, setSelectModerator] = useState<string>("");
+    const [selectedDoctor, setSelectedDoctor] = useState<string>(
+        initialDoctor || ""
+    );
+    const [currentPage, setCurrentPage] = useState<number>(initialPage);
+    const [selectModerator, setSelectModerator] = useState<string>(
+        initialModerator || ""
+    );
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
-        []
+        initialCategories || []
     );
-    const [selectedOption, setSelectedOption] =
-        useState<string>("modifiedDate");
+    const [selectedOption, setSelectedOption] = useState<string>(initialSort);
+    const updateURLParams = (
+        newParams: Partial<Record<string, string | string[] | number>>
+    ) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        Object.entries(newParams).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                // Xóa tất cả key trước khi set lại
+                params.delete(key);
+                value.forEach((v) => params.append(key, v));
+            } else if (value !== null && value !== undefined && value !== "") {
+                params.set(key, String(value));
+            } else {
+                params.delete(key);
+            }
+        });
+
+        router.push(`?${params.toString()}`);
+    };
+
+    const handleStatusChange = (status: number) => {
+        setSelectedStatus(status);
+        updateURLParams({ status: status });
+    };
+
+    const handleSortByChange = (sortType: string) => {
+        setSelectedOption(sortType);
+        updateURLParams({ sort: sortType });
+    };
+
+    const handleDoctorChange = (doctorId: string) => {
+        setSelectedDoctor(doctorId);
+        updateURLParams({ doctorId });
+    };
+
+    const handleModeratorChange = (moderatorId: string) => {
+        setSelectModerator(moderatorId);
+        updateURLParams({ moderatorId });
+    };
+
+    const handleCategoryChange = (categoryIds: string[]) => {
+        setSelectedCategoryIds(categoryIds);
+        updateURLParams({ categoryIds });
+    };
+
+    const handlePageChange = (pageIndex: number) => {
+        setCurrentPage(pageIndex);
+        updateURLParams({ pageIndex: pageIndex });
+    };
+
+    const handlePerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage);
+        setCurrentPage(1);
+    };
 
     const [isSortAsc, setIsSortAsc] = useState(false);
-
-    const pageSize = 6;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const formatDate = (dateString: string) => {
@@ -67,6 +134,11 @@ export default function ModeratorManageBlogComponent() {
         setSelectedCategoryIds([]);
         setSearchTerm("");
         setSelectedOption("modifiedDate");
+        setCurrentPage(1);
+        setSelectedStatus(1);
+
+        const params = new URLSearchParams();
+        router.push(`?${params.toString()}`);
     };
 
     const { categories, isPending } = useGetCategories();
@@ -83,7 +155,7 @@ export default function ModeratorManageBlogComponent() {
         moderatorId: selectModerator,
         doctorId: selectedDoctor,
         pageIndex: currentPage,
-        pageSize: pageSize,
+        pageSize: itemsPerPage,
         sortType: selectedOption,
         isSortAsc: isSortAsc,
     });
@@ -118,10 +190,6 @@ export default function ModeratorManageBlogComponent() {
         }
     };
 
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-    };
-
     return (
         <div>
             {/* Header */}
@@ -141,32 +209,32 @@ export default function ModeratorManageBlogComponent() {
                         {/*Select status*/}
                         <BlogStatusDropdown
                             selectedStatus={selectedStatus}
-                            onStatusChange={setSelectedStatus}
+                            onStatusChange={handleStatusChange}
                         />
                         {/* Select Category*/}
                         <MultiSelectCategoriesFilter
                             data={categories}
                             isPending={isPending}
-                            onCategoryChange={setSelectedCategoryIds}
+                            onCategoryChange={handleCategoryChange}
                             selectedCategories={selectedCategoryIds}
                         />
                         {/* Select Doctor */}
                         <DoctorSelectFilter
-                            onDoctorChange={setSelectedDoctor}
+                            onDoctorChange={handleDoctorChange}
                             selectDoctor={selectedDoctor}
                         />
 
                         {/* Select Moderator */}
                         {isSystemAdmin && (
                             <ModeratorSelectFilter
-                                onModeratorChange={setSelectModerator}
+                                onModeratorChange={handleModeratorChange}
                                 selectedModerator={selectModerator}
                             />
                         )}
 
                         {/* Select Sort Type */}
                         <BlogSortDropdown
-                            onSortChange={setSelectedOption}
+                            onSortChange={handleSortByChange}
                             selectedOption={selectedOption}
                         />
                         {/* Sort ASC/ DES */}
@@ -192,7 +260,7 @@ export default function ModeratorManageBlogComponent() {
 
             {blogsPending && <SkeletonFolderGrid count={6} />}
 
-            {/* Staff Grid/List */}
+            {/* Block Posts */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {blogs?.items.map((data, index) => (
                     <Link
@@ -267,13 +335,20 @@ export default function ModeratorManageBlogComponent() {
                 ))}
             </div>
             {/* Show pagination when has data */}
-            {blogs?.items && blogs.items.length > 0 && !blogsPending && (
+            {blogs?.items && blogs.items.length > 0 && (
                 <div className="my-10">
                     <div className="mt-5">
-                        <PaginatedComponent
-                            totalPages={blogs.totalPages || 1}
+                        <Pagination
                             currentPage={currentPage}
+                            totalPages={blogs.totalPages}
+                            totalItems={blogs.totalCount}
+                            perPage={itemsPerPage}
+                            hasNext={blogs.hasNextPage}
+                            hasPrev={blogs.hasPreviousPage}
                             onPageChange={handlePageChange}
+                            isLoading={isPending}
+                            perPageOptions={[6, 9, 12, 18, 24]}
+                            onPerPageChange={handlePerPageChange}
                         />
                     </div>
                 </div>
