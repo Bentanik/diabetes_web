@@ -4,6 +4,10 @@ declare namespace REQUEST {
     session_id: string;
     message: string;
   };
+
+  type TChatSession = {
+    session_id: string
+  }
 }
 
 declare namespace API {
@@ -16,6 +20,15 @@ declare namespace API {
     content: string;
     created_at: string;
   };
+
+  type TChatSession = {
+      id: string,
+      user_id: string,
+      title: string,
+      external_knowledge: boolean,
+      created_at: string,
+      updated_at: string
+  }
 
   type TChatHistory = {
     session_id: string;

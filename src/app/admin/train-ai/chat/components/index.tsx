@@ -12,7 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Trash2, ChevronDown, Bot, User } from "lucide-react";
 import axios from "axios";
 import { useBackdrop } from "@/context/backdrop_context";
-import ReactMarkdown from 'react-markdown';
+import API_ENDPOINTS from "@/services/train-ai/api-path";
+
+// import ReactMarkdown from 'react-markdown';
 
 
 type ChatMessage = {
@@ -33,6 +35,13 @@ type ChatHistoryResponse = {
     data: ChatMessage[];
 };
 
+type ChatSessionResponse = {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    data: API.TChatSession[];
+};
+
 type SendMessageResponse = {
     isSuccess: boolean;
     code: string;
@@ -48,7 +57,7 @@ type SendMessageResponse = {
     };
 };
 
-const API_BASE_URL = "http://localhost:8000/api/v1/rag";
+const API_BASE_URL = API_ENDPOINTS.TRAIN_AI;
 const FIXED_USER_ID = "admin";
 
 const formatTime = (iso: string) =>
@@ -63,6 +72,8 @@ export default function ChatMain() {
     const [isLoading, setIsLoading] = useState(false);
     const listRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
+    const [isExternal, setIsExternal] = useState<boolean>(false);
+    const [session, setSession] = useState<API.TChatSession | null>(null)
 
     const { showBackdrop, hideBackdrop } = useBackdrop()
 
@@ -93,6 +104,36 @@ export default function ChatMain() {
         loadChatHistory();
     }, []);
 
+    useEffect(() => {
+        updateSession(session, isExternal)
+    }, [isExternal])
+
+
+    const updateSession = async (data?: API.TChatSession | null, external?: boolean | null) => {
+        try {
+            if(data == null || external == null) return;
+
+            await axios.put(
+                `${API_BASE_URL}/session-chat`,
+                {
+                    "session_id": data.id,
+                    "title": data.title,
+                    "external_knowledge": external
+                },
+                {
+                    headers: {
+                        "accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                }
+            )
+        } catch (error) {
+            console.error("Error updating session:", error);
+        } finally {
+            setIsLoading(false);
+        }
+}
+
     const loadChatHistory = async () => {
         try {
             setIsLoading(true);
@@ -105,12 +146,26 @@ export default function ChatMain() {
                 }
             );
 
+            const session_response = await axios.get<ChatSessionResponse>(
+                `${API_BASE_URL}/session-chat?user_id=${FIXED_USER_ID}`,
+                {
+                    headers: {
+                        accept: "application/json",
+                    },
+                }
+            )
+
             if (response.data.isSuccess) {
                 const historyMessages = response.data.data.map((msg) => ({
                     ...msg,
                     role: msg.role === "ai" ? "assistant" : msg.role,
                 })) as ChatMessage[];
                 setMessages(historyMessages);
+            }
+
+            if (session_response.data.isSuccess) {
+                setIsExternal(session_response.data.data[0].external_knowledge)
+                setSession(session_response.data.data[0])
             }
         } catch (error) {
             console.error("Error loading chat history:", error);
@@ -251,13 +306,34 @@ export default function ChatMain() {
                                 </div>
                             </div>
                         </div>
-                        <Button
-                            className="bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 rounded-full cursor-pointer"
-                            onClick={clearConversation}
-                        >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Xóa cuộc trò chuyện
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-white text-sm">Sử dụng kiến thức bên ngoài</span>
+                                <div
+                                    className={`relative w-12 h-6 rounded-full cursor-pointer transition-all duration-300 ${isExternal ? 'bg-white/30 border-white/50' : 'bg-white/10 border-white/20'
+                                        } border backdrop-blur-sm`}
+                                    onClick={() => setIsExternal(!isExternal)}
+                                >
+                                    <div
+                                        className={`absolute top-0.5 w-5 h-5 rounded-full transition-all duration-300 ${isExternal
+                                            ? 'left-6 bg-white'
+                                            : 'left-0.5 bg-white/60'
+                                            }`}
+                                    />
+                                </div>
+                                <span className={`text-sm transition-colors duration-200 ${isExternal ? 'text-white' : 'text-white/50'
+                                    }`}>
+                                    {isExternal ? 'Đã mở' : 'Đã tắt'}
+                                </span>
+                            </div>
+                            <Button
+                                className="bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 rounded-full cursor-pointer"
+                                onClick={clearConversation}
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Xóa cuộc trò chuyện
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -358,9 +434,9 @@ export default function ChatMain() {
                                             </div>
                                         ) : (
                                             <div className="whitespace-pre-wrap break-words">
-                                                <ReactMarkdown>
-                                                    {m.content}
-                                                </ReactMarkdown>
+                                                {m.content}
+                                                {/* <ReactMarkdown>
+                                                </ReactMarkdown> */}
                                             </div>
                                         )}
                                     </div>
