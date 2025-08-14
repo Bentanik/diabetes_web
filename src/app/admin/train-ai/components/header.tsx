@@ -85,7 +85,7 @@ export default function Header() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
-                        <Link href={"/admin/train-ai/check"}>
+                        <Link href={"/admin/train-ai/chat"}>
                             <Button
                                 type="button"
                                 variant="outline"

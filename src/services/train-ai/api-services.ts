@@ -229,3 +229,26 @@ export const getViewFileAsync = async (id: string) => {
 
   return response.data;
 }
+
+export const getDocumentParserAsync = async (
+  document_id: string,
+  params: {
+    search?: string;
+    sort_by?: string;
+    sort_order?: string;
+    page?: number;
+    limit?: number;
+  }
+) => {
+  const response = await request<TResponseData<TPagination<API.TDocumentParser>>>(
+    API_ENDPOINTS.DOCUMENTS + "/" + document_id + "/parser",
+    {
+      method: "GET",
+      params: {
+        ...params,
+      },
+    }
+  );
+
+  return response.data;
+};

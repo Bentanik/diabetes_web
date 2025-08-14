@@ -13,7 +13,7 @@ import {
     Minimize2,
     Maximize2,
 } from "lucide-react";
-import { useGetDocumentByIdService } from "@/services/train-ai/services";
+import { useGetDocumentByIdService, useGetDocumentParserService } from "@/services/train-ai/services";
 import { getViewFileAsync } from "@/services/train-ai/api-services";
 
 const DocumentViewPdf = dynamic(
@@ -116,6 +116,12 @@ const DocumentDetailComponent: React.FC<DocumentDetailComponentProps> = ({
 
     const { data: documentData } = useGetDocumentByIdService(id);
 
+    const { data: documentParser } = useGetDocumentParserService(id, {
+        page: 1,
+        limit: 10,
+    });
+
+    console.log(documentParser);
     const pdfViewerRef = useRef<{
         scrollToHighlight: (highlightId: string) => void;
     }>(null);
