@@ -30,7 +30,7 @@ declare namespace REQUEST {
         email: string;
         otp: string;
         password: string;
-    }
+    };
 }
 
 declare namespace API {

@@ -46,8 +46,6 @@ import DateOfBirthPicker from "./date-picker";
 
 export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const { form, onSubmit } = useCreateDoctor();
-    const [open, setOpen] = React.useState(false);
-    const [date, setDate] = React.useState<Date | undefined>(undefined);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadUserImage();
@@ -128,11 +126,10 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 form.reset();
                 setTimeout(() => {
                     router.push("/hospitals/doctor");
-                }, 2000);
+                }, 500);
             });
         } catch (error) {
-            console.error("Error updating post:", error);
-            alert("Có lỗi xảy ra khi cập nhật bài viết.");
+            console.error(error);
         } finally {
             setIsSubmitting(false);
         }

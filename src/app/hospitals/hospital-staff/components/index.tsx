@@ -12,29 +12,35 @@ import { Toaster } from "sonner";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import Header from "./header";
 import HospitalStaffFilters from "./hospital-staff-filter";
+import { useSearchParams, useRouter } from "next/navigation";
+import Pagination from "@/components/shared/pagination";
 
 export default function HospitalStaffComponent() {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage, setItemsPerPage] = useState(6);
+
     const [selectSortBy, setSelectSortBy] = useState<string>("createdDate");
     const [isSortAsc, setIsSortAsc] = useState(false);
-    const [selectedHospital, setSelectedHospital] = useState<string>("");
     const [selectGender, setSelectGender] = useState<number | null>(null);
 
-    const pageSize = 6;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
     const { hospital_staffs, isPending, isError, error } = useGetHospitalStaffs(
         {
             search: debouncedSearchTerm,
-            // hospitalId: selectedHospital,
             gender: selectGender,
-            pageSize: pageSize,
+            pageSize: itemsPerPage,
             pageIndex: currentPage,
             sortBy: selectSortBy,
             sortDirection: isSortAsc ? 0 : 1,
         }
     );
+
+    const handlePerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage);
+        setCurrentPage(1);
+    };
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -82,8 +88,6 @@ export default function HospitalStaffComponent() {
                     setSelectSortBy={setSelectSortBy}
                     selectGender={selectGender}
                     setSelectGender={setSelectGender}
-                    // setSelectHospital={setSelectedHospital}
-                    // selectHospital={selectedHospital}
                     isSortAsc={isSortAsc}
                     setIsSortAsc={setIsSortAsc}
                 />
@@ -158,20 +162,29 @@ export default function HospitalStaffComponent() {
                 ))}
             </div>
 
-            {hospital_staffs?.items.length !== 0 && !isPending && (
-                <div className="my-10">
-                    <div className="mt-5">
-                        <PaginatedComponent
-                            totalPages={hospital_staffs?.totalPages || 0}
-                            currentPage={currentPage}
-                            onPageChange={handlePageChange}
-                        />
+            {hospital_staffs &&
+                hospital_staffs?.items.length !== 0 &&
+                !isPending && (
+                    <div className="my-10">
+                        <div className="mt-5">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={hospital_staffs.totalPages}
+                                totalItems={hospital_staffs.totalCount}
+                                perPage={itemsPerPage}
+                                hasNext={hospital_staffs.hasNextPage}
+                                hasPrev={hospital_staffs.hasPreviousPage}
+                                onPageChange={handlePageChange}
+                                isLoading={isPending}
+                                perPageOptions={[6, 9, 12, 18, 24]}
+                                onPerPageChange={handlePerPageChange}
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
             {/* Empty State */}
-            {hospital_staffs?.items.length === 0 && (
+            {hospital_staffs && hospital_staffs.items.length === 0 && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
