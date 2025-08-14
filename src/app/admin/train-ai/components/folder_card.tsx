@@ -51,7 +51,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
                 className="group cursor-pointer h-full"
                 onClick={handleCardClick}
             >
-                <Card className="p-6 hover:shadow-md transition-all duration-300 border border-gray-100 bg-white h-full min-h-[200px] rounded-2xl flex flex-col">
+                <Card className="p-6 hover:shadow-md transition-all duration-300 border border-gray-100 bg-white h-full max-w-[400px] min-h-[200px] rounded-2xl flex flex-col">
                     {/* Header của card */}
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -59,9 +59,9 @@ export default function FolderCard({ folder }: FolderCardProps) {
                             <div className="w-12 h-12 bg-gradient-to-br from-[#248fca] to-[#1e7bb8] rounded-xl flex items-center justify-center">
                                 <FolderIcon className="w-6 h-6 text-white" />
                             </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                                 <h3
-                                    className="font-semibold text-gray-900 group-hover:text-[#248fca] transition-colors truncate"
+                                    className="font-semibold text-gray-900 group-hover:text-[#248fca] transition-colors"
                                     title={folder.name}
                                 >
                                     {folder.name}

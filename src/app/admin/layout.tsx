@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { sidebar_items } from "@/constants/admin";
@@ -32,16 +32,22 @@ export default function AdminLayout({
     const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
     const pathname = usePathname();
     const router = useRouter();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const userState = useAppSelector((state) => state.userSlice);
 
-    // Cho phép cả SystemAdmin và Moderator
     if (
+        mounted &&
         !userState.user?.roles?.includes("SystemAdmin") &&
         !userState.user?.roles?.includes("Moderator")
     ) {
         return (window.location.href = "/");
     }
+
     const sidebarWidth = open ? 280 : 80;
 
     const toggleExpanded = (index: number) => {
@@ -55,6 +61,7 @@ export default function AdminLayout({
     };
 
     const isItemActive = (item: SidebarItem) => {
+        if (!mounted) return false;
         if (pathname === item.href) return true;
         if (item.subItems) {
             return item.subItems.some((subItem) => pathname === subItem.href);
@@ -62,9 +69,16 @@ export default function AdminLayout({
         return false;
     };
 
-    const isSubItemActive = (href: string) => pathname === href;
+    const isSubItemActive = (href: string) => {
+        if (!mounted) return false;
+        return pathname === href;
+    };
 
     const { handleLogout } = useLogout();
+
+    if (!mounted) {
+        return null; // tránh render khi chưa mount để không mismatch
+    }
 
     return (
         <div className="min-h-screen w-full font-be-vietnam-pro flex bg-gradient-to-br from-gray-50 via-white to-gray-50">
