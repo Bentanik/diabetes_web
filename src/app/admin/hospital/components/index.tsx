@@ -25,6 +25,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { Toggle } from "@radix-ui/react-toggle";
 import PaginatedComponent from "@/components/paginated";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
+import Pagination from "@/components/shared/pagination";
 
 const sortBy = [
     { name: "Tên bệnh viện", value: "name" },
@@ -78,6 +79,7 @@ export default function ManageHospitalComponent() {
     const [selectSortBy, setSelectSortBy] = useState<string>("createdDate");
     const [isSortAsc, setIsSortAsc] = useState(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage, setItemsPerPage] = useState(6);
 
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
     const pageSize = 6;
@@ -92,6 +94,11 @@ export default function ManageHospitalComponent() {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+    };
+
+    const handlePerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage);
+        setCurrentPage(1);
     };
 
     return (
@@ -227,13 +234,20 @@ export default function ManageHospitalComponent() {
                 ))}
             </div>
 
-            {hospitals?.items.length !== 0 && !isPending && (
+            {hospitals && hospitals?.items.length > 0 && !isPending && (
                 <div className="my-10">
                     <div className="mt-5">
-                        <PaginatedComponent
-                            totalPages={hospitals?.totalPages || 0}
+                        <Pagination
                             currentPage={currentPage}
+                            totalPages={hospitals.totalPages}
+                            totalItems={hospitals.totalCount}
+                            perPage={itemsPerPage}
+                            hasNext={hospitals.hasNextPage}
+                            hasPrev={hospitals.hasPreviousPage}
                             onPageChange={handlePageChange}
+                            isLoading={isPending}
+                            perPageOptions={[6, 9, 12, 18, 24]}
+                            onPerPageChange={handlePerPageChange}
                         />
                     </div>
                 </div>
