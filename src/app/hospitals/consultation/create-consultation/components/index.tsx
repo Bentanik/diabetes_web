@@ -62,13 +62,22 @@ const mockDoctors = {
     ],
 };
 
-// Utility to generate week options (unchanged)
+// Hàm giúp định dạng ngày thành YYYY-MM-DD theo giờ địa phương
+const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
+// Tạo danh sách tuần trong tháng (bắt đầu từ thứ Hai)
 const generateWeekOptionsForMonth = (year: number, month: number) => {
     const weeks: WeekOption[] = [];
     const firstDay = new Date(year, month - 1, 1);
     const lastDay = new Date(year, month, 0);
 
     let currentWeekStart = new Date(firstDay);
+    // Lùi về thứ Hai (getDay: Chủ Nhật=0, Thứ Hai=1,...)
     currentWeekStart.setDate(
         firstDay.getDate() - ((firstDay.getDay() + 6) % 7)
     );
@@ -94,7 +103,7 @@ const generateWeekOptionsForMonth = (year: number, month: number) => {
                 dates: Array.from({ length: 7 }, (_, index) => {
                     const date = new Date(currentWeekStart);
                     date.setDate(currentWeekStart.getDate() + index);
-                    return date.toISOString().split("T")[0];
+                    return formatDate(date); // Dùng định dạng local YYYY-MM-DD
                 }),
                 weekStart: new Date(currentWeekStart),
                 weekEnd: new Date(weekEnd),
@@ -116,8 +125,8 @@ export default function CreateDoctorSchedule() {
         dayIndex: number;
         slotIndex: number;
     } | null>(null);
-
-    // State for selecting year, month, week
+    const [selectedStatus, setSelectedStatus] = useState<number | null>(null);
+    // State lựa chọn năm, tháng, tuần
     const currentDate = new Date();
     const [selectedYear, setSelectedYear] = useState<string>(
         currentDate.getFullYear().toString()
@@ -131,9 +140,11 @@ export default function CreateDoctorSchedule() {
         timeTemplates: [],
     });
 
-    const [hasChanges, setHasChanges] = useState(false);
+    const [hasChanges, setHasChanges] = useState(true);
 
-    // Compute week options and selectedWeekData from year/month/week
+    console.log();
+
+    // Tính toán tuần và thông tin tuần được chọn
     const weekOptions = useMemo(() => {
         if (!selectedYear || !selectedMonth) return [];
         return generateWeekOptionsForMonth(
@@ -146,13 +157,13 @@ export default function CreateDoctorSchedule() {
         return weekOptions.find((w) => w.value === selectedWeek);
     }, [weekOptions, selectedWeek]);
 
-    // Prepare API params based on selected week
+    // Chuẩn bị tham số API dựa trên tuần đã chọn (dùng định dạng YYYY-MM-DD local)
     const apiParams = useMemo(() => {
         if (!selectedWeekData) return null;
         return {
             pageSize: 7,
-            fromDate: selectedWeekData.weekStart.toISOString().split("T")[0],
-            toDate: selectedWeekData.weekEnd.toISOString().split("T")[0],
+            fromDate: formatDate(selectedWeekData.weekStart),
+            toDate: formatDate(selectedWeekData.weekEnd),
         };
     }, [
         selectedWeekData?.weekStart?.getTime(),
@@ -181,8 +192,41 @@ export default function CreateDoctorSchedule() {
     }, [selectedDoctorId, selectedWeek]);
 
     // Transform API data into scheduleData when data pages arrive
+    // useEffect(() => {
+    //     // Only proceed if a week and doctor are selected
+    //     if (!selectedDoctorId || !selectedWeekData) {
+    //         return;
+    //     }
+    //     if (consultationData?.pages) {
+    //         const allConsultations = consultationData.pages.flatMap(
+    //             (page: any) => page.data?.items ?? []
+    //         );
+
+    //         if (allConsultations.length > 0) {
+    //             // Map API items to our schedule format
+    //             const transformedScheduleData: ScheduleData = {
+    //                 timeTemplates: allConsultations.map((item: any) => ({
+    //                     date: item.date.split("T")[0], // YYYY-MM-DD
+    //                     times: item.consultationTemplates.map(
+    //                         (template: any) => ({
+    //                             start: template.startTime,
+    //                             end: template.endTime,
+    //                             id: template.id,
+    //                             status: template.status,
+    //                         })
+    //                     ),
+    //                 })),
+    //             };
+    //             setScheduleData(transformedScheduleData);
+    //         } else {
+    //             // No items returned for this week
+    //             setScheduleData({ timeTemplates: [] });
+    //         }
+    //         setHasChanges(false);
+    //     }
+    // }, [consultationData?.pages]);
+
     useEffect(() => {
-        // Only proceed if a week and doctor are selected
         if (!selectedDoctorId || !selectedWeekData) {
             return;
         }
@@ -190,25 +234,37 @@ export default function CreateDoctorSchedule() {
             const allConsultations = consultationData.pages.flatMap(
                 (page: any) => page.data?.items ?? []
             );
-
             if (allConsultations.length > 0) {
-                // Map API items to our schedule format
+                // Map API items to scheduleData với định dạng thời gian HH:mm
                 const transformedScheduleData: ScheduleData = {
-                    timeTemplates: allConsultations.map((item: any) => ({
-                        date: item.date.split("T")[0], // YYYY-MM-DD
-                        times: item.consultationTemplates.map(
-                            (template: any) => ({
-                                start: template.startTime,
-                                end: template.endTime,
-                                id: template.id,
-                                status: template.status,
-                            })
-                        ),
-                    })),
+                    timeTemplates: allConsultations.map((item: any) => {
+                        const date = item.date.split("T")[0];
+                        const timeslots = item.consultationTemplates.map(
+                            (template: any) => {
+                                // Cắt và pad để được HH:mm (loại bỏ giây)
+                                const [hourStart, minuteStart] =
+                                    template.startTime.split(":");
+                                const [hourEnd, minuteEnd] =
+                                    template.endTime.split(":");
+                                return {
+                                    start: `${hourStart.padStart(
+                                        2,
+                                        "0"
+                                    )}:${minuteStart.padStart(2, "0")}`,
+                                    end: `${hourEnd.padStart(
+                                        2,
+                                        "0"
+                                    )}:${minuteEnd.padStart(2, "0")}`,
+                                    id: template.id,
+                                    status: template.status,
+                                };
+                            }
+                        );
+                        return { date, times: timeslots };
+                    }),
                 };
                 setScheduleData(transformedScheduleData);
             } else {
-                // No items returned for this week
                 setScheduleData({ timeTemplates: [] });
             }
             setHasChanges(false);
@@ -245,13 +301,16 @@ export default function CreateDoctorSchedule() {
 
     const handleUpdateScheduleSubmit = async () => {
         try {
+            // Sử dụng selectedStatus (kiểu number) hoặc mặc định 0
+            const statusValue = selectedStatus !== null ? selectedStatus : 0;
             const formData: TimeTemplateFormData = {
-                status: updateForm.getValues("status") || 1,
+                status: statusValue,
                 upsertTimeTemplates: scheduleData.timeTemplates.flatMap((day) =>
                     day.times.map((time) => ({
-                        timeTemplateId: time.id || "",
+                        timeTemplateId: time.id || null,
                         date: day.date,
                         timeRange: {
+                            // Đảm bảo thời gian ở định dạng HH:MM:SS
                             start: formatTimeToHMS(time.start),
                             end: formatTimeToHMS(time.end),
                         },
@@ -259,8 +318,9 @@ export default function CreateDoctorSchedule() {
                 ),
                 templateIdsToDelete: [],
             };
-            UpdateSubmit(formData);
+            await UpdateSubmit(formData);
             updateForm.reset();
+            setSelectedStatus(null);
             setHasChanges(false);
         } catch (error) {
             console.error("Error submitting schedule data:", error);
@@ -500,8 +560,8 @@ export default function CreateDoctorSchedule() {
                                             onClick={handleUpdateScheduleSubmit}
                                             disabled={
                                                 loading ||
-                                                isLoadingConsultations ||
-                                                !hasChanges
+                                                isLoadingConsultations
+                                                // hasChanges
                                             }
                                             size="sm"
                                             className="bg-[#248FCA] hover:bg-[#248FCA]/90"

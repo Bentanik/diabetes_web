@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Check, X, Edit3, Trash2, Loader2, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Đã thêm useEffect
 import {
     Select,
     SelectContent,
@@ -69,26 +69,20 @@ const validateTimeSlot = (
         toast.error("Định dạng thời gian không hợp lệ");
         return false;
     }
-
     const getMinutes = (time: string): number => {
         const [hours, minutes] = time.split(":").map(Number);
         return hours * 60 + minutes;
     };
-
     const newStart = getMinutes(newSlot.start);
     const newEnd = getMinutes(newSlot.end);
-
     if (newEnd - newStart < 15) {
         toast.error("Khoảng thời gian phải tối thiểu 15 phút");
         return false;
     }
-
     for (let i = 0; i < existingSlots.length; i++) {
         if (slotIndexToIgnore === i) continue;
-
         const existingStart = getMinutes(existingSlots[i].start);
         const existingEnd = getMinutes(existingSlots[i].end);
-
         if (
             (newStart >= existingStart && newStart < existingEnd) ||
             (newEnd > existingStart && newEnd <= existingEnd) ||
@@ -98,7 +92,6 @@ const validateTimeSlot = (
             return false;
         }
     }
-
     return true;
 };
 
@@ -128,10 +121,40 @@ export default function WeeklySchedule({
     const [selectedSlots, setSelectedSlots] = useState<
         { dayIndex: number; slotIndex: number }[]
     >([]);
-    // State để lưu giá trị status mới từ dropdown
-    const [newStatus, setNewStatus] = useState<string | null>(null);
+    // State để lưu giá trị status mới từ dropdown (kiểu number)
+    const [newStatus, setNewStatus] = useState<number | null>(null);
 
-    // Helper to compare HH:MM:SS times
+    // Chuẩn hóa các slot lấy từ API về định dạng HH:MM:SS (nếu cần)
+    useEffect(() => {
+        if (scheduleData && scheduleData.timeTemplates) {
+            // Kiểm tra nếu có slot nào định dạng HH:MM (chỉ có 2 phần)
+            const needFormat = scheduleData.timeTemplates.some((day) =>
+                day.times.some((slot) => slot.start.split(":").length === 2)
+            );
+            if (needFormat) {
+                const updated: { timeTemplates: DaySchedule[] } = {
+                    timeTemplates: [],
+                };
+                scheduleData.timeTemplates.forEach((day) => {
+                    const updatedDay: DaySchedule = {
+                        date: day.date,
+                        times: [],
+                    };
+                    day.times.forEach((slot) => {
+                        updatedDay.times.push({
+                            ...slot,
+                            start: formatTimeToHMS(slot.start), // thêm :00
+                            end: formatTimeToHMS(slot.end),
+                        });
+                    });
+                    updated.timeTemplates.push(updatedDay);
+                });
+                setScheduleData(updated);
+            }
+        }
+    }, [scheduleData, setScheduleData]);
+
+    // So sánh thời gian HH:MM:SS
     const compareTimes = (time1: string, time2: string): number => {
         const [h1, m1] = time1.split(":").map(Number);
         const [h2, m2] = time2.split(":").map(Number);
@@ -140,7 +163,7 @@ export default function WeeklySchedule({
         return total1 - total2;
     };
 
-    // Helper to check overlap
+    // Kiểm tra chồng lấn khung giờ
     const hasOverlap = (
         existingSlots: TimeSlot[],
         newSlot: TimeSlot
@@ -158,10 +181,8 @@ export default function WeeklySchedule({
 
     const addTimeSlot = (dayIndex: number) => {
         if (!selectedWeekData) return;
-
         const date = selectedWeekData.dates[dayIndex];
         const newScheduleData = { ...scheduleData };
-
         let daySchedule = newScheduleData.timeTemplates.find(
             (t) => t.date === date
         );
@@ -169,7 +190,6 @@ export default function WeeklySchedule({
             daySchedule = { date, times: [] };
             newScheduleData.timeTemplates.push(daySchedule);
         }
-
         let newStart = "08:00:00"; // Mặc định bắt đầu từ 08:00:00
         let newEnd = "08:30:00"; // Mặc định kết thúc sau 30 phút
         if (daySchedule.times.length > 0) {
@@ -177,18 +197,15 @@ export default function WeeklySchedule({
             newStart = incrementTime(lastSlot.end);
             newEnd = incrementTime(newStart);
         }
-
         if (compareTimes(newEnd, "24:00:00") >= 0) {
             toast.error("Bạn đã thêm hết thời gian trong 24 giờ!");
             return;
         }
-
         const newSlot = { start: newStart, end: newEnd };
         if (hasOverlap(daySchedule.times, newSlot)) {
             toast.error("Bạn đã thêm hết thời gian trong 24 giờ!");
             return;
         }
-
         daySchedule.times.push(newSlot);
         setScheduleData(newScheduleData);
         setEditingSlot({ dayIndex, slotIndex: daySchedule.times.length - 1 });
@@ -202,13 +219,11 @@ export default function WeeklySchedule({
         value: string
     ) => {
         if (!selectedWeekData) return;
-
         const date = selectedWeekData.dates[dayIndex];
         const newScheduleData = { ...scheduleData };
         const daySchedule = newScheduleData.timeTemplates.find(
             (t) => t.date === date
         );
-
         if (daySchedule) {
             const timeSlot = { ...daySchedule.times[slotIndex] };
             // Chuyển đổi HH:MM từ input thành HH:MM:SS để lưu
@@ -225,6 +240,7 @@ export default function WeeklySchedule({
             editingSlot.dayIndex === dayIndex &&
             editingSlot.slotIndex === slotIndex
         ) {
+            // Hoàn tất chỉnh sửa
             if (!selectedWeekData) return;
             const date = selectedWeekData.dates[dayIndex];
             const daySchedule = scheduleData.timeTemplates.find(
@@ -238,30 +254,25 @@ export default function WeeklySchedule({
             }
             setEditingSlot(null);
         } else {
+            // Bắt đầu chỉnh sửa
             setEditingSlot({ dayIndex, slotIndex });
         }
     };
 
     const removeTimeSlot = (dayIndex: number, slotIndex: number) => {
         if (!selectedWeekData) return;
-
         const date = selectedWeekData.dates[dayIndex];
         const newScheduleData = { ...scheduleData };
         const daySchedule = newScheduleData.timeTemplates.find(
             (t) => t.date === date
         );
-
         if (daySchedule) {
             const timeSlotToRemove = daySchedule.times[slotIndex];
-
-            // Nếu timeSlot có id (từ API), lưu vào mảng deletedIds
+            // Nếu slot có id (từ API), thêm vào deletedIds
             if (timeSlotToRemove.id) {
                 const newDeletedIds = [...deletedIds, timeSlotToRemove.id];
                 setDeletedIds(newDeletedIds);
-                console.log("ID cần xóa:", timeSlotToRemove.id);
-                console.log("Danh sách tất cả ID cần xóa:", newDeletedIds);
             }
-
             daySchedule.times = daySchedule.times.filter(
                 (_, index) => index !== slotIndex
             );
@@ -272,17 +283,16 @@ export default function WeeklySchedule({
                     );
             }
         }
-
         setScheduleData(newScheduleData);
         setEditingSlot(null);
-        // Xóa khỏi danh sách selectedSlots nếu time slot bị xóa
+        // Xóa khỏi danh sách selectedSlots nếu cần
         setSelectedSlots(
             selectedSlots.filter(
                 (slot) =>
                     slot.dayIndex !== dayIndex || slot.slotIndex !== slotIndex
             )
         );
-        onStatusUpdate(); // Gọi callback khi có thay đổi
+        onStatusUpdate();
     };
 
     const toggleSelectSlot = (dayIndex: number, slotIndex: number) => {
@@ -291,14 +301,11 @@ export default function WeeklySchedule({
             (t) => t.date === date
         );
         if (!daySchedule) return;
-
         const timeSlot = daySchedule.times[slotIndex];
-        if (timeSlot.status === 2) return; // Không cho phép tương tác với status = 2
-
+        if (timeSlot.status === 2) return; // Không cho chọn nếu đã đặt
         const isSelected = selectedSlots.some(
             (slot) => slot.dayIndex === dayIndex && slot.slotIndex === slotIndex
         );
-
         if (isSelected) {
             // Bỏ chọn
             setSelectedSlots(
@@ -309,16 +316,14 @@ export default function WeeklySchedule({
                 )
             );
         } else {
-            // Kiểm tra xem có slot nào được chọn với status khác không
-            const selectedStatus = selectedSlots.length
+            const selectedStatusValue = selectedSlots.length
                 ? scheduleData.timeTemplates.find(
                       (t) =>
                           t.date ===
                           selectedWeekData.dates[selectedSlots[0].dayIndex]
                   )?.times[selectedSlots[0].slotIndex].status
                 : timeSlot.status;
-
-            if (selectedStatus === timeSlot.status) {
+            if (selectedStatusValue === timeSlot.status) {
                 // Chỉ thêm nếu status khớp
                 setSelectedSlots([...selectedSlots, { dayIndex, slotIndex }]);
             } else {
@@ -330,8 +335,7 @@ export default function WeeklySchedule({
     };
 
     const updateSelectedSlotsStatus = () => {
-        if (!newStatus || selectedSlots.length === 0) return;
-
+        if (newStatus === null || selectedSlots.length === 0) return;
         const newScheduleData = { ...scheduleData };
         selectedSlots.forEach(({ dayIndex, slotIndex }) => {
             const date = selectedWeekData.dates[dayIndex];
@@ -339,20 +343,21 @@ export default function WeeklySchedule({
                 (t) => t.date === date
             );
             if (daySchedule) {
+                // Cập nhật status (dùng number)
                 daySchedule.times[slotIndex] = {
                     ...daySchedule.times[slotIndex],
-                    status: parseInt(newStatus),
+                    status: newStatus!, // đã là number
                 };
             }
         });
-
         setScheduleData(newScheduleData);
-        setSelectedSlots([]); // Reset danh sách chọn
-        setNewStatus(null); // Reset dropdown
+        setSelectedSlots([]); // Reset chọn
+        setNewStatus(null);
         toast.success("Cập nhật trạng thái thành công!");
-        onStatusUpdate(); // Gọi callback khi cập nhật trạng thái
+        onStatusUpdate();
     };
 
+    // Lấy màu nền theo status hoặc mặc định (#248FCA)
     const getBadgeColor = (timeSlot: TimeSlot) => {
         if (timeSlot.id) {
             if (timeSlot.status === 0) {
@@ -403,8 +408,14 @@ export default function WeeklySchedule({
                             {selectedSlots.length > 0 && (
                                 <div className="flex items-center space-x-2">
                                     <Select
-                                        onValueChange={setNewStatus}
-                                        value={newStatus || ""}
+                                        onValueChange={(val) =>
+                                            setNewStatus(Number(val))
+                                        }
+                                        value={
+                                            newStatus !== null
+                                                ? newStatus.toString()
+                                                : ""
+                                        }
                                     >
                                         <SelectTrigger className="w-[150px] h-8 text-xs">
                                             <SelectValue placeholder="Chọn trạng thái" />
@@ -422,7 +433,9 @@ export default function WeeklySchedule({
                                         size="sm"
                                         onClick={updateSelectedSlotsStatus}
                                         className="h-8 text-xs bg-[#248FCA] hover:bg-[#248FCA]/90"
-                                        disabled={isLoading || !newStatus}
+                                        disabled={
+                                            isLoading || newStatus === null
+                                        }
                                     >
                                         <Calendar className="h-4 w-4 mr-1" />
                                         Lưu trạng thái
@@ -460,7 +473,6 @@ export default function WeeklySchedule({
                                             })}
                                         </div>
                                     </div>
-
                                     <div className="p-2 min-h-[250px] space-y-2">
                                         {isLoading && !daySchedule && (
                                             <div className="space-y-2">
@@ -472,7 +484,6 @@ export default function WeeklySchedule({
                                                 ))}
                                             </div>
                                         )}
-
                                         {daySchedule?.times.map(
                                             (timeSlot, slotIndex) => {
                                                 const isSelected =
@@ -483,6 +494,11 @@ export default function WeeklySchedule({
                                                             slot.slotIndex ===
                                                                 slotIndex
                                                     );
+                                                const baseColor =
+                                                    getBadgeColor(timeSlot);
+                                                const badgeColor = isSelected
+                                                    ? "bg-[#248FCA] hover:bg-[#248FCA]/90"
+                                                    : baseColor;
                                                 return (
                                                     <div
                                                         key={`${dayIndex}-${slotIndex}`}
@@ -577,9 +593,7 @@ export default function WeeklySchedule({
                                                         ) : (
                                                             <div className="relative group">
                                                                 <Badge
-                                                                    className={`w-full justify-center ${getBadgeColor(
-                                                                        timeSlot
-                                                                    )} text-white text-xs py-2 transition-all ${
+                                                                    className={`w-full justify-center ${badgeColor} text-white text-xs py-2 transition-all ${
                                                                         isSelected
                                                                             ? "ring-2 ring-[#248FCA]"
                                                                             : ""
@@ -619,8 +633,9 @@ export default function WeeklySchedule({
                                                                     2 && (
                                                                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                                                                         <div className="flex space-x-1">
-                                                                            {timeSlot.status ===
-                                                                                1 && (
+                                                                            {(!timeSlot.id ||
+                                                                                timeSlot.status ===
+                                                                                    1) && (
                                                                                 <Button
                                                                                     size="sm"
                                                                                     variant="secondary"

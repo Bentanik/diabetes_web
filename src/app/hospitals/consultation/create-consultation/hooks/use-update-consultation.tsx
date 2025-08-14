@@ -13,7 +13,7 @@ export const timeRangeSchema = z.object({
 });
 
 export const upsertTimeTemplateSchema = z.object({
-    timeTemplateId: z.string().nonempty("ID mẫu thời gian không được để trống"),
+    timeTemplateId: z.string().nullable(),
     date: z.string().nonempty("Ngày không được để trống"),
     timeRange: timeRangeSchema,
 });

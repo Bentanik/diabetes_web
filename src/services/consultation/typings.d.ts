@@ -5,7 +5,7 @@ declare namespace REQUEST {
     };
 
     type UpsertTimeTemplate = {
-        timeTemplateId: string;
+        timeTemplateId?: string | null;
         date: string;
         timeRange: TimeRange;
     };
