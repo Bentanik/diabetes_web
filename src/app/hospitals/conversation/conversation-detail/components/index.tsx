@@ -237,7 +237,7 @@ export default function GroupDetailComponent({
                                 {conversation_detail?.items.map((user) => (
                                     <TableRow
                                         key={user.id}
-                                        className="hover:bg-gray-50"
+                                        className="hover:bg-gray-50 !h-[80px]"
                                     >
                                         <TableCell>
                                             <div className="flex items-center space-x-3">

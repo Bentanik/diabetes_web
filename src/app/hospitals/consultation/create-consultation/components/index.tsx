@@ -295,7 +295,7 @@ export default function CreateDoctorSchedule() {
                         },
                     }))
                 ),
-                templateIdsToDelete: deletedIds, // Sử dụng deletedIds từ state
+                templateIdsToDelete: deletedIds,
             };
             await UpdateSubmit(formData);
             updateForm.reset();
