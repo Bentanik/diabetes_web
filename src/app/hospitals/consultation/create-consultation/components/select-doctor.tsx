@@ -48,9 +48,9 @@ export default function DoctorSelect({
 
     return (
         <div>
-            <FormLabel className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                <Stethoscope className="h-5 w-5 text-[#248fca]" />
-                Bác sĩ
+            <FormLabel className="text-lg font-semibold flex items-center gap-2 text-[#248fca]">
+                <Stethoscope className="h-5 w-5 " />
+                Chọn bác sĩ
             </FormLabel>
             <Controller
                 control={control}
@@ -81,7 +81,7 @@ export default function DoctorSelect({
                         onMenuScrollToBottom={handleMenuScrollToBottom}
                         isSearchable
                         isLoading={isLoading || isFetchingNextPage}
-                        className="w-[250px] mt-4"
+                        className="w-[230px] mt-3"
                         classNamePrefix="react-select"
                         styles={{
                             control: (base) => ({

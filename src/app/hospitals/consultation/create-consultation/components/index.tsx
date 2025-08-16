@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock, User, Save } from "lucide-react";
 import {
@@ -29,6 +29,8 @@ import { useGetConsultationsCursor } from "@/app/hospitals/consultation/create-c
 import useUpdateConsultation, {
     TimeTemplateFormData,
 } from "../hooks/use-update-consultation";
+import { FormProvider, useForm } from "react-hook-form";
+import DoctorSelect from "./select-doctor";
 
 interface DaySchedule {
     date: string;
@@ -53,8 +55,8 @@ const mockDoctors = {
         {
             id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
             name: "Bác sĩ Nguyễn Văn A",
-            avatar: "/images/home1.jpg",
-            phoneNumber: "0909123456",
+            avatar: "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
+            phoneNumber: "0987654321",
             numberOfExperiences: 10,
             position: 0,
             gender: 0,
@@ -141,8 +143,20 @@ export default function CreateDoctorSchedule() {
     });
 
     const [hasChanges, setHasChanges] = useState(true);
+    const [deletedIds, setDeletedIds] = useState<string[]>([]);
 
-    console.log();
+    // Callback function để nhận deletedIds từ WeeklySchedule
+    const handleDeletedIdsUpdate = (ids: string[]) => {
+        setDeletedIds(ids);
+    };
+
+    const [triggerRemoveMarkedSlots, setTriggerRemoveMarkedSlots] = useState<
+        (() => void) | null
+    >(null);
+
+    const handleRemoveMarkedSlotsCallback = (removeFunction: () => void) => {
+        setTriggerRemoveMarkedSlots(() => removeFunction);
+    };
 
     // Tính toán tuần và thông tin tuần được chọn
     const weekOptions = useMemo(() => {
@@ -179,7 +193,6 @@ export default function CreateDoctorSchedule() {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-        refetch,
     } = useGetConsultationsCursor(
         { doctorId: selectedDoctorId },
         apiParams || { pageSize: 7, fromDate: "", toDate: "" }
@@ -190,41 +203,6 @@ export default function CreateDoctorSchedule() {
         setScheduleData({ timeTemplates: [] });
         setHasChanges(false);
     }, [selectedDoctorId, selectedWeek]);
-
-    // Transform API data into scheduleData when data pages arrive
-    // useEffect(() => {
-    //     // Only proceed if a week and doctor are selected
-    //     if (!selectedDoctorId || !selectedWeekData) {
-    //         return;
-    //     }
-    //     if (consultationData?.pages) {
-    //         const allConsultations = consultationData.pages.flatMap(
-    //             (page: any) => page.data?.items ?? []
-    //         );
-
-    //         if (allConsultations.length > 0) {
-    //             // Map API items to our schedule format
-    //             const transformedScheduleData: ScheduleData = {
-    //                 timeTemplates: allConsultations.map((item: any) => ({
-    //                     date: item.date.split("T")[0], // YYYY-MM-DD
-    //                     times: item.consultationTemplates.map(
-    //                         (template: any) => ({
-    //                             start: template.startTime,
-    //                             end: template.endTime,
-    //                             id: template.id,
-    //                             status: template.status,
-    //                         })
-    //                     ),
-    //                 })),
-    //             };
-    //             setScheduleData(transformedScheduleData);
-    //         } else {
-    //             // No items returned for this week
-    //             setScheduleData({ timeTemplates: [] });
-    //         }
-    //         setHasChanges(false);
-    //     }
-    // }, [consultationData?.pages]);
 
     useEffect(() => {
         if (!selectedDoctorId || !selectedWeekData) {
@@ -301,7 +279,9 @@ export default function CreateDoctorSchedule() {
 
     const handleUpdateScheduleSubmit = async () => {
         try {
-            // Sử dụng selectedStatus (kiểu number) hoặc mặc định 0
+            if (triggerRemoveMarkedSlots) {
+                triggerRemoveMarkedSlots();
+            }
             const statusValue = selectedStatus !== null ? selectedStatus : 0;
             const formData: TimeTemplateFormData = {
                 status: statusValue,
@@ -310,23 +290,22 @@ export default function CreateDoctorSchedule() {
                         timeTemplateId: time.id || null,
                         date: day.date,
                         timeRange: {
-                            // Đảm bảo thời gian ở định dạng HH:MM:SS
                             start: formatTimeToHMS(time.start),
                             end: formatTimeToHMS(time.end),
                         },
                     }))
                 ),
-                templateIdsToDelete: [],
+                templateIdsToDelete: deletedIds, // Sử dụng deletedIds từ state
             };
             await UpdateSubmit(formData);
             updateForm.reset();
             setSelectedStatus(null);
+            setDeletedIds([]); // Reset deletedIds sau khi update thành công
             setHasChanges(false);
         } catch (error) {
             console.error("Error submitting schedule data:", error);
         }
     };
-
     const handleScheduleSubmit = async () => {
         try {
             const formData: ConsultationFormData = {
@@ -389,6 +368,20 @@ export default function CreateDoctorSchedule() {
         // Reset editing state when week changes
         setEditingSlot(null);
     };
+    const doctorSelectMethods = useForm({
+        defaultValues: {
+            doctorId: "",
+        },
+    });
+
+    const watchedDoctorId = doctorSelectMethods.watch("doctorId");
+
+    // Effect để sync giữa form và state hiện tại
+    useEffect(() => {
+        if (watchedDoctorId && watchedDoctorId !== selectedDoctorId) {
+            setSelectedDoctorId(watchedDoctorId);
+        }
+    }, [watchedDoctorId, selectedDoctorId]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -410,46 +403,12 @@ export default function CreateDoctorSchedule() {
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                         {/* Chọn bác sĩ */}
                         <div className="space-y-3">
-                            <div className="flex items-center space-x-2">
-                                <User className="h-5 w-5 text-[#248FCA]" />
-                                <h2 className="text-lg font-semibold text-[#248FCA]">
-                                    Chọn bác sĩ
-                                </h2>
-                            </div>
-                            <Select
-                                value={selectedDoctorId}
-                                onValueChange={setSelectedDoctorId}
-                            >
-                                <SelectTrigger className="h-12">
-                                    <SelectValue placeholder="Chọn bác sĩ..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {mockDoctors.items.map((doctor) => (
-                                        <SelectItem
-                                            key={doctor.id}
-                                            value={doctor.id}
-                                        >
-                                            <div className="flex items-center space-x-2">
-                                                <div className="w-6 h-6 bg-[#248FCA] rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                                                    {doctor.name.charAt(
-                                                        doctor.name.lastIndexOf(
-                                                            " "
-                                                        ) + 1
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <div className="font-medium text-sm">
-                                                        {doctor.name}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {doctor.phoneNumber}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <FormProvider {...doctorSelectMethods}>
+                                <DoctorSelect
+                                    control={doctorSelectMethods.control}
+                                    name="doctorId"
+                                />
+                            </FormProvider>
                         </div>
 
                         {/* Date Selector Component */}
@@ -620,6 +579,10 @@ export default function CreateDoctorSchedule() {
                             setEditingSlot={setEditingSlot}
                             isLoading={isLoadingConsultations}
                             onStatusUpdate={() => setHasChanges(true)}
+                            onDeletedIdsUpdate={handleDeletedIdsUpdate}
+                            onRegisterRemoveFunction={
+                                handleRemoveMarkedSlotsCallback
+                            }
                         />
                     </motion.div>
                 )}
