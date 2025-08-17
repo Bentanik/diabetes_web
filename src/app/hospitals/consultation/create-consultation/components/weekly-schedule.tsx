@@ -4,9 +4,17 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Check, X, Edit3, Trash2, Loader2, Calendar } from "lucide-react";
-import { toast } from "sonner";
-import { useState, useEffect } from "react"; // Đã thêm useEffect
+import {
+    Plus,
+    Check,
+    X,
+    Edit3,
+    Trash2,
+    Loader2,
+    Calendar,
+    SquareMousePointer,
+} from "lucide-react";
+import { useState, useEffect } from "react";
 import {
     Select,
     SelectContent,
@@ -14,10 +22,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import useToast from "@/hooks/use-toast";
 
 export interface TimeSlot {
-    start: string; // Lưu dưới dạng HH:MM:SS
-    end: string; // Lưu dưới dạng HH:MM:SS
+    start: string;
+    end: string;
     id?: string;
     status?: number;
 }
@@ -40,7 +49,11 @@ interface WeeklyScheduleProps {
     ) => void;
     isLoading?: boolean;
     onStatusUpdate: () => void;
+    onDeletedIdsUpdate: (ids: string[]) => void;
+    onRegisterRemoveFunction: (removeFunction: () => void) => void;
 }
+
+const { addToast } = useToast();
 
 // Chuyển đổi từ HH:MM sang HH:MM:SS
 const formatTimeToHMS = (time: string): string => {
@@ -66,7 +79,11 @@ const validateTimeSlot = (
 ): boolean => {
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
     if (!timeRegex.test(newSlot.start) || !timeRegex.test(newSlot.end)) {
-        toast.error("Định dạng thời gian không hợp lệ");
+        addToast({
+            type: "error",
+            description: "Định dạng thời gian không hợp lệ",
+            duration: 3000,
+        });
         return false;
     }
     const getMinutes = (time: string): number => {
@@ -76,7 +93,11 @@ const validateTimeSlot = (
     const newStart = getMinutes(newSlot.start);
     const newEnd = getMinutes(newSlot.end);
     if (newEnd - newStart < 15) {
-        toast.error("Khoảng thời gian phải tối thiểu 15 phút");
+        addToast({
+            type: "error",
+            description: "Khoảng thời gian phải tối thiểu 15 phút",
+            duration: 3000,
+        });
         return false;
     }
     for (let i = 0; i < existingSlots.length; i++) {
@@ -88,7 +109,11 @@ const validateTimeSlot = (
             (newEnd > existingStart && newEnd <= existingEnd) ||
             (newStart <= existingStart && newEnd >= existingEnd)
         ) {
-            toast.error("Khung giờ bị trùng lặp hoặc chồng lấn");
+            addToast({
+                type: "error",
+                description: "Khung giờ bị trùng lặp hoặc chồng lấn",
+                duration: 3000,
+            });
             return false;
         }
     }
@@ -114,6 +139,8 @@ export default function WeeklySchedule({
     setEditingSlot,
     isLoading = false,
     onStatusUpdate,
+    onDeletedIdsUpdate,
+    onRegisterRemoveFunction,
 }: WeeklyScheduleProps) {
     // Mảng lưu trữ các ID cần xóa
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -123,6 +150,17 @@ export default function WeeklySchedule({
     >([]);
     // State để lưu giá trị status mới từ dropdown (kiểu number)
     const [newStatus, setNewStatus] = useState<number | null>(null);
+    const [markedForDeletion, setMarkedForDeletion] = useState<Set<string>>(
+        new Set()
+    );
+
+    const isMarkedForDeletion = (
+        dayIndex: number,
+        slotIndex: number
+    ): boolean => {
+        const slotKey = `${dayIndex}-${slotIndex}`;
+        return markedForDeletion.has(slotKey);
+    };
 
     // Chuẩn hóa các slot lấy từ API về định dạng HH:MM:SS (nếu cần)
     useEffect(() => {
@@ -198,12 +236,20 @@ export default function WeeklySchedule({
             newEnd = incrementTime(newStart);
         }
         if (compareTimes(newEnd, "24:00:00") >= 0) {
-            toast.error("Bạn đã thêm hết thời gian trong 24 giờ!");
+            addToast({
+                type: "error",
+                description: "Bạn đã thêm hết thời gian trong 24 giờ!",
+                duration: 3000,
+            });
             return;
         }
         const newSlot = { start: newStart, end: newEnd };
         if (hasOverlap(daySchedule.times, newSlot)) {
-            toast.error("Bạn đã thêm hết thời gian trong 24 giờ!");
+            addToast({
+                type: "error",
+                description: "Bạn đã thêm hết thời gian trong 24 giờ!",
+                duration: 3000,
+            });
             return;
         }
         daySchedule.times.push(newSlot);
@@ -259,23 +305,134 @@ export default function WeeklySchedule({
         }
     };
 
-    const removeTimeSlot = (dayIndex: number, slotIndex: number) => {
+    // Hàm tạo key unique cho mỗi slot
+    const getSlotKey = (dayIndex: number, slotIndex: number) => {
+        return `${dayIndex}-${slotIndex}`;
+    };
+
+    const toggleDeleteMark = (dayIndex: number, slotIndex: number) => {
+        const slotKey = getSlotKey(dayIndex, slotIndex);
+
+        setMarkedForDeletion((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(slotKey)) {
+                // Nếu đã được đánh dấu, bỏ đánh dấu
+                newSet.delete(slotKey);
+            } else {
+                // Nếu chưa được đánh dấu, thêm vào
+                newSet.add(slotKey);
+            }
+            return newSet;
+        });
+    };
+
+    const actuallyRemoveMarkedSlots = () => {
+        if (!selectedWeekData || markedForDeletion.size === 0) return;
+
+        const newScheduleData = { ...scheduleData };
+        const newDeletedIds = [...deletedIds];
+
+        // Chuyển đổi Set thành mảng và sắp xếp theo thứ tự giảm dần để tránh lỗi index
+        const slotsToRemove = Array.from(markedForDeletion)
+            .map((slotKey) => {
+                const [dayIndexStr, slotIndexStr] = slotKey.split("-");
+                return {
+                    dayIndex: parseInt(dayIndexStr),
+                    slotIndex: parseInt(slotIndexStr),
+                    key: slotKey,
+                };
+            })
+            .sort((a, b) => {
+                if (a.dayIndex !== b.dayIndex) return b.dayIndex - a.dayIndex;
+                return b.slotIndex - a.slotIndex;
+            });
+
+        // Xóa các slot được đánh dấu
+        slotsToRemove.forEach(({ dayIndex, slotIndex }) => {
+            const date = selectedWeekData.dates[dayIndex];
+            const daySchedule = newScheduleData.timeTemplates.find(
+                (t) => t.date === date
+            );
+
+            if (daySchedule && daySchedule.times[slotIndex]) {
+                const timeSlotToRemove = daySchedule.times[slotIndex];
+
+                // Nếu slot có id (từ API), thêm vào deletedIds
+                if (timeSlotToRemove.id) {
+                    newDeletedIds.push(timeSlotToRemove.id);
+                }
+
+                // Xóa slot khỏi mảng
+                daySchedule.times = daySchedule.times.filter(
+                    (_, index) => index !== slotIndex
+                );
+
+                // Nếu không còn slot nào, xóa cả daySchedule
+                if (daySchedule.times.length === 0) {
+                    newScheduleData.timeTemplates =
+                        newScheduleData.timeTemplates.filter(
+                            (t) => t.date !== date
+                        );
+                }
+            }
+        });
+
+        // Cập nhật state và gửi lên parent
+        setDeletedIds(newDeletedIds);
+        onDeletedIdsUpdate(newDeletedIds); // Gửi lên parent component
+        setScheduleData(newScheduleData);
+        setMarkedForDeletion(new Set()); // Clear marked slots
+        setEditingSlot(null);
+        // Xóa khỏi danh sách selectedSlots
+        setSelectedSlots(
+            selectedSlots.filter(
+                (slot) =>
+                    !markedForDeletion.has(
+                        getSlotKey(slot.dayIndex, slot.slotIndex)
+                    )
+            )
+        );
+        onStatusUpdate();
+    };
+
+    const handleRemoveTimeSlot = (dayIndex: number, slotIndex: number) => {
         if (!selectedWeekData) return;
+
+        const date = selectedWeekData.dates[dayIndex];
+        const daySchedule = scheduleData.timeTemplates.find(
+            (t) => t.date === date
+        );
+
+        if (!daySchedule || !daySchedule.times[slotIndex]) return;
+
+        const timeSlot = daySchedule.times[slotIndex];
+
+        if (timeSlot.id) {
+            // Nếu có ID (từ API) - chỉ đánh dấu để xóa sau
+            toggleDeleteMark(dayIndex, slotIndex);
+        } else {
+            // Nếu không có ID (slot mới tạo) - xóa luôn khỏi giao diện
+            actuallyRemoveSlotFromUI(dayIndex, slotIndex);
+        }
+    };
+
+    // Hàm xóa slot ngay lập tức khỏi UI (cho slot không có ID)
+    const actuallyRemoveSlotFromUI = (dayIndex: number, slotIndex: number) => {
+        if (!selectedWeekData) return;
+
         const date = selectedWeekData.dates[dayIndex];
         const newScheduleData = { ...scheduleData };
         const daySchedule = newScheduleData.timeTemplates.find(
             (t) => t.date === date
         );
+
         if (daySchedule) {
-            const timeSlotToRemove = daySchedule.times[slotIndex];
-            // Nếu slot có id (từ API), thêm vào deletedIds
-            if (timeSlotToRemove.id) {
-                const newDeletedIds = [...deletedIds, timeSlotToRemove.id];
-                setDeletedIds(newDeletedIds);
-            }
+            // Xóa slot khỏi mảng
             daySchedule.times = daySchedule.times.filter(
                 (_, index) => index !== slotIndex
             );
+
+            // Nếu không còn slot nào, xóa cả daySchedule
             if (daySchedule.times.length === 0) {
                 newScheduleData.timeTemplates =
                     newScheduleData.timeTemplates.filter(
@@ -283,8 +440,10 @@ export default function WeeklySchedule({
                     );
             }
         }
+
         setScheduleData(newScheduleData);
         setEditingSlot(null);
+
         // Xóa khỏi danh sách selectedSlots nếu cần
         setSelectedSlots(
             selectedSlots.filter(
@@ -292,6 +451,7 @@ export default function WeeklySchedule({
                     slot.dayIndex !== dayIndex || slot.slotIndex !== slotIndex
             )
         );
+
         onStatusUpdate();
     };
 
@@ -327,12 +487,19 @@ export default function WeeklySchedule({
                 // Chỉ thêm nếu status khớp
                 setSelectedSlots([...selectedSlots, { dayIndex, slotIndex }]);
             } else {
-                toast.error(
-                    "Chỉ có thể chọn các khung giờ có cùng trạng thái!"
-                );
+                addToast({
+                    type: "error",
+                    description:
+                        "Chỉ có thể chọn các khung giờ có cùng trạng thái!",
+                    duration: 3000,
+                });
             }
         }
     };
+
+    useEffect(() => {
+        onRegisterRemoveFunction(actuallyRemoveMarkedSlots);
+    }, []);
 
     const updateSelectedSlotsStatus = () => {
         if (newStatus === null || selectedSlots.length === 0) return;
@@ -353,7 +520,11 @@ export default function WeeklySchedule({
         setScheduleData(newScheduleData);
         setSelectedSlots([]); // Reset chọn
         setNewStatus(null);
-        toast.success("Cập nhật trạng thái thành công!");
+        addToast({
+            type: "success",
+            description: "Cập nhật trạng thái thành công",
+            duration: 3000,
+        });
         onStatusUpdate();
     };
 
@@ -474,6 +645,7 @@ export default function WeeklySchedule({
                                         </div>
                                     </div>
                                     <div className="p-2 min-h-[250px] space-y-2">
+                                        {/* Hiển thị loading slot khi load dữ liệu từ api */}
                                         {isLoading && !daySchedule && (
                                             <div className="space-y-2">
                                                 {[1, 2, 3].map((i) => (
@@ -575,13 +747,13 @@ export default function WeeklySchedule({
                                                                     <Button
                                                                         size="sm"
                                                                         variant="outline"
-                                                                        onClick={() =>
-                                                                            removeTimeSlot(
-                                                                                dayIndex,
-                                                                                slotIndex
-                                                                            )
-                                                                        }
-                                                                        className="h-6 px-2 text-xs border-red-300 text-red-600 hover:bg-red-50"
+                                                                        onClick={() => {
+                                                                            // Hủy edit mode thay vì xóa
+                                                                            setEditingSlot(
+                                                                                null
+                                                                            );
+                                                                        }}
+                                                                        className="h-6 px-2 text-xs border-gray-300 text-gray-600 hover:bg-gray-50"
                                                                         disabled={
                                                                             isLoading
                                                                         }
@@ -593,10 +765,17 @@ export default function WeeklySchedule({
                                                         ) : (
                                                             <div className="relative group">
                                                                 <Badge
-                                                                    className={`w-full justify-center ${badgeColor} text-white text-xs py-2 transition-all ${
+                                                                    className={`w-full justify-center text-white text-xs py-2 transition-all ${
                                                                         isSelected
-                                                                            ? "ring-2 ring-[#248FCA]"
-                                                                            : ""
+                                                                            ? "bg-[#248FCA] hover:bg-[#248FCA]/90 ring-2 ring-[#248FCA]"
+                                                                            : baseColor
+                                                                    } ${
+                                                                        isMarkedForDeletion(
+                                                                            dayIndex,
+                                                                            slotIndex
+                                                                        )
+                                                                            ? "bg-red-600 hover:bg-red-700"
+                                                                            : badgeColor
                                                                     } ${
                                                                         timeSlot.status ===
                                                                         2
@@ -653,32 +832,38 @@ export default function WeeklySchedule({
                                                                                     <Edit3 className="h-3 w-3" />
                                                                                 </Button>
                                                                             )}
-                                                                            <Button
-                                                                                size="sm"
-                                                                                variant="secondary"
-                                                                                onClick={() =>
-                                                                                    toggleSelectSlot(
-                                                                                        dayIndex,
-                                                                                        slotIndex
-                                                                                    )
-                                                                                }
-                                                                                className="h-6 w-6 p-0"
-                                                                                disabled={
-                                                                                    isLoading
-                                                                                }
-                                                                            >
-                                                                                <Calendar className="h-3 w-3" />
-                                                                            </Button>
+                                                                            {(timeSlot.status ===
+                                                                                0 ||
+                                                                                timeSlot.status ===
+                                                                                    1) && (
+                                                                                <Button
+                                                                                    size="sm"
+                                                                                    variant="secondary"
+                                                                                    onClick={() =>
+                                                                                        toggleSelectSlot(
+                                                                                            dayIndex,
+                                                                                            slotIndex
+                                                                                        )
+                                                                                    }
+                                                                                    className="h-6 w-6 p-0"
+                                                                                    disabled={
+                                                                                        isLoading
+                                                                                    }
+                                                                                >
+                                                                                    <SquareMousePointer className="h-3 w-3" />
+                                                                                </Button>
+                                                                            )}
+
                                                                             <Button
                                                                                 size="sm"
                                                                                 variant="destructive"
                                                                                 onClick={() =>
-                                                                                    removeTimeSlot(
+                                                                                    handleRemoveTimeSlot(
                                                                                         dayIndex,
                                                                                         slotIndex
                                                                                     )
                                                                                 }
-                                                                                className="h-6 w-6 p-0"
+                                                                                className={`h-6 w-6 p-0 `}
                                                                                 disabled={
                                                                                     isLoading
                                                                                 }

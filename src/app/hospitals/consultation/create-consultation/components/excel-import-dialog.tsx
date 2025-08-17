@@ -179,7 +179,7 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
             <DialogTrigger asChild>
                 <Button
                     disabled={!doctorId}
-                    className="bg-[#248FCA] hover:bg-[#248FCA]/90 cursor-pointer"
+                    className="bg-[#248FCA] hover:bg-[#248FCA]/90 cursor-pointer w-[200px] h-10"
                 >
                     <Upload className="w-4 h-4 mr-2" />
                     Import Excel

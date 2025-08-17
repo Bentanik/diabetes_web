@@ -171,7 +171,7 @@ export default function DateSelector({
                     </h2>
                 </div>
                 <Select value={selectedYear} onValueChange={handleYearChange}>
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger className="!h-10 w-[200px]">
                         <SelectValue placeholder="Chọn năm..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-[250px]">
@@ -197,7 +197,7 @@ export default function DateSelector({
                     onValueChange={handleMonthChange}
                     disabled={!selectedYear}
                 >
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger className="!h-10 w-[200px]">
                         <SelectValue placeholder="Chọn tháng..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-[250px]">
@@ -223,7 +223,7 @@ export default function DateSelector({
                     onValueChange={setSelectedWeek}
                     disabled={!selectedYear || !selectedMonth}
                 >
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger className="!h-10 w-[200px]">
                         <SelectValue placeholder="Chọn tuần..." />
                     </SelectTrigger>
                     <SelectContent>
