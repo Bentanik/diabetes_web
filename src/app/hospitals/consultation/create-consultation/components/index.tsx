@@ -13,13 +13,6 @@ import { Toaster, toast } from "sonner";
 import useCreateConsultation, {
     ConsultationFormData,
 } from "../hooks/use-create-consultation";
-import {
-    Select,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import ExcelImportDialog from "./excel-import-dialog";
 import WeeklySchedule, { TimeSlot } from "./weekly-schedule";
@@ -48,21 +41,6 @@ interface WeekOption {
     weekStart: Date;
     weekEnd: Date;
 }
-
-const mockDoctors = {
-    totalPages: 1,
-    items: [
-        {
-            id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
-            name: "Bác sĩ Nguyễn Văn A",
-            avatar: "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-            phoneNumber: "0987654321",
-            numberOfExperiences: 10,
-            position: 0,
-            gender: 0,
-        },
-    ],
-};
 
 // Hàm giúp định dạng ngày thành YYYY-MM-DD theo giờ địa phương
 const formatDate = (date: Date): string => {
@@ -127,7 +105,6 @@ export default function CreateDoctorSchedule() {
         dayIndex: number;
         slotIndex: number;
     } | null>(null);
-    const [selectedStatus, setSelectedStatus] = useState<number | null>(null);
     // State lựa chọn năm, tháng, tuần
     const currentDate = new Date();
     const [selectedYear, setSelectedYear] = useState<string>(
@@ -141,13 +118,21 @@ export default function CreateDoctorSchedule() {
     const [scheduleData, setScheduleData] = useState<ScheduleData>({
         timeTemplates: [],
     });
-
-    const [hasChanges, setHasChanges] = useState(true);
+    const [changedTimeSlots, setChangedTimeSlots] = useState<any[]>([]);
+    const [selectedStatus, setSelectedStatus] = useState<number>(0);
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
+
+    const handleStatusChange = (status: number) => {
+        setSelectedStatus(status);
+    };
 
     // Callback function để nhận deletedIds từ WeeklySchedule
     const handleDeletedIdsUpdate = (ids: string[]) => {
         setDeletedIds(ids);
+    };
+
+    const handleChangedSlotsUpdate = (changedSlots: any[]) => {
+        setChangedTimeSlots(changedSlots);
     };
 
     const [triggerRemoveMarkedSlots, setTriggerRemoveMarkedSlots] = useState<
@@ -201,7 +186,7 @@ export default function CreateDoctorSchedule() {
     // Clear scheduleData when doctor or week changes
     useEffect(() => {
         setScheduleData({ timeTemplates: [] });
-        setHasChanges(false);
+        // setHasChanges(0);
     }, [selectedDoctorId, selectedWeek]);
 
     useEffect(() => {
@@ -245,13 +230,9 @@ export default function CreateDoctorSchedule() {
             } else {
                 setScheduleData({ timeTemplates: [] });
             }
-            setHasChanges(false);
+            // setHasChanges(false);
         }
     }, [consultationData?.pages]);
-
-    const selectedDoctor = mockDoctors.items.find(
-        (d) => d.id === selectedDoctorId
-    );
 
     const { form, onSubmit } = useCreateConsultation({
         doctorId: selectedDoctorId,
@@ -282,30 +263,22 @@ export default function CreateDoctorSchedule() {
             if (triggerRemoveMarkedSlots) {
                 triggerRemoveMarkedSlots();
             }
-            const statusValue = selectedStatus !== null ? selectedStatus : 0;
             const formData: TimeTemplateFormData = {
-                status: statusValue,
-                upsertTimeTemplates: scheduleData.timeTemplates.flatMap((day) =>
-                    day.times.map((time) => ({
-                        timeTemplateId: time.id || null,
-                        date: day.date,
-                        timeRange: {
-                            start: formatTimeToHMS(time.start),
-                            end: formatTimeToHMS(time.end),
-                        },
-                    }))
-                ),
+                status: selectedStatus,
+                upsertTimeTemplates: changedTimeSlots,
                 templateIdsToDelete: deletedIds,
             };
             await UpdateSubmit(formData);
-            updateForm.reset();
-            setSelectedStatus(null);
-            setDeletedIds([]); // Reset deletedIds sau khi update thành công
-            setHasChanges(false);
+
+            // Reset states after successful submission
+            setChangedTimeSlots([]);
+            setDeletedIds([]);
+            // setSelectedStatusValue(0);
         } catch (error) {
             console.error("Error submitting schedule data:", error);
         }
     };
+
     const handleScheduleSubmit = async () => {
         try {
             const formData: ConsultationFormData = {
@@ -314,7 +287,7 @@ export default function CreateDoctorSchedule() {
             onSubmit(formData, () => {
                 form.reset();
                 setScheduleData({ timeTemplates: [] });
-                setHasChanges(false);
+                // setHasChanges(false);
             });
         } catch (error) {
             console.error("Error submitting schedule data:", error);
@@ -380,6 +353,9 @@ export default function CreateDoctorSchedule() {
     useEffect(() => {
         if (watchedDoctorId && watchedDoctorId !== selectedDoctorId) {
             setSelectedDoctorId(watchedDoctorId);
+            // Reset changed slots when doctor changes
+            setChangedTimeSlots([]);
+            setDeletedIds([]);
         }
     }, [watchedDoctorId, selectedDoctorId]);
 
@@ -436,34 +412,6 @@ export default function CreateDoctorSchedule() {
                             />
                         </div>
                     </div>
-
-                    {selectedDoctor && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-6 p-4 bg-gradient-to-r from-[#248FCA]/10 to-blue-50 border border-[#248FCA]/20 rounded-xl"
-                        >
-                            <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-[#248FCA] rounded-full flex items-center justify-center text-white text-lg font-bold">
-                                    {selectedDoctor.name.charAt(
-                                        selectedDoctor.name.lastIndexOf(" ") + 1
-                                    )}
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">
-                                        {selectedDoctor.name}
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        {selectedDoctor.phoneNumber}
-                                    </p>
-                                    <p className="text-xs text-[#248FCA]">
-                                        {selectedDoctor.numberOfExperiences} năm
-                                        kinh nghiệm
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
 
                     {/* Selected Info Display */}
                     {selectedYear &&
@@ -578,11 +526,12 @@ export default function CreateDoctorSchedule() {
                             editingSlot={editingSlot}
                             setEditingSlot={setEditingSlot}
                             isLoading={isLoadingConsultations}
-                            onStatusUpdate={() => setHasChanges(true)}
+                            onStatusChange={handleStatusChange}
                             onDeletedIdsUpdate={handleDeletedIdsUpdate}
                             onRegisterRemoveFunction={
                                 handleRemoveMarkedSlotsCallback
                             }
+                            onChangedSlotsUpdate={handleChangedSlotsUpdate}
                         />
                     </motion.div>
                 )}
