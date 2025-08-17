@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock, User, Save } from "lucide-react";
 import {
@@ -121,6 +121,7 @@ export default function CreateDoctorSchedule() {
     const [changedTimeSlots, setChangedTimeSlots] = useState<any[]>([]);
     const [selectedStatus, setSelectedStatus] = useState<number>(0);
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
+    const [resetSignal, setResetSignal] = useState<number>(0);
 
     const handleStatusChange = (status: number) => {
         setSelectedStatus(status);
@@ -273,7 +274,7 @@ export default function CreateDoctorSchedule() {
             // Reset states after successful submission
             setChangedTimeSlots([]);
             setDeletedIds([]);
-            // setSelectedStatusValue(0);
+            setResetSignal((prev) => prev + 1);
         } catch (error) {
             console.error("Error submitting schedule data:", error);
         }
@@ -532,6 +533,7 @@ export default function CreateDoctorSchedule() {
                                 handleRemoveMarkedSlotsCallback
                             }
                             onChangedSlotsUpdate={handleChangedSlotsUpdate}
+                            resetSignal={resetSignal}
                         />
                     </motion.div>
                 )}

@@ -52,6 +52,7 @@ interface WeeklyScheduleProps {
     onDeletedIdsUpdate: (ids: string[]) => void;
     onRegisterRemoveFunction: (removeFunction: () => void) => void;
     onChangedSlotsUpdate: (changedSlots: any[]) => void;
+    resetSignal: number;
 }
 
 const { addToast } = useToast();
@@ -143,6 +144,7 @@ export default function WeeklySchedule({
     onDeletedIdsUpdate,
     onRegisterRemoveFunction,
     onChangedSlotsUpdate,
+    resetSignal,
 }: WeeklyScheduleProps) {
     // Mảng lưu trữ các ID cần xóa
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -150,7 +152,6 @@ export default function WeeklySchedule({
     const [selectedSlots, setSelectedSlots] = useState<
         { dayIndex: number; slotIndex: number }[]
     >([]);
-    // State để lưu giá trị status mới từ dropdown (kiểu number)
     const [markedForDeletion, setMarkedForDeletion] = useState<Set<string>>(
         new Set()
     );
@@ -425,17 +426,21 @@ export default function WeeklySchedule({
         if (!daySchedule || !daySchedule.times[slotIndex]) return;
 
         const timeSlot = daySchedule.times[slotIndex];
+        const slotKey = getSlotKey(dayIndex, slotIndex);
 
         if (timeSlot.id) {
-            // Nếu có ID (từ API) - thêm vào deletedIds
-            const newDeletedIds = [...deletedIds, timeSlot.id];
-            setDeletedIds(newDeletedIds);
-            onDeletedIdsUpdate(newDeletedIds);
+            setDeletedIds((prev: any) => {
+                const newDeletedIds = prev.includes(timeSlot.id)
+                    ? prev.filter((id: any) => id !== timeSlot.id)
+                    : [...prev, timeSlot.id]; // Add if not in array
+                onDeletedIdsUpdate(newDeletedIds); // Update parent
+                return newDeletedIds;
+            });
 
-            // Đánh dấu để hiển thị màu đỏ
+            // Toggle deletion mark for UI
             toggleDeleteMark(dayIndex, slotIndex);
         } else {
-            // Nếu không có ID (slot mới tạo) - xóa luôn khỏi giao diện
+            // If no ID (new slot), remove directly from UI
             actuallyRemoveSlotFromUI(dayIndex, slotIndex);
         }
     };
@@ -501,17 +506,29 @@ export default function WeeklySchedule({
                         slot.slotIndex !== slotIndex
                 )
             );
+            // Remove from changedSlots when deselected
+            setChangedSlots((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(slotKey);
+                return newSet;
+            });
         } else {
-            // Track original value for ALL slots, not just ones with ID
+            // Track original value
             if (!originalSlots.has(slotKey)) {
                 setOriginalSlots((prev) =>
                     new Map(prev).set(slotKey, { ...timeSlot })
                 );
             }
-
             setSelectedSlots([...selectedSlots, { dayIndex, slotIndex }]);
+            // Add to changedSlots
+            setChangedSlots((prev) => new Set(prev).add(slotKey));
         }
     };
+
+    useEffect(() => {
+        setChangedSlots(new Set());
+        setOriginalSlots(new Map());
+    }, [resetSignal]);
 
     useEffect(() => {
         onRegisterRemoveFunction(actuallyRemoveMarkedSlots);
@@ -530,20 +547,21 @@ export default function WeeklySchedule({
                 const slotKey = `${dayIndex}-${slotIndex}`;
                 const timeSlot = daySchedule.times[slotIndex];
 
-                // Cập nhật status
-                daySchedule.times[slotIndex] = {
-                    ...timeSlot,
-                    status: newStatus,
-                };
-
-                // Đánh dấu là đã thay đổi cho TẤT CẢ slots, không chỉ có ID
+                // Không cập nhật status ngay, chỉ đánh dấu là đã thay đổi
                 setChangedSlots((prev) => new Set(prev).add(slotKey));
+
+                // Lưu newStatus vào một nơi tạm thời (ví dụ: state hoặc map)
+                if (!originalSlots.has(slotKey)) {
+                    setOriginalSlots((prev) =>
+                        new Map(prev).set(slotKey, { ...timeSlot })
+                    );
+                }
             }
         });
 
         setScheduleData(newScheduleData);
         setSelectedSlots([]);
-        onStatusChange(newStatus);
+        onStatusChange(newStatus); // Gửi status lên parent để dùng trong API
     };
 
     useEffect(() => {
@@ -571,7 +589,13 @@ export default function WeeklySchedule({
                             start: timeSlot.start,
                             end: timeSlot.end,
                         },
-                        status: timeSlot.status,
+                        status: selectedSlots.some(
+                            (slot) =>
+                                slot.dayIndex === dayIndex &&
+                                slot.slotIndex === slotIndex
+                        )
+                            ? status // Use dropdown status for selected slots
+                            : timeSlot.status, // Keep original status for others
                     };
                 }
                 return null;
@@ -579,7 +603,13 @@ export default function WeeklySchedule({
             .filter(Boolean);
 
         onChangedSlotsUpdate(changedSlotsArray);
-    }, [changedSlots.size, selectedWeekData?.dates, scheduleData]);
+    }, [
+        changedSlots,
+        selectedWeekData?.dates,
+        scheduleData,
+        selectedSlots,
+        status,
+    ]);
 
     // Lấy màu nền theo status hoặc mặc định (#248FCA)
     const getBadgeColor = (
@@ -589,17 +619,17 @@ export default function WeeklySchedule({
     ) => {
         const slotKey = `${dayIndex}-${slotIndex}`;
 
-        // Màu đỏ cho slots đánh dấu xóa
+        // Red for slots marked for deletion
         if (isMarkedForDeletion(dayIndex, slotIndex)) {
             return "bg-red-600 hover:bg-red-700";
         }
 
-        // Màu cam cho slots đã thay đổi
+        // Orange for slots marked as changed
         if (changedSlots.has(slotKey)) {
             return "bg-orange-600 hover:bg-orange-700";
         }
 
-        // Màu theo status
+        // Status-based colors
         if (timeSlot.id) {
             if (timeSlot.status === 0) {
                 return "bg-green-600 hover:bg-green-100";
@@ -650,9 +680,9 @@ export default function WeeklySchedule({
                                 <div className="flex items-center space-x-2">
                                     <Select
                                         onValueChange={(newValue) => {
-                                            const numValue = Number(newValue); // Chuyển sang number
-                                            setStatus(newValue); // Cập nhật state nội bộ (string để khớp value)
-                                            updateSelectedSlotsStatus(numValue); // Áp dụng ngay cho selectedSlots
+                                            const numValue = Number(newValue);
+                                            setStatus(newValue);
+                                            updateSelectedSlotsStatus(numValue);
                                         }}
                                         value={status}
                                     >
