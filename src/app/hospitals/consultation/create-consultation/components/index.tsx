@@ -49,20 +49,20 @@ interface WeekOption {
     weekEnd: Date;
 }
 
-const mockDoctors = {
-    totalPages: 1,
-    items: [
-        {
-            id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
-            name: "Bác sĩ Nguyễn Văn A",
-            avatar: "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
-            phoneNumber: "0987654321",
-            numberOfExperiences: 10,
-            position: 0,
-            gender: 0,
-        },
-    ],
-};
+// const mockDoctors = {
+//     totalPages: 1,
+//     items: [
+//         {
+//             id: "9554b171-acdc-42c3-8dec-5d3aba44ca99",
+//             name: "Bác sĩ Nguyễn Văn A",
+//             avatar: "https://res.cloudinary.com/dc4eascme/image/upload/v1750172946/diabetesdoctor/vector-illustration-doctor-avatar-photo-doctor-fill-out-questionnaire-banner-set-more-doctor-health-medical-icon_469123-417_nvqosc.avif",
+//             phoneNumber: "0987654321",
+//             numberOfExperiences: 10,
+//             position: 0,
+//             gender: 0,
+//         },
+//     ],
+// };
 
 // Hàm giúp định dạng ngày thành YYYY-MM-DD theo giờ địa phương
 const formatDate = (date: Date): string => {
@@ -249,10 +249,6 @@ export default function CreateDoctorSchedule() {
         }
     }, [consultationData?.pages]);
 
-    const selectedDoctor = mockDoctors.items.find(
-        (d) => d.id === selectedDoctorId
-    );
-
     const { form, onSubmit } = useCreateConsultation({
         doctorId: selectedDoctorId,
     });
@@ -436,34 +432,6 @@ export default function CreateDoctorSchedule() {
                             />
                         </div>
                     </div>
-
-                    {selectedDoctor && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-6 p-4 bg-gradient-to-r from-[#248FCA]/10 to-blue-50 border border-[#248FCA]/20 rounded-xl"
-                        >
-                            <div className="flex items-center space-x-4">
-                                <div className="w-12 h-12 bg-[#248FCA] rounded-full flex items-center justify-center text-white text-lg font-bold">
-                                    {selectedDoctor.name.charAt(
-                                        selectedDoctor.name.lastIndexOf(" ") + 1
-                                    )}
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">
-                                        {selectedDoctor.name}
-                                    </h3>
-                                    <p className="text-sm text-gray-600">
-                                        {selectedDoctor.phoneNumber}
-                                    </p>
-                                    <p className="text-xs text-[#248FCA]">
-                                        {selectedDoctor.numberOfExperiences} năm
-                                        kinh nghiệm
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
 
                     {/* Selected Info Display */}
                     {selectedYear &&
