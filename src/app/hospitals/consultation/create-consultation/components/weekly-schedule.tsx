@@ -14,7 +14,7 @@ import {
     Calendar,
     SquareMousePointer,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     Select,
     SelectContent,
@@ -159,7 +159,8 @@ export default function WeeklySchedule({
     const [originalSlots, setOriginalSlots] = useState<Map<string, TimeSlot>>(
         new Map()
     );
-    const [status, setStatus] = useState<string>("0"); // State cho Select, string vì value của SelectItem là string
+    const [status, setStatus] = useState<string>(""); // State cho Select, empty để hiển thị placeholder
+
     const isMarkedForDeletion = (
         dayIndex: number,
         slotIndex: number
@@ -167,6 +168,60 @@ export default function WeeklySchedule({
         const slotKey = `${dayIndex}-${slotIndex}`;
         return markedForDeletion.has(slotKey);
     };
+
+    // ✅ Sửa: Tách việc gọi callback ra khỏi setState
+    useEffect(() => {
+        onDeletedIdsUpdate(deletedIds);
+    }, [deletedIds]); // Bỏ onDeletedIdsUpdate khỏi dependency
+
+    // ✅ Sửa: Tách việc gọi callback cho changedSlots
+    useEffect(() => {
+        if (changedSlots.size === 0) {
+            onChangedSlotsUpdate([]);
+            return;
+        }
+
+        const changedSlotsArray = Array.from(changedSlots)
+            .map((slotKey) => {
+                const [dayIndex, slotIndex] = slotKey.split("-").map(Number);
+                const date = selectedWeekData?.dates?.[dayIndex];
+                if (!date) return null;
+
+                const daySchedule = scheduleData.timeTemplates.find(
+                    (t) => t.date === date
+                );
+                const timeSlot = daySchedule?.times?.[slotIndex];
+
+                if (timeSlot) {
+                    return {
+                        timeTemplateId: timeSlot.id || null,
+                        date: date,
+                        timeRange: {
+                            start: timeSlot.start,
+                            end: timeSlot.end,
+                        },
+                        status: selectedSlots.some(
+                            (slot) =>
+                                slot.dayIndex === dayIndex &&
+                                slot.slotIndex === slotIndex
+                        )
+                            ? Number(status) // Convert string từ dropdown sang number
+                            : timeSlot.status ?? 0, // Fallback về 0 nếu undefined (cho new slots)
+                    };
+                }
+                return null;
+            })
+            .filter(Boolean);
+
+        onChangedSlotsUpdate(changedSlotsArray);
+    }, [
+        changedSlots,
+        selectedWeekData?.dates,
+        scheduleData.timeTemplates,
+        selectedSlots,
+        status,
+    ]);
+
     // Chuẩn hóa các slot lấy từ API về định dạng HH:MM:SS (nếu cần)
     useEffect(() => {
         if (scheduleData && scheduleData.timeTemplates) {
@@ -197,6 +252,17 @@ export default function WeeklySchedule({
         }
     }, [scheduleData, setScheduleData]);
 
+    // Reset states when resetSignal changes
+    useEffect(() => {
+        setChangedSlots(new Set());
+        setOriginalSlots(new Map());
+    }, [resetSignal]);
+
+    // Register remove function - chỉ gọi 1 lần
+    useEffect(() => {
+        onRegisterRemoveFunction(actuallyRemoveMarkedSlots);
+    }, []); // Bỏ onRegisterRemoveFunction khỏi dependency
+
     // So sánh thời gian HH:MM:SS
     const compareTimes = (time1: string, time2: string): number => {
         const [h1, m1] = time1.split(":").map(Number);
@@ -222,84 +288,118 @@ export default function WeeklySchedule({
         return false;
     };
 
-    const addTimeSlot = (dayIndex: number) => {
-        if (!selectedWeekData) return;
-        const date = selectedWeekData.dates[dayIndex];
-        const newScheduleData = { ...scheduleData };
-        let daySchedule = newScheduleData.timeTemplates.find(
-            (t) => t.date === date
-        );
-        if (!daySchedule) {
-            daySchedule = { date, times: [] };
-            newScheduleData.timeTemplates.push(daySchedule);
-        }
-        let newStart = "08:00:00"; // Mặc định bắt đầu từ 08:00:00
-        let newEnd = "08:30:00"; // Mặc định kết thúc sau 30 phút
-        if (daySchedule.times.length > 0) {
-            const lastSlot = daySchedule.times[daySchedule.times.length - 1];
-            newStart = incrementTime(lastSlot.end);
-            newEnd = incrementTime(newStart);
-        }
-        if (compareTimes(newEnd, "24:00:00") >= 0) {
-            addToast({
-                type: "error",
-                description: "Bạn đã thêm hết thời gian trong 24 giờ!",
-                duration: 3000,
-            });
-            return;
-        }
-        const newSlot = { start: newStart, end: newEnd };
-        if (hasOverlap(daySchedule.times, newSlot)) {
-            addToast({
-                type: "error",
-                description: "Bạn đã thêm hết thời gian trong 24 giờ!",
-                duration: 3000,
-            });
-            return;
-        }
-        daySchedule.times.push(newSlot);
-        setScheduleData(newScheduleData);
-        setEditingSlot({ dayIndex, slotIndex: daySchedule.times.length - 1 });
-        onStatusChange(0);
-    };
-
-    const updateTimeSlot = (
-        dayIndex: number,
-        slotIndex: number,
-        field: "start" | "end",
-        value: string
-    ) => {
-        if (!selectedWeekData) return;
-        const date = selectedWeekData.dates[dayIndex];
-        const newScheduleData = { ...scheduleData };
-        const daySchedule = newScheduleData.timeTemplates.find(
-            (t) => t.date === date
-        );
-
-        if (daySchedule) {
-            const timeSlot = { ...daySchedule.times[slotIndex] };
-            const slotKey = `${dayIndex}-${slotIndex}`;
-
-            // Track original value nếu chưa có
-            if (!originalSlots.has(slotKey)) {
-                setOriginalSlots((prev) =>
-                    new Map(prev).set(slotKey, { ...timeSlot })
-                );
+    // ✅ Sửa: Sử dụng useCallback và tách callback ra khỏi setState
+    const addTimeSlot = useCallback(
+        (dayIndex: number) => {
+            if (!selectedWeekData) return;
+            const date = selectedWeekData.dates[dayIndex];
+            const newScheduleData = { ...scheduleData };
+            let daySchedule = newScheduleData.timeTemplates.find(
+                (t) => t.date === date
+            );
+            if (!daySchedule) {
+                daySchedule = { date, times: [] };
+                newScheduleData.timeTemplates.push(daySchedule);
             }
-
-            // Cập nhật giá trị
-            timeSlot[field] = formatTimeToHMS(value);
-            daySchedule.times[slotIndex] = timeSlot;
-
-            // Đánh dấu là đã thay đổi
-            if (timeSlot.id) {
-                setChangedSlots((prev) => new Set(prev).add(slotKey));
+            let newStart = "08:00:00"; // Mặc định bắt đầu từ 08:00:00
+            let newEnd = "08:30:00"; // Mặc định kết thúc sau 30 phút
+            if (daySchedule.times.length > 0) {
+                const lastSlot =
+                    daySchedule.times[daySchedule.times.length - 1];
+                newStart = incrementTime(lastSlot.end);
+                newEnd = incrementTime(newStart);
             }
-
+            if (compareTimes(newEnd, "24:00:00") >= 0) {
+                addToast({
+                    type: "error",
+                    description: "Bạn đã thêm hết thời gian trong 24 giờ!",
+                    duration: 3000,
+                });
+                return;
+            }
+            const newSlot = { start: newStart, end: newEnd, status: 0 }; // Gán status mặc định 0 cho new slot
+            if (hasOverlap(daySchedule.times, newSlot)) {
+                addToast({
+                    type: "error",
+                    description: "Bạn đã thêm hết thời gian trong 24 giờ!",
+                    duration: 3000,
+                });
+                return;
+            }
+            daySchedule.times.push(newSlot);
             setScheduleData(newScheduleData);
-            onStatusChange(timeSlot.status || 0);
-        }
-    };
+            setEditingSlot({
+                dayIndex,
+                slotIndex: daySchedule.times.length - 1,
+            });
+
+            // ✅ Thêm vào changedSlots để gửi về cha ngay (status default 0, override nếu select sau)
+            const slotIndex = daySchedule.times.length - 1; // Index của slot mới
+            const slotKey = `${dayIndex}-${slotIndex}`;
+            setChangedSlots((prev) => new Set(prev).add(slotKey));
+
+            // ✅ Clear markedForDeletion khi thêm slot mới để tránh hiển thị trạng thái xóa sai
+            setMarkedForDeletion(new Set());
+
+            // ✅ Sử dụng setTimeout để tách callback ra khỏi render cycle
+            setTimeout(() => {
+                onStatusChange(0);
+            }, 0);
+        },
+        [
+            selectedWeekData,
+            scheduleData,
+            setScheduleData,
+            setEditingSlot,
+            onStatusChange,
+        ]
+    );
+
+    // ✅ Sửa: Tương tự cho updateTimeSlot
+    const updateTimeSlot = useCallback(
+        (
+            dayIndex: number,
+            slotIndex: number,
+            field: "start" | "end",
+            value: string
+        ) => {
+            if (!selectedWeekData) return;
+            const date = selectedWeekData.dates[dayIndex];
+            const newScheduleData = { ...scheduleData };
+            const daySchedule = newScheduleData.timeTemplates.find(
+                (t) => t.date === date
+            );
+
+            if (daySchedule) {
+                const timeSlot = { ...daySchedule.times[slotIndex] };
+                const slotKey = `${dayIndex}-${slotIndex}`;
+
+                // Track original value nếu chưa có
+                if (!originalSlots.has(slotKey)) {
+                    setOriginalSlots((prev) =>
+                        new Map(prev).set(slotKey, { ...timeSlot })
+                    );
+                }
+
+                // Cập nhật giá trị
+                timeSlot[field] = formatTimeToHMS(value);
+                daySchedule.times[slotIndex] = timeSlot;
+
+                // Đánh dấu là đã thay đổi
+                if (timeSlot.id) {
+                    setChangedSlots((prev) => new Set(prev).add(slotKey));
+                }
+
+                setScheduleData(newScheduleData);
+
+                // ✅ Tách callback ra khỏi render cycle
+                setTimeout(() => {
+                    onStatusChange(timeSlot.status || 0);
+                }, 0);
+            }
+        },
+        [selectedWeekData, scheduleData]
+    ); // Bỏ các callback functions và setter
 
     const toggleEditMode = (dayIndex: number, slotIndex: number) => {
         if (
@@ -347,7 +447,7 @@ export default function WeeklySchedule({
         });
     };
 
-    const actuallyRemoveMarkedSlots = () => {
+    const actuallyRemoveMarkedSlots = useCallback(() => {
         if (!selectedWeekData || markedForDeletion.size === 0) return;
 
         const newScheduleData = { ...scheduleData };
@@ -398,9 +498,8 @@ export default function WeeklySchedule({
             }
         });
 
-        // Cập nhật state và gửi lên parent
+        // Cập nhật state
         setDeletedIds(newDeletedIds);
-        onDeletedIdsUpdate(newDeletedIds); // Gửi lên parent component
         setScheduleData(newScheduleData);
         setMarkedForDeletion(new Set()); // Clear marked slots
         setEditingSlot(null);
@@ -413,37 +512,59 @@ export default function WeeklySchedule({
                     )
             )
         );
-    };
+    }, [
+        selectedWeekData,
+        scheduleData,
+        deletedIds,
+        markedForDeletion,
+        selectedSlots,
+    ]);
 
-    const handleRemoveTimeSlot = (dayIndex: number, slotIndex: number) => {
-        if (!selectedWeekData) return;
+    // ✅ Sửa: Tách callback ra khỏi setState
+    const handleRemoveTimeSlot = useCallback(
+        (dayIndex: number, slotIndex: number) => {
+            if (!selectedWeekData) return;
 
-        const date = selectedWeekData.dates[dayIndex];
-        const daySchedule = scheduleData.timeTemplates.find(
-            (t) => t.date === date
-        );
+            const date = selectedWeekData.dates[dayIndex];
+            const daySchedule = scheduleData.timeTemplates.find(
+                (t) => t.date === date
+            );
 
-        if (!daySchedule || !daySchedule.times[slotIndex]) return;
+            if (!daySchedule || !daySchedule.times[slotIndex]) return;
 
-        const timeSlot = daySchedule.times[slotIndex];
-        const slotKey = getSlotKey(dayIndex, slotIndex);
+            const timeSlot = daySchedule.times[slotIndex];
+            const slotKey = getSlotKey(dayIndex, slotIndex);
 
-        if (timeSlot.id) {
-            setDeletedIds((prev: any) => {
-                const newDeletedIds = prev.includes(timeSlot.id)
-                    ? prev.filter((id: any) => id !== timeSlot.id)
-                    : [...prev, timeSlot.id]; // Add if not in array
-                onDeletedIdsUpdate(newDeletedIds); // Update parent
-                return newDeletedIds;
-            });
+            if (timeSlot.id) {
+                setDeletedIds((prev: any) => {
+                    const newDeletedIds = prev.includes(timeSlot.id)
+                        ? prev.filter((id: any) => id !== timeSlot.id)
+                        : [...prev, timeSlot.id]; // Add if not in array
 
-            // Toggle deletion mark for UI
-            toggleDeleteMark(dayIndex, slotIndex);
-        } else {
-            // If no ID (new slot), remove directly from UI
-            actuallyRemoveSlotFromUI(dayIndex, slotIndex);
-        }
-    };
+                    // ✅ Clear mark khi remove ID khỏi deletedIds (tức là bỏ xóa)
+                    if (prev.includes(timeSlot.id)) {
+                        // ID đang có trong deletedIds, bây giờ remove → bỏ mark
+                        setMarkedForDeletion((prevMarked) => {
+                            const newMarked = new Set(prevMarked);
+                            newMarked.delete(slotKey);
+                            return newMarked;
+                        });
+                    } else {
+                        // ID không có trong deletedIds, bây giờ add → mark for deletion
+                        setMarkedForDeletion((prevMarked) =>
+                            new Set(prevMarked).add(slotKey)
+                        );
+                    }
+
+                    return newDeletedIds;
+                });
+            } else {
+                // If no ID (new slot), remove directly from UI
+                actuallyRemoveSlotFromUI(dayIndex, slotIndex);
+            }
+        },
+        [selectedWeekData, scheduleData]
+    ); // Bỏ toggleDeleteMark và actuallyRemoveSlotFromUI
 
     // Hàm xóa slot ngay lập tức khỏi UI (cho slot không có ID)
     const actuallyRemoveSlotFromUI = (dayIndex: number, slotIndex: number) => {
@@ -481,7 +602,10 @@ export default function WeeklySchedule({
             )
         );
 
-        onStatusChange(1); // Thêm dòng này - truyền status 1 (unavailable) khi xóa
+        // ✅ Tách callback ra khỏi render cycle
+        setTimeout(() => {
+            onStatusChange(1);
+        }, 0);
     };
 
     const toggleSelectSlot = (dayIndex: number, slotIndex: number) => {
@@ -525,15 +649,6 @@ export default function WeeklySchedule({
         }
     };
 
-    useEffect(() => {
-        setChangedSlots(new Set());
-        setOriginalSlots(new Map());
-    }, [resetSignal]);
-
-    useEffect(() => {
-        onRegisterRemoveFunction(actuallyRemoveMarkedSlots);
-    }, []);
-
     const updateSelectedSlotsStatus = (newStatus: number) => {
         if (selectedSlots.length === 0) return;
         const newScheduleData = { ...scheduleData };
@@ -561,55 +676,15 @@ export default function WeeklySchedule({
 
         setScheduleData(newScheduleData);
         setSelectedSlots([]);
-        onStatusChange(newStatus); // Gửi status lên parent để dùng trong API
+
+        // ✅ Reset status state để hiển thị lại placeholder
+        setStatus("");
+
+        // ✅ Tách callback ra khỏi render cycle
+        setTimeout(() => {
+            onStatusChange(newStatus);
+        }, 0);
     };
-
-    useEffect(() => {
-        if (changedSlots.size === 0) {
-            onChangedSlotsUpdate([]);
-            return;
-        }
-
-        const changedSlotsArray = Array.from(changedSlots)
-            .map((slotKey) => {
-                const [dayIndex, slotIndex] = slotKey.split("-").map(Number);
-                const date = selectedWeekData?.dates?.[dayIndex];
-                if (!date) return null;
-
-                const daySchedule = scheduleData.timeTemplates.find(
-                    (t) => t.date === date
-                );
-                const timeSlot = daySchedule?.times?.[slotIndex];
-
-                if (timeSlot) {
-                    return {
-                        timeTemplateId: timeSlot.id || null,
-                        date: date,
-                        timeRange: {
-                            start: timeSlot.start,
-                            end: timeSlot.end,
-                        },
-                        status: selectedSlots.some(
-                            (slot) =>
-                                slot.dayIndex === dayIndex &&
-                                slot.slotIndex === slotIndex
-                        )
-                            ? status // Use dropdown status for selected slots
-                            : timeSlot.status, // Keep original status for others
-                    };
-                }
-                return null;
-            })
-            .filter(Boolean);
-
-        onChangedSlotsUpdate(changedSlotsArray);
-    }, [
-        changedSlots,
-        selectedWeekData?.dates,
-        scheduleData,
-        selectedSlots,
-        status,
-    ]);
 
     // Lấy màu nền theo status hoặc mặc định (#248FCA)
     const getBadgeColor = (
