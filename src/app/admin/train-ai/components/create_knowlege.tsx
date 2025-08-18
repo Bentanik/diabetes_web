@@ -65,7 +65,7 @@ export default function CreateKnowlegeModal({
                                 transition={{ delay: 0.4 }}
                                 className="text-xl font-bold text-white"
                             >
-                                Tạo thư mục mới
+                                Tạo cơ sở tri thức mới
                             </motion.h2>
                             <motion.p
                                 initial={{ opacity: 0, x: -20 }}
@@ -73,7 +73,7 @@ export default function CreateKnowlegeModal({
                                 transition={{ delay: 0.5 }}
                                 className="text-white/90 text-sm mt-1"
                             >
-                                Tạo một thư mục kiến thức mới cho hệ thống AI
+                                Tạo một cơ sở tri thức mới cho hệ thống AI
                             </motion.p>
                         </div>
                     </motion.div>
@@ -130,7 +130,7 @@ export default function CreateKnowlegeModal({
                                     htmlFor="name"
                                     className="text-sm font-semibold text-gray-800"
                                 >
-                                    Tên thư mục
+                                    Tên cơ sở tri thức
                                 </Label>
                                 <span className="text-red-500 text-sm">*</span>
                             </div>
@@ -138,7 +138,7 @@ export default function CreateKnowlegeModal({
                                 type="text"
                                 register={register("name")}
                                 error={errors.name?.message}
-                                placeholder="Nhập tên thư mục..."
+                                placeholder="Nhập tên cho cơ sở tri thức... (Ví dụ: Đái tháo đường)"
                                 disabled={isCreating}
                             />
                         </motion.div>
@@ -164,7 +164,7 @@ export default function CreateKnowlegeModal({
                                 register={register("description")}
                                 error={errors.description?.message}
                                 className="resize-none! border-gray-200 focus-visible:border-[#248fca] focus:ring-[#248fca]/20 min-h-[120px] transition-all duration-200"
-                                placeholder="Nhập mô tả cho thư mục..."
+                                placeholder="Nhập mô tả cho cơ sở tri thức..."
                                 disabled={isCreating}
                             />
                         </motion.div>

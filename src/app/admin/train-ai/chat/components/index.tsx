@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-undef */
 "use client";
 import {
     type FormEvent,
@@ -11,12 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Trash2, ChevronDown, Bot, User } from "lucide-react";
 import axios from "axios";
 import { useBackdrop } from "@/context/backdrop_context";
+import API_ENDPOINTS from "@/services/train-ai/api-path";
+
+// import ReactMarkdown from 'react-markdown';
+
 
 type ChatMessage = {
     id?: string;
     session_id?: string;
     user_id?: string;
-    role: "user" | "assistant" | "ai";
+    role: "human" | "assistant" | "ai";
     content: string;
     created_at: string;
     updated_at?: string;
@@ -30,6 +35,13 @@ type ChatHistoryResponse = {
     data: ChatMessage[];
 };
 
+type ChatSessionResponse = {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    data: API.TChatSession[];
+};
+
 type SendMessageResponse = {
     isSuccess: boolean;
     code: string;
@@ -39,13 +51,13 @@ type SendMessageResponse = {
         session_id: string;
         user_id: string;
         content: string;
-        role: "ai" | "user";
+        role: "ai" | "human";
         created_at: string;
         updated_at: string;
     };
 };
 
-const API_BASE_URL = "http://localhost:8000/api/v1/rag";
+const API_BASE_URL = API_ENDPOINTS.TRAIN_AI;
 const FIXED_USER_ID = "admin";
 
 const formatTime = (iso: string) =>
@@ -60,8 +72,10 @@ export default function ChatMain() {
     const [isLoading, setIsLoading] = useState(false);
     const listRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
+    const [isExternal, setIsExternal] = useState<boolean>(false);
+    const [session, setSession] = useState<API.TChatSession | null>(null)
 
-    const {showBackdrop, hideBackdrop} = useBackdrop()
+    const { showBackdrop, hideBackdrop } = useBackdrop()
 
     useEffect(() => {
         if (!listRef.current) return;
@@ -90,6 +104,36 @@ export default function ChatMain() {
         loadChatHistory();
     }, []);
 
+    useEffect(() => {
+        updateSession(session)
+    }, [isExternal])
+
+
+    const updateSession = async (data?: API.TChatSession | null) => {
+        try {
+            if(data == null) return;
+
+            await axios.put(
+                `${API_BASE_URL}/session-chat`,
+                {
+                    "session_id": data.id,
+                    "title": data.title,
+                    "external_knowledge": isExternal
+                },
+                {
+                    headers: {
+                        "accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                }
+            )
+        } catch (error) {
+            console.error("Error updating session:", error);
+        } finally {
+            setIsLoading(false);
+        }
+}
+
     const loadChatHistory = async () => {
         try {
             setIsLoading(true);
@@ -102,12 +146,26 @@ export default function ChatMain() {
                 }
             );
 
+            const session_response = await axios.get<ChatSessionResponse>(
+                `${API_BASE_URL}/session-chat?user_id=${FIXED_USER_ID}`,
+                {
+                    headers: {
+                        accept: "application/json",
+                    },
+                }
+            )
+
             if (response.data.isSuccess) {
                 const historyMessages = response.data.data.map((msg) => ({
                     ...msg,
                     role: msg.role === "ai" ? "assistant" : msg.role,
                 })) as ChatMessage[];
                 setMessages(historyMessages);
+            }
+
+            if (session_response.data.isSuccess) {
+                setIsExternal(session_response.data.data[0].external_knowledge)
+                setSession(session_response.data.data[0])
             }
         } catch (error) {
             console.error("Error loading chat history:", error);
@@ -118,7 +176,7 @@ export default function ChatMain() {
 
     const sendMessage = async (text: string) => {
         const userMessage: ChatMessage = {
-            role: "user",
+            role: "human",
             content: text,
             created_at: new Date().toISOString(),
         };
@@ -248,13 +306,34 @@ export default function ChatMain() {
                                 </div>
                             </div>
                         </div>
-                        <Button
-                            className="bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 rounded-full cursor-pointer"
-                            onClick={clearConversation}
-                        >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Xóa cuộc trò chuyện
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className="text-white text-sm">Sử dụng kiến thức bên ngoài</span>
+                                <div
+                                    className={`relative w-12 h-6 rounded-full cursor-pointer transition-all duration-300 ${isExternal ? 'bg-white/30 border-white/50' : 'bg-white/10 border-white/20'
+                                        } border backdrop-blur-sm`}
+                                    onClick={() => setIsExternal(!isExternal)}
+                                >
+                                    <div
+                                        className={`absolute top-0.5 w-5 h-5 rounded-full transition-all duration-300 ${isExternal
+                                            ? 'left-6 bg-white'
+                                            : 'left-0.5 bg-white/60'
+                                            }`}
+                                    />
+                                </div>
+                                <span className={`text-sm transition-colors duration-200 ${isExternal ? 'text-white' : 'text-white/50'
+                                    }`}>
+                                    {isExternal ? 'Đã mở' : 'Đã tắt'}
+                                </span>
+                            </div>
+                            <Button
+                                className="bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 rounded-full cursor-pointer"
+                                onClick={clearConversation}
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Xóa cuộc trò chuyện
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -289,17 +368,17 @@ export default function ChatMain() {
                         messages.map((m, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${m.role === "user" ? "flex-row-reverse" : ""
+                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${m.role === "human" ? "flex-row-reverse" : ""
                                     }`}
                             >
                                 {/* Avatar */}
                                 <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "user"
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "human"
                                         ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8]"
                                         : "bg-gradient-to-br from-gray-500 to-gray-600"
                                         }`}
                                 >
-                                    {m.role === "user" ? (
+                                    {m.role === "human" ? (
                                         <User className="w-4 h-4 text-white" />
                                     ) : (
                                         <Bot className="w-4 h-4 text-white" />
@@ -308,14 +387,14 @@ export default function ChatMain() {
 
                                 {/* Message Content */}
                                 <div
-                                    className={`max-w-[75%] ${m.role === "user"
+                                    className={`max-w-[75%] ${m.role === "human"
                                         ? "items-end"
                                         : "items-start"
                                         } flex flex-col`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-xs font-medium text-gray-600">
-                                            {m.role === "user"
+                                            {m.role === "human"
                                                 ? "Bạn"
                                                 : "Trợ lý AI"}
                                         </span>
@@ -325,7 +404,7 @@ export default function ChatMain() {
                                     </div>
 
                                     <div
-                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${m.role === "user"
+                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${m.role === "human"
                                             ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8] text-white shadow-[#248FCA]/20 rounded-br-md"
                                             : "bg-white text-gray-800 border border-[#248FCA]/10 shadow-[#248FCA]/5 rounded-bl-md hover:shadow-md hover:border-[#248FCA]/20"
                                             } ${m.isTyping ? "animate-pulse" : ""}`}
@@ -356,6 +435,8 @@ export default function ChatMain() {
                                         ) : (
                                             <div className="whitespace-pre-wrap break-words">
                                                 {m.content}
+                                                {/* <ReactMarkdown>
+                                                </ReactMarkdown> */}
                                             </div>
                                         )}
                                     </div>

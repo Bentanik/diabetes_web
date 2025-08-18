@@ -5,7 +5,6 @@ import DocumentList from "@/app/admin/train-ai/[id]/components/document_list"
 import DocumentSearch from "@/app/admin/train-ai/[id]/components/document_search"
 import { useGetDocumentsService } from "@/services/train-ai/services"
 import { useDebounce } from "@/hooks/use-debounce"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileTextIcon, BrainIcon } from "lucide-react"
 import { useGetJobDocumentHistoryService } from "@/services/job/services"
 import { DocumentCardTrain } from "@/app/admin/train-ai/[id]/components/document_card_train"
@@ -79,8 +78,8 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
         refetchDocuments()
     }
 
-    const handleTabChange = (value: string) => {
-        setActiveTab(value as "documents" | "training")
+    const handleTabChange = (value: "documents" | "training") => {
+        setActiveTab(value)
         setCurrentPage(1)
         setSearchTerm("")
         setStatusFilter("all")
@@ -91,102 +90,120 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
 
     return (
         <div className="space-y-6">
-            {/* Tabs Section với màu chủ đạo */}
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 lg:w-[400px] bg-gray-100 p-1 rounded-lg">
-                    <TabsTrigger
-                        value="documents"
-                        className="flex items-center gap-2 data-[state=active]:bg-[#248fca] data-[state=active]:text-white 
-                        data-[state=active]:shadow-sm transition-all duration-200 rounded-md py-2.5"
+            {/* Custom Tabs Section */}
+            <div className="w-full">
+                {/* Tab List */}
+                <div className="grid grid-cols-2 lg:w-[400px] rounded-lg bg-[#248fca] p-1">
+                    <button
+                        onClick={() => handleTabChange("documents")}
+                        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                            activeTab === "documents"
+                                ? "bg-white text-[#248fca] shadow-sm"
+                                : "text-white hover:text-orange-100"
+                        }`}
                     >
                         <FileTextIcon className="w-4 h-4" />
                         Tài liệu
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="training"
-                        className="flex items-center gap-2 data-[state=active]:bg-[#248fca] data-[state=active]:text-white 
-                        data-[state=active]:shadow-sm transition-all duration-200 rounded-md py-2.5"
+                    </button>
+                    <button
+                        onClick={() => handleTabChange("training")}
+                        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                            activeTab === "training"
+                                ? "bg-white text-[#248fca] shadow-sm"
+                                : "text-white hover:text-orange-100"
+                        }`}
                     >
                         <BrainIcon className="w-4 h-4" />
                         Đang huấn luyện
-                    </TabsTrigger>
-                </TabsList>
+                    </button>
+                </div>
 
-                <TabsContent value="documents" className="space-y-6 mt-6">
-                    {/* Search và Filter Section cho Documents */}
-                    <DocumentSearch
-                        searchTerm={searchTerm}
-                        onSearchChange={handleSearchChange}
-                        statusFilter={statusFilter}
-                        onStatusFilterChange={handleStatusFilterChange}
-                        totalCount={documentsData?.total || 0}
-                        isSearching={debouncedSearchTerm.length > 0}
-                        searchQuery={debouncedSearchTerm}
-                        isTrainingTab={false}
-                    />
+                {/* Tab Content */}
+                <div className="mt-6">
+                    {/* Documents Tab Content */}
+                    {activeTab === "documents" && (
+                        <div className="space-y-6">
+                            {/* Search và Filter Section cho Documents */}
+                            <DocumentSearch
+                                searchTerm={searchTerm}
+                                onSearchChange={handleSearchChange}
+                                statusFilter={statusFilter}
+                                onStatusFilterChange={handleStatusFilterChange}
+                                totalCount={documentsData?.total || 0}
+                                isSearching={debouncedSearchTerm.length > 0}
+                                searchQuery={debouncedSearchTerm}
+                                isTrainingTab={false}
+                            />
 
-                    {/* Document List */}
-                    {documentsData && (
-                        <DocumentList
-                            knowledgeBaseId={knowledgeBaseId}
-                            isPending={isDocumentsPending}
-                            documentsData={documentsData}
-                            onPageChange={handlePageChange}
-                            onPerPageChange={handlePerPageChange}
-                            onTrainSuccess={handleTrainSuccess}
-                        />
-                    )}
-                </TabsContent>
-
-                <TabsContent value="training" className="space-y-6 mt-6">
-                    {/* Search và Filter Section cho Training Jobs */}
-                    <DocumentSearch
-                        searchTerm={searchTerm}
-                        onSearchChange={handleSearchChange}
-                        statusFilter={statusFilter}
-                        onStatusFilterChange={handleStatusFilterChange}
-                        totalCount={trainingCount}
-                        isSearching={debouncedSearchTerm.length > 0}
-                        searchQuery={debouncedSearchTerm}
-                        isTrainingTab={true}
-                    />
-
-                    {/* Training Jobs List */}
-                    {isTrainingPending ? (
-                        <div className="bg-white rounded-xl border border-gray-200 p-12 shadow-sm">
-                            <div className="text-center">
-                                <div className="w-8 h-8 mx-auto mb-4 border-2 border-[#248fca] border-t-transparent rounded-full animate-spin"></div>
-                                <p className="text-gray-500">Đang tải dữ liệu huấn luyện...</p>
-                            </div>
-                        </div>
-                    ) : trainingData && trainingData.items.length > 0 ? (
-                        <div className="w-full max-w-full overflow-hidden">
-                            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm w-full max-w-full overflow-hidden">
-                                <div className="space-y-4">
-                                    {trainingData.items.map((job: API.TJob, index: number) => (
-                                        <DocumentCardTrain key={index} job={job} />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-xl border border-gray-200 p-12 shadow-sm">
-                            <div className="text-center text-gray-500">
-                                <div className="w-16 h-16 mx-auto mb-4 bg-[#248fca]/10 rounded-full flex items-center justify-center">
-                                    <BrainIcon className="w-8 h-8 text-[#248fca]" />
-                                </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                                    Không có công việc huấn luyện nào
-                                </h3>
-                                <p className="text-sm text-gray-500 max-w-md mx-auto">
-                                    Hiện tại không có công việc huấn luyện AI nào đang chạy.
-                                    Các công việc huấn luyện sẽ hiển thị tại đây khi được khởi tạo.
-                                </p>
-                            </div>
+                            {/* Document List */}
+                            {documentsData && (
+                                <DocumentList
+                                    knowledgeBaseId={knowledgeBaseId}
+                                    isPending={isDocumentsPending}
+                                    documentsData={documentsData}
+                                    onPageChange={handlePageChange}
+                                    onPerPageChange={handlePerPageChange}
+                                    onTrainSuccess={handleTrainSuccess}
+                                />
+                            )}
                         </div>
                     )}
-                </TabsContent>
-            </Tabs>
+
+                    {/* Training Tab Content */}
+                    {activeTab === "training" && (
+                        <div>
+                            {/* Search và Filter Section cho Training Jobs */}
+                            <DocumentSearch
+                                searchTerm={searchTerm}
+                                onSearchChange={handleSearchChange}
+                                statusFilter={statusFilter}
+                                onStatusFilterChange={handleStatusFilterChange}
+                                totalCount={trainingCount}
+                                isSearching={debouncedSearchTerm.length > 0}
+                                searchQuery={debouncedSearchTerm}
+                                isTrainingTab={true}
+                            />
+
+                            {/* Training Jobs List */}
+                            <div className="mt-6">
+                                {isTrainingPending ? (
+                                    <div className="bg-white rounded-xl border border-gray-200 p-12 shadow-sm">
+                                        <div className="text-center">
+                                            <div className="w-8 h-8 mx-auto mb-4 border-2 border-[#248fca] border-t-transparent rounded-full animate-spin"></div>
+                                            <p className="text-gray-500">Đang tải dữ liệu huấn luyện...</p>
+                                        </div>
+                                    </div>
+                                ) : trainingData && trainingData.items.length > 0 ? (
+                                    <div className="w-full max-w-full overflow-hidden">
+                                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm w-full max-w-full overflow-hidden">
+                                            <div className="space-y-4">
+                                                {trainingData.items.map((job: API.TJob, index: number) => (
+                                                    <DocumentCardTrain key={index} job={job} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-white rounded-xl border border-gray-200 p-12 shadow-sm">
+                                        <div className="text-center text-gray-500">
+                                            <div className="w-16 h-16 mx-auto mb-4 bg-[#248fca]/10 rounded-full flex items-center justify-center">
+                                                <BrainIcon className="w-8 h-8 text-[#248fca]" />
+                                            </div>
+                                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                                Không có công việc huấn luyện nào
+                                            </h3>
+                                            <p className="text-sm text-gray-500 max-w-md mx-auto">
+                                                Hiện tại không có công việc huấn luyện AI nào đang chạy.
+                                                Các công việc huấn luyện sẽ hiển thị tại đây khi được khởi tạo.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }

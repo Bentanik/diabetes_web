@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-const TRAIN_AI = "http://localhost:8000/api/v1/rag";
+const TRAIN_AI = "https://seas-discount-character-adelaide.trycloudflare.com/api/v1/rag";
 const KNOWLEDGES = TRAIN_AI + "/knowledges";
 
 const DOCUMENTS = `${TRAIN_AI}/documents`;
@@ -13,6 +13,7 @@ const TRAIN_DOCUMENT = `${TRAIN_AI}/train-ai`;
 const SETTING = `${TRAIN_AI}/setting`;
 
 export default {
+  TRAIN_AI,
   KNOWLEDGES,
   DOCUMENTS,
   GET_DOCUMENT_BY_ID,
