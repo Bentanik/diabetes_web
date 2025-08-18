@@ -317,11 +317,11 @@ export default function CreateDoctorSchedule() {
                                             onClick={handleUpdateScheduleSubmit}
                                             disabled={
                                                 loading ||
-                                                isLoadingConsultations
-                                                // hasChanges
+                                                isLoadingConsultations ||
+                                                (changedTimeSlots.length === 0 && deletedIds.length === 0)
                                             }
                                             size="sm"
-                                            className="bg-[#248FCA] hover:bg-[#248FCA]/90"
+                                            className="bg-[#248FCA] hover:bg-[#248FCA]/90 !px-5 !py-5"
                                         >
                                             {loading ? (
                                                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
@@ -349,21 +349,6 @@ export default function CreateDoctorSchedule() {
                                         </Button>
                                     )}
 
-                                    {/* Load More Button nếu có hasNextPage */}
-                                    {hasNextPage && (
-                                        <Button
-                                            onClick={() => fetchNextPage()}
-                                            disabled={isFetchingNextPage}
-                                            variant="outline"
-                                            size="sm"
-                                        >
-                                            {isFetchingNextPage ? (
-                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent mr-2"></div>
-                                            ) : (
-                                                "Tải thêm"
-                                            )}
-                                        </Button>
-                                    )}
                                 </div>
                             </div>
                         </div>

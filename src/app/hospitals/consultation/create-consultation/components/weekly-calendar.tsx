@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useToast from "@/hooks/use-toast";
+import { Save, SquareMousePointer, Trash } from "lucide-react";
 
 export interface TimeSlot {
 	start: string;
@@ -376,32 +377,6 @@ export default function WeeklyCalendar({
 										<SelectItem value="1">Không công khai</SelectItem>
 									</SelectContent>
 								</Select>
-								<Button
-									size="sm"
-									disabled={bulkStatus === ""}
-									className="h-8"
-									onClick={() => {
-										if (bulkStatus === "") return;
-										const next = cloneSchedule(scheduleData);
-										Array.from(selectedKeys).forEach((keyStr) => {
-											const [d, s] = keyStr.split("-").map(Number);
-											const date = selectedWeekData.dates[d];
-											const day = next.timeTemplates.find((t) => t.date === date);
-											if (!day) return;
-											const slot = day.times[s];
-											if (!slot) return;
-											slot.status = Number(bulkStatus);
-											changedKeysRef.current.add(slotIdentity(slot));
-										});
-									setScheduleData(next);
-									upsertChanged(next);
-									onStatusChange?.(Number(bulkStatus));
-									setBulkStatus("");
-									setSelectedKeys(new Set());
-								}}
-							>
-								Áp dụng
-							</Button>
 						</>
 						)}
 					</div>
@@ -490,7 +465,7 @@ export default function WeeklyCalendar({
 										{!isDraft && (
 											<Button
 												variant={isSelected ? "secondary" : "default"}
-												className="bg-[#248FCA] hover:bg-[#248FCA]/90"
+												className="border-[1px] border-[#248FCA] bg-white text-[#248FCA] hover:bg-[#248FCA]/10 cursor-pointer"
 												onClick={() => {
 													setSelectedKeys((prev) => {
 														const next = new Set(prev);
@@ -501,6 +476,7 @@ export default function WeeklyCalendar({
 												}}
 												disabled={status === 2}
 											>
+												<SquareMousePointer />
 												{isSelected ? "Bỏ chọn" : "Chọn"}
 											</Button>
 										)}
@@ -543,7 +519,9 @@ export default function WeeklyCalendar({
 											setTimeout(() => upsertChanged(), 0);
 										}}
 										disabled={status === 2}
+										className="cursor-pointer"
 									>
+										<Trash />
 										{isDraft ? "Xóa khung giờ" : isMarked ? "Bỏ đánh dấu xóa" : "Đánh dấu xóa"}
 									</Button>
 								</div>
@@ -553,9 +531,14 @@ export default function WeeklyCalendar({
 						<DialogFooter className="gap-2">
 							<Button
 								onClick={persistEdit}
-								className="bg-[#248FCA] hover:bg-[#248FCA]/90"
-								disabled={!editTarget || (currentSlot?.status === 2)}
+								className="bg-[#248FCA] hover:bg-[#248FCA]/90 cursor-pointer"
+								disabled={
+									!editTarget || 
+									(currentSlot?.status === 2) ||
+									(!editStart && !editEnd && selectedKeys.size === 0 && markedForDeletion.size === 0)
+								}
 							>
+								<Save />
 								Lưu
 							</Button>
 						</DialogFooter>
