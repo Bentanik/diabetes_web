@@ -58,7 +58,7 @@ export const parseDate = (dateValue: string) => {
     return new Date(dateValue);
 };
 
-// Hàm parse thời gian thành chuỗi "HH:MM" trong định dạng 24h
+// Hàm parse thời gian thành chuỗi "HH:MM:SS" trong định dạng 24h (backend yêu cầu)
 export const parseTime = (timeValue: any) => {
     if (typeof timeValue === "number") {
         // Chuyển đổi số thập phân Excel (phân số ngày) thành giờ
@@ -67,9 +67,10 @@ export const parseTime = (timeValue: any) => {
         const minutes = totalMinutes % 60; // Phút
         return `${hours.toString().padStart(2, "0")}:${minutes
             .toString()
-            .padStart(2, "0")}`;
+            .padStart(2, "0")}:00`;
     }
     if (typeof timeValue === "string") {
+        // Handle various time formats
         const timeMatch = timeValue.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
         if (timeMatch) {
             const hours = Number.parseInt(timeMatch[1], 10);
@@ -77,10 +78,23 @@ export const parseTime = (timeValue: any) => {
             if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
                 return `${hours.toString().padStart(2, "0")}:${minutes
                     .toString()
-                    .padStart(2, "0")}`;
+                    .padStart(2, "0")}:00`;
             }
         }
-        // Nếu không parse được, giữ nguyên giá trị thô (ví dụ: "1:45")
+        
+        // Handle time without leading zeros (e.g., "1:45" -> "01:45:00")
+        const simpleTimeMatch = timeValue.match(/^(\d{1,2}):(\d{1,2})$/);
+        if (simpleTimeMatch) {
+            const hours = Number.parseInt(simpleTimeMatch[1], 10);
+            const minutes = Number.parseInt(simpleTimeMatch[2], 10);
+            if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+                return `${hours.toString().padStart(2, "0")}:${minutes
+                    .toString()
+                    .padStart(2, "0")}:00`;
+            }
+        }
+        
+        // If no pattern matches, return the original value
         return timeValue;
     }
     return timeValue ? timeValue.toString() : "";
@@ -165,6 +179,14 @@ export const validateAndTransformData = (rawData: any[]) => {
             const parsedEndTime = parseTime(endTime);
             dataItem.startTime = parsedStartTime || startTime;
             dataItem.endTime = parsedEndTime || endTime;
+            
+            // Ensure time format is HH:MM for API
+            if (parsedStartTime && typeof parsedStartTime === 'string') {
+                dataItem.startTime = parsedStartTime;
+            }
+            if (parsedEndTime && typeof parsedEndTime === 'string') {
+                dataItem.endTime = parsedEndTime;
+            }
 
             if (parsedStartTime && parsedEndTime) {
                 if (parsedStartTime >= parsedEndTime) {

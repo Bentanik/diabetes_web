@@ -17,7 +17,9 @@ import { Input } from "@/components/ui/input";
 import ExcelImportDialog from "./excel-import-dialog";
 import Header from "./header";
 import DateSelector from "./date-selector";
-import useUpdateConsultation, { TimeTemplateFormData } from "../hooks/use-update-consultation";
+import useUpdateConsultation, {
+    TimeTemplateFormData,
+} from "../hooks/use-update-consultation";
 import { FormProvider, useForm } from "react-hook-form";
 import DoctorSelect from "./select-doctor";
 import { useWeekOptions } from "../hooks/use-week-options";
@@ -29,11 +31,6 @@ interface DaySchedule {
     date: string;
     times: TimeSlot[];
 }
-
-interface ScheduleData {
-    timeTemplates: DaySchedule[];
-}
-
 
 export default function CreateDoctorSchedule() {
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
@@ -88,11 +85,6 @@ export default function CreateDoctorSchedule() {
         (() => void) | null
     >(null);
 
-    const handleRemoveMarkedSlotsCallback = (removeFunction: () => void) => {
-        setTriggerRemoveMarkedSlots(() => removeFunction);
-    };
-
-
     const { form, onSubmit } = useCreateConsultation({
         doctorId: selectedDoctorId,
     });
@@ -110,12 +102,12 @@ export default function CreateDoctorSchedule() {
         }
     };
 
-    const formatTimeToHMS = (time: string): string => {
-        if (time.includes(":") && time.split(":").length === 2) {
-            return `${time}:00`;
-        }
-        return time;
-    };
+    // const formatTimeToHMS = (time: string): string => {
+    //     if (time.includes(":") && time.split(":").length === 2) {
+    //         return `${time}:00`;
+    //     }
+    //     return time;
+    // };
 
     const handleUpdateScheduleSubmit = async () => {
         try {
@@ -156,29 +148,68 @@ export default function CreateDoctorSchedule() {
     const handleExcelImport = async (importedData: any[]) => {
         try {
             setLoading(true);
+
+            // Group consultations by date
+            const groupedByDate = importedData.reduce(
+                (acc: Record<string, any[]>, consultation) => {
+                    const date = consultation.date;
+                    if (!acc[date]) {
+                        acc[date] = [];
+                    }
+                    acc[date].push({
+                        start: consultation.startTime,
+                        end: consultation.endTime,
+                    });
+                    return acc;
+                },
+                {}
+            );
+
+            // Transform to the expected API format
             const transformedData: REQUEST.TCreateConsultation = {
-                timeTemplates: importedData.reduce(
-                    (acc: REQUEST.TimeTemplate[], consultation) => {
-                        const existingTemplate = acc.find(
-                            (template) => template.date === consultation.date
-                        );
-                        const timeRange: REQUEST.TimeRange = {
-                            start: consultation.startTime,
-                            end: consultation.endTime,
-                        };
-                        if (existingTemplate) {
-                            existingTemplate.times.push(timeRange);
-                        } else {
-                            acc.push({
-                                date: consultation.date,
-                                times: [timeRange],
-                            });
-                        }
-                        return acc;
-                    },
-                    []
+                timeTemplates: Object.entries(groupedByDate).map(
+                    ([date, times]) => ({
+                        date: date,
+                        times: times,
+                    })
                 ),
             };
+
+            console.log("Transformed data for API:", transformedData);
+
+            // Validate the transformed data structure
+            if (
+                !transformedData.timeTemplates ||
+                transformedData.timeTemplates.length === 0
+            ) {
+                throw new Error("Không có dữ liệu hợp lệ để import");
+            }
+
+            // Log each template for debugging
+            transformedData.timeTemplates.forEach((template, index) => {
+                console.log(`Template ${index + 1}:`, {
+                    date: template.date,
+                    timesCount: template.times.length,
+                    times: template.times,
+                });
+
+                // Verify time format for each time slot
+                template.times.forEach((timeSlot, timeIndex) => {
+                    console.log(`  Time slot ${timeIndex + 1}:`, {
+                        start: timeSlot.start,
+                        end: timeSlot.end,
+                        startFormat:
+                            typeof timeSlot.start === "string"
+                                ? timeSlot.start.split(":").length
+                                : "N/A",
+                        endFormat:
+                            typeof timeSlot.end === "string"
+                                ? timeSlot.end.split(":").length
+                                : "N/A",
+                    });
+                });
+            });
+
             await handleFormSubmit(transformedData);
         } catch (error) {
             console.error("Error importing consultations:", error);
@@ -318,7 +349,9 @@ export default function CreateDoctorSchedule() {
                                             disabled={
                                                 loading ||
                                                 isLoadingConsultations ||
-                                                (changedTimeSlots.length === 0 && deletedIds.length === 0)
+                                                (changedTimeSlots.length ===
+                                                    0 &&
+                                                    deletedIds.length === 0)
                                             }
                                             size="sm"
                                             className="bg-[#248FCA] hover:bg-[#248FCA]/90 !px-5 !py-5"
@@ -348,7 +381,6 @@ export default function CreateDoctorSchedule() {
                                             Lưu lịch tuần
                                         </Button>
                                     )}
-
                                 </div>
                             </div>
                         </div>

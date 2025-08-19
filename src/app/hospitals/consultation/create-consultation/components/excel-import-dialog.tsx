@@ -114,11 +114,7 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                 );
             }
 
-            const end = performance.now(); // 🔸 Kết thúc đo thời gian
-
-            console.log(
-                `⏱️ Thời gian xử lý file Excel: ${(end - start).toFixed(2)} ms`
-            );
+            const end = performance.now(); // Kết thúc đo thời gian
         } catch (err: any) {
             setError(`Lỗi xử lý file: ${err.message}`);
         } finally {
@@ -140,6 +136,8 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                     endTime: item.endTime,
                     date: item.date,
                 }));
+
+            console.log("Sending consultation data:", consultationData);
             await onImportSuccess(consultationData);
             setTimeout(() => {
                 setIsOpen(false);
@@ -261,6 +259,15 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                             <h3 className="text-lg font-semibold mb-3">
                                 Dữ liệu sẽ được import ({data.length} khung giờ)
                             </h3>
+                            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p className="text-sm text-blue-700">
+                                    <strong>Lưu ý:</strong> Dữ liệu sẽ được nhóm
+                                    theo ngày và gửi với format:
+                                    <code className="block mt-1 p-2 bg-white rounded text-xs">
+                                        {`{timeTemplates: [{date: "YYYY-MM-DD", times: [{start: "HH:MM:SS", end: "HH:MM:SS"}]}]}`}
+                                    </code>
+                                </p>
+                            </div>
                             <div className="border rounded-lg overflow-hidden">
                                 <div className="max-h-64 overflow-y-auto">
                                     <Table>
@@ -395,11 +402,11 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                             </li>
                             <li>
                                 • <strong>Cột Start Time:</strong> Giờ bắt đầu
-                                (định dạng HH:MM)
+                                (định dạng HH:MM hoặc HH:MM:SS)
                             </li>
                             <li>
                                 • <strong>Cột End Time:</strong> Giờ kết thúc
-                                (định dạng HH:MM)
+                                (định dạng HH:MM hoặc HH:MM:SS)
                             </li>
                             <li>
                                 • Giờ kết thúc phải lớn hơn giờ bắt đầu và tối
