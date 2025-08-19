@@ -45,19 +45,20 @@ export default function useLogin() {
                         hideBackdrop();
                         reset();
                         dispatch(clearAllRegister());
-                        if (data.data?.authUser.roles?.includes("SystemAdmin"))
-                            return router.push("/admin/home");
-                        else if (
-                            data.data?.authUser.roles?.includes("Moderator")
-                        )
+                        // Role-based redirect with explicit precedence
+                        const roles = data.data?.authUser.roles ?? [];
+                        if (roles.includes("Moderator")) {
                             return router.push("/admin/blogs");
-                        else if (
-                            data.data?.authUser.roles?.includes(
-                                "HospitalStaff"
-                            ) ||
-                            data.data?.authUser.roles?.includes("HospitalAdmin")
-                        )
+                        }
+                        if (roles.includes("SystemAdmin")) {
+                            return router.push("/admin/home");
+                        }
+                        if (roles.includes("HospitalAdmin")) {
+                            return router.push("/hospitals/hospital-staff");
+                        }
+                        if (roles.includes("HospitalStaff")) {
                             return router.push("/hospitals/home");
+                        }
                         return router.push("/");
                     }
                 },

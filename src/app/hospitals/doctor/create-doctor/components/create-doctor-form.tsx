@@ -224,9 +224,9 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                         }
                                                     />
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    {/* <AlertCircle className="h-4 w-4" /> */}
-                                                </FormMessage>
+                                                <div className="h-5">
+                                                    <FormMessage className="flex items-center gap-1" />
+                                                </div>
                                             </FormItem>
                                         )}
                                     />
@@ -250,7 +250,9 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                         />
                                                     </div>
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1" />
+                                                <div className="h-5">
+                                                    <FormMessage className="flex items-center gap-1" />
+                                                </div>
                                             </FormItem>
                                         )}
                                     />
@@ -273,9 +275,9 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                         }
                                                     />
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    {/* <AlertCircle className="h-4 w-4" /> */}
-                                                </FormMessage>
+                                                <div className="h-5">
+                                                    <FormMessage className="flex items-center gap-1" />
+                                                </div>
                                             </FormItem>
                                         )}
                                     />

@@ -14,13 +14,17 @@ export default function AuthLayout({
 }>) {
     const userState = useAppSelector((state) => state.userSlice);
 
-    if (
-        userState.user?.roles?.includes("SystemAdmin") ||
-        userState.user?.roles?.includes("Moderator")
-    ) {
+    const roles = userState.user?.roles ?? [];
+    if (roles.includes("Moderator")) {
+        return (window.location.href = "/admin/blogs");
+    }
+    if (roles.includes("SystemAdmin")) {
         return (window.location.href = "/admin/home");
     }
-    if (userState.user?.roles?.includes("HospitalStaff")) {
+    if (roles.includes("HospitalAdmin")) {
+        return (window.location.href = "/hospitals/hospital-staff");
+    }
+    if (roles.includes("HospitalStaff")) {
         return (window.location.href = "/hospitals/home");
     }
     return (
