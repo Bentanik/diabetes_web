@@ -10,11 +10,13 @@ import { useGetDoctors } from "@/app/admin/blogs/update-blog/hooks/use-get-docto
 type DoctorSelectProps = {
     control: Control<any>;
     name?: string;
+    onDoctorChange?: (doctor: API.Doctors | null) => void;
 };
 
 export default function DoctorSelect({
     control,
     name = "doctorId",
+    onDoctorChange,
 }: DoctorSelectProps) {
     const pageSize = 5;
 
@@ -38,6 +40,7 @@ export default function DoctorSelect({
     const options = doctors.map((doctor: API.Doctors) => ({
         value: doctor.id,
         label: doctor.name,
+        doctor,
     }));
 
     const handleMenuScrollToBottom = useCallback(() => {
@@ -67,6 +70,7 @@ export default function DoctorSelect({
                             selectedOption: SingleValue<{
                                 value: string;
                                 label: string;
+                                doctor: API.Doctors;
                             }>
                         ) => {
                             field.onChange(
@@ -76,6 +80,14 @@ export default function DoctorSelect({
                                         selectedOption?.value
                                 )
                             );
+                            if (onDoctorChange) {
+                                const selectedDoctor = selectedOption
+                                    ? doctors.find(
+                                          (d) => d.id === selectedOption.value
+                                      ) || null
+                                    : null;
+                                onDoctorChange(selectedDoctor);
+                            }
                         }}
                         placeholder="Lựa chọn bác sĩ"
                         onMenuScrollToBottom={handleMenuScrollToBottom}
