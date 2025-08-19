@@ -11,6 +11,7 @@ import {
     FormControl,
     FormLabel,
     FormMessage,
+    FormField,
 } from "@/components/ui/form";
 import { CalendarDays, ChevronDownIcon } from "lucide-react";
 import { Controller } from "react-hook-form";
@@ -28,10 +29,10 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
     const [date, setDate] = useState<Date | undefined>(undefined);
 
     return (
-        <Controller
+        <FormField
             control={control}
-            name={name}
-            render={({ field }) => (
+            name={name as any}
+            render={({ field, fieldState }) => (
                 <FormItem>
                     <FormControl>
                         <div>
@@ -74,7 +75,7 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
                                                     offsetDate.toISOString();
                                                 field.onChange(isoDate);
                                             } else {
-                                                field.onChange(null);
+                                                field.onChange("");
                                             }
                                             setOpen(false);
                                         }}
@@ -83,7 +84,9 @@ const DateOfBirthPicker: React.FC<DateOfBirthPickerProps> = ({
                             </Popover>
                         </div>
                     </FormControl>
-                    <FormMessage className="flex items-center gap-1" />
+                    {fieldState.error && (
+                        <FormMessage className="flex items-center gap-1" />
+                    )}
                 </FormItem>
             )}
         />

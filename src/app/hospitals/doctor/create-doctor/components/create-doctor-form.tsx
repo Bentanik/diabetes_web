@@ -204,7 +204,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
 
                             <div className="flex gap-[10%] mt-10">
                                 {/* Họ và tên */}
-                                <div className="flex-1 flex gap-2">
+                                <div className="flex-1 flex gap-6">
                                     <FormField
                                         control={form.control}
                                         name="lastName"
@@ -240,18 +240,17 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                     Tên đệm
                                                 </FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        {...field}
-                                                        placeholder="Nhập tên đệm bác sĩ"
-                                                        className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
-                                                        onChange={
-                                                            field.onChange
-                                                        }
-                                                    />
+                                                    {/* Wrap Input to avoid inheriting aria-invalid styles for optional field */}
+                                                    <div>
+                                                        <Input
+                                                            {...field}
+                                                            placeholder="Nhập tên đệm bác sĩ"
+                                                            className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
+                                                            onChange={field.onChange}
+                                                        />
+                                                    </div>
                                                 </FormControl>
-                                                <FormMessage className="flex items-center gap-1">
-                                                    {/* <AlertCircle className="h-4 w-4" /> */}
-                                                </FormMessage>
+                                                <FormMessage className="flex items-center gap-1" />
                                             </FormItem>
                                         )}
                                     />
