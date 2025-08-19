@@ -83,8 +83,7 @@ export default function DoctorSelect({
                             if (onDoctorChange) {
                                 const selectedDoctor = selectedOption
                                     ? doctors.find(
-                                          (d) =>
-                                              d.id === selectedOption.value
+                                          (d) => d.id === selectedOption.value
                                       ) || null
                                     : null;
                                 onDoctorChange(selectedDoctor);
