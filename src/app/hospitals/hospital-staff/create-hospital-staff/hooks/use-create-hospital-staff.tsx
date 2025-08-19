@@ -7,9 +7,9 @@ import { z } from "zod";
 import { GET_HOSPITAL_STAFFS_QUERY_KEY } from "../../hooks/use-get-hospital-staffs";
 
 export const hospitalStaffSchema = z.object({
-    firstName: z.string().min(1, "Vui lòng nhập họ"),
+    firstName: z.string().min(1, "Vui lòng nhập tên"),
     middleName: z.string().optional(),
-    lastName: z.string().min(1, "Vui lòng nhập tên"),
+    lastName: z.string().min(1, "Vui lòng nhập họ"),
     dateOfBirth: z
         .string({
             required_error: "Vui lòng chọn ngày sinh cho nhân viên",

@@ -26,14 +26,19 @@ export const useServiceCreateHospitalStaff = () => {
             });
         },
 
-        onError: (data: TMeta) => {
-            if (data.status === 409) {
-                addToast({
-                    type: "error",
-                    description: "Email không được trùng. Vui lòng nhập lại !",
-                    duration: 5000,
-                });
-            }
+        onError: (error: TMeta) => {
+            error.errors?.forEach((error) => {
+                console.log(error);
+
+                if (error.code === "hospital_staff_error_02") {
+                    addToast({
+                        type: "error",
+                        description:
+                            "Email không được trùng. Vui lòng nhập lại !",
+                        duration: 5000,
+                    });
+                }
+            });
         },
     });
 };

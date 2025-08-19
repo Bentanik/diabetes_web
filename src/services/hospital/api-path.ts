@@ -1,6 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
 const HOSPITAL =
-    "https://capstonegateway-dqdrf9g0g9h0ffdd.southeastasia-01.azurewebsites.net/api/v1/hospitals";
+    "https://capstonegateway-dqdrf9g0g9h0ffdd.southeastasia-01.azurewebsites.net/user-service/api/v1/hospitals";
 const CREATE_DOCTOR = HOSPITAL + "/doctors";
 const GET_DOCTORS = HOSPITAL + "/me/doctors";
 const GET_HOSPITALS_CURSOR = HOSPITAL;

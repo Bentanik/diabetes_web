@@ -352,15 +352,20 @@ export default function WeeklyCalendar({
                     )
                 )
                     return;
+
+                const originalStart = ensureHms(slot.start);
+                const originalEnd = ensureHms(slot.end);
+
+                const identity = slotIdentity(slot);
+
+                // Apply edits
                 slot.start = newStart;
                 slot.end = newEnd;
                 slot.status = slot.status ?? 1;
-                const keyStr = `${editTarget.dayIndex}-${editTarget.slotIndex}`;
-                const identity = slotIdentity(slot);
-                if (selectedKeys.has(keyStr)) {
+
+                // Mark as changed only if time actually changed
+                if (originalStart !== newStart || originalEnd !== newEnd) {
                     changedKeysRef.current.add(identity);
-                } else {
-                    changedKeysRef.current.delete(identity);
                 }
             }
         }
