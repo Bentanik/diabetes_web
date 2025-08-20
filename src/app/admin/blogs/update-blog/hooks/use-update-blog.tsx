@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { BLOG_DETAIL_QUERY_KEY } from "../../blog-detail/hooks/use-get-blog";
 import { GET_POSTS_QUERY_KEY } from "../../hooks/use-get-blogs";
+import { useRouter } from "next/navigation";
 
 export const blogSchema = z.object({
     title: z
@@ -39,6 +40,7 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
     const isPendingUpdate = isPending;
     const { showBackdrop, hideBackdrop } = useBackdrop();
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const onSubmit = (data: REQUEST.TUpdateBlog, clearImages: () => void) => {
         if (!data.isDraft) {
@@ -54,6 +56,7 @@ export default function useUpdateBlog({ blogId }: REQUEST.BlogId) {
                 });
                 if (!data.isDraft) {
                     hideBackdrop();
+                    router.replace("/admin/blogs");
                     form.reset();
                     clearImages();
                 }

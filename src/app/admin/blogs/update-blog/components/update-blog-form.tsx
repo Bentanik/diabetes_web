@@ -173,9 +173,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             onSubmit(formData, () => {
                 setIsDialogOpen(false);
                 form.reset();
-                setTimeout(() => {
-                    router.push("/admin/blogs");
-                }, 2000);
             });
         } catch (error) {
             console.error("Error updating post:", error);
