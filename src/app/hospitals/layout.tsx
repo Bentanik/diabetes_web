@@ -114,7 +114,8 @@ export default function HospitalLayout({
                             item.subItems && item.subItems.length > 0;
                         if (
                             userState.user?.roles?.includes("HospitalAdmin") &&
-                            item.href !== "/hospitals/hospital-staff"
+                            item.href !== "/hospitals/hospital-staff" &&
+                            item.href !== "/hospitals/dashboard"
                         ) {
                             return null;
                         }
