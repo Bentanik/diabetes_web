@@ -12,16 +12,17 @@ export const packageSchema = z.object({
     name: z.string().min(3, "Vui lòng nhập tên gói (tối thiểu 3 ký tự)"),
     description: z.string().min(10, "Mô tả tối thiểu 10 ký tự"),
     price: z
-        .number({ invalid_type_error: "Giá phải là số" })
-        .min(1000, "Giá tối thiểu là 1,000 VNĐ"),
+        .union([z.string(), z.number()])
+        .transform((val) => (typeof val === "string" ? Number(val) : val))
+        .refine((val) => !isNaN(val) && val >= 1000, "Giá tối thiểu là 1,000 VNĐ"),
     sessions: z
-        .number({ invalid_type_error: "Số lượt phải là số" })
-        .int("Số lượt phải là số nguyên")
-        .min(1, "Tối thiểu 1 lượt"),
+        .union([z.string(), z.number()])
+        .transform((val) => (typeof val === "string" ? Number(val) : val))
+        .refine((val) => !isNaN(val) && Number.isInteger(val) && val >= 1, "Số lượt phải là số nguyên tối thiểu 1"),
     durationInMonths: z
-        .number({ invalid_type_error: "Thời hạn phải là số" })
-        .int("Thời hạn phải là số nguyên")
-        .min(1, "Tối thiểu 1 tháng"),
+        .union([z.string(), z.number()])
+        .transform((val) => (typeof val === "string" ? Number(val) : val))
+        .refine((val) => !isNaN(val) && Number.isInteger(val) && val >= 1, "Thời hạn phải là số nguyên tối thiểu 1"),
 });
 
 export type PackageFormData = z.infer<typeof packageSchema>;

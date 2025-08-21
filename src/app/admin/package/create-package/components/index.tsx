@@ -46,9 +46,18 @@ export default function CreatePackage() {
             const formData: REQUEST.TCreatePackage = {
                 name: data.name,
                 description: data.description,
-                price: data.price,
-                sessions: data.sessions,
-                durationInMonths: data.durationInMonths,
+                price:
+                    typeof data.price === "string"
+                        ? Number(data.price)
+                        : data.price,
+                sessions:
+                    typeof data.sessions === "string"
+                        ? Number(data.sessions)
+                        : data.sessions,
+                durationInMonths:
+                    typeof data.durationInMonths === "string"
+                        ? Number(data.durationInMonths)
+                        : data.durationInMonths,
             };
             onSubmit(formData);
         } catch (error) {
@@ -139,23 +148,32 @@ export default function CreatePackage() {
                                                 <FormLabel>Giá (VNĐ)</FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        type="number"
-                                                        min={0}
+                                                        type="text"
+                                                        inputMode="numeric"
                                                         placeholder="600000"
-                                                        value={field.value}
-                                                        onChange={(e) =>
+                                                        value={
+                                                            field.value === 0
+                                                                ? ""
+                                                                : String(
+                                                                      field.value
+                                                                  )
+                                                        }
+                                                        onChange={(e) => {
+                                                            const value =
+                                                                e.target.value;
+                                                            // Loại bỏ số 0 ở đầu
+                                                            const cleanValue =
+                                                                value.replace(
+                                                                    /^0+/,
+                                                                    ""
+                                                                ) || "";
                                                             field.onChange(
-                                                                e.target
-                                                                    .value ===
+                                                                cleanValue ===
                                                                     ""
                                                                     ? 0
-                                                                    : Number(
-                                                                          e
-                                                                              .target
-                                                                              .value
-                                                                      )
-                                                            )
-                                                        }
+                                                                    : cleanValue
+                                                            );
+                                                        }}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -171,23 +189,32 @@ export default function CreatePackage() {
                                                 <FormLabel>Số lượt</FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        type="number"
-                                                        min={1}
+                                                        type="text"
+                                                        inputMode="numeric"
                                                         placeholder="40"
-                                                        value={field.value}
-                                                        onChange={(e) =>
+                                                        value={
+                                                            field.value === 0
+                                                                ? ""
+                                                                : String(
+                                                                      field.value
+                                                                  )
+                                                        }
+                                                        onChange={(e) => {
+                                                            const value =
+                                                                e.target.value;
+                                                            // Loại bỏ số 0 ở đầu
+                                                            const cleanValue =
+                                                                value.replace(
+                                                                    /^0+/,
+                                                                    ""
+                                                                ) || "";
                                                             field.onChange(
-                                                                e.target
-                                                                    .value ===
+                                                                cleanValue ===
                                                                     ""
                                                                     ? 0
-                                                                    : Number(
-                                                                          e
-                                                                              .target
-                                                                              .value
-                                                                      )
-                                                            )
-                                                        }
+                                                                    : cleanValue
+                                                            );
+                                                        }}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -205,23 +232,32 @@ export default function CreatePackage() {
                                                 </FormLabel>
                                                 <FormControl>
                                                     <Input
-                                                        type="number"
-                                                        min={1}
+                                                        type="text"
+                                                        inputMode="numeric"
                                                         placeholder="5"
-                                                        value={field.value}
-                                                        onChange={(e) =>
+                                                        value={
+                                                            field.value === 0
+                                                                ? ""
+                                                                : String(
+                                                                      field.value
+                                                                  )
+                                                        }
+                                                        onChange={(e) => {
+                                                            const value =
+                                                                e.target.value;
+                                                            // Loại bỏ số 0 ở đầu
+                                                            const cleanValue =
+                                                                value.replace(
+                                                                    /^0+/,
+                                                                    ""
+                                                                ) || "";
                                                             field.onChange(
-                                                                e.target
-                                                                    .value ===
+                                                                cleanValue ===
                                                                     ""
                                                                     ? 0
-                                                                    : Number(
-                                                                          e
-                                                                              .target
-                                                                              .value
-                                                                      )
-                                                            )
-                                                        }
+                                                                    : cleanValue
+                                                            );
+                                                        }}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
