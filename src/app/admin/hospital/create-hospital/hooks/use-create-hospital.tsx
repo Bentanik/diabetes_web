@@ -13,7 +13,7 @@ export const hospitalSchema = z.object({
         message:
             "Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có 10 đến 11 chữ số",
     }),
-    website: z.string().url("Website không hợp lệ"),
+    website: z.string().url("Địa chỉ website không hợp lệ"),
     address: z.string().min(1, "Địa chỉ là bắt buộc"),
     introduction: z.string().min(10, "Giới thiệu phải có ít nhất 10 ký tự"),
     thumbnail: z.string().uuid("Thumbnail phải là UUID hợp lệ"),
