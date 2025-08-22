@@ -30,11 +30,9 @@ declare namespace API {
     description: string;
     file: TDocumentJobFile;
     type: "upload_document" | "training_document";
-    status: TStatus;
-    progress: TProgress;
+    processing_status: TStatus;
     priority_diabetes: number;
-    is_document_delete: boolean;
-    is_document_duplicate: boolean;
+    document_status: "normal" | "deleted" | "duplicate";
     created_at: string;
     updated_at: string;
   };

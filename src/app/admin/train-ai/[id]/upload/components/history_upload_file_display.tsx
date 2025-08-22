@@ -219,24 +219,19 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                         </div>
                         <div className="flex flex-col items-end gap-1">
                             <div className="flex gap-1">
-                                {document.is_document_delete && (
+                                {document.document_status === "deleted" && (
                                     <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200 text-xs">
                                         Đã xóa
                                     </Badge>
                                 )}
-                                {document.is_document_duplicate && (
+                                {document.document_status === "duplicate" && (
                                     <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200 text-xs">
                                         Đã tồn tại
                                     </Badge>
                                 )}
 
-                                {document.status.status === "failed" && (
-                                    <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200 text-xs">
-                                        Thất bại
-                                    </Badge>
-                                )}
                             </div>
-                            {document.status.status === "completed" && !document.is_document_delete && !document.is_document_duplicate && (
+                            {document.processing_status.status === "completed" && document.document_status === "normal" && (
                                 <div className="flex gap-2 mt-1">
                                     {/* <Button
                                         variant="outline"
@@ -285,46 +280,46 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                     </div>
 
                     {/* Mô tả nếu có */}
-                    {document.description && document.status.status !== "failed" && (
+                    {document.description && document.processing_status.status !== "failed" && (
                         <div>
                             <SmartDescription description={document.description} />
                         </div>
                     )}
 
                     {/* Nếu có lỗi */}
-                    {document.status.status === "failed" && (
+                    {document.processing_status.status === "failed" && (
                         <div className="bg-red-50 border border-red-200 rounded-md p-2 text-sm text-red-700 flex items-center gap-2">
                             <AlertCircleIcon className="w-4 h-4" />
-                            <span>{document.status.progress_message}</span>
-                            {document.status.progress !== undefined && (
+                            <span>{document.processing_status.progress_message}</span>
+                            {document.processing_status.progress !== undefined && (
                                 <span className="ml-auto text-xs font-medium">
-                                    Tiến trình lỗi: {document.status.progress}%
+                                    Tiến trình lỗi: {document.processing_status.progress}%
                                 </span>
                             )}
                         </div>
                     )}
 
                     <div className="flex flex-wrap items-center gap-2">
-                        {document.status.status === "completed" && getStatusBadge(document.status.status)}
-                        {document.status.status === "completed" &&
-                            !document.is_document_delete &&
+                        {document.processing_status.status === "completed" && getStatusBadge(document.processing_status.status)}
+                        {document.processing_status.status === "completed" &&
+                            document.document_status === "normal" &&
                             getTopicRelevanceBadge(document.priority_diabetes, "Đái tháo đường")}
-                        {(document.status.status === "processing" || document.status.status === "queued") && (
+                        {(document.processing_status.status === "processing" || document.processing_status.status === "queued") && (
                             <div className="flex flex-col w-full max-w-xs gap-1">
                                 <div className="flex items-center gap-2">
                                     <Progress
-                                        value={document.status.progress}
+                                        value={document.processing_status.progress}
                                         className="h-2 rounded-full flex-1 bg-[#e7f3fa] [&_[data-slot=progress-indicator]]:bg-[#248fca]"
                                     />
-                                    {typeof document.status.progress === "number" && (
+                                    {typeof document.processing_status.progress === "number" && (
                                         <span className="text-xs text-gray-500 font-medium min-w-[32px] text-right">
-                                            {document.status.progress}%
+                                            {document.processing_status.progress}%
                                         </span>
                                     )}
                                 </div>
-                                {document.status.progress_message && (
+                                {document.processing_status.progress_message && (
                                     <span className="text-xs text-[#248fca] font-medium">
-                                        {document.status.progress_message}
+                                        {document.processing_status.progress_message}
                                     </span>
                                 )}
                             </div>

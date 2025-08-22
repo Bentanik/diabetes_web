@@ -48,7 +48,7 @@ export default function DocumentCard({
     onDelete = () => { },
     onTrainSuccess = () => { }
 }: DocumentCardProps) {
-    const isUploadDoc = document.type === "upload_document";
+    const isUploadDoc = document.document_type === "uploaded_document";
     const { mutate: trainDocument, isPending: isTraining } = useTrainDocumentService();
     const { addNotification } = useNotification();
 
@@ -91,7 +91,7 @@ export default function DocumentCard({
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-xs text-gray-500">
                     <ArchiveIcon className="w-3 h-3" />
-                    <span>{document.file?.file_type?.toUpperCase() || 'FILE'}</span>
+                    <span>{document.file?.type?.toUpperCase() || 'FILE'}</span>
                 </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -131,7 +131,7 @@ export default function DocumentCard({
                 {/* Title với icon */}
                 <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0">
-                        {getFileIcon(document.file?.file_type || 'file')}
+                        {getFileIcon(document.file?.type || 'file')}
                     </div>
                     <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-900 text-sm leading-tight line-clamp-2 mb-1">
