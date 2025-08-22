@@ -66,13 +66,13 @@ declare namespace API {
     updated_at: string;
   };
 
-  type TDocumentType = "upload_document" | "training_document";
+  type TDocumentType = "uploaded_document" | "training_document" | "trained_document";
 
   type TDocumentFile = {
     path: string;
     size_bytes: number;
-    hash: string;
-    file_type: string;
+    name: string;
+    type: string;
   };
 
   type TDocument = {
@@ -80,36 +80,13 @@ declare namespace API {
     knowledge_id: string;
     title: string;
     description: string;
+    document_type: TDocumentType;
     file: TDocumentFile;
-    progress: number;
-    type: TDocumentType;
+    file_hash: string;
     priority_diabetes: number;
     created_at: string;
     updated_at: string;
   };
-
-  type TSettings = {
-    top_k: number;
-    temperature: number;
-    max_tokens: number;
-    search_accuracy: number;
-    system_prompt: string;
-    context_prompt: string;
-  }
-
-  type TBbox = {
-    x0: number;
-    y0: number;
-    x1: number;
-    y1: number;
-  }
-
-  type TLocation = {
-    page: string;
-    bbox: TBbox;
-    block_index: number;
-    doc_type: string;
-  }
 
   type TDocumentParser = {
     id: string;
