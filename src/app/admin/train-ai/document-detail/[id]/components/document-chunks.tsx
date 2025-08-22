@@ -40,6 +40,7 @@ interface DocumentChunksProps {
     highlights: HighlightData[];
     onHighlightClick: (highlightId: string) => void;
     onSelectionToggle: (highlightId: string) => void;
+    diabetesNumber?: number;
 }
 
 const ITEMS_PER_PAGE = 5; // Number of highlights per page
@@ -47,7 +48,8 @@ const ITEMS_PER_PAGE = 5; // Number of highlights per page
 const DocumentChunks: React.FC<DocumentChunksProps> = ({
     highlights,
     onHighlightClick,
-    onSelectionToggle
+    onSelectionToggle,
+    diabetesNumber,
 }) => {
     const [searchTerm, setSearchTerm] = React.useState('');
     const [showOnlySelected, setShowOnlySelected] = React.useState(false);
@@ -82,7 +84,7 @@ const DocumentChunks: React.FC<DocumentChunksProps> = ({
     };
 
     const getPageNumbers = () => {
-        const pages = [];
+        const pages = [] as number[];
         const maxVisiblePages = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -105,14 +107,24 @@ const DocumentChunks: React.FC<DocumentChunksProps> = ({
             {/* Header with gradient */}
             <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-[#248fca] to-[#1e7bb8] relative overflow-hidden">
                 <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <Bookmark className="w-5 h-5 text-white" />
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                                <Bookmark className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-white">Đoạn nội dung</h3>
+                                <p className="text-white/80 text-sm">Các đoạn được đánh dấu trong tài liệu</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-lg font-semibold text-white">Đoạn nội dung</h3>
-                            <p className="text-white/80 text-sm">Các đoạn được đánh dấu trong tài liệu</p>
-                        </div>
+                        {typeof diabetesNumber === 'number' && (
+                            <div className="px-4 py-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-sm border border-white/50 text-right">
+                                <div className="text-[11px] text-gray-500">Chỉ số đường huyết</div>
+                                <div className="text-lg font-semibold text-gray-900">
+                                    {diabetesNumber} <span className="text-xs text-gray-600">mg/dL</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -180,7 +192,7 @@ const DocumentChunks: React.FC<DocumentChunksProps> = ({
             </div>
 
             {/* Highlights List */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1">
                 {filteredHighlights.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
