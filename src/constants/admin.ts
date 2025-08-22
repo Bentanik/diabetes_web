@@ -10,6 +10,8 @@ import {
     UserRoundCog,
     Bot,
     BotMessageSquare,
+    Columns3,
+    Columns3Cog,
 } from "lucide-react";
 export const sidebar_items = [
     {
@@ -35,6 +37,23 @@ export const sidebar_items = [
         ],
     },
 
+    {
+        href: "/admin/package",
+        icon: Columns3Cog,
+        label: "Quản lý gói tư vấn",
+        subItems: [
+            {
+                label: "Quản lý gói tư vấn",
+                href: "/admin/package/manage-package",
+                icon: SquareChartGantt,
+            },
+            {
+                label: "Tạo gói tư vấn",
+                href: "/admin/package/create-package",
+                icon: Plus,
+            },
+        ],
+    },
     {
         href: "/admin/users",
         icon: UserIcon,

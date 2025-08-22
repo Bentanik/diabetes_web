@@ -15,35 +15,44 @@ export const doctorSchema = z.object({
     middleName: z.string().optional(),
     lastName: z.string().min(1, "Vui lòng nhập họ"),
     dateOfBirth: z
-    .string({
-        required_error: "Vui lòng chọn ngày sinh cho bác sĩ",
-    })
-    .min(1, "Vui lòng chọn ngày sinh cho bác sĩ")
-    .refine((v) => {
-        const d = new Date(v);
-        return !Number.isNaN(d.getTime());
-    }, {
-        message: "Ngày sinh không hợp lệ",
-    })
-    .refine((v) => {
-        const d = new Date(v);
-        const today = new Date();
-        return d <= today;
-    }, {
-        message: "Ngày sinh không được ở tương lai",
-    })
-    .refine((v) => {
-        const d = new Date(v);
-        const today = new Date();
-        let age = today.getFullYear() - d.getFullYear();
-        const m = today.getMonth() - d.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < d.getDate())) {
-            age--;
-        }
-        return age >= 18;
-    }, {
-        message: "Bác sĩ không được dưới 18 tuổi",
-    }),
+        .string({
+            required_error: "Vui lòng chọn ngày sinh cho bác sĩ",
+        })
+        .min(1, "Vui lòng chọn ngày sinh cho bác sĩ")
+        .refine(
+            (v) => {
+                const d = new Date(v);
+                return !Number.isNaN(d.getTime());
+            },
+            {
+                message: "Ngày sinh không hợp lệ",
+            }
+        )
+        .refine(
+            (v) => {
+                const d = new Date(v);
+                const today = new Date();
+                return d <= today;
+            },
+            {
+                message: "Ngày sinh không được ở tương lai",
+            }
+        )
+        .refine(
+            (v) => {
+                const d = new Date(v);
+                const today = new Date();
+                let age = today.getFullYear() - d.getFullYear();
+                const m = today.getMonth() - d.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < d.getDate())) {
+                    age--;
+                }
+                return age >= 18;
+            },
+            {
+                message: "Bác sĩ không được dưới 18 tuổi",
+            }
+        ),
     gender: z.number(),
     avatarId: z.string().nonempty("Avatar là bắt buộc"),
     numberOfExperiences: z.preprocess(

@@ -112,6 +112,31 @@ export const calculateDuration = (startTime: string, endTime: string) => {
     return endMinutes - startMinutes;
 };
 
+// Helpers to compare with current time
+const getTodayStr = () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+};
+
+const getNowHms = () => {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    const ss = String(now.getSeconds()).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
+};
+
+const isPastByStart = (date: string, startTime: string) => {
+    if (!date || !startTime) return false;
+    const today = getTodayStr();
+    if (date < today) return true;
+    if (date > today) return false;
+    return startTime <= getNowHms();
+};
+
 // Hàm validate và chuyển đổi dữ liệu từ Excel
 export const validateAndTransformData = (rawData: any[]) => {
     const validData: any[] = [];
@@ -171,7 +196,11 @@ export const validateAndTransformData = (rawData: any[]) => {
             if (isNaN(parsedDate.getTime())) {
                 validationErrors.push(`Định dạng ngày không hợp lệ`);
             } else {
-                dataItem.date = parsedDate.toISOString().split("T")[0];
+                // Use local timezone to avoid UTC offset shifting the date
+                const y = parsedDate.getFullYear();
+                const m = String(parsedDate.getMonth() + 1).padStart(2, "0");
+                const d = String(parsedDate.getDate()).padStart(2, "0");
+                dataItem.date = `${y}-${m}-${d}`;
                 dataItem.dateDisplay = parsedDate.toLocaleDateString("vi-VN");
             }
 
@@ -209,6 +238,16 @@ export const validateAndTransformData = (rawData: any[]) => {
                 validationErrors.push(
                     `Định dạng giờ không hợp lệ (chỉ hỗ trợ 24h)`
                 );
+            }
+
+            // Mark timeslots in the past (by start time) as invalid
+            if (
+                validationErrors.length === 0 &&
+                typeof dataItem.date === "string" &&
+                typeof dataItem.startTime === "string" &&
+                isPastByStart(dataItem.date, dataItem.startTime)
+            ) {
+                validationErrors.push("Thời gian đã qua so với hiện tại");
             }
 
             dataItem.valid = validationErrors.length === 0;
