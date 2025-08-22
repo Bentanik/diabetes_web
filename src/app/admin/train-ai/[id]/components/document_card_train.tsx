@@ -75,7 +75,7 @@ export const DocumentCardTrain = ({ job }: DocumentCardTrainProps) => {
                         <h3 className="font-medium text-gray-900 truncate">
                             {job.file.file_name}
                         </h3>
-                        {getStatusBadge(job.status.status)}
+                        {getStatusBadge(job.processing_status.status)}
                     </div>
 
                     <div className="mt-1 flex flex-wrap gap-2">
@@ -91,18 +91,18 @@ export const DocumentCardTrain = ({ job }: DocumentCardTrainProps) => {
 
                     </div>
 
-                    {job.status.status === 'processing' && (
+                    {job.processing_status.status === 'processing' && (
                         <div className="mt-3">
-                            <Progress value={job.status.progress || 0} className="h-1" />
+                            <Progress value={job.processing_status.progress || 0} className="h-1" />
                             <p className="mt-1 text-xs text-gray-500">
-                                Đang xử lý: {job.status.progress || 0}%
+                                Đang xử lý: {job.processing_status.progress || 0}%
                             </p>
                         </div>
                     )}
 
-                    {job.status.progress_message && (
+                    {job.processing_status.progress_message && (
                         <p className="mt-2 text-sm text-blue-600">
-                            Tiến trình: {job.status.progress_message}
+                            Tiến trình: {job.processing_status.progress_message}
                         </p>
                     )}
                 </div>

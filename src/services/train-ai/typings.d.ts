@@ -96,5 +96,12 @@ declare namespace API {
     is_active: boolean;
     created_at: string;
     updated_at: string;
-  }
+  };
+
+  type TSettings = {
+    top_k: number;
+    temperature: number;
+    max_tokens: number;
+    search_accuracy: number;
+  };
 }

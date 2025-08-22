@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
@@ -11,11 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import {
     SaveIcon,
     RotateCcwIcon,
-    LightbulbIcon,
     TargetIcon,
-    MessageSquareIcon,
-    ZapIcon,
-    EyeIcon,
 } from 'lucide-react'
 import { useGetSettingService } from '@/services/train-ai/services'
 import useUpdateSetting from '@/app/admin/train-ai/setting/hook/useUpdateSetting'
@@ -28,10 +23,8 @@ export default function AISettings() {
     const [settings, setSettings] = useState<API.TSettings>({
         top_k: 5,
         search_accuracy: 0.7,
-        system_prompt: '',
-        context_prompt: '',
         max_tokens: 1000,
-        temperature: 0.7
+        temperature: 0.7,
     })
 
     const [isSaving, setIsSaving] = useState(false)
@@ -106,11 +99,10 @@ export default function AISettings() {
                         className="flex items-center gap-2"
                     >
                         <RotateCcwIcon className="w-4 h-4" />
-                        Khôi phục
+                        Đặt lại
                     </Button>
                     <Button
                         onClick={handleSave}
-                        disabled={!hasChanges || isSaving}
                         className="flex items-center gap-2 bg-[#248fca] hover:bg-[#248fca]/80"
                     >
                         <SaveIcon className="w-4 h-4" />
@@ -119,10 +111,8 @@ export default function AISettings() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column - Basic Settings */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Basic Parameters */}
+            <div className="">
+                <div className="space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -229,144 +219,6 @@ export default function AISettings() {
                                     Giá trị thấp = trả lời nhất quán, giá trị cao = sáng tạo hơn
                                 </p>
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Prompt Configuration */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <MessageSquareIcon className="w-5 h-5 text-green-600" />
-                                Cấu hình Prompt
-                            </CardTitle>
-                            <CardDescription>
-                                Tùy chỉnh cách AI hiểu và trả lời câu hỏi
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {/* System Prompt */}
-                            <div className="space-y-3">
-                                <Label htmlFor="systemPrompt" className="text-sm font-medium">
-                                    System Prompt
-                                </Label>
-                                <Textarea
-                                    id="systemPrompt"
-                                    placeholder="Định nghĩa vai trò và tính cách của AI..."
-                                    value={settings.system_prompt}
-                                    onChange={(e) => handleSettingChange('system_prompt', e.target.value)}
-                                    rows={4}
-                                    className="resize-none"
-                                />
-                                <p className="text-xs text-gray-500">
-                                    Định nghĩa vai trò, tính cách và cách thức hoạt động của AI
-                                </p>
-                            </div>
-
-                            {/* Context Prompt */}
-                            <div className="space-y-3">
-                                <Label htmlFor="contextPrompt" className="text-sm font-medium">
-                                    Context Prompt
-                                </Label>
-                                <Textarea
-                                    id="contextPrompt"
-                                    placeholder="Hướng dẫn cách AI xử lý thông tin..."
-                                    value={settings.context_prompt}
-                                    onChange={(e) => handleSettingChange('context_prompt', e.target.value)}
-                                    rows={3}
-                                    className="resize-none"
-                                />
-                                <p className="text-xs text-gray-500">
-                                    Hướng dẫn cách AI xử lý và tổng hợp thông tin từ cơ sở tri thức
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Right Column - Quick Actions & Preview */}
-                <div className="space-y-6">
-                    {/* Quick Actions */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <ZapIcon className="w-5 h-5 text-[#248fca]" />
-                                Hành động nhanh
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <Button
-                                variant="outline"
-                                className="w-full justify-start"
-                                onClick={() => handleSettingChange('system_prompt', defaultSettings?.system_prompt || '')}
-                                disabled={!defaultSettings}
-                            >
-                                <RotateCcwIcon className="w-4 h-4 mr-2" />
-                                Khôi phục System Prompt
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full justify-start"
-                                onClick={() => handleSettingChange('context_prompt', defaultSettings?.context_prompt || '')}
-                                disabled={!defaultSettings}
-                            >
-                                <RotateCcwIcon className="w-4 h-4 mr-2" />
-                                Khôi phục Context Prompt
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="w-full justify-start"
-                                onClick={handleReset}
-                                disabled={!defaultSettings}
-                            >
-                                <RotateCcwIcon className="w-4 h-4 mr-2" />
-                                Khôi phục tất cả
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    {/* Settings Preview */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <EyeIcon className="w-5 h-5 text-[#248fca]" />
-                                Xem trước cài đặt
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Top K:</span>
-                                    <span className="font-medium">{settings.top_k}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Độ chính xác:</span>
-                                    <span className="font-medium">{(settings.search_accuracy * 100).toFixed(0)}%</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Max tokens:</span>
-                                    <span className="font-medium">{settings.max_tokens}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Temperature:</span>
-                                    <span className="font-medium">{settings.temperature}</span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Tips */}
-                    <Card className="bg-[#248fca]/10 border-blue-200">
-                        <CardHeader>
-                            <CardTitle className="text-[#248fca] text-sm flex items-center gap-2">
-                                <LightbulbIcon className="w-5 h-5 text-[#248fca]" />
-                                Mẹo cài đặt
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="text-xs text-[#248fca] space-y-2">
-                            <p>• <strong>Top K:</strong> Giá trị 3-7 thường cho kết quả tốt nhất</p>
-                            <p>• <strong>Độ chính xác:</strong> 70% - 80% cân bằng giữa chất lượng và độ phủ</p>
-                            <p>• <strong>Temperature:</strong> 0.7 cho câu trả lời cân bằng</p>
-                            <p>• <strong>System Prompt:</strong> Rõ ràng, ngắn gọn về vai trò AI</p>
                         </CardContent>
                     </Card>
                 </div>

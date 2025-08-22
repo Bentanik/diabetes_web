@@ -21,7 +21,7 @@ type ChatMessage = {
     id?: string;
     session_id?: string;
     user_id?: string;
-    role: "human" | "assistant" | "ai";
+    role: "user" | "assistant" | "ai";
     content: string;
     created_at: string;
     updated_at?: string;
@@ -51,7 +51,7 @@ type SendMessageResponse = {
         session_id: string;
         user_id: string;
         content: string;
-        role: "ai" | "human";
+        role: "ai" | "user";
         created_at: string;
         updated_at: string;
     };
@@ -176,7 +176,7 @@ export default function ChatMain() {
 
     const sendMessage = async (text: string) => {
         const userMessage: ChatMessage = {
-            role: "human",
+            role: "user",
             content: text,
             created_at: new Date().toISOString(),
         };
@@ -368,17 +368,17 @@ export default function ChatMain() {
                         messages.map((m, idx) => (
                             <div
                                 key={idx}
-                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${m.role === "human" ? "flex-row-reverse" : ""
+                                className={`flex items-start gap-3 animate-in slide-in-from-bottom-2 duration-300 ${m.role === "user" ? "flex-row-reverse" : ""
                                     }`}
                             >
                                 {/* Avatar */}
                                 <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "human"
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "user"
                                         ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8]"
                                         : "bg-gradient-to-br from-gray-500 to-gray-600"
                                         }`}
                                 >
-                                    {m.role === "human" ? (
+                                    {m.role === "user" ? (
                                         <User className="w-4 h-4 text-white" />
                                     ) : (
                                         <Bot className="w-4 h-4 text-white" />
@@ -387,14 +387,14 @@ export default function ChatMain() {
 
                                 {/* Message Content */}
                                 <div
-                                    className={`max-w-[75%] ${m.role === "human"
+                                    className={`max-w-[75%] ${m.role === "user"
                                         ? "items-end"
                                         : "items-start"
                                         } flex flex-col`}
                                 >
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-xs font-medium text-gray-600">
-                                            {m.role === "human"
+                                            {m.role === "user"
                                                 ? "Bạn"
                                                 : "Trợ lý AI"}
                                         </span>
@@ -404,7 +404,7 @@ export default function ChatMain() {
                                     </div>
 
                                     <div
-                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${m.role === "human"
+                                        className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-200 ${m.role === "user"
                                             ? "bg-gradient-to-br from-[#248FCA] to-[#1e7bb8] text-white shadow-[#248FCA]/20 rounded-br-md"
                                             : "bg-white text-gray-800 border border-[#248FCA]/10 shadow-[#248FCA]/5 rounded-bl-md hover:shadow-md hover:border-[#248FCA]/20"
                                             } ${m.isTyping ? "animate-pulse" : ""}`}
