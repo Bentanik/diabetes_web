@@ -75,6 +75,36 @@ const toMinutes = (t: string) => {
     return hh * 60 + mm;
 };
 
+const getTodayStr = () => {
+	const now = new Date();
+	const y = now.getFullYear();
+	const m = String(now.getMonth() + 1).padStart(2, "0");
+	const d = String(now.getDate()).padStart(2, "0");
+	return `${y}-${m}-${d}`;
+};
+
+const getNowHms = () => {
+	const now = new Date();
+	const hh = String(now.getHours()).padStart(2, "0");
+	const mm = String(now.getMinutes()).padStart(2, "0");
+	const ss = String(now.getSeconds()).padStart(2, "0");
+	return `${hh}:${mm}:${ss}`;
+};
+
+const isPastDateTime = (date: string, endTime: string) => {
+	const today = getTodayStr();
+	if (date < today) return true;
+	if (date > today) return false;
+	return ensureHms(endTime) <= getNowHms();
+};
+
+const isPastByStart = (date: string, startTime: string) => {
+	const today = getTodayStr();
+	if (date < today) return true;
+	if (date > today) return false;
+	return ensureHms(startTime) <= getNowHms();
+};
+
 const hasOverlap = (
     times: TimeSlot[],
     start: string,
@@ -197,7 +227,9 @@ export default function WeeklyCalendar({
                         : "Công khai",
                     start: toIso(date, slot.start),
                     end: toIso(date, slot.end),
-                    editable: isDraft || status === 1,
+                    editable:
+                        (isDraft || status === 1) &&
+                        !isPastByStart(date, slot.start),
                     backgroundColor: isDraft
                         ? "#248FCA"
                         : status === 2
@@ -226,6 +258,30 @@ export default function WeeklyCalendar({
         });
         return evts;
     }, [scheduleData.timeTemplates, selectedWeekData.dates]);
+
+    const backgroundEvents: EventInput[] = useMemo(() => {
+		const today = getTodayStr();
+		const nowHms = getNowHms();
+		const bg: EventInput[] = [];
+		selectedWeekData.dates.forEach((date) => {
+			if (date < today) {
+				bg.push({
+					start: `${date}T00:00:00`,
+					end: `${date}T23:59:59`,
+					display: "background",
+					backgroundColor: "#fee2e2",
+				});
+			} else if (date === today) {
+				bg.push({
+					start: `${date}T00:00:00`,
+					end: `${date}T${nowHms}`,
+					display: "background",
+					backgroundColor: "#fee2e2",
+				});
+			}
+		});
+		return bg;
+	}, [selectedWeekData.dates]);
 
     const upsertChanged = (source?: { timeTemplates: DaySchedule[] }) => {
         const base = source ?? scheduleData;
@@ -301,7 +357,7 @@ export default function WeeklyCalendar({
     const handleDateSelect = (arg: DateSelectArg) => {
         const date = arg.startStr.split("T")[0];
         const start = new Date(arg.start);
-        const end = new Date(start.getTime() + 30 * 60 * 1000);
+        const end = new Date(start.getTime() + 15 * 60 * 1000);
         setEditStart(start.toTimeString().slice(0, 5));
         setEditEnd(end.toTimeString().slice(0, 5));
         const dayIndex = selectedWeekData.dates.findIndex((d) => d === date);
@@ -311,9 +367,21 @@ export default function WeeklyCalendar({
 
     const handleEventClick = (arg: EventClickArg) => {
         const { dayIndex, slotIndex, status } = arg.event.extendedProps as any;
+        const eventDate = arg.event.startStr.split("T")[0];
+        const startHms = arg.event.startStr
+            .split("T")[1]
+            ?.slice(0, 8) ?? "00:00:00";
+        if (isPastByStart(eventDate, startHms)) {
+            addToast({
+                type: "error",
+                description: "Thời gian đã qua, không thể chỉnh sửa.",
+                duration: 3000,
+            });
+            return;
+        }
         if (status === 2) return; // status=2 do nothing
-        const date = selectedWeekData.dates[dayIndex];
-        const day = scheduleData.timeTemplates.find((d) => d.date === date);
+        const selectedDate = selectedWeekData.dates[dayIndex];
+        const day = scheduleData.timeTemplates.find((d) => d.date === selectedDate);
         const slot = day?.times[slotIndex];
         if (!slot) return;
         setEditStart(ensureHms(slot.start).slice(0, 5));
@@ -329,6 +397,15 @@ export default function WeeklyCalendar({
         const newStart = ensureHms(editStart);
         const newEnd = ensureHms(editEnd);
         if (editTarget.mode === "create") {
+            // Disallow creating slots in the past by start time
+            if (isPastByStart(date, newStart)) {
+                addToast({
+                    type: "error",
+                    description: "Thời gian đã qua, không thể chỉnh sửa.",
+                    duration: 3000,
+                });
+                return;
+            }
             if (!validateSlotAndToast(day, newStart, newEnd)) return;
             const clientKey = `draft-${Date.now()}-${Math.random()
                 .toString(36)
@@ -343,6 +420,15 @@ export default function WeeklyCalendar({
         } else {
             const slot = day.times[editTarget.slotIndex];
             if (slot) {
+                // Disallow editing into the past by start time
+                if (isPastByStart(date, newStart)) {
+                    addToast({
+                        type: "error",
+                        description: "Thời gian đã qua, không thể chỉnh sửa.",
+                        duration: 3000,
+                    });
+                    return;
+                }
                 if (
                     !validateSlotAndToast(
                         day,
@@ -402,6 +488,17 @@ export default function WeeklyCalendar({
             .extendedProps as any;
         if (!(status === 1 || !templateId)) return; // allow draft or status=1
         const newDate = arg.event.startStr.split("T")[0];
+        const oldDateGuard = selectedWeekData.dates[dayIndex];
+        // Restrict status=1 (Không công khai) to only move within the same day
+        if (status === 1 && newDate !== oldDateGuard) {
+            addToast({
+                type: "error",
+                description: "Chỉ được di chuyển trong cùng một ngày",
+                duration: 3000,
+            });
+            (arg as any).revert?.();
+            return;
+        }
         const newStart =
             arg.event.startStr.split("T")[1]?.slice(0, 8) ?? "00:00:00";
         const newEnd = arg.event.endStr?.split("T")[1]?.slice(0, 8) ?? newStart;
@@ -535,7 +632,7 @@ export default function WeeklyCalendar({
                     allDaySlot={false}
                     headerToolbar={false as any}
                     weekends={true}
-                    events={events}
+                    events={[...events, ...backgroundEvents]}
                     eventClassNames={(info) => {
                         const { key, status, identity } = info.event
                             .extendedProps as any;
@@ -545,9 +642,49 @@ export default function WeeklyCalendar({
                             classes.push("to-delete");
                         if (status === 2)
                             classes.push("opacity-70 cursor-not-allowed");
+                        // Past timeslots are visually disabled
+                        const date = info.event.startStr?.split("T")[0] ?? "";
+                        const startHms = info.event.startStr
+                            ?.split("T")[1]
+                            ?.slice(0, 8) ?? "00:00:00";
+                        if (isPastByStart(date, startHms)) {
+                            classes.push("opacity-60 cursor-not-allowed");
+                        }
                         return classes;
                     }}
                     select={handleDateSelect}
+                    selectAllow={(arg) => {
+                        const date = arg.startStr.split("T")[0];
+                        const hms = arg.startStr
+                            .split("T")[1]
+                            ?.slice(0, 8) ?? "00:00:00";
+                        const allowed = !isPastByStart(date, hms);
+                        if (!allowed) {
+                            addToast({
+                                type: "error",
+                                description:
+                                    "Thời gian đã qua, không thể chỉnh sửa.",
+                                duration: 3000,
+                            });
+                        }
+                        return allowed;
+                    }}
+                    eventAllow={(dropInfo) => {
+                        const targetDate = dropInfo.startStr.split("T")[0];
+                        const hms = dropInfo.startStr
+                            .split("T")[1]
+                            ?.slice(0, 8) ?? "00:00:00";
+                        const allowed = !isPastByStart(targetDate, hms);
+                        if (!allowed) {
+                            addToast({
+                                type: "error",
+                                description:
+                                    "Thời gian đã qua, không thể chỉnh sửa.",
+                                duration: 3000,
+                            });
+                        }
+                        return allowed;
+                    }}
                     eventClick={handleEventClick}
                     eventDrop={handleEventDrop}
                     eventResize={handleEventResize}

@@ -41,7 +41,7 @@ export const sidebar_items = [
     {
         href: "/hospitals/hospital-staff",
         icon: UserRoundCog,
-        label: "Quản lý nhân viên bệnh viện",
+        label: "Quản lý nhân viên",
         subItems: [
             {
                 label: "Quản lý nhân viên",
@@ -56,6 +56,18 @@ export const sidebar_items = [
         ],
     },
     {
+        href: "/hospitals/dashboard",
+        icon: MessageCircle,
+        label: "Thống kê bác sĩ",
+        subItems: [
+            {
+                label: "Quản lý tư vấn",
+                href: "/hospitals/dashboard/consultation",
+                icon: SquareChartGantt,
+            },
+        ],
+    },
+    {
         href: "/mentor/setting",
         icon: UserCogIcon,
         label: "Quản lí tài khoản",
@@ -65,11 +77,11 @@ export const sidebar_items = [
         icon: MessageCircle,
         label: "Quản lí cuộc tư vấn",
         subItems: [
-            {
-                label: "Quản lý cuộc tư vấn",
-                href: "/hospitals/consultation/schedule",
-                icon: SquareChartGantt,
-            },
+            // {
+            //     label: "Quản lý cuộc tư vấn",
+            //     href: "/hospitals/consultation/schedule",
+            //     icon: SquareChartGantt,
+            // },
             {
                 label: "Tạo lịch tư vấn",
                 href: "/hospitals/consultation/create-consultation",

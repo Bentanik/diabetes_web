@@ -39,7 +39,7 @@ export default function ModeratorManageBlogComponent() {
     const user = useAppSelector((state) => state.userSlice);
     const isSystemAdmin = user.user?.roles?.includes("SystemAdmin");
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [itemsPerPage, setItemsPerPage] = useState(6);
+    const [itemsPerPage, setItemsPerPage] = useState(8);
 
     const initialStatus = Number(searchParams.get("status") || "1");
     const initialDoctor = searchParams.get("doctorId");
@@ -258,10 +258,10 @@ export default function ModeratorManageBlogComponent() {
                 </div>
             </motion.div>
 
-            {blogsPending && <SkeletonFolderGrid count={6} />}
+            {blogsPending && <SkeletonFolderGrid count={8} />}
 
             {/* Block Posts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {blogs?.items.map((data, index) => (
                     <Link
                         href={`/admin/blogs/blog-detail/${data.id}`}
@@ -281,7 +281,7 @@ export default function ModeratorManageBlogComponent() {
                                         "/images/default_img.jpg"
                                     }
                                     alt="thumbnail"
-                                    width={100}
+                                    width={50}
                                     height={50}
                                     className="w-full rounded-2xl h-[250px] object-cover"
                                 />
