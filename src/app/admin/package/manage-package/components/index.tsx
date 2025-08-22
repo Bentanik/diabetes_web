@@ -149,9 +149,6 @@ export default function ManagePackage() {
                                 </h3>
                             </div>
                             <div className="p-5">
-                                <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                                    {pkg.description || "—"}
-                                </p>
                                 <div className="mt-4 space-y-3">
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-gray-600">
