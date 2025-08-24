@@ -144,6 +144,9 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
                                     onPageChange={handlePageChange}
                                     onPerPageChange={handlePerPageChange}
                                     onTrainSuccess={handleTrainSuccess}
+                                    isSearching={debouncedSearchTerm.length > 0}
+                                    searchQuery={debouncedSearchTerm}
+                                    onClearSearch={() => setSearchTerm("")}
                                 />
                             )}
                         </div>

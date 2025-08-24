@@ -1,3 +1,4 @@
+import { useNotificationContext } from "@/context/notification_context";
 import {
   KNOWLEDGE_QUERY_KEY,
   useDeleteKnowledgeService,
@@ -10,6 +11,9 @@ export default function useDeleteKnowlege() {
 
   const { mutate } = useDeleteKnowledgeService();
   const queryClient = useQueryClient();
+
+  const { addSuccess } = useNotificationContext()
+
 
   const onSubmit = async (id: string, onClose: () => void) => {
     if (isDeleting) return; // Prevent multiple submissions
@@ -25,6 +29,7 @@ export default function useDeleteKnowlege() {
             await queryClient.invalidateQueries({
               queryKey: [KNOWLEDGE_QUERY_KEY],
             });
+            addSuccess("Thành công", `Cơ sở tri thức đã được xóa thành công`)
           }
         },
         onError: () => {

@@ -22,7 +22,7 @@ import {
 
 import { formatFileSize, getFileIcon } from "@/utils/file";
 import { useTrainDocumentService } from "@/services/train-ai/services";
-import { useNotification } from "@/context/notification_context";
+import { useNotificationContext } from "@/context/notification_context";
 import { downloadDocumentAsync } from "@/services/train-ai/api-services";
 import { useRouter } from "next/navigation";
 
@@ -50,7 +50,7 @@ export default function DocumentCard({
 }: DocumentCardProps) {
     const isUploadDoc = document.document_type === "uploaded_document";
     const { mutate: trainDocument, isPending: isTraining } = useTrainDocumentService();
-    const { addNotification } = useNotification();
+    const { addSuccess, addError } = useNotificationContext();
 
     const router = useRouter();
 
@@ -59,23 +59,14 @@ export default function DocumentCard({
             { document_id: document.id },
             {
                 onSuccess: () => {
-                    addNotification({
-                        title: "Thành công",
-                        message: "Đã bắt đầu huấn luyện tài liệu",
-                        type: "success",
-                        duration: 4000,
-                        position: "top-right",
-                    });
+                    addSuccess(
+                       "Thành công",
+                        "Đã bắt đầu huấn luyện tài liệu",
+                    );
                     onTrainSuccess();
                 },
-                onError: (error) => {
-                    addNotification({
-                        title: error.title || "Lỗi huấn luyện",
-                        message: error.detail || "Đã xảy ra lỗi khi huấn luyện tài liệu",
-                        type: "error",
-                        duration: 4000,
-                        position: "top-right",
-                    });
+                onError: () => {
+                    addError("Thất bại", "Đã xảy ra lỗi khi huấn luyện tài liệu");
                 },
             }
         );
@@ -188,8 +179,8 @@ export default function DocumentCard({
                         <Badge
                             variant="outline"
                             className={`${isUploadDoc
-                                ? "bg-blue-50 text-blue-600 border-blue-200"
-                                : "bg-green-50 text-green-700 border-green-200"
+                                ? "bg-white text-red-400 border-red-200"
+                                : "bg-blue-50 text-blue-600 border-blue-200"
                                 } text-xs font-medium`}
                         >
                             {isUploadDoc ? "Chưa huấn luyện" : "Đã huấn luyện"}

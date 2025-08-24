@@ -10,9 +10,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNotificationContext } from "@/context/notification_context";
 
 export default function useCreateKnowlegeBase() {
   const [isCreating, setIsCreating] = useState(false);
+
+  const { addSuccess } = useNotificationContext()
 
   const {
     register,
@@ -57,6 +60,7 @@ export default function useCreateKnowlegeBase() {
             await queryClient.invalidateQueries({
               queryKey: [KNOWLEDGE_QUERY_KEY],
             });
+            addSuccess("Thành công", `Cơ sở tri thức có tên ${data.name} đã được tạo thành công`)
           }
         },
         onError: (data: TMeta) => {

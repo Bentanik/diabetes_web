@@ -435,10 +435,10 @@ export default function HistoryUploadFileDisplay({ knowledgeId }: HistoryUploadF
                     <div className="flex items-center justify-center p-12">
                         <div className="text-center space-y-3">
                             <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mx-auto">
-                                <HistoryIcon className="w-8 h-8 text-gray-300" />
+                                <HistoryIcon className="w-8 h-8 text-gray-400" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-gray-900 mb-1">Chưa có lịch sử tải nào</p>
+                                <p className="text-xl font-medium text-gray-900 mb-1">Chưa có lịch sử tải nào</p>
                                 <p className="text-xs text-gray-500">Lịch sử tải sẽ hiển thị ở đây</p>
                             </div>
                         </div>

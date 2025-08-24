@@ -4,16 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-    PlusIcon,
-    ChevronDownIcon,
-    FolderPlusIcon,
-    FileTextIcon,
     SettingsIcon,
     SquarePercentIcon,
 } from "lucide-react";
@@ -45,42 +35,6 @@ export default function Header() {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    {/* Create Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild className="outline-none">
-                            <motion.div
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                <Button
-                                    variant="outline"
-                                    className="gap-2 bg-transparent"
-                                >
-                                    <PlusIcon className="w-4 h-4" />
-                                    Tạo
-                                    <ChevronDownIcon className="w-4 h-4" />
-                                </Button>
-                            </motion.div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                                onClick={() => setCreateFolderModalOpen(true)}
-                                className="gap-2 cursor-pointer"
-                            >
-                                <FolderPlusIcon className="w-4 h-4" />
-                                <span className="text-sm text-gray-800">
-                                    Tạo thư mục
-                                </span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 cursor-pointer">
-                                <FileTextIcon className="w-4 h-4" />
-                                <span className="text-sm text-gray-800">
-                                    Tạo prompt
-                                </span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
                     <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}

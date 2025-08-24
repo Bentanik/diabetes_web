@@ -61,7 +61,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
                             </div>
                             <div className="min-w-0 flex-1">
                                 <h3
-                                    className="font-semibold text-gray-900 group-hover:text-[#248fca] transition-colors"
+                                    className="font-semibold text-[#248fca] group-hover:text-[#248fca] transition-colors"
                                     title={folder.name}
                                 >
                                     {folder.name}
@@ -94,14 +94,14 @@ export default function FolderCard({ folder }: FolderCardProps) {
                                             e.stopPropagation()
                                             setDropdownOpen(false)
                                         }}
-                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 hover:text-[#248fca]"
+                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 hover:text-[#248fca] hover:cursor-pointer"
                                     >
                                         <EditIcon className="w-4 h-4" />
                                         Chỉnh sửa
                                     </button>
                                     <button
                                         onClick={handleDeleteClick}
-                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 hover:text-[#248fca]"
+                                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2 hover:text-red-600 hover:cursor-pointer"
                                     >
                                         <TrashIcon className="w-4 h-4" />
                                         Xóa

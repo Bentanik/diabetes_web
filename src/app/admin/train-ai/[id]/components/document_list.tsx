@@ -13,6 +13,9 @@ type DocumentListProps = {
     onPageChange: (page: number) => void
     onPerPageChange: (perPage: number) => void
     onTrainSuccess?: () => void
+    isSearching?: boolean
+    searchQuery?: string
+    onClearSearch?: () => void
 }
 
 export default function DocumentList({
@@ -22,20 +25,22 @@ export default function DocumentList({
     onPageChange,
     onPerPageChange,
     onTrainSuccess = () => { },
+    isSearching = false,
+    searchQuery = "",
+    onClearSearch = () => { },
 }: DocumentListProps) {
 
     if (isPending) {
         return <DocumentListSkeleton />
     }
 
+
     if (documentsData.items.length === 0) {
         return <DocumentEmptyState
             knowledgeBaseId={knowledgeBaseId}
-            isSearching={false}
-            searchQuery=""
-            statusFilter="all"
-            onClearSearch={() => { }}
-            onClearFilter={() => { }}
+            isSearching={isSearching}
+            searchQuery={searchQuery}
+            onClearSearch={onClearSearch}
         />
     }
 
