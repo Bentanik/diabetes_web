@@ -1,6 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
 const TRAIN_AI =
-    "https://penalties-complimentary-democratic-camping.trycloudflare.com/api/v1/rag";
+    "http://localhost:8000/api/v1/rag";
 const KNOWLEDGES = TRAIN_AI + "/knowledges";
 
 const DOCUMENTS = `${TRAIN_AI}/documents`;

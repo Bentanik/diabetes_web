@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { useAppSelector } from "@/stores";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AuthLayout({
     children,
@@ -14,19 +16,20 @@ export default function AuthLayout({
 }>) {
     const userState = useAppSelector((state) => state.userSlice);
 
-    const roles = userState.user?.roles ?? [];
-    if (roles.includes("Moderator")) {
-        return (window.location.href = "/admin/blogs");
-    }
-    if (roles.includes("SystemAdmin")) {
-        return (window.location.href = "/admin/home");
-    }
-    if (roles.includes("HospitalAdmin")) {
-        return (window.location.href = "/hospitals/hospital-staff");
-    }
-    if (roles.includes("HospitalStaff")) {
-        return (window.location.href = "/hospitals/home");
-    }
+    const router = useRouter();
+
+    useEffect(() => {
+        const roles = userState.user?.roles ?? [];
+        if (roles.includes("Moderator")) {
+            router.push("/admin/blogs");
+        } else if (roles.includes("SystemAdmin")) {
+            router.push("/admin/home");
+        } else if (roles.includes("HospitalAdmin")) {
+            router.push("/hospitals/hospital-staff");
+        } else if (roles.includes("HospitalStaff")) {
+            router.push("/hospitals/home");
+        }
+    }, [userState.user?.roles, router]);
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -64,7 +67,7 @@ export default function AuthLayout({
                         <button
                             type="button"
                             className="w-12 h-12 backdrop-blur-md border border-[#248fca]/20 flex items-center justify-center rounded-full transition-all duration-300 cursor-pointer hover:bg-[var(--primary-color)] group"
-                            // onClick={handlePrevious}
+                            onClick={() => router.back()}
                         >
                             <MoveLeftIcon className="w-5 h-5 text-[#248fca]  transition-colors group-hover:text-white!" />
                         </button>

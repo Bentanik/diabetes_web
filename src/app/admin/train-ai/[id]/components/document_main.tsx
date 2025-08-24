@@ -99,7 +99,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
                         className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                             activeTab === "documents"
                                 ? "bg-white text-[#248fca] shadow-sm"
-                                : "text-white hover:text-orange-100"
+                                : "text-white hover:opacity-80"
                         }`}
                     >
                         <FileTextIcon className="w-4 h-4" />
@@ -110,7 +110,7 @@ export default function DocumentMain({ knowledgeBaseId }: DocumentMainProps) {
                         className={`flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                             activeTab === "training"
                                 ? "bg-white text-[#248fca] shadow-sm"
-                                : "text-white hover:text-orange-100"
+                                : "text-white hover:opacity-80"
                         }`}
                     >
                         <BrainIcon className="w-4 h-4" />
