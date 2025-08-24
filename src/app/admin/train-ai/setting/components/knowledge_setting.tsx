@@ -9,13 +9,14 @@ import {
     SearchIcon,
     FileTextIcon,
     HardDriveIcon,
-    CheckCircleIcon,
     CircleIcon,
     CalendarIcon,
     BookOpenIcon,
     FileIcon,
     SaveIcon,
     XIcon,
+    CheckCircleIcon,
+    MessageCircleIcon,
 } from "lucide-react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Pagination from "@/components/shared/pagination";
@@ -44,51 +45,53 @@ const KnowledgeItem = ({
     }, []);
 
     return (
-        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-6">
+        <div
+            className="flex items-center justify-between p-5 rounded-xl bg-white shadow shadow-gray-200 border border-gray-100 hover:shadow-md hover:shadow-gray-300 transition-all group"
+        >
+            <div className="flex items-center gap-5">
                 <input
                     type="checkbox"
                     id={knowledgeBase.id}
                     checked={isSelected}
                     onChange={() => onToggle(knowledgeBase.id)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-5 w-5 accent-[#248fca] rounded-md border-gray-300 focus:ring-0 focus:ring-[#248fca]/30 transition"
                 />
-                <div className="flex-1">
+                <div>
                     <label
                         htmlFor={knowledgeBase.id}
-                        className="font-medium text-gray-900 cursor-pointer"
+                        className="font-semibold text-gray-900 text-base cursor-pointer group-hover:text-[#248fca] transition"
                     >
                         {knowledgeBase.name}
                     </label>
                     {knowledgeBase.description && (
-                        <p className="text-sm text-gray-600 mt-0.5 line-clamp-2">
+                        <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
                             {knowledgeBase.description}
                         </p>
                     )}
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-1 flex-wrap">
+                    <div className="flex items-center gap-4 text-xs text-gray-400 mt-2 flex-wrap">
                         <span className="flex items-center gap-1">
                             <FileTextIcon className="w-3 h-3" />
-                            {knowledgeBase.stats.document_count.toLocaleString()} tài
-                            liệu
+                            {knowledgeBase.stats.document_count.toLocaleString()} tài liệu
                         </span>
                         <span className="flex items-center gap-1">
                             <HardDriveIcon className="w-3 h-3" />
                             {formatFileSize(knowledgeBase.stats.total_size_bytes)}
                         </span>
-                        <span className="flex items-center gap-1 text-xs">
+                        <span className="flex items-center gap-1">
                             <CalendarIcon className="w-3 h-3" />
-                            Cập nhật: {formatDate(knowledgeBase.updated_at)}
+                            {formatDate(knowledgeBase.updated_at)}
                         </span>
                         <span
-                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${knowledgeBase.select_training === true
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-medium text-xs transition
+                                ${knowledgeBase.select_training
+                                    ? "bg-[#248fca]/10 text-[#248fca]"
+                                    : "bg-gray-100 text-gray-400"
                                 }`}
                         >
-                            {knowledgeBase.select_training === true ? (
+                            {knowledgeBase.select_training ? (
                                 <>
                                     <CheckCircleIcon className="w-3 h-3" />
-                                    Hoạt động
+                                    Đã kích hoạt
                                 </>
                             ) : (
                                 <>
@@ -100,11 +103,11 @@ const KnowledgeItem = ({
                     </div>
                 </div>
             </div>
-            <div className="flex items-center gap-2 ml-4">
+            <div>
                 {onDelete && (
                     <button
                         onClick={() => onDelete(knowledgeBase)}
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                        className="p-2 rounded-full hover:bg-[#248fca]/10 text-gray-400 hover:text-[#248fca] transition"
                         title="Xóa"
                         type="button"
                     >
@@ -245,7 +248,7 @@ export default function KnowledgeSetting() {
     if (isPending && currentPage === 1 && !searchTerm) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#248fca]"></div>
             </div>
         );
     }
@@ -255,12 +258,13 @@ export default function KnowledgeSetting() {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                    <p className="text-red-600 mb-2">
+                    <p className="text-[#e53935] mb-2">
                         Có lỗi xảy ra khi tải dữ liệu
                     </p>
                     <Button
                         onClick={() => window.location.reload()}
                         variant="outline"
+                        className="border-[#248fca] text-[#248fca] hover:bg-[#248fca]/10"
                     >
                         Thử lại
                     </Button>
@@ -270,142 +274,133 @@ export default function KnowledgeSetting() {
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex flex-col lg:flex-row gap-8 w-full">
             {/* Main Settings */}
-            <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-[#248fca] flex items-center gap-2">
-                            <BookOpenIcon className="w-5 h-5" />
-                            Chọn cơ sở tri thức để AI trả lời
-                        </h3>
+            <div className="flex-1 flex flex-col min-h-[600px]">
+                <div className="bg-white rounded-2xl border border-gray-100 p-8 h-full shadow shadow-gray-200 flex flex-col">
+                    <div className="flex items-center justify-between gap-x-4 mb-4">
+                        <div className="w-full">
+                            <div className="relative">
+                                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Tìm kiếm nội dung..."
+                                    value={searchTerm}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2.5 h-11 rounded-lg border border-gray-200 shadow-none focus:ring-0 placeholder:text-gray-400 transition input-auth"
+                                />
+                            </div>
+                        </div>
                         <Button
                             variant="outline"
-                            className="gap-2 bg-transparent text-[#248fca] hover:text-[#248fca]"
+                            className="w-[180px] h-11 gap-2 border-[#248fca]/20 text-[#248fca] hover:text-[#248fca] hover:border-[#248fca]/40 rounded-lg font-semibold bg-white hover:cursor-pointer"
                             onClick={handleAddKnowledgeBase}
                         >
                             <PlusIcon className="w-5 h-5" />
                             Thêm cơ sở tri thức
                         </Button>
                     </div>
-
-                    {/* Search */}
-                    <div className="mb-4">
-                        <div className="relative">
-                            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                            <input
-                                type="text"
-                                placeholder="Tìm kiếm cơ sở tri thức..."
-                                value={searchTerm}
-                                onChange={(e) =>
-                                    handleSearchChange(e.target.value)
-                                }
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            />
-                        </div>
-                    </div>
-
                     {/* Results info */}
-                    <div className="mb-3 text-sm text-gray-600">
+                    <div className="my-4 text-sm text-gray-500">
                         {isPending ? (
                             <span>Đang tìm kiếm...</span>
                         ) : (
                             <>
-                                Tìm thấy {totalItems} kết quả
+                                Tìm thấy <span className="text-[#248fca]">{totalItems}</span> kết quả
                                 {debouncedSearchTerm &&
-                                    ` cho "${debouncedSearchTerm}"`}
+                                    <> cho <span className="text-[#248fca]">&quot;{debouncedSearchTerm}&quot;</span></>
+                                }
                             </>
                         )}
                     </div>
 
-                    {/* Knowledge Base List */}
-                    <div className="space-y-3 min-h-[300px]">
-                        {isPending ? (
-                            // Loading skeleton
-                            Array.from({ length: ITEMS_PER_PAGE }).map(
-                                (_, index) => (
-                                    <div key={index} className="animate-pulse">
-                                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                                            <div className="flex items-center gap-3 flex-1">
-                                                <div className="h-4 w-4 bg-gray-200 rounded"></div>
-                                                <div className="flex-1">
-                                                    <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
-                                                    <div className="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
-                                                    <div className="flex gap-4">
-                                                        <div className="h-3 bg-gray-200 rounded w-16"></div>
-                                                        <div className="h-3 bg-gray-200 rounded w-12"></div>
-                                                        <div className="h-3 bg-gray-200 rounded w-20"></div>
+                    <div className="flex-1 flex flex-col">
+                        {/* Knowledge Base List */}
+                        <div className="space-y-4 min-h-[300px] flex-1">
+                            {isPending ? (
+                                // Loading skeleton
+                                Array.from({ length: ITEMS_PER_PAGE }).map(
+                                    (_, index) => (
+                                        <div key={index} className="animate-pulse">
+                                            <div className="flex items-center justify-between p-5 border border-gray-100 rounded-xl shadow shadow-gray-100 bg-gray-50">
+                                                <div className="flex items-center gap-4 flex-1">
+                                                    <div className="h-5 w-5 bg-gray-200 rounded"></div>
+                                                    <div className="flex-1">
+                                                        <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                                                        <div className="h-3 bg-gray-200 rounded w-2/3 mb-2"></div>
+                                                        <div className="flex gap-4">
+                                                            <div className="h-3 bg-gray-200 rounded w-16"></div>
+                                                            <div className="h-3 bg-gray-200 rounded w-12"></div>
+                                                            <div className="h-3 bg-gray-200 rounded w-20"></div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <div className="h-8 w-8 bg-gray-200 rounded"></div>
-                                                <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                                                <div className="flex gap-2">
+                                                    <div className="h-8 w-8 bg-gray-200 rounded"></div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )
                                 )
-                            )
-                        ) : knowledgeBases.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500">
-                                <BookOpenIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                                {debouncedSearchTerm ? (
-                                    <>
-                                        <p className="text-lg mb-2">
-                                            Không tìm thấy nội dung nào
-                                        </p>
-                                        <p className="text-sm">
-                                            Thử tìm kiếm với từ khóa khác
-                                        </p>
-                                    </>
-                                ) : (
-                                    <>
-                                        <p className="text-lg mb-2">
-                                            Chưa có nội dung nào
-                                        </p>
-                                        <p className="text-sm">
-                                            Hãy thêm nội dung đầu tiên của bạn
-                                        </p>
-                                    </>
-                                )}
-                            </div>
-                        ) : (
-                            knowledgeBases.map((knowledgeBase: API.TKnowledge) => (
-                                <KnowledgeItem
-                                    key={knowledgeBase.id}
-                                    knowledgeBase={knowledgeBase}
-                                    isSelected={selectedKnowledgeBases.includes(
-                                        knowledgeBase.id
+                            ) : knowledgeBases.length === 0 ? (
+                                <div className="text-center py-12 text-gray-500">
+                                    <BookOpenIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                    {debouncedSearchTerm ? (
+                                        <>
+                                            <p className="text-lg mb-2 font-semibold">
+                                                Không tìm thấy cơ sở tri thức
+                                            </p>
+                                            <p className="text-sm">
+                                                Thử tìm kiếm với từ khóa khác
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-lg mb-2 font-semibold">
+                                                Chưa có cơ sở tri thức nào
+                                            </p>
+                                            <p className="text-sm">
+                                                Hãy thêm cơ sở tri thức đầu tiên của bạn
+                                            </p>
+                                        </>
                                     )}
-                                    onToggle={handleKnowledgeBaseToggle}
-                                    onDelete={handleDelete}
-                                />
-                            ))
+                                </div>
+                            ) : (
+                                knowledgeBases.map((knowledgeBase: API.TKnowledge) => (
+                                    <KnowledgeItem
+                                        key={knowledgeBase.id}
+                                        knowledgeBase={knowledgeBase}
+                                        isSelected={selectedKnowledgeBases.includes(
+                                            knowledgeBase.id
+                                        )}
+                                        onToggle={handleKnowledgeBaseToggle}
+                                        onDelete={handleDelete}
+                                    />
+                                ))
+                            )}
+                        </div>
+                        {/* Pagination */}
+                        {!isPending && totalPages > 1 && (
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={totalItems}
+                                perPage={ITEMS_PER_PAGE}
+                                hasNext={hasNext}
+                                hasPrev={hasPrev}
+                                onPageChange={handlePageChange}
+                                isLoading={isPending}
+                            />
                         )}
                     </div>
-
-                    {/* Pagination */}
-                    {!isPending && totalPages > 1 && (
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            totalItems={totalItems}
-                            perPage={ITEMS_PER_PAGE}
-                            hasNext={hasNext}
-                            hasPrev={hasPrev}
-                            onPageChange={handlePageChange}
-                            isLoading={isPending}
-                        />
-                    )}
                 </div>
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
-                {/* Selected Knowledge Bases */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                        <FileIcon className="w-5 h-5" />
+            <div className="w-full lg:w-[370px] flex flex-col min-h-[600px]">
+                <div className="bg-gray-50 rounded-2xl border border-gray-100 p-8 shadow shadow-gray-200 mb-8 flex-1 flex flex-col">
+                    <h3 className="text-lg font-[600] text-[#248fca] mb-6 flex items-center gap-2">
+                        <FileIcon className="w-5 h-5 text-[#248fca]" />
                         Nội dung đã chọn ({selectedKnowledgeBases.length})
                     </h3>
                     <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -420,13 +415,13 @@ export default function KnowledgeSetting() {
                             selectedKnowledgeBasesInfo.map((knowledgeBase) => (
                                 <div
                                     key={knowledgeBase?.id}
-                                    className="flex items-center justify-between p-3 bg-blue-50 rounded-lg"
+                                    className="flex items-center justify-between p-3 bg-[#248fca]/10 rounded-lg"
                                 >
                                     <div className="flex-1 min-w-0">
-                                        <span className="text-sm font-medium text-blue-900 block truncate">
+                                        <span className="text-sm font-semibold text-[#248fca] block truncate">
                                             {knowledgeBase?.name}
                                         </span>
-                                        <div className="text-xs text-blue-600 flex items-center gap-1">
+                                        <div className="text-xs text-[#248fca] flex items-center gap-1">
                                             <FileTextIcon className="w-3 h-3" />
                                             {knowledgeBase?.stats.document_count.toLocaleString()}{" "}
                                             tài liệu
@@ -438,7 +433,7 @@ export default function KnowledgeSetting() {
                                                 knowledgeBase?.id || ""
                                             )
                                         }
-                                        className="text-blue-400 hover:text-blue-600 ml-2 p-1"
+                                        className="text-[#248fca] hover:text-[#197bb5] ml-2 p-1 rounded-full transition"
                                         title="Bỏ chọn"
                                     >
                                         <XIcon className="w-4 h-4" />
@@ -448,20 +443,34 @@ export default function KnowledgeSetting() {
                         )}
                     </div>
                 </div>
-
-                {/* Quick Actions */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-                        <SettingsIcon className="w-5 h-5" />
+                <div className="bg-gray-50 rounded-2xl border border-gray-100 p-8 shadow shadow-gray-200 flex-1 flex flex-col">
+                    <h3 className="text-lg font-[600] text-[#248fca] mb-6 flex items-center gap-2">
+                        <SettingsIcon className="w-5 h-5 text-[#248fca]" />
                         Thao tác nhanh
                     </h3>
                     <div className="space-y-3">
                         <Button
-                            className="w-full bg-[#248fca] hover:bg-[#248fca]/80 gap-2"
+                            className="w-full bg-[#248fca] hover:bg-[#197bb5] text-white rounded-lg font-semibold py-2 gap-2 transition cursor-pointer"
                             onClick={handleSaveSettings}
                         >
                             <SaveIcon className="w-4 h-4" />
                             Lưu cài đặt
+                        </Button>
+
+                        <Button
+                            className="w-full bg-[#248fca] hover:bg-[#197bb5] text-white rounded-lg font-semibold py-2 gap-2 transition cursor-pointer"
+                            onClick={handleSaveSettings}
+                        >
+                            <SearchIcon className="w-4 h-4" />
+                            Tìm kiếm tài liệu theo ngữ nghĩa
+                        </Button>
+
+                        <Button
+                            className="w-full bg-[#248fca] hover:bg-[#197bb5] text-white rounded-lg font-semibold py-2 gap-2 transition cursor-pointer"
+                            onClick={handleSaveSettings}
+                        >
+                            <MessageCircleIcon className="w-4 h-4" />
+                            Chat với cơ sở tri thức
                         </Button>
                     </div>
                 </div>
