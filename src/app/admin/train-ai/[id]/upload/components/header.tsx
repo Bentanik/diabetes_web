@@ -1,8 +1,10 @@
 "use client"
 import { motion } from "framer-motion"
-import { ArrowLeftIcon, UploadIcon } from "lucide-react"
+import { ArrowLeftIcon, SettingsIcon, SquarePercentIcon, UploadIcon } from "lucide-react"
 import ProfileHospitalMenu from "@/components/profile_hospital_menu"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import NotificationDropdown from "@/components/notification"
 
 interface HeaderProps {
     knowledgeBase: API.TKnowledge
@@ -45,10 +47,45 @@ export default function Header({ knowledgeBase, onGoBack }: HeaderProps) {
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <ProfileHospitalMenu profile={knowledgeBase} />
+                <div className="flex items-center gap-4">
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        <Link href={"/admin/train-ai/chat"}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="gap-2 bg-transparent"
+                            >
+                                <SquarePercentIcon className="w-4 h-4" />
+                                Kiểm tra
+                            </Button>
+                        </Link>
+                    </motion.div>
+
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        <Link href={"/admin/train-ai/setting"}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="gap-2 bg-transparent"
+                            >
+                                <SettingsIcon className="w-4 h-4" />
+                                Cài đặt
+                            </Button>
+                        </Link>
+                    </motion.div>
+
+                    <NotificationDropdown />
+                    <div>
+                        <ProfileHospitalMenu profile={1} />
+                    </div>
                 </div>
             </div>
         </motion.div>
-    )
+    );
 }

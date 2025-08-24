@@ -7,7 +7,7 @@ import Header from "@/app/admin/train-ai/[id]/upload/components/header";
 import UploadArea from "@/app/admin/train-ai/[id]/upload/components/upload_area";
 import ValidationInfo from "@/app/admin/train-ai/[id]/upload/components/validation_info";
 import WarningModal from "@/app/admin/train-ai/[id]/upload/components/warning_modal";
-import { useNotification } from "@/context/notification_context";
+import { useNotificationContext } from "@/context/notification_context";
 import { useUploadDocument } from "@/app/admin/train-ai/[id]/upload/hooks/useUploadDocument";
 import { fileForTrainAI } from "@/lib/validations/file_train_ai";
 import HistoryUploadFileDisplay from "@/app/admin/train-ai/[id]/upload/components/history_upload_file_display";
@@ -35,7 +35,7 @@ export default function UploadPageComponent({ id }: { id: string }) {
     const [retryCount, setRetryCount] = useState(0);
 
     const { handleUploadDocument } = useUploadDocument();
-    const { addNotification } = useNotification();
+    const { addSuccess, addError } = useNotificationContext();
 
     const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeByIdService(id);
 
@@ -99,25 +99,23 @@ export default function UploadPageComponent({ id }: { id: string }) {
             try {
                 handleUploadDocument(formData, {
                     onSuccess: () => {
+                        addSuccess(
+                            "Tải lên tài liệu thành công",
+                            "Tài liệu đã được tải lên thành công"
+                        );
                     },
-                    onError: (error) => {
-                        addNotification({
-                            title: error.title || "Lỗi tải lên",
-                            message: error.detail || "Đã xảy ra lỗi khi tải lên tài liệu",
-                            type: "error",
-                            duration: 4000,
-                            position: "top-right",
-                        });
+                    onError: () => {
+                        addError(
+                            "Lỗi tải lên",
+                            "Đã xảy ra lỗi khi tải lên tài liệu"
+                        );
                     },
                 });
             } catch {
-                addNotification({
-                    title: "Lỗi tải lên",
-                    message: "Đã xảy ra lỗi không xác định khi tải lên tài liệu",
-                    type: "error",
-                    duration: 4000,
-                    position: "top-right",
-                });
+                addError(
+                    "Lỗi tải lên",
+                    "Đã xảy ra lỗi không xác định khi tải lên tài liệu"
+                );
             }
         },
         []
@@ -129,13 +127,10 @@ export default function UploadPageComponent({ id }: { id: string }) {
             if (file) {
                 const validationResult = fileForTrainAI.validate(file);
                 if (validationResult.blockingErrors.length > 0) {
-                    addNotification({
-                        title: "Tệp không hợp lệ",
-                        message: validationResult.blockingErrors.join("\n"),
-                        type: "error",
-                        duration: 4000,
-                        position: "top-right",
-                    });
+                    addError(
+                        "Tệp không hợp lệ",
+                        validationResult.blockingErrors.join("\n")
+                    );
                     return;
                 }
                 setFileToUpload(file);
@@ -146,7 +141,7 @@ export default function UploadPageComponent({ id }: { id: string }) {
                 handleOpenCreateDocumentModal();
             }
         },
-        [addNotification]
+        [addError]
     );
 
     const handleFileUpload = useCallback(() => {
@@ -180,13 +175,10 @@ export default function UploadPageComponent({ id }: { id: string }) {
             if (file) {
                 const validationResult = fileForTrainAI.validate(file);
                 if (validationResult.blockingErrors.length > 0) {
-                    addNotification({
-                        title: "Tệp không hợp lệ",
-                        message: validationResult.blockingErrors.join("\n"),
-                        type: "error",
-                        duration: 4000,
-                        position: "top-right",
-                    });
+                    addError(
+                        "Tệp không hợp lệ",
+                        validationResult.blockingErrors.join("\n")
+                    );
                     return;
                 }
                 setFileToUpload(file);
@@ -197,7 +189,7 @@ export default function UploadPageComponent({ id }: { id: string }) {
                 handleOpenCreateDocumentModal();
             }
         },
-        [addNotification]
+        [addError]
     );
 
     // Loading Skeleton Component

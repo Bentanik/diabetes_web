@@ -2,6 +2,8 @@ import { motion } from "framer-motion"
 import { ArrowLeftIcon, FolderIcon, PlusIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import NotificationDropdown from "@/components/notification"
+import ProfileHospitalMenu from "@/components/profile_hospital_menu"
 
 interface HeaderProps {
     knowledgeBase: API.TKnowledge
@@ -42,17 +44,29 @@ export default function Header({ knowledgeBase }: HeaderProps) {
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Link href={`/admin/train-ai/${knowledgeBase.id}/upload`}>
-                        <Button size="sm" className="gap-2 bg-[#248fca] hover:bg-[#248fca]/80">
-                            <PlusIcon className="w-4 h-4" />
-                            Thêm tài liệu
-                        </Button>
-                    </Link>
+
+                <div className="flex items-center gap-4">
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Link href={`/admin/train-ai/${knowledgeBase.id}/upload`}>
+                                <Button size="sm" className="gap-2 bg-[#248fca] hover:bg-[#248fca]/80">
+                                    <PlusIcon className="w-4 h-4" />
+                                    Thêm tài liệu
+                                </Button>
+                            </Link>
+                        </div>
+                    </motion.div>
+
+                    <NotificationDropdown />
+                    <div>
+                        <ProfileHospitalMenu profile={1} />
+                    </div>
                 </div>
             </div>
 
-            {/* Description - Optional, only if needed */}
             {knowledgeBase.description && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
                     <p className="text-sm text-gray-600 leading-relaxed">{knowledgeBase.description}</p>

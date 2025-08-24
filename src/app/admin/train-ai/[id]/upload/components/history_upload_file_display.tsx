@@ -384,7 +384,7 @@ export default function HistoryUploadFileDisplay({ knowledgeId }: HistoryUploadF
                             <HistoryIcon className="w-5 h-5" />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-gray-900 font-semibold">Lịch sử tải tài liệu</span>
+                            <span className="text-[#248fca] font-semibold">Lịch sử tải tài liệu</span>
                             <span className="text-sm text-gray-500">Theo dõi các tài liệu đã tải lên gần đây</span>
                         </div>
                     </div>
