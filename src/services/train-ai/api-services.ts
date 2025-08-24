@@ -62,7 +62,9 @@ export const deleteKnowledgeAsync = async (name: string) => {
   return response.data;
 };
 
-export const editKnowledgeAsync = async (data: REQUEST.TEditKnowledgeRequest) => {
+export const editKnowledgeAsync = async (
+  data: REQUEST.TEditKnowledgeRequest
+) => {
   const response = await request<TResponseData<API.TKnowledge>>(
     API_ENDPOINTS.KNOWLEDGES + "/" + data.id,
     {
@@ -135,7 +137,7 @@ export const getDocumentByIdAsync = async (id: string) => {
   );
 
   return response.data;
-}
+};
 
 export const downloadDocumentAsync = async (id: string) => {
   try {
@@ -215,19 +217,18 @@ export const getSettingsAsync = async () => {
   );
 
   return response.data;
-}
+};
 
-export const updateSettingAsync = async (data: REQUEST.TUpdateSettingsRequest) => {
-  const response = await request<TResponseData>(
-    API_ENDPOINTS.SETTING,
-    {
-      method: "PUT",
-      data,
-    }
-  );
+export const updateSettingAsync = async (
+  data: REQUEST.TUpdateSettingsRequest
+) => {
+  const response = await request<TResponseData>(API_ENDPOINTS.SETTING, {
+    method: "PUT",
+    data,
+  });
 
   return response.data;
-}
+};
 
 export const getViewFileAsync = async (id: string) => {
   const response = await request<Blob>(
@@ -239,9 +240,9 @@ export const getViewFileAsync = async (id: string) => {
   );
 
   return response.data;
-}
+};
 
-export const getDocumentParserAsync = async (
+export const getDocumentChunkAsync = async (
   document_id: string,
   params: {
     search?: string;
@@ -251,15 +252,14 @@ export const getDocumentParserAsync = async (
     limit?: number;
   }
 ) => {
-  const response = await request<TResponseData<TPagination<API.TDocumentParser>>>(
-    API_ENDPOINTS.DOCUMENTS + "/" + document_id + "/parser",
-    {
-      method: "GET",
-      params: {
-        ...params,
-      },
-    }
-  );
+  const response = await request<
+    TResponseData<TPagination<API.TDocumentChunk>>
+  >(API_ENDPOINTS.DOCUMENTS + "/" + document_id + "/chunks", {
+    method: "GET",
+    params: {
+      ...params,
+    },
+  });
 
   return response.data;
 };

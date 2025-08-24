@@ -1,18 +1,15 @@
-"use client";
-import { formatFileSize } from "@/utils/file";
-import { motion } from "framer-motion";
-import {
-    ArrowLeftIcon,
-    FileText,
-    Calendar,
-    Clock,
-    ArchiveIcon,
-} from "lucide-react";
-import Link from "next/link";
+"use client"
+import NotificationDropdown from "@/components/notification";
+import ProfileHospitalMenu from "@/components/profile_hospital_menu";
+import { formatFileSize, getFileIcon } from "@/utils/file";
+import { motion } from "framer-motion"
+import { ArrowLeftIcon, FileText, Calendar, Clock, ArchiveIcon } from "lucide-react"
+import Link from "next/link"
 
 interface HeaderProps {
     documentData: API.TDocument;
 }
+
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -25,7 +22,10 @@ const formatDate = (dateString: string) => {
     }).format(date);
 };
 
-export default function Header({ documentData }: HeaderProps) {
+
+export default function Header({
+    documentData,
+}: HeaderProps) {
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -51,15 +51,12 @@ export default function Header({ documentData }: HeaderProps) {
 
                     <div className="flex items-start gap-3 flex-1">
                         <div className="p-2 bg-[#248fca]/10 rounded-lg mt-1">
-                            {/* {getFileIcon(
-                                documentData?.file.file_type || "file"
-                            )} */}
-                            File
+                            {getFileIcon(documentData?.file.type || 'file')}
                         </div>
                         <div className="flex-1">
                             {documentData ? (
                                 <>
-                                    <h1 className="text-lg font-semibold text-gray-900 mb-1 leading-tight">
+                                    <h1 className="text-lg font-semibold text-[#248fca] mb-1 leading-tight">
                                         {documentData.title}
                                     </h1>
                                     <p className="text-sm text-gray-600 mb-3 leading-relaxed">
@@ -70,48 +67,26 @@ export default function Header({ documentData }: HeaderProps) {
                                     <div className="flex items-center gap-6 text-xs text-gray-500">
                                         <div className="flex items-center gap-2">
                                             <Calendar className="w-3 h-3" />
-                                            <span>
-                                                Tải lên:{" "}
-                                                {formatDate(
-                                                    documentData.updated_at
-                                                )}
-                                            </span>
+                                            <span>Tải lên: {formatDate(documentData.updated_at)}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-3 h-3" />
-                                            <span>
-                                                Cập nhật:{" "}
-                                                {formatDate(
-                                                    documentData.created_at
-                                                )}
-                                            </span>
+                                            <span>Cập nhật: {formatDate(documentData.created_at)}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <FileText className="w-3 h-3" />
-                                            <span>
-                                                {formatFileSize(
-                                                    documentData.file.size_bytes
-                                                )}
-                                            </span>
+                                            <span>{formatFileSize(documentData.file.size_bytes)}</span>
                                         </div>
                                         <div className="flex items-center gap-1 text-xs text-gray-500">
                                             <ArchiveIcon className="w-3 h-3" />
-                                            <span>
-                                                {/* {documentData.file?.file_type?.toUpperCase() ||
-                                                    "FILE"} */}
-                                                File
-                                            </span>
+                                            <span>{documentData.file?.type?.toUpperCase() || 'FILE'}</span>
                                         </div>
                                     </div>
                                 </>
                             ) : (
                                 <>
-                                    <h1 className="text-lg font-semibold text-[#248fca] mb-1">
-                                        Chi tiết tài liệu
-                                    </h1>
-                                    <p className="text-sm text-gray-600">
-                                        Xem và quản lý chi tiết tài liệu
-                                    </p>
+                                    <h1 className="text-lg font-semibold text-[#248fca] mb-1">Chi tiết tài liệu</h1>
+                                    <p className="text-sm text-gray-600">Xem và quản lý chi tiết tài liệu</p>
                                 </>
                             )}
                         </div>
@@ -121,22 +96,24 @@ export default function Header({ documentData }: HeaderProps) {
                 <div className="flex items-center gap-3 ml-4">
                     {/* Status Badge */}
                     {documentData && (
-                        <span
-                            // className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                            //     documentData.type === "upload_document"
-                            //         ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                            //         : "bg-green-100 text-green-700 border-green-200"
-                            // }`}
-                            className={`px-3 py-1 rounded-full text-xs font-medium border`}
-                        >
-                            {/* {documentData.type === "upload_document"
-                                ? "Chưa được huấn luyện"
-                                : "Đã huấn luyện"} */}
-                            Đã Huấn luyện
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${documentData.document_type === 'uploaded_document'
+                            ? 'bg-white text-red-400 border-red-200'
+                            : 'bg-blue-50 text-[#248fca] border-blue-200'
+                            }`}>
+                            {documentData.document_type === 'uploaded_document' ? 'Chưa huấn luyện' : 'Đã huấn luyện'}
                         </span>
                     )}
+
+                    <div className="flex items-center gap-4">
+                        <NotificationDropdown />
+                        <div>
+                            <ProfileHospitalMenu profile={1} />
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </motion.div>
-    );
+    )
 }

@@ -60,7 +60,7 @@ export default function DocumentCard({
             {
                 onSuccess: () => {
                     addSuccess(
-                       "Thành công",
+                        "Thành công",
                         "Đã bắt đầu huấn luyện tài liệu",
                     );
                     onTrainSuccess();
@@ -164,11 +164,11 @@ export default function DocumentCard({
                     <Button
                         variant="outline"
                         size="sm"
-                        className="h-6 px-2 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                        className="h-6 px-2 text-xs text-[#248fca] border-[#248fca] hover:bg-[#248fca]/10 hover:text-[#248fca]"
                         onClick={handleTrainDocument}
                         disabled={isTraining}
                     >
-                        <TrainIcon className="w-3 h-3 mr-1" />
+                        <TrainIcon className="w-3 h-3 mr-1 text-[#248fca]" />
                         {isTraining ? "Đang xử lý..." : "Huấn luyện"}
                     </Button>
                 )}
@@ -180,7 +180,7 @@ export default function DocumentCard({
                             variant="outline"
                             className={`${isUploadDoc
                                 ? "bg-white text-red-400 border-red-200"
-                                : "bg-blue-50 text-blue-600 border-blue-200"
+                                : "bg-blue-50 text-[#248fca] border-blue-200"
                                 } text-xs font-medium`}
                         >
                             {isUploadDoc ? "Chưa huấn luyện" : "Đã huấn luyện"}

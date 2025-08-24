@@ -37,6 +37,7 @@ import { formatFileSize, getFileIcon } from "@/utils/file";
 import { downloadDocumentAsync } from "@/services/train-ai/api-services";
 import DeleteDocumentModal from "@/app/admin/train-ai/[id]/upload/components/delete_document";
 import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
 
 const SmartDescription = ({ description }: { description: string }) => {
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -195,6 +196,7 @@ interface HistoryDocumentItemProps {
 }
 
 const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocumentItemProps) => {
+    const router = useRouter()
     return (
         <div className="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50/50 hover:border-gray-300 transition-colors">
             <div className="flex gap-4">
@@ -261,7 +263,7 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-40">
-                                            <DropdownMenuItem className="text-sm py-2">
+                                            <DropdownMenuItem className="text-sm py-2" onClick={() => router.push(`/admin/train-ai/document-detail/${document.document_id}`)}>
                                                 <EyeIcon className="w-4 h-4 mr-2" />
                                                 Xem chi tiết
                                             </DropdownMenuItem>

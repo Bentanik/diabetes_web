@@ -10,7 +10,7 @@ import {
   updateSettingAsync,
   getSettingsAsync,
   getDocumentByIdAsync,
-  getDocumentParserAsync,
+  getDocumentChunkAsync,
   editKnowledgeAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -19,7 +19,7 @@ export const KNOWLEDGE_QUERY_KEY = "knowledge";
 export const DOCUMENTS_QUERY_KEY = "documents";
 export const DOCUMENT_QUERY_KEY = "document";
 export const SETTINGS_DOCUMENT_QUERY_KEY = "setting_documents";
-export const DOCUMENT_PARSER_QUERY_KEY = "document_parser";
+export const DOCUMENT_CHUNK_QUERY_KEY = "document_chunk";
 
 interface IGetKnowledgesService {
   search: string;
@@ -97,7 +97,11 @@ export const useDeleteKnowledgeService = () => {
 };
 
 export const useEditKnowledgeService = () => {
-  return useMutation<TResponseData<API.TKnowledge>, TMeta, REQUEST.TEditKnowledgeRequest>({
+  return useMutation<
+    TResponseData<API.TKnowledge>,
+    TMeta,
+    REQUEST.TEditKnowledgeRequest
+  >({
     mutationFn: (data) => editKnowledgeAsync(data),
   });
 };
@@ -170,26 +174,30 @@ export const useGetSettingService = () => {
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });
-}
+};
 
-export const useGetDocumentParserService = (document_id: string, params: {
-  search?: string;
-  sort_by?: string;
-  sort_order?: string;
-  page?: number;
-  limit?: number;
-}) => {
+export const useGetDocumentChunksService = (
+  document_id: string,
+  params: {
+    search?: string;
+    sort_by?: string;
+    sort_order?: string;
+    page?: number;
+    limit?: number;
+  }
+) => {
   return useQuery({
-    queryKey: [DOCUMENT_PARSER_QUERY_KEY, document_id, params],
-    queryFn: () => getDocumentParserAsync(document_id, params),
-    select: (data) => data.data || {
-      items: [],
-      total: 0,
-      page: 0,
-      limit: 0,
-      total_pages: 0,
-    },
+    queryKey: [DOCUMENT_CHUNK_QUERY_KEY, document_id, params],
+    queryFn: () => getDocumentChunkAsync(document_id, params),
+    select: (data) =>
+      data.data || {
+        items: [],
+        total: 0,
+        page: 0,
+        limit: 0,
+        total_pages: 0,
+      },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
   });
-}
+};
