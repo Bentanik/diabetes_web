@@ -11,6 +11,7 @@ import {
   getSettingsAsync,
   getDocumentByIdAsync,
   getDocumentParserAsync,
+  editKnowledgeAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -92,6 +93,12 @@ export const useCreateKnowledgeService = () => {
 export const useDeleteKnowledgeService = () => {
   return useMutation<TResponseData<API.TKnowledge>, TMeta, string>({
     mutationFn: (name) => deleteKnowledgeAsync(name),
+  });
+};
+
+export const useEditKnowledgeService = () => {
+  return useMutation<TResponseData<API.TKnowledge>, TMeta, REQUEST.TEditKnowledgeRequest>({
+    mutationFn: (data) => editKnowledgeAsync(data),
   });
 };
 

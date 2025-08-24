@@ -138,7 +138,7 @@ export default function FolderList() {
                         </motion.div>
                     </div>
                     {/* Pagination */}
-                    {data.total_pages >= 1 && (
+                    {data?.total_pages && data.total_pages > 1 && (
                         <Pagination
                             currentPage={data.page}
                             totalPages={data.total_pages}

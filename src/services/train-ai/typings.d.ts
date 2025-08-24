@@ -4,6 +4,13 @@ declare namespace REQUEST {
         description: string;
     };
 
+    type TEditKnowledgeRequest = {
+        id: string;
+        name: string;
+        description: string;
+    };
+
+
     type TValidationResults = {
         isValid: boolean;
         confidence: number;

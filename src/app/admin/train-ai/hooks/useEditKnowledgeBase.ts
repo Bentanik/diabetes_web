@@ -1,10 +1,10 @@
 import {
-  type CreateKnowledgeBaseFormData,
-  createKnowledgeBaseSchema,
+  type EditKnowledgeBaseFormData,
+  editKnowledgeBaseSchema,
 } from "@/lib/validations/knowledge_base.schema";
 import {
   KNOWLEDGE_QUERY_KEY,
-  useCreateKnowledgeService,
+  useEditKnowledgeService,
 } from "@/services/train-ai/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,8 +12,8 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNotificationContext } from "@/context/notification_context";
 
-export default function useCreateKnowlegeBase() {
-  const [isCreating, setIsCreating] = useState(false);
+export default function useEditKnowledgeBase(knowledge: API.TKnowledge) {
+  const [isEditing, setIsEditing] = useState(false);
 
   const { addSuccess } = useNotificationContext()
 
@@ -25,28 +25,29 @@ export default function useCreateKnowlegeBase() {
     setValue,
     reset,
     watch,
-  } = useForm<CreateKnowledgeBaseFormData>({
-    resolver: zodResolver(createKnowledgeBaseSchema),
+  } = useForm<EditKnowledgeBaseFormData>({
+    resolver: zodResolver(editKnowledgeBaseSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: knowledge.name,
+      description: knowledge.description,
     },
   });
 
-  const { mutate } = useCreateKnowledgeService();
+  const { mutate } = useEditKnowledgeService();
   const queryClient = useQueryClient();
 
   const onSubmit = async (
-    data: CreateKnowledgeBaseFormData,
+    data: EditKnowledgeBaseFormData,
     onClose: () => void
   ) => {
-    if (isCreating) return; // Prevent multiple submissions
+    if (isEditing) return; // Prevent multiple submissions
 
     try {
-      setIsCreating(true);
+      setIsEditing(true);
 
       // Prepare request
-      const request: REQUEST.TCreateKnowledgeRequest = {
+      const request: REQUEST.TEditKnowledgeRequest = {
+        id: knowledge.id,
         name: data?.name,
         description: data?.description,
       };
@@ -55,25 +56,25 @@ export default function useCreateKnowlegeBase() {
       mutate(request, {
         onSuccess: async (responseData) => {
           if (responseData) {
-            setIsCreating(false);
+            setIsEditing(false);
             onClose();
             await queryClient.invalidateQueries({
               queryKey: [KNOWLEDGE_QUERY_KEY],
             });
-            addSuccess("Thành công", `Cơ sở tri thức có tên ${data.name} đã được tạo thành công`)
+            addSuccess("Thành công", `Cơ sở tri thức đã được chỉnh sửa thành công`)
           }
         },
         onError: (data: TMeta) => {
           if (data.errorCode === "KNOWLEDGE_NAME_EXISTS") {
             setError("name", { message: "Tên cơ sở tri thức đã tồn tại" });
           }
-          setIsCreating(false);
+          setIsEditing(false);
         },
       });
     } catch (err) {
       console.error("Unexpected error:", err);
 
-      setIsCreating(false);
+      setIsEditing(false);
     }
   };
 
@@ -85,7 +86,7 @@ export default function useCreateKnowlegeBase() {
     setValue,
     setError,
     watch,
-    isCreating,
+    isEditing,
     reset,
   };
 }

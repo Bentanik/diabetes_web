@@ -14,3 +14,19 @@ export const createKnowledgeBaseSchema = z.object({
 export type CreateKnowledgeBaseFormData = z.infer<
   typeof createKnowledgeBaseSchema
 >;
+
+
+export const editKnowledgeBaseSchema = z.object({
+  name: z
+    .string()
+    .nonempty({ message: validationMessages.knowledge_name.required }),
+
+  description: z
+    .string()
+    .nonempty({ message: validationMessages.knowledge_description.required }),
+});
+
+export type EditKnowledgeBaseFormData = z.infer<
+  typeof editKnowledgeBaseSchema
+>;
+

@@ -62,6 +62,17 @@ export const deleteKnowledgeAsync = async (name: string) => {
   return response.data;
 };
 
+export const editKnowledgeAsync = async (data: REQUEST.TEditKnowledgeRequest) => {
+  const response = await request<TResponseData<API.TKnowledge>>(
+    API_ENDPOINTS.KNOWLEDGES + "/" + data.id,
+    {
+      method: "PUT",
+      data,
+    }
+  );
+  return response.data;
+};
+
 export const uploadDocumentAsync = async (data: FormData) => {
   const response = await request<TResponseData>(API_ENDPOINTS.DOCUMENTS, {
     method: "POST",
