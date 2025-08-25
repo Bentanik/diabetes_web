@@ -235,14 +235,6 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                             </div>
                             {document.processing_status.status === "completed" && document.document_status === "normal" && (
                                 <div className="flex gap-2 mt-1">
-                                    {/* <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-7 px-2.5 text-xs text-[#0d90db] border-[#0d90db]/30 hover:bg-[#0d90db]/5 hover:text-[#0d90db]"
-                                    >
-                                        <TrainIcon className="w-3 h-3 mr-1" />
-                                        Huấn luyện
-                                    </Button> */}
                                     <Button
                                         variant="outline"
                                         size="sm"

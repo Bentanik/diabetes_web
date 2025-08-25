@@ -1,319 +1,527 @@
-import Pagination from '@/components/shared/pagination'
-import { useGetDocumentChunksService } from '@/services/train-ai/services'
-import React, { useState, useMemo } from 'react'
+"use client"
+
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+import Pagination from "@/components/shared/pagination"
+import { useGetDocumentChunksService, useUpdateStatusDocumentChunkService } from "@/services/train-ai/services"
+import { useState } from "react"
+
+// Shadcn UI
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { useNotificationContext } from "@/context/notification_context"
+import { useBackdrop } from "@/context/backdrop_context"
 
 interface DocumentChunkListProps {
     id: string
 }
 
 export default function DocumentChunkList({ id }: DocumentChunkListProps) {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [diabetesScoreFilter, setDiabetesScoreFilter] = useState('all')
-    const [showInactive, setShowInactive] = useState(false)
+    const [qualityFilter, setQualityFilter] = useState("all")
     const [expandedChunks, setExpandedChunks] = useState<Set<string>>(new Set())
-    const [updatingChunks, setUpdatingChunks] = useState<Set<string>>(new Set())
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(6)
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(6);
+    const { showBackdrop, hideBackdrop } = useBackdrop();
+    const { mutate: updateStatusDocumentChunk } = useUpdateStatusDocumentChunkService()
 
-    const handlePageChange = async (page: number) => {
-        setCurrentPage(page);
-    };
-
-    const handlePerPageChange = (perPage: number) => {
-        setItemsPerPage(perPage);
-        setCurrentPage(1);
-    };
+    const { addSuccess } = useNotificationContext()
 
 
-    const { data: documentChunksData, refetch, isPending } = useGetDocumentChunksService(id, {
+    const [document_chunk_changes, setDocumentChunkChanges] = useState<{ id: string; is_active: boolean }[]>([])
+
+    let minScore: number | undefined = undefined
+    let maxScore: number | undefined = undefined
+    switch (qualityFilter) {
+        case "high":
+            minScore = 0.8
+            break
+        case "medium":
+            minScore = 0.5
+            maxScore = 0.8
+            break
+        case "low":
+            maxScore = 0.5
+            break
+    }
+
+    const {
+        data: documentChunksData,
+        refetch,
+        isPending,
+    } = useGetDocumentChunksService(id, {
         page: currentPage,
         limit: itemsPerPage,
+        min_diabetes_score: minScore,
+        max_diabetes_score: maxScore,
     })
 
-    // Toggle expand/collapse for individual chunks
+    // Toggle expand/collapse
     const toggleExpand = (chunkId: string) => {
-        const newExpanded = new Set(expandedChunks)
-        if (newExpanded.has(chunkId)) {
-            newExpanded.delete(chunkId)
-        } else {
-            newExpanded.add(chunkId)
-        }
-        setExpandedChunks(newExpanded)
-    }
-
-    // Toggle active status for chunk
-    const toggleActiveStatus = async (chunkId: string, currentStatus: boolean) => {
-        // Add to updating set
-        setUpdatingChunks(prev => new Set(prev).add(chunkId))
-
-        try {
-            // TODO: Replace with your actual API call
-            // await updateChunkActiveStatus(chunkId, !currentStatus)
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 800))
-
-            console.log(`Toggling chunk ${chunkId} from ${currentStatus} to ${!currentStatus}`)
-
-            // Refetch data after successful update
-            await refetch()
-
-        } catch (error) {
-            console.error('Failed to update chunk status:', error)
-            // TODO: Show error toast notification
-        } finally {
-            // Remove from updating set
-            setUpdatingChunks(prev => {
-                const newSet = new Set(prev)
-                newSet.delete(chunkId)
-                return newSet
-            })
-        }
-    }
-
-    // Filter logic
-    const filteredChunks = useMemo(() => {
-        if (!documentChunksData?.items) return []
-
-        let filtered = documentChunksData.items
-
-        // Filter by active status
-        if (!showInactive) {
-            filtered = filtered.filter(chunk => chunk.is_active)
-        }
-
-        // Search filter
-        if (searchQuery) {
-            filtered = filtered.filter(chunk =>
-                chunk.content.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        }
-
-        // Diabetes score filter
-        if (diabetesScoreFilter !== 'all') {
-            filtered = filtered.filter(chunk => {
-                const score = parseFloat(chunk.diabetes_score)
-                switch (diabetesScoreFilter) {
-                    case 'high':
-                        return score >= 0.8
-                    case 'medium':
-                        return score >= 0.5 && score < 0.8
-                    case 'low':
-                        return score < 0.5
-                    case 'no-score':
-                        return !chunk.diabetes_score || isNaN(score)
-                    default:
-                        return true
-                }
-            })
-        }
-
-        return filtered
-    }, [documentChunksData?.items, searchQuery, diabetesScoreFilter, showInactive])
-
-    const getScoreBadgeClasses = (score: string) => {
-        const numScore = parseFloat(score)
-        if (isNaN(numScore)) return 'bg-gray-500 text-white'
-        if (numScore >= 0.8) return 'bg-green-500 text-white'
-        if (numScore >= 0.5) return 'bg-yellow-500 text-black'
-        return 'bg-red-500 text-white'
-    }
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+        setExpandedChunks((prev) => {
+            const newSet = new Set(prev)
+            newSet.has(chunkId) ? newSet.delete(chunkId) : newSet.add(chunkId)
+            return newSet
         })
     }
 
-    // Truncate content for preview
-    const getTruncatedContent = (content: string, limit: number = 300) => {
-        if (content.length <= limit) return content
-        return content.substring(0, limit) + '...'
+    // Toggle active
+    const handleToggleActive = (chunkId: string, currentActive: boolean) => {
+        setDocumentChunkChanges((prev) => {
+            if (prev.some((c) => c.id === chunkId)) {
+                return prev.map((c) => (c.id === chunkId ? { ...c, is_active: !currentActive } : c))
+            }
+            return [...prev, { id: chunkId, is_active: !currentActive }]
+        })
+    }
+
+    const handleSaveChanges = async () => {
+        const data = {
+            document_chunk_ids: document_chunk_changes.map((c) => c.id),
+        }
+
+        showBackdrop()
+
+        updateStatusDocumentChunk(data, {
+            onSuccess: () => {
+            },
+            onSettled: () => {
+                handleResetChanges()
+                addSuccess("Thành công", "Đã lưu thay đổi của các đoạn văn bản!")
+                refetch()
+                hideBackdrop()
+            }
+        })
+    }
+
+    // Reset
+    const handleResetChanges = () => {
+        setDocumentChunkChanges([])
+    }
+
+    const currentPageChunks = documentChunksData?.items ?? []
+
+    // Helper functions
+    const shortId = (id: string) => (id.length > 8 ? id.slice(-8) : id)
+
+    const getQualityBadge = (score: string) => {
+        const numScore = Number.parseFloat(score)
+        if (isNaN(numScore))
+            return { variant: "secondary" as const, label: "N/A", className: "bg-slate-100 text-slate-600" }
+
+        if (numScore >= 0.8)
+            return {
+                variant: "default" as const,
+                label: (numScore * 100).toFixed(0) + "%",
+                className: "bg-emerald-500 text-white",
+            }
+        if (numScore >= 0.5)
+            return {
+                variant: "secondary" as const,
+                label: (numScore * 100).toFixed(0) + "%",
+                className: "bg-amber-500 text-white",
+            }
+        return {
+            variant: "destructive" as const,
+            label: (numScore * 100).toFixed(0) + "%",
+            className: "bg-orange-500 text-white",
+        }
     }
 
     return (
-        <div className="mx-auto">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-5 pb-4 border-b-2 border-gray-200 gap-3">
-                <h2 className="text-2xl font-semibold text-[#248fca]"> Danh sách các đoạn văn bản</h2>
-            </div>
-
-            {/* Filters */}
-            <div className="bg-gray-50 p-4 rounded-lg mb-5 border border-gray-200">
-                {/* Search Bar */}
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search in content..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    />
-                </div>
-
-                {/* Filter Controls */}
-                <div className="flex flex-wrap gap-4 items-center">
-                    <select
-                        value={diabetesScoreFilter}
-                        onChange={(e) => setDiabetesScoreFilter(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="all">Tất cả điểm</option>
-                        <option value="high">Điểm cao (≥ 0.8)</option>
-                        <option value="medium">Điểm trung bình (0.5-0.8)</option>
-                        <option value="low">Điểm thấp (&lt; 0.5)</option>
-                        <option value="no-score">Không có điểm</option>
-                    </select>
-
-                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={showInactive}
-                            onChange={(e) => setShowInactive(e.target.checked)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-gray-700">Hiển thị các đoạn văn bản không được chọn</span>
-                    </label>
-                </div>
-            </div>
-
-            {/* Chunks List */}
-            <div className="space-y-3">
-                {filteredChunks.length === 0 ? (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                        <div className="text-gray-500">
-                            <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p className="text-lg font-medium">No chunks found</p>
-                            <p className="text-sm">Try adjusting your search or filter criteria</p>
-                        </div>
-                    </div>
-                ) : (
-                    filteredChunks.map((chunk) => {
-                        const isExpanded = expandedChunks.has(chunk.id)
-                        const shouldShowExpand = chunk.content.length > 300
-                        const isUpdating = updatingChunks.has(chunk.id)
-
-                        return (
-                            <div
-                                key={chunk.id}
-                                className={`border rounded-lg bg-white transition-all duration-200 hover:shadow-md hover:border-blue-300 ${!chunk.is_active ? 'bg-gray-50 border-gray-300 opacity-70' : 'border-gray-200'
-                                    } ${isUpdating ? 'animate-pulse' : ''}`}
-                            >
-                                {/* Chunk Header */}
-                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 pb-3 border-b border-gray-100">
-                                    <div className="flex items-center gap-3 mb-2 sm:mb-0">
-                                        <span className="font-mono text-sm font-semibold text-gray-600">
-                                            #{chunk.id.slice(-8)}
-                                        </span>
-
-                                        {/* Toggle Switch */}
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => toggleActiveStatus(chunk.id, chunk.is_active)}
-                                                disabled={isUpdating}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${chunk.is_active ? 'bg-green-600' : 'bg-gray-300'
-                                                    }`}
-                                                title={`Click to ${chunk.is_active ? 'deactivate' : 'activate'} chunk`}
+        <div className="min-h-screen bg-gray-50">
+            <div className="container mx-auto">
+                <div className="flex flex-col xl:flex-row gap-8">
+                    {/* Left Panel - Main content */}
+                    <div className="xl:w-2/3 w-full space-y-8">
+                        <Card className="border-0 bg-white" style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}>
+                            <CardContent>
+                                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                                    <div className="lg:col-span-2">
+                                        <label className="block text-sm font-semibold text-slate-700 mb-3">Mức độ chất lượng</label>
+                                        <Select value={qualityFilter} onValueChange={setQualityFilter}>
+                                            <SelectTrigger
+                                                className="w-full h-12 border-slate-200 bg-white"
+                                                style={{
+                                                    borderColor: qualityFilter !== "all" ? "#248fca" : undefined,
+                                                    boxShadow: qualityFilter !== "all" ? "0 0 0 1px #248fca" : undefined,
+                                                }}
                                             >
-                                                <span
-                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${chunk.is_active ? 'translate-x-6' : 'translate-x-1'
-                                                        }`}
+                                                <SelectValue placeholder="Chọn mức chất lượng" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">Tất cả mức độ</SelectItem>
+                                                <SelectItem value="high">Chất lượng cao</SelectItem>
+                                                <SelectItem value="medium">Chất lượng trung bình</SelectItem>
+                                                <SelectItem value="low">Cần cải thiện</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Chunks List */}
+                        <div className="space-y-6">
+                            {currentPageChunks.length === 0 ? (
+                                <Card className="border-0 bg-white" style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}>
+                                    <CardContent className="text-center py-20">
+                                        <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
+                                            <svg className="w-16 h-16 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={1.5}
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                                 />
-                                            </button>
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-sm font-semibold text-slate-700 mb-3">Không tìm thấy tài liệu</h3>
+                                        <p className="text-slate-500 text-sm">Thử điều chỉnh bộ lọc để xem thêm kết quả</p>
+                                    </CardContent>
+                                </Card>
+                            ) : (
+                                currentPageChunks.map((chunk) => {
+                                    const isExpanded = expandedChunks.has(chunk.id)
+                                    const shouldShowExpand = chunk.content.length > 300
+                                    const change = document_chunk_changes.find((c) => c.id === chunk.id)
+                                    const isActive = change ? change.is_active : chunk.is_active
+                                    const isModified = !!change
+                                    const qualityBadge = getQualityBadge(chunk.diabetes_score)
 
-                                            {/* Status Badge */}
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full uppercase ${chunk.is_active
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-gray-100 text-gray-600'
-                                                }`}>
-                                                {chunk.is_active ? 'Active' : 'Inactive'}
-                                            </span>
+                                    return (
+                                        <Card
+                                            key={chunk.id}
+                                            className={`border-0 bg-white hover:shadow-lg transition-all duration-300 ${isModified ? "ring-2 ring-blue-400" : ""
+                                                } ${!isActive ? "opacity-60" : ""}`}
+                                            style={{
+                                                boxShadow: isModified
+                                                    ? "rgba(0, 0, 0, 0.16) 0px 1px 4px, 0 0 0 2px rgba(59, 130, 246, 0.5)"
+                                                    : "rgba(0, 0, 0, 0.16) 0px 1px 4px",
+                                            }}
+                                        >
+                                            <CardHeader className="pb-6">
+                                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+                                                                style={{ backgroundColor: "#248fca" }}
+                                                            >
+                                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 00-2-2V5a2 2 0 002-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                                    />
+                                                                </svg>
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-semibold text-slate-800">Đoạn #{shortId(chunk.id)}</span>
+                                                                <span className="text-sm text-slate-500">Nội dung tài liệu</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                            {/* Loading indicator */}
-                                            {isUpdating && (
-                                                <div className="flex items-center gap-1 text-xs text-blue-600">
-                                                    <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Updating...
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-sm font-medium text-slate-600">Chất lượng:</span>
+                                                            <Badge className={qualityBadge.className + " font-semibold px-3 py-1"}>
+                                                                {qualityBadge.label}
+                                                            </Badge>
+                                                        </div>
+
+                                                        <div className="flex items-center gap-3">
+                                                            <Switch
+                                                                checked={isActive}
+                                                                onCheckedChange={() => handleToggleActive(chunk.id, isActive)}
+                                                                style={{
+                                                                    backgroundColor: isActive ? "#248fca" : undefined,
+                                                                }}
+                                                                id={`switch-${chunk.id}`}
+                                                            />
+                                                            <span
+                                                                className={`text-sm font-semibold px-3 py-1 rounded-full ${isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                                                                    }`}
+                                                            >
+                                                                {isActive ? "Đang sử dụng" : "Tạm dừng"}
+                                                            </span>
+                                                        </div>
+
+                                                        {isModified && (
+                                                            <Badge className="font-semibold" style={{ backgroundColor: "#248fca", color: "white" }}>
+                                                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                                    />
+                                                                </svg>
+                                                                Đã chỉnh sửa
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            )}
+                                            </CardHeader>
+
+                                            <CardContent className="pt-0">
+                                                <div className="relative">
+                                                    <div
+                                                        className="rounded-xl p-6 border-l-4"
+                                                        style={{
+                                                            backgroundColor: "#f8fafc",
+                                                            borderLeftColor: "#248fca",
+                                                        }}
+                                                    >
+                                                        <p className="text-slate-800 leading-relaxed whitespace-pre-wrap break-words text-sm">
+                                                            {isExpanded
+                                                                ? chunk.content
+                                                                : chunk.content.length > 300
+                                                                    ? chunk.content.substring(0, 300) + "..."
+                                                                    : chunk.content}
+                                                        </p>
+                                                        {!isExpanded && shouldShowExpand && (
+                                                            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none rounded-b-xl"></div>
+                                                        )}
+                                                    </div>
+
+                                                    {shouldShowExpand && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => toggleExpand(chunk.id)}
+                                                            className="mt-4 font-semibold hover:bg-blue-50 text-sm"
+                                                            style={{ color: "#248fca" }}
+                                                        >
+                                                            {isExpanded ? (
+                                                                <>
+                                                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M5 15l7-7 7 7"
+                                                                        />
+                                                                    </svg>
+                                                                    Thu gọn nội dung
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M19 9l-7 7-7-7"
+                                                                        />
+                                                                    </svg>
+                                                                    Xem toàn bộ nội dung
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )
+                                })
+                            )}
+                        </div>
+
+                        {/* Pagination */}
+                        {documentChunksData?.total_pages && documentChunksData?.total_pages > 1 && (
+                            <div className="mt-12">
+                                <Pagination
+                                    currentPage={documentChunksData?.page}
+                                    totalPages={documentChunksData?.total_pages}
+                                    totalItems={documentChunksData?.total}
+                                    perPage={documentChunksData?.limit}
+                                    hasNext={documentChunksData?.page < documentChunksData?.total_pages}
+                                    hasPrev={documentChunksData?.page > 1}
+                                    onPageChange={setCurrentPage}
+                                    isLoading={isPending}
+                                    perPageOptions={[6, 9, 12, 18, 24]}
+                                    onPerPageChange={setItemsPerPage}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="xl:w-1/3 w-full">
+                        <div className="sticky top-6 space-y-6">
+                            {/* Statistics Card */}
+                            <Card className="border-0 bg-white" style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}>
+                                <CardHeader className="pb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+                                            style={{ backgroundColor: "#248fca" }}
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-slate-800">Tổng Quan Thay Đổi</h3>
+                                            <p className="text-sm text-slate-500">Theo dõi các chỉnh sửa</p>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="text-center p-4 bg-white rounded-xl border border-slate-100">
+                                            <div className="text-sm font-bold" style={{ color: "#248fca" }}>
+                                                {document_chunk_changes.length}
+                                            </div>
+                                            <div className="text-sm text-slate-600 font-medium">Đã chỉnh sửa</div>
+                                        </div>
+                                        <div className="text-center p-4 bg-white rounded-xl border border-slate-100">
+                                            <div className="text-sm font-bold text-slate-600">{currentPageChunks.length}</div>
+                                            <div className="text-sm text-slate-600 font-medium">Tổng đoạn</div>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        {chunk.diabetes_score && (
-                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full uppercase ${getScoreBadgeClasses(chunk.diabetes_score)}`}>
-                                                Score: {parseFloat(chunk.diabetes_score).toFixed(2)}
-                                            </span>
-                                        )}
+                                    <div className="mt-6">
+                                        <h4 className="font-semibold text-slate-700 mb-4 flex items-center gap-2 text-sm">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                                />
+                                            </svg>
+                                            Danh sách thay đổi
+                                        </h4>
+                                        <div className="space-y-3 max-h-48 overflow-y-auto">
+                                            {document_chunk_changes.map((c) => (
+                                                <div
+                                                    key={c.id}
+                                                    className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100"
+                                                >
+                                                    <span className="font-mono text-slate-600 font-medium text-sm">#{shortId(c.id)}</span>
+                                                    <Badge className={c.is_active ? "bg-emerald-500 text-white" : "bg-orange-500 text-white"}>
+                                                        {c.is_active ? "Kích hoạt" : "Tạm dừng"}
+                                                    </Badge>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                </CardContent>
+                            </Card>
 
-                                {/* Chunk Content */}
-                                <div className="p-4 pt-3">
-                                    <div className="relative">
-                                        <p className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words text-sm mb-0">
-                                            {isExpanded ? chunk.content : getTruncatedContent(chunk.content)}
-                                        </p>
-
-                                        {/* Fade effect when collapsed */}
-                                        {!isExpanded && shouldShowExpand && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
-                                        )}
-                                    </div>
-
-                                    {/* Expand/Collapse Button */}
-                                    {shouldShowExpand && (
-                                        <button
-                                            onClick={() => toggleExpand(chunk.id)}
-                                            className="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors"
+                            {/* Action Card */}
+                            {document_chunk_changes.length > 0 && (
+                                <Card className="border-0 bg-white" style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}>
+                                    <CardHeader className="pb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+                                                style={{ backgroundColor: "#248fca" }}
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-sm font-semibold text-slate-800">Thao Tác</h3>
+                                                <p className="text-sm text-slate-500">Lưu hoặc hủy thay đổi</p>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <Button
+                                            onClick={handleSaveChanges}
+                                            className="w-full text-white font-semibold py-4 hover:opacity-90 transition-all duration-200 text-sm"
+                                            style={{
+                                                backgroundColor: "#248fca",
+                                                boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
+                                            }}
                                         >
-                                            {isExpanded ? (
-                                                <>
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                                    </svg>
-                                                    Show Less
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                    Show More
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )
-                    })
-                )}
-            </div>
+                                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Lưu Thay Đổi ({document_chunk_changes.length})
+                                        </Button>
+                                        <Button
+                                            onClick={handleResetChanges}
+                                            variant="outline"
+                                            className="w-full border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-800 font-semibold py-4 hover:bg-slate-50 transition-all duration-200 bg-transparent text-sm"
+                                        >
+                                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                />
+                                            </svg>
+                                            Đặt Lại
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
 
-            {/* Pagination Info */}
-            {documentChunksData?.total_pages && documentChunksData?.total_pages > 1 && <Pagination
-                currentPage={documentChunksData?.page}
-                totalPages={documentChunksData?.total_pages}
-                totalItems={documentChunksData?.total}
-                perPage={documentChunksData?.limit}
-                hasNext={documentChunksData?.page < documentChunksData?.total_pages}
-                hasPrev={documentChunksData?.page > 1}
-                onPageChange={handlePageChange}
-                isLoading={isPending}
-                perPageOptions={[6, 9, 12, 18, 24]}
-                onPerPageChange={handlePerPageChange}
-            />}
+                            <Card className="border-0 bg-white" style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}>
+                                <CardContent className="p-6">
+                                    <div className="flex items-start gap-4">
+                                        <div
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white"
+                                            style={{ backgroundColor: "#248fca" }}
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-slate-800 mb-3 text-sm">Hướng Dẫn Sử Dụng</h4>
+                                            <ul className="text-sm text-slate-600 space-y-2 leading-relaxed">
+                                                <li className="flex items-start gap-2">
+                                                    <span style={{ color: "#248fca" }} className="mt-1">
+                                                        •
+                                                    </span>
+                                                    <span>Nội dung chất lượng cao được ưu tiên hiển thị</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span style={{ color: "#248fca" }} className="mt-1">
+                                                        •
+                                                    </span>
+                                                    <span>Sử dụng công tắc để bật/tắt từng đoạn nội dung</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span style={{ color: "#248fca" }} className="mt-1">
+                                                        •
+                                                    </span>
+                                                    <span>Thay đổi được áp dụng trên toàn bộ hệ thống</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

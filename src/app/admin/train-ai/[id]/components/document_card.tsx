@@ -21,10 +21,11 @@ import {
 } from "lucide-react";
 
 import { formatFileSize, getFileIcon } from "@/utils/file";
-import { useTrainDocumentService } from "@/services/train-ai/services";
+import { DOCUMENTS_QUERY_KEY, useTrainDocumentService } from "@/services/train-ai/services";
 import { useNotificationContext } from "@/context/notification_context";
 import { downloadDocumentAsync } from "@/services/train-ai/api-services";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -49,6 +50,8 @@ export default function DocumentCard({
     onTrainSuccess = () => { }
 }: DocumentCardProps) {
     const isUploadDoc = document.document_type === "uploaded_document";
+
+    const queryClient = useQueryClient();
     const { mutate: trainDocument, isPending: isTraining } = useTrainDocumentService();
     const { addSuccess, addError } = useNotificationContext();
 
@@ -67,6 +70,11 @@ export default function DocumentCard({
                 },
                 onError: () => {
                     addError("Thất bại", "Đã xảy ra lỗi khi huấn luyện tài liệu");
+                },
+                onSettled: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: [DOCUMENTS_QUERY_KEY],
+                    });
                 },
             }
         );
@@ -173,8 +181,6 @@ export default function DocumentCard({
                     </Button>
                 )}
                 <div className="flex items-center justify-between w-full">
-                    {/* Trái: Status + Train button */}
-
                     <div className="flex items-center gap-2">
                         <Badge
                             variant="outline"
@@ -187,7 +193,6 @@ export default function DocumentCard({
                         </Badge>
                     </div>
 
-                    {/* Phải: Date */}
                     <div className="flex items-center gap-1 text-xs text-gray-400">
                         <CalendarIcon className="w-3 h-3" />
                         <span>{formatDate(document.updated_at).split(" ")[1]}</span>

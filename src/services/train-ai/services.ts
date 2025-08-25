@@ -12,6 +12,7 @@ import {
   getDocumentByIdAsync,
   getDocumentChunkAsync,
   editKnowledgeAsync,
+  updateStatusDocumentChunkAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -180,6 +181,8 @@ export const useGetDocumentChunksService = (
   document_id: string,
   params: {
     search?: string;
+    min_diabetes_score?: number;
+    max_diabetes_score?: number;
     sort_by?: string;
     sort_order?: string;
     page?: number;
@@ -199,5 +202,15 @@ export const useGetDocumentChunksService = (
       },
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
+  });
+};
+
+export const useUpdateStatusDocumentChunkService = () => {
+  return useMutation<
+    TResponseData,
+    TMeta,
+    REQUEST.TUpdateStatusDocumentChunkRequest
+  >({
+    mutationFn: (data) => updateStatusDocumentChunkAsync(data),
   });
 };

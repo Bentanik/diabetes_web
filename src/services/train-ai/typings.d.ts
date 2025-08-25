@@ -54,6 +54,10 @@ declare namespace REQUEST {
     page?: number;
     limit?: number;
   };
+
+  type TUpdateStatusDocumentChunkRequest = {
+    document_chunk_ids: string[];
+  };
 }
 
 declare namespace API {

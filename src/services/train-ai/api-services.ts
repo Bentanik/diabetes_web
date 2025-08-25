@@ -246,6 +246,8 @@ export const getDocumentChunkAsync = async (
   document_id: string,
   params: {
     search?: string;
+    min_diabetes_score?: number;
+    max_diabetes_score?: number;
     sort_by?: string;
     sort_order?: string;
     page?: number;
@@ -260,6 +262,20 @@ export const getDocumentChunkAsync = async (
       ...params,
     },
   });
+
+  return response.data;
+};
+
+export const updateStatusDocumentChunkAsync = async (
+  data: REQUEST.TUpdateStatusDocumentChunkRequest
+) => {
+  const response = await request<TResponseData>(
+    API_ENDPOINTS.DOCUMENTS + "/change-status",
+    {
+      method: "PUT",
+      data,
+    }
+  );
 
   return response.data;
 };
