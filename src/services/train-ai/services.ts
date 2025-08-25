@@ -13,6 +13,7 @@ import {
   getDocumentChunkAsync,
   editKnowledgeAsync,
   updateStatusDocumentChunkAsync,
+  updateDocumentAsync,
 } from "@/services/train-ai/api-services";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -152,6 +153,16 @@ export const useGetDocumentByIdService = (id: string) => {
 export const useDeleteDocumentService = () => {
   return useMutation<TResponseData, TMeta, string>({
     mutationFn: (id) => deleteDocumentAsync(id),
+  });
+};
+
+export const useUpdateDocumentService = () => {
+  return useMutation<
+    TResponseData<API.TDocument>,
+    TMeta,
+    REQUEST.TUpdateDocumentRequest
+  >({
+    mutationFn: (data) => updateDocumentAsync(data),
   });
 };
 

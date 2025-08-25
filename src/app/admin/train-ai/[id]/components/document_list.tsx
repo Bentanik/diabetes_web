@@ -7,6 +7,7 @@ import DocumentEmptyState from "@/app/admin/train-ai/[id]/components/document_em
 import Pagination from "@/components/shared/pagination"
 import DeleteDocumentModal from "@/app/admin/train-ai/[id]/components/delete_document"
 import { useState } from "react"
+import EditDocumentModal from "@/app/admin/train-ai/[id]/upload/components/edit-document"
 
 type DocumentListProps = {
     knowledgeBaseId: string
@@ -33,6 +34,8 @@ export default function DocumentList({
 }: DocumentListProps) {
     const [isDeleteDocumentOpen, setIsDeleteDocumentOpen] = useState(false);
     const [deleteDocument, setDeleteDocument] = useState<API.TDocument | null>(null);
+    const [isEditDocumentModalOpen, setIsEditDocumentModalOpen] = useState(false);
+    const [editDocument, setEditDocument] = useState<API.TDocument | null>(null);
 
     const handleCloseDeleteDocument = () => {
         setIsDeleteDocumentOpen(false);
@@ -42,6 +45,16 @@ export default function DocumentList({
 
         setDeleteDocument(document);
         setIsDeleteDocumentOpen(true);
+    };
+
+    const handleEditDocument = (document: API.TDocument) => {
+        setEditDocument(document);
+        setIsEditDocumentModalOpen(true);
+    };
+
+    const handleCloseEditDocument = () => {
+        setIsEditDocumentModalOpen(false);
+        setEditDocument(null);
     };
 
 
@@ -76,6 +89,7 @@ export default function DocumentList({
                             document={document}
                             onTrainSuccess={onTrainSuccess}
                             onDelete={handleDeleteDocument}
+                            onEdit={handleEditDocument}
                         />
                     ))}
                 </motion.div>
@@ -100,6 +114,13 @@ export default function DocumentList({
                     document={deleteDocument}
                 />
             )}
+
+            {editDocument && (
+                <EditDocumentModal
+                    isOpen={isEditDocumentModalOpen}
+                    onClose={handleCloseEditDocument}
+                    document={editDocument}
+                />)}
         </div>
     )
 }

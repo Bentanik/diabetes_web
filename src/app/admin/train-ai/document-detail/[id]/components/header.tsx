@@ -4,7 +4,7 @@ import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { formatFileSize, getFileIcon } from "@/utils/file";
 import { motion } from "framer-motion"
 import { ArrowLeftIcon, FileText, Calendar, Clock, ArchiveIcon } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
     documentData: API.TDocument;
@@ -26,6 +26,8 @@ const formatDate = (dateString: string) => {
 export default function Header({
     documentData,
 }: HeaderProps) {
+    const router = useRouter();
+
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -37,7 +39,7 @@ export default function Header({
         >
             <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4 flex-1">
-                    <Link href={`/admin/train-ai`}>
+                    <div className="cursor-pointer" onClick={() => router.back()}>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -45,7 +47,7 @@ export default function Header({
                         >
                             <ArrowLeftIcon className="w-4 h-4 text-gray-700" />
                         </motion.button>
-                    </Link>
+                    </div>
 
                     <div className="h-8 w-px bg-gray-300 mt-1"></div>
 

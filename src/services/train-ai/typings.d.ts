@@ -58,6 +58,13 @@ declare namespace REQUEST {
   type TUpdateStatusDocumentChunkRequest = {
     document_chunk_ids: string[];
   };
+
+  type TUpdateDocumentRequest = {
+    document_id: string;
+    title?: string;
+    description?: string;
+    is_active?: boolean;
+  };
 }
 
 declare namespace API {
@@ -99,6 +106,7 @@ declare namespace API {
     priority_diabetes: number;
     created_at: string;
     updated_at: string;
+    is_active?: boolean;
   };
 
   type TDocumentChunk = {

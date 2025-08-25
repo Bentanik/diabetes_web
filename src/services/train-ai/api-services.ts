@@ -139,6 +139,19 @@ export const getDocumentByIdAsync = async (id: string) => {
   return response.data;
 };
 
+export const updateDocumentAsync = async (
+  data: REQUEST.TUpdateDocumentRequest
+) => {
+  const response = await request<TResponseData<API.TDocument>>(
+    API_ENDPOINTS.DOCUMENTS,
+    {
+      method: "PUT",
+      data,
+    }
+  );
+  return response.data;
+};
+
 export const downloadDocumentAsync = async (id: string) => {
   try {
     const response = await axios({
@@ -270,7 +283,7 @@ export const updateStatusDocumentChunkAsync = async (
   data: REQUEST.TUpdateStatusDocumentChunkRequest
 ) => {
   const response = await request<TResponseData>(
-    API_ENDPOINTS.DOCUMENTS + "/change-status",
+    API_ENDPOINTS.DOCUMENTS + "/chunks/change-status",
     {
       method: "PUT",
       data,
