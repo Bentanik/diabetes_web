@@ -12,7 +12,7 @@ export default function Header() {
                     </Link>
 
                     <h1 className="text-2xl font-bold text-[var(--primary-color)]">
-                        Quản lý bác sĩ
+                        Quản lý tiền và lượt tư vấn
                     </h1>
                 </div>
                 <p className="text-gray-600 mt-1 ml-11 text-sm">

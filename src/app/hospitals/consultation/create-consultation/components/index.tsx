@@ -1,7 +1,15 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, User, Save, Building2, Phone, BadgeCheck, BadgeCheckIcon } from "lucide-react";
+import {
+    Clock,
+    User,
+    Save,
+    Building2,
+    Phone,
+    BadgeCheck,
+    BadgeCheckIcon,
+} from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -37,7 +45,9 @@ interface DaySchedule {
 
 export default function CreateDoctorSchedule() {
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
-    const [selectedDoctor, setSelectedDoctor] = useState<API.Doctors | null>(null);
+    const [selectedDoctor, setSelectedDoctor] = useState<API.Doctors | null>(
+        null
+    );
     const [loading, setLoading] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [newTemplate, setNewTemplate] = useState({ start: "", end: "" });
@@ -293,7 +303,6 @@ export default function CreateDoctorSchedule() {
                                     onDoctorChange={handleDoctorChange}
                                 />
                             </FormProvider>
-                          
                         </div>
 
                         {/* Date Selector Component */}
@@ -309,7 +318,7 @@ export default function CreateDoctorSchedule() {
 
                         {/* Import Excel */}
                         <div className="space-y-3">
-                            <div className="flex items-center space-x-2"> 
+                            <div className="flex items-center space-x-2">
                                 <Clock className="h-5 w-5 text-[#248FCA]" />
                                 <h2 className="text-lg font-semibold text-[#248FCA]">
                                     Tạo bằng file
@@ -322,56 +331,80 @@ export default function CreateDoctorSchedule() {
                         </div>
                     </div>
                     <div className="flex min-h-[100px] gap-4 mt-4">
-      <div className="flex-1">
-        {selectedDoctor && (
-          <Card className="p-4 rounded-2xl border border-blue-200 shadow-sm">
-            <CardContent className="p-0">
-              <div className="flex items-center gap-5">
-                <Avatar className="size-16">
-                  <AvatarImage src={selectedDoctor.avatar || "/images/default_img.jpg"} />
-                  <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold">
-                    {selectedDoctor.name?.split(" ").slice(-2).map((w) => w[0]).join("") || "BS"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="text-[1.1rem] font-semibold text-emerald-900">{selectedDoctor.name}</div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-xs font-medium">
-                      <BadgeCheckIcon className="w-4 h-4" />
-                      {getPositionName(selectedDoctor.position)}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-700 flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-blue-700" />
-                    <span>{selectedDoctor.hospital?.name}</span>
-                  </div>
-                  <div className="text-sm text-gray-700 flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-blue-700" />
-                    <span>{selectedDoctor.phoneNumber || "Chưa cập nhật"}</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                        <div className="flex-1">
+                            {selectedDoctor && (
+                                <Card className="p-4 rounded-2xl border border-blue-200 shadow-sm">
+                                    <CardContent className="p-0">
+                                        <div className="flex items-center gap-5">
+                                            <Avatar className="size-16">
+                                                <AvatarImage
+                                                    src={
+                                                        selectedDoctor.avatar ||
+                                                        "/images/default_img.jpg"
+                                                    }
+                                                />
+                                                <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold">
+                                                    {selectedDoctor.name
+                                                        ?.split(" ")
+                                                        .slice(-2)
+                                                        .map((w) => w[0])
+                                                        .join("") || "BS"}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-[1.1rem] font-semibold text-emerald-900">
+                                                        {selectedDoctor.name}
+                                                    </div>
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-xs font-medium">
+                                                        <BadgeCheckIcon className="w-4 h-4" />
+                                                        {getPositionName(
+                                                            selectedDoctor.position
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="text-sm text-gray-700 flex items-center gap-2">
+                                                    <Building2 className="w-4 h-4 text-blue-700" />
+                                                    <span>
+                                                        {
+                                                            selectedDoctor
+                                                                .hospital?.name
+                                                        }
+                                                    </span>
+                                                </div>
+                                                <div className="text-sm text-gray-700 flex items-center gap-2">
+                                                    <Phone className="w-4 h-4 text-blue-700" />
+                                                    <span>
+                                                        {selectedDoctor.phoneNumber ||
+                                                            "Chưa cập nhật"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
 
-      {/* Selected Info Display */}
-      <div className="flex-1">
-        {selectedYear && selectedMonth && selectedWeek && selectedWeekData && (
-          <div className="p-4 bg-blue-100 border border-blue-300 rounded-xl h-full flex justify-center items-center">
-            <div className="flex items-center space-x-2 text-blue-800">
-              <Clock className="h-5 w-5" />
-              <span className="font-medium">
-                Đã chọn: {selectedWeekData.label} - Năm {selectedYear}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-
-                 
+                        {/* Selected Info Display */}
+                        <div className="flex-1">
+                            {selectedYear &&
+                                selectedMonth &&
+                                selectedWeek &&
+                                selectedWeekData && (
+                                    <div className="p-4 bg-blue-100 border border-blue-300 rounded-xl h-full flex justify-center items-center">
+                                        <div className="flex items-center space-x-2 text-blue-800">
+                                            <Clock className="h-5 w-5" />
+                                            <span className="font-medium">
+                                                Đã chọn:{" "}
+                                                {selectedWeekData.label} - Năm{" "}
+                                                {selectedYear}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                        </div>
+                    </div>
 
                     {/* Loading State */}
                     {isLoadingConsultations &&
