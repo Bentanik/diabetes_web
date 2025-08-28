@@ -12,3 +12,15 @@ export const createDocumentSchema = z.object({
 });
 
 export type CreateDocumentFormData = z.infer<typeof createDocumentSchema>;
+
+export const updateDocumentSchema = z.object({
+  name: z
+    .string()
+    .nonempty({ message: validationMessages.document_name.required }),
+
+  description: z
+    .string()
+    .nonempty({ message: validationMessages.document_description.required }),
+});
+
+export type UpdateDocumentFormData = z.infer<typeof updateDocumentSchema>;

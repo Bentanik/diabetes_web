@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useCallback } from "react";
@@ -81,8 +83,6 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
         setError("");
         setSuccess("");
 
-        const start = performance.now(); // 🔸 Bắt đầu đo thời gian
-
         try {
             const buffer = await file.arrayBuffer();
             const workbook = XLSX.read(buffer, { type: "buffer" });
@@ -114,7 +114,6 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                 );
             }
 
-            const end = performance.now(); // Kết thúc đo thời gian
         } catch (err: any) {
             setError(`Lỗi xử lý file: ${err.message}`);
         } finally {
@@ -295,13 +294,12 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                                             {data.map((item, index) => (
                                                 <TableRow
                                                     key={index}
-                                                    className={`hover:bg-gray-50 ${
-                                                        !item.valid ||
+                                                    className={`hover:bg-gray-50 ${!item.valid ||
                                                         item.validationErrors
                                                             .length > 0
-                                                            ? "bg-red-100"
-                                                            : ""
-                                                    }`}
+                                                        ? "bg-red-100"
+                                                        : ""
+                                                        }`}
                                                 >
                                                     <TableCell>
                                                         {index + 1}
@@ -329,19 +327,18 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                                                         >
                                                             {item.duration
                                                                 ? `${Math.floor(
-                                                                      item.duration /
-                                                                          60
-                                                                  )}h ${
-                                                                      item.duration %
-                                                                      60
-                                                                  }m`
+                                                                    item.duration /
+                                                                    60
+                                                                )}h ${item.duration %
+                                                                60
+                                                                }m`
                                                                 : "N/A"}
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell>
                                                         {item.valid &&
-                                                        item.validationErrors
-                                                            .length === 0 ? (
+                                                            item.validationErrors
+                                                                .length === 0 ? (
                                                             <Badge
                                                                 variant="outline"
                                                                 className="bg-green-50 text-green-700 border-green-200"

@@ -4,6 +4,12 @@ declare namespace REQUEST {
     description: string;
   };
 
+  type TEditKnowledgeRequest = {
+    id: string;
+    name: string;
+    description: string;
+  };
+
   type TValidationResults = {
     isValid: boolean;
     confidence: number;
@@ -48,6 +54,21 @@ declare namespace REQUEST {
     page?: number;
     limit?: number;
   };
+
+  type TUpdateStatusDocumentChunkRequest = {
+    document_chunk_ids: string[];
+  };
+
+  type TUpdateDocumentRequest = {
+    document_id: string;
+    title?: string;
+    description?: string;
+    is_active?: boolean;
+  };
+
+  type TGetRetrievedContextRequest = {
+    query: string;
+  };
 }
 
 declare namespace API {
@@ -66,7 +87,10 @@ declare namespace API {
     updated_at: string;
   };
 
-  type TDocumentType = "uploaded_document" | "training_document" | "trained_document";
+  type TDocumentType =
+    | "uploaded_document"
+    | "training_document"
+    | "trained_document";
 
   type TDocumentFile = {
     path: string;
@@ -86,13 +110,15 @@ declare namespace API {
     priority_diabetes: number;
     created_at: string;
     updated_at: string;
+    is_active?: boolean;
   };
 
-  type TDocumentParser = {
+  type TDocumentChunk = {
     id: string;
+    knowledge_id: string;
     document_id: string;
+    diabetes_score: string;
     content: string;
-    location: TLocation;
     is_active: boolean;
     created_at: string;
     updated_at: string;
@@ -103,5 +129,11 @@ declare namespace API {
     temperature: number;
     max_tokens: number;
     search_accuracy: number;
+  };
+
+  type TSearchDocument = {
+    document: TDocument;
+    score: number;
+    content: string;
   };
 }

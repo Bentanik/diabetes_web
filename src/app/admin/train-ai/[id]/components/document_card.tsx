@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,13 +19,19 @@ import {
     ArchiveIcon,
     TrainIcon,
     FileIcon,
+    PencilIcon,
 } from "lucide-react";
 
 import { formatFileSize, getFileIcon } from "@/utils/file";
-import { useTrainDocumentService } from "@/services/train-ai/services";
-import { useNotification } from "@/context/notification_context";
+import { DOCUMENTS_QUERY_KEY, useTrainDocumentService } from "@/services/train-ai/services";
+import { useNotificationContext } from "@/context/notification_context";
 import { downloadDocumentAsync } from "@/services/train-ai/api-services";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { Switch } from "@/components/ui/switch";
+import { useState, useRef, useCallback } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import useUpdateDocument from "@/app/admin/train-ai/hooks/useUpdateDocument";
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -41,40 +48,78 @@ interface DocumentCardProps {
     document: API.TDocument;
     onDelete?: (document: API.TDocument) => void;
     onTrainSuccess?: () => void;
+    onEdit?: (document: API.TDocument) => void;
 }
 
 export default function DocumentCard({
     document,
     onDelete = () => { },
-    onTrainSuccess = () => { }
+    onTrainSuccess = () => { },
+    onEdit = () => { }
 }: DocumentCardProps) {
     const isUploadDoc = document.document_type === "uploaded_document";
+
+    const queryClient = useQueryClient();
     const { mutate: trainDocument, isPending: isTraining } = useTrainDocumentService();
-    const { addNotification } = useNotification();
+    const { addSuccess, addError } = useNotificationContext();
 
     const router = useRouter();
+    const [switchValue, setSwitchValue] = useState(document.is_active);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const { onSubmit } = useUpdateDocument(document);
+
+    const updateDocumentStatus = async (documentId: string, isActive: boolean) => {
+        try {
+            setIsUpdating(true);
+
+            onSubmit({
+                document_id: documentId,
+                is_active: isActive
+            }, () => {
+            });
+
+        } catch {
+            addError("Thất bại", "Không thể cập nhật trạng thái tài liệu");
+            setSwitchValue(document.is_active);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    // Handle switch change với debounce
+    const handleSwitchChange = useCallback((checked: boolean) => {
+        setSwitchValue(checked);
+
+        // Clear timeout cũ nếu có
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
+        // Set timeout mới
+        timeoutRef.current = setTimeout(() => {
+            updateDocumentStatus(document.id, checked);
+        }, 800);
+    }, [document.id]);
 
     const handleTrainDocument = () => {
         trainDocument(
             { document_id: document.id },
             {
                 onSuccess: () => {
-                    addNotification({
-                        title: "Thành công",
-                        message: "Đã bắt đầu huấn luyện tài liệu",
-                        type: "success",
-                        duration: 4000,
-                        position: "top-right",
-                    });
+                    addSuccess(
+                        "Thành công",
+                        "Đã bắt đầu huấn luyện tài liệu",
+                    );
                     onTrainSuccess();
                 },
-                onError: (error) => {
-                    addNotification({
-                        title: error.title || "Lỗi huấn luyện",
-                        message: error.detail || "Đã xảy ra lỗi khi huấn luyện tài liệu",
-                        type: "error",
-                        duration: 4000,
-                        position: "top-right",
+                onError: () => {
+                    addError("Thất bại", "Đã xảy ra lỗi khi huấn luyện tài liệu");
+                },
+                onSettled: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: [DOCUMENTS_QUERY_KEY],
                     });
                 },
             }
@@ -173,31 +218,66 @@ export default function DocumentCard({
                     <Button
                         variant="outline"
                         size="sm"
-                        className="h-6 px-2 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                        className="h-6 px-2 text-xs text-[#248fca] border-[#248fca] hover:bg-[#248fca]/10 hover:text-[#248fca]"
                         onClick={handleTrainDocument}
                         disabled={isTraining}
                     >
-                        <TrainIcon className="w-3 h-3 mr-1" />
+                        <TrainIcon className="w-3 h-3 mr-1 text-[#248fca]" />
                         {isTraining ? "Đang xử lý..." : "Huấn luyện"}
                     </Button>
                 )}
-                <div className="flex items-center justify-between w-full">
-                    {/* Trái: Status + Train button */}
-
-                    <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between w-full h-6">
+                    <div className="flex items-center gap-2 h-full">
                         <Badge
                             variant="outline"
                             className={`${isUploadDoc
-                                ? "bg-blue-50 text-blue-600 border-blue-200"
-                                : "bg-green-50 text-green-700 border-green-200"
-                                } text-xs font-medium`}
+                                ? "bg-white text-red-400 border-red-200"
+                                : "bg-blue-50 text-[#248fca] border-blue-200"
+                                } text-xs font-medium h-6 px-2 flex items-center justify-center`}
                         >
                             {isUploadDoc ? "Chưa huấn luyện" : "Đã huấn luyện"}
                         </Badge>
+                        {!isUploadDoc &&
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-6 px-2 text-xs text-[#248fca] border-[#248fca] hover:bg-[#248fca]/10 hover:text-[#248fca]"
+                                onClick={() => onEdit(document)}
+                            >
+                                <PencilIcon className="w-3 h-3 mr-1 text-[#248fca]" />
+                                Sửa
+                            </Button>}
+
+                        {!isUploadDoc && <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1 h-6">
+                                        <Switch
+                                            checked={switchValue}
+                                            onCheckedChange={handleSwitchChange}
+                                            disabled={isUpdating}
+                                            className="data-[state=checked]:bg-[#248fca] data-[state=unchecked]:bg-gray-200 scale-75"
+                                        />
+                                        {isUpdating && (
+                                            <div className="w-3 h-3 border border-[#248fca] border-t-transparent rounded-full animate-spin ml-1" />
+                                        )}
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-[#248fca] text-white border-0">
+                                    <p className="text-xs">
+                                        {isUpdating
+                                            ? "Đang cập nhật..."
+                                            : switchValue
+                                                ? "Tắt kích hoạt tài liệu"
+                                                : "Kích hoạt tài liệu"
+                                        }
+                                    </p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>}
                     </div>
 
-                    {/* Phải: Date */}
-                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <div className="flex items-center gap-1 text-xs text-gray-400 h-6">
                         <CalendarIcon className="w-3 h-3" />
                         <span>{formatDate(document.updated_at).split(" ")[1]}</span>
                     </div>

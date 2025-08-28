@@ -7,9 +7,10 @@ import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dropdown } from "@/components/shared/Dropdown"
-import { FolderIcon, MoreVerticalIcon, EditIcon, TrashIcon, FileTextIcon } from "lucide-react"
+import { FolderIcon, MoreVerticalIcon, EditIcon, TrashIcon } from "lucide-react"
 import { useClickOutside } from "@/hooks/use-click-outside"
 import DeleteKnowledgeModal from "@/app/admin/train-ai/components/delete_knowlege"
+import EditKnowlegeModal from "@/app/admin/train-ai/components/edit_knowledge"
 
 interface FolderCardProps {
     folder: API.TKnowledge
@@ -18,6 +19,7 @@ interface FolderCardProps {
 export default function FolderCard({ folder }: FolderCardProps) {
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [editModalOpen, setEditModalOpen] = useState(false)
     const router = useRouter()
 
     const dropdownRef = useClickOutside<HTMLDivElement>(() => {
@@ -42,6 +44,12 @@ export default function FolderCard({ folder }: FolderCardProps) {
         setDropdownOpen(false)
     }
 
+    const handleEditClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setEditModalOpen(true)
+        setDropdownOpen(false)
+    }
+
     return (
         <div>
             <motion.div
@@ -61,7 +69,7 @@ export default function FolderCard({ folder }: FolderCardProps) {
                             </div>
                             <div className="min-w-0 flex-1">
                                 <h3
-                                    className="font-semibold text-gray-900 group-hover:text-[#248fca] transition-colors"
+                                    className="font-semibold text-[#248fca] group-hover:text-[#248fca] transition-colors"
                                     title={folder.name}
                                 >
                                     {folder.name}
@@ -90,18 +98,15 @@ export default function FolderCard({ folder }: FolderCardProps) {
                             >
                                 <div className="py-1">
                                     <button
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            setDropdownOpen(false)
-                                        }}
-                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 hover:text-[#248fca]"
+                                        onClick={handleEditClick}
+                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 hover:text-[#248fca] hover:cursor-pointer"
                                     >
                                         <EditIcon className="w-4 h-4" />
                                         Chỉnh sửa
                                     </button>
                                     <button
                                         onClick={handleDeleteClick}
-                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 hover:text-[#248fca]"
+                                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2 hover:text-red-600 hover:cursor-pointer"
                                     >
                                         <TrashIcon className="w-4 h-4" />
                                         Xóa
@@ -122,13 +127,21 @@ export default function FolderCard({ folder }: FolderCardProps) {
                     </div>
 
                     {/* Footer với thông tin cập nhật */}
-                    <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
-                        <span>Cập nhật {new Date(folder.updated_at).toLocaleString()}</span>
-                        <div className="flex items-center gap-1">
-                            <FileTextIcon className="w-3 h-3" />
-                            <span>{folder.stats.document_count}</span>
-                        </div>
-                    </div>
+                    <div className="flex items-center justify-between text-xs mt-auto pt-3 border-t border-gray-100">
+    <span className="text-gray-500 text-xs">
+        Cập nhật {new Date(folder.updated_at).toLocaleDateString('vi-VN')}
+    </span>
+    <div className="flex items-center gap-1.5">
+        <div className={`w-2 h-2 rounded-full ${
+            folder.select_training ? 'bg-[#248fca]' : 'bg-gray-400'
+        }`} />
+        <span className={`text-xs font-medium ${
+            folder.select_training ? 'text-[#248fca]' : 'text-gray-600'
+        }`}>
+            {folder.select_training ? "Đã kích hoạt" : "Chưa kích hoạt"}
+        </span>
+    </div>
+</div>
                 </Card>
             </motion.div>
 
@@ -142,6 +155,12 @@ export default function FolderCard({ folder }: FolderCardProps) {
                     description: folder.description,
                     document_count: folder.stats.document_count,
                 }}
+            />
+
+            <EditKnowlegeModal
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                knowledge={folder}
             />
         </div>
     )

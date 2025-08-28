@@ -37,6 +37,7 @@ import { formatFileSize, getFileIcon } from "@/utils/file";
 import { downloadDocumentAsync } from "@/services/train-ai/api-services";
 import DeleteDocumentModal from "@/app/admin/train-ai/[id]/upload/components/delete_document";
 import { Progress } from "@/components/ui/progress";
+import { useRouter } from "next/navigation";
 
 const SmartDescription = ({ description }: { description: string }) => {
     const [isOverflowing, setIsOverflowing] = useState(false);
@@ -195,6 +196,7 @@ interface HistoryDocumentItemProps {
 }
 
 const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocumentItemProps) => {
+    const router = useRouter()
     return (
         <div className="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50/50 hover:border-gray-300 transition-colors">
             <div className="flex gap-4">
@@ -233,14 +235,6 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                             </div>
                             {document.processing_status.status === "completed" && document.document_status === "normal" && (
                                 <div className="flex gap-2 mt-1">
-                                    {/* <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-7 px-2.5 text-xs text-[#0d90db] border-[#0d90db]/30 hover:bg-[#0d90db]/5 hover:text-[#0d90db]"
-                                    >
-                                        <TrainIcon className="w-3 h-3 mr-1" />
-                                        Huấn luyện
-                                    </Button> */}
                                     <Button
                                         variant="outline"
                                         size="sm"
@@ -261,7 +255,7 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end" className="w-40">
-                                            <DropdownMenuItem className="text-sm py-2">
+                                            <DropdownMenuItem className="text-sm py-2" onClick={() => router.push(`/admin/train-ai/document-detail/${document.document_id}`)}>
                                                 <EyeIcon className="w-4 h-4 mr-2" />
                                                 Xem chi tiết
                                             </DropdownMenuItem>
@@ -305,7 +299,7 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                             document.document_status === "normal" &&
                             getTopicRelevanceBadge(document.priority_diabetes, "Đái tháo đường")}
                         {(document.processing_status.status === "processing" || document.processing_status.status === "queued") && (
-                            <div className="flex flex-col w-full max-w-xs gap-1">
+                            <div className="flex flex-col w-full gap-1">
                                 <div className="flex items-center gap-2">
                                     <Progress
                                         value={document.processing_status.progress}
@@ -384,7 +378,7 @@ export default function HistoryUploadFileDisplay({ knowledgeId }: HistoryUploadF
                             <HistoryIcon className="w-5 h-5" />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-gray-900 font-semibold">Lịch sử tải tài liệu</span>
+                            <span className="text-[#248fca] font-semibold">Lịch sử tải tài liệu</span>
                             <span className="text-sm text-gray-500">Theo dõi các tài liệu đã tải lên gần đây</span>
                         </div>
                     </div>
@@ -435,10 +429,10 @@ export default function HistoryUploadFileDisplay({ knowledgeId }: HistoryUploadF
                     <div className="flex items-center justify-center p-12">
                         <div className="text-center space-y-3">
                             <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mx-auto">
-                                <HistoryIcon className="w-8 h-8 text-gray-300" />
+                                <HistoryIcon className="w-8 h-8 text-gray-400" />
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-gray-900 mb-1">Chưa có lịch sử tải nào</p>
+                                <p className="text-xl font-medium text-gray-900 mb-1">Chưa có lịch sử tải nào</p>
                                 <p className="text-xs text-gray-500">Lịch sử tải sẽ hiển thị ở đây</p>
                             </div>
                         </div>

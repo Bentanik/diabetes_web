@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -40,13 +39,13 @@ export default function AdminLayout({
 
     const userState = useAppSelector((state) => state.userSlice);
 
-    if (
-        mounted &&
-        !userState.user?.roles?.includes("SystemAdmin") &&
-        !userState.user?.roles?.includes("Moderator")
-    ) {
-        return (window.location.href = "/");
-    }
+    // if (
+    //     mounted &&
+    //     !userState.user?.roles?.includes("SystemAdmin") &&
+    //     !userState.user?.roles?.includes("Moderator")
+    // ) {
+    //     return (window.location.href = "/");
+    // }
 
     const sidebarWidth = open ? 280 : 80;
 

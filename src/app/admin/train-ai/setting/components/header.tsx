@@ -1,4 +1,6 @@
 "use client"
+import NotificationDropdown from "@/components/notification"
+import ProfileHospitalMenu from "@/components/profile_hospital_menu"
 import { motion } from "framer-motion"
 import { ArrowLeftIcon, SettingsIcon } from "lucide-react"
 import Link from "next/link"
@@ -35,6 +37,13 @@ export default function Header() {
                             <h1 className="text-xl font-semibold text-[#248fca]">Cài đặt hệ thống AI</h1>
                             <p className="text-sm text-gray-600">Quản lý thư mục và prompt templates cho hệ thống AI.</p>
                         </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                <NotificationDropdown />
+                    <div>
+                        <ProfileHospitalMenu profile={1} />
                     </div>
                 </div>
             </div>

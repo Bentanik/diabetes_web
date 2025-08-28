@@ -7,7 +7,6 @@ import {
     SearchIcon,
     XIcon,
     UploadIcon,
-    FilterXIcon,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -15,20 +14,16 @@ type DocumentEmptyStateProps = {
     knowledgeBaseId: string
     isSearching: boolean
     searchQuery: string
-    statusFilter: "all" | "completed" | "failed"
     onClearSearch: () => void
-    onClearFilter: () => void
 }
 
 export default function DocumentEmptyState({
     knowledgeBaseId,
     isSearching,
     searchQuery,
-    statusFilter,
     onClearSearch,
-    onClearFilter,
 }: DocumentEmptyStateProps) {
-    const hasFilters = isSearching || statusFilter !== "all"
+    const hasFilters = isSearching
 
     return (
         <motion.div
@@ -43,18 +38,10 @@ export default function DocumentEmptyState({
                         Không tìm thấy tài liệu
                     </h3>
                     <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                        {isSearching && statusFilter !== "all" ? (
+                        {isSearching && (
                             <>
                                 Không có tài liệu nào phù hợp với từ khóa &quot;{searchQuery}&quot;
                                 và bộ lọc đã chọn
-                            </>
-                        ) : isSearching ? (
-                            <>
-                                Không có tài liệu nào phù hợp với từ khóa &quot;{searchQuery}&quot;
-                            </>
-                        ) : (
-                            <>
-                                Không có tài liệu nào với bộ lọc đã chọn
                             </>
                         )}
                     </p>
@@ -63,12 +50,6 @@ export default function DocumentEmptyState({
                             <Button onClick={onClearSearch} variant="outline" className="gap-2">
                                 <XIcon className="w-4 h-4" />
                                 Xóa tìm kiếm
-                            </Button>
-                        )}
-                        {statusFilter !== "all" && (
-                            <Button onClick={onClearFilter} variant="outline" className="gap-2">
-                                <FilterXIcon className="w-4 h-4" />
-                                Xóa bộ lọc
                             </Button>
                         )}
                     </div>

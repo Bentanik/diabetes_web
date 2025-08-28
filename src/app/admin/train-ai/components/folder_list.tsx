@@ -13,8 +13,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import FolderCard from "@/app/admin/train-ai/components/folder_card";
 import SearchInput from "@/app/admin/train-ai/components/search_input";
 
-// tách SearchInput ra component riêng
-
 export default function FolderList() {
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -125,7 +123,7 @@ export default function FolderList() {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+                            className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6"
                         >
                             {data.items.map((folder, index) => (
                                 <motion.div
@@ -140,7 +138,7 @@ export default function FolderList() {
                         </motion.div>
                     </div>
                     {/* Pagination */}
-                    {data.total_pages > 1 && (
+                    {data?.total_pages && data.total_pages > 1 && (
                         <Pagination
                             currentPage={data.page}
                             totalPages={data.total_pages}

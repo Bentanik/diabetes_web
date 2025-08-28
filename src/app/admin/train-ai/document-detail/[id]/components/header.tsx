@@ -1,8 +1,10 @@
 "use client"
+import NotificationDropdown from "@/components/notification";
+import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { formatFileSize, getFileIcon } from "@/utils/file";
 import { motion } from "framer-motion"
 import { ArrowLeftIcon, FileText, Calendar, Clock, ArchiveIcon } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
     documentData: API.TDocument;
@@ -24,6 +26,8 @@ const formatDate = (dateString: string) => {
 export default function Header({
     documentData,
 }: HeaderProps) {
+    const router = useRouter();
+
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -35,7 +39,7 @@ export default function Header({
         >
             <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4 flex-1">
-                    <Link href={`/admin/train-ai`}>
+                    <div className="cursor-pointer" onClick={() => router.back()}>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -43,7 +47,7 @@ export default function Header({
                         >
                             <ArrowLeftIcon className="w-4 h-4 text-gray-700" />
                         </motion.button>
-                    </Link>
+                    </div>
 
                     <div className="h-8 w-px bg-gray-300 mt-1"></div>
 
@@ -54,7 +58,7 @@ export default function Header({
                         <div className="flex-1">
                             {documentData ? (
                                 <>
-                                    <h1 className="text-lg font-semibold text-gray-900 mb-1 leading-tight">
+                                    <h1 className="text-lg font-semibold text-[#248fca] mb-1 leading-tight">
                                         {documentData.title}
                                     </h1>
                                     <p className="text-sm text-gray-600 mb-3 leading-relaxed">
@@ -95,12 +99,21 @@ export default function Header({
                     {/* Status Badge */}
                     {documentData && (
                         <span className={`px-3 py-1 rounded-full text-xs font-medium border ${documentData.document_type === 'uploaded_document'
-                            ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
-                            : 'bg-green-100 text-green-700 border-green-200'
+                            ? 'bg-white text-red-400 border-red-200'
+                            : 'bg-blue-50 text-[#248fca] border-blue-200'
                             }`}>
-                            {documentData.document_type === 'uploaded_document' ? 'Chưa được huấn luyện' : 'Đã huấn luyện'}
+                            {documentData.document_type === 'uploaded_document' ? 'Chưa huấn luyện' : 'Đã huấn luyện'}
                         </span>
                     )}
+
+                    <div className="flex items-center gap-4">
+                        <NotificationDropdown />
+                        <div>
+                            <ProfileHospitalMenu profile={1} />
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </motion.div>
