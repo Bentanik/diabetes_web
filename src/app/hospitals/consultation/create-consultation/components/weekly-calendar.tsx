@@ -27,7 +27,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import useToast from "@/hooks/use-toast";
-import { Save, SquareMousePointer, Trash } from "lucide-react";
+import { Save, MousePointer2, Trash2, SquarePen } from "lucide-react";
+import { createRoot } from "react-dom/client";
 
 export interface TimeSlot {
     start: string;
@@ -53,9 +54,18 @@ interface WeeklyCalendarProps {
     resetSignal: number;
 }
 
+// Các hàm hỗ trợ
+
+// Đánh dấu một slot để tracking thay đổi
+const slotIdentity = (slot: TimeSlot) =>
+    slot.id ? `id:${slot.id}` : `draft:${slot.clientKey}`;
+
+// Chuyển "HH:MM" thành "HH:MM:SS"
 const ensureHms = (time: string) =>
     time.split(":").length === 2 ? `${time}:00` : time;
+// Chuyển ngày và giờ thành định dạng ISO
 const toIso = (date: string, time: string) => `${date}T${ensureHms(time)}`;
+//
 const cloneSchedule = (src: {
     timeTemplates: DaySchedule[];
 }): { timeTemplates: DaySchedule[] } => ({
@@ -65,9 +75,7 @@ const cloneSchedule = (src: {
     })),
 });
 
-const slotIdentity = (slot: TimeSlot) =>
-    slot.id ? `id:${slot.id}` : `draft:${slot.clientKey}`;
-
+// Chuyển "HH:MM:SS" thành số phút từ đầu ngày
 const toMinutes = (t: string) => {
     const [hh, mm] = ensureHms(t)
         .split(":")
@@ -75,36 +83,40 @@ const toMinutes = (t: string) => {
     return hh * 60 + mm;
 };
 
+// Lấy ngày hiện tại dạng "YYYY-MM-DD"
 const getTodayStr = () => {
-	const now = new Date();
-	const y = now.getFullYear();
-	const m = String(now.getMonth() + 1).padStart(2, "0");
-	const d = String(now.getDate()).padStart(2, "0");
-	return `${y}-${m}-${d}`;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
 };
 
+// Lấy giờ hiện tại dạng "HH:MM:SS"
 const getNowHms = () => {
-	const now = new Date();
-	const hh = String(now.getHours()).padStart(2, "0");
-	const mm = String(now.getMinutes()).padStart(2, "0");
-	const ss = String(now.getSeconds()).padStart(2, "0");
-	return `${hh}:${mm}:${ss}`;
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
+    const ss = String(now.getSeconds()).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
 };
 
-const isPastDateTime = (date: string, endTime: string) => {
-	const today = getTodayStr();
-	if (date < today) return true;
-	if (date > today) return false;
-	return ensureHms(endTime) <= getNowHms();
-};
+// const isPastDateTime = (date: string, endTime: string) => {
+//     const today = getTodayStr();
+//     if (date < today) return true;
+//     if (date > today) return false;
+//     return ensureHms(endTime) <= getNowHms();
+// };
 
+// Kiểm tra nếu thời điểm bắt đầu đã qua
 const isPastByStart = (date: string, startTime: string) => {
-	const today = getTodayStr();
-	if (date < today) return true;
-	if (date > today) return false;
-	return ensureHms(startTime) <= getNowHms();
+    const today = getTodayStr();
+    if (date < today) return true;
+    if (date > today) return false;
+    return ensureHms(startTime) <= getNowHms();
 };
 
+// Kiểm tra chồng lấn trong cùng một ngày
 const hasOverlap = (
     times: TimeSlot[],
     start: string,
@@ -122,6 +134,7 @@ const hasOverlap = (
     return false;
 };
 
+// Component chính
 export default function WeeklyCalendar({
     selectedWeekData,
     scheduleData,
@@ -151,6 +164,7 @@ export default function WeeklyCalendar({
     );
     const [bulkStatus, setBulkStatus] = useState<string>("");
 
+    // Lấy slot hiện tại đang chỉnh sửa (nếu có)
     const currentSlot = useMemo(() => {
         if (!editTarget) return null;
         const date = selectedWeekData.dates[editTarget.dayIndex];
@@ -158,6 +172,7 @@ export default function WeeklyCalendar({
         return day?.times[editTarget.slotIndex] ?? null;
     }, [editTarget, selectedWeekData.dates, scheduleData.timeTemplates]);
 
+    // Xác định nếu thời gian có thể chỉnh sửa
     const canEditTime = useMemo(() => {
         if (!editTarget) return false;
         if (editTarget.mode === "create") return true; // always editable when creating
@@ -167,8 +182,8 @@ export default function WeeklyCalendar({
         return !currentSlot.id || currentSlot.status === 1;
     }, [editTarget, currentSlot]);
 
+    // Đồng bộ tuần hiển thị khi tuần được chọn thay đổi
     useEffect(() => {
-        // Sync calendar's visible week with the selected week (use Monday date)
         if (selectedWeekData?.dates?.length) {
             const startDate = selectedWeekData.dates[0];
             const api = calendarRef.current?.getApi?.();
@@ -178,6 +193,7 @@ export default function WeeklyCalendar({
         }
     }, [selectedWeekData?.dates?.[0]]);
 
+    // Reset trạng thái khi nhận tín hiệu reset
     useEffect(() => {
         // reset tracking after submit
         changedKeysRef.current = new Set();
@@ -188,7 +204,7 @@ export default function WeeklyCalendar({
         setBulkStatus("");
     }, [resetSignal]);
 
-    // If user selects a bulk status but forgets to click Apply, still include selected slots in upsert
+    // Áp dụng thay đổi hàng loạt khi trạng thái hàng loạt thay đổi
     useEffect(() => {
         if (bulkStatus !== "" && selectedKeys.size > 0) {
             const next = cloneSchedule(scheduleData);
@@ -208,14 +224,16 @@ export default function WeeklyCalendar({
         }
     }, [bulkStatus]);
 
+    // Chuẩn bị sự kiện cho FullCalendar
     const events: EventInput[] = useMemo(() => {
         const evts: EventInput[] = [];
         selectedWeekData.dates.forEach((date, dayIndex) => {
             const day = scheduleData.timeTemplates.find((d) => d.date === date);
             day?.times.forEach((slot, slotIndex) => {
-                const status = slot.status ?? 1; // default display as 1 if undefined
+                const status = slot.status ?? 1;
                 const key = `${dayIndex}-${slotIndex}`;
                 const isDraft = !slot.id;
+                // Thêm sự kiện vào mảng
                 evts.push({
                     id: slot.id || key,
                     title: isDraft
@@ -260,28 +278,28 @@ export default function WeeklyCalendar({
     }, [scheduleData.timeTemplates, selectedWeekData.dates]);
 
     const backgroundEvents: EventInput[] = useMemo(() => {
-		const today = getTodayStr();
-		const nowHms = getNowHms();
-		const bg: EventInput[] = [];
-		selectedWeekData.dates.forEach((date) => {
-			if (date < today) {
-				bg.push({
-					start: `${date}T00:00:00`,
-					end: `${date}T23:59:59`,
-					display: "background",
-					backgroundColor: "#fee2e2",
-				});
-			} else if (date === today) {
-				bg.push({
-					start: `${date}T00:00:00`,
-					end: `${date}T${nowHms}`,
-					display: "background",
-					backgroundColor: "#fee2e2",
-				});
-			}
-		});
-		return bg;
-	}, [selectedWeekData.dates]);
+        const today = getTodayStr();
+        const nowHms = getNowHms();
+        const bg: EventInput[] = [];
+        selectedWeekData.dates.forEach((date) => {
+            if (date < today) {
+                bg.push({
+                    start: `${date}T00:00:00`,
+                    end: `${date}T23:59:59`,
+                    display: "background",
+                    backgroundColor: "#fee2e2",
+                });
+            } else if (date === today) {
+                bg.push({
+                    start: `${date}T00:00:00`,
+                    end: `${date}T${nowHms}`,
+                    display: "background",
+                    backgroundColor: "#fee2e2",
+                });
+            }
+        });
+        return bg;
+    }, [selectedWeekData.dates]);
 
     const upsertChanged = (source?: { timeTemplates: DaySchedule[] }) => {
         const base = source ?? scheduleData;
@@ -339,7 +357,7 @@ export default function WeeklyCalendar({
             addToast({
                 type: "error",
                 description: "Khoảng thời gian tối thiểu là 15 phút",
-                duration: 3000,
+                duration: 2000,
             });
             return false;
         }
@@ -347,7 +365,7 @@ export default function WeeklyCalendar({
             addToast({
                 type: "error",
                 description: "Khung giờ bị chồng lấn trong cùng ngày",
-                duration: 3000,
+                duration: 2000,
             });
             return false;
         }
@@ -368,20 +386,21 @@ export default function WeeklyCalendar({
     const handleEventClick = (arg: EventClickArg) => {
         const { dayIndex, slotIndex, status } = arg.event.extendedProps as any;
         const eventDate = arg.event.startStr.split("T")[0];
-        const startHms = arg.event.startStr
-            .split("T")[1]
-            ?.slice(0, 8) ?? "00:00:00";
+        const startHms =
+            arg.event.startStr.split("T")[1]?.slice(0, 8) ?? "00:00:00";
         if (isPastByStart(eventDate, startHms)) {
             addToast({
                 type: "error",
                 description: "Thời gian đã qua, không thể chỉnh sửa.",
-                duration: 3000,
+                duration: 2000,
             });
             return;
         }
         if (status === 2) return; // status=2 do nothing
         const selectedDate = selectedWeekData.dates[dayIndex];
-        const day = scheduleData.timeTemplates.find((d) => d.date === selectedDate);
+        const day = scheduleData.timeTemplates.find(
+            (d) => d.date === selectedDate
+        );
         const slot = day?.times[slotIndex];
         if (!slot) return;
         setEditStart(ensureHms(slot.start).slice(0, 5));
@@ -402,7 +421,7 @@ export default function WeeklyCalendar({
                 addToast({
                     type: "error",
                     description: "Thời gian đã qua, không thể chỉnh sửa.",
-                    duration: 3000,
+                    duration: 2000,
                 });
                 return;
             }
@@ -425,7 +444,7 @@ export default function WeeklyCalendar({
                     addToast({
                         type: "error",
                         description: "Thời gian đã qua, không thể chỉnh sửa.",
-                        duration: 3000,
+                        duration: 2000,
                     });
                     return;
                 }
@@ -494,7 +513,7 @@ export default function WeeklyCalendar({
             addToast({
                 type: "error",
                 description: "Chỉ được di chuyển trong cùng một ngày",
-                duration: 3000,
+                duration: 2000,
             });
             (arg as any).revert?.();
             return;
@@ -633,6 +652,145 @@ export default function WeeklyCalendar({
                     headerToolbar={false as any}
                     weekends={true}
                     events={[...events, ...backgroundEvents]}
+                    eventContent={(arg) => {
+                        const { dayIndex, slotIndex, status, key, identity, templateId, clientKey } = arg.event
+                            .extendedProps as any;
+                        const date = arg.event.startStr?.split("T")[0] ?? "";
+                        const startHms = arg.event.startStr?.split("T")[1]?.slice(0, 8) ?? "00:00:00";
+                        const startHM = arg.event.startStr?.split("T")[1]?.slice(0, 5) ?? "";
+                        const endHM = arg.event.endStr?.split("T")[1]?.slice(0, 5) ?? startHM;
+                        const isPast = isPastByStart(date, startHms);
+                        const isDraft = !templateId;
+                        const isBooked = status === 2;
+                        const isSelected = selectedKeys.has(key);
+                        const isMarked = identity ? markedForDeletion.has(identity) : false;
+
+                        // Base label (keep existing title rendering)
+                        const title = arg.event.title;
+                        const mergedLabel = `${startHM} - ${endHM} • ${title}`;
+
+                        // Build a container with hover overlay
+                        const container = document.createElement("div");
+                        container.className = "relative group h-full flex items-center justify-center";
+
+                        const titleDiv = document.createElement("div");
+                        titleDiv.className = "px-2 py-1 text-xs font-medium w-full text-center";
+                        titleDiv.textContent = mergedLabel;
+                        container.appendChild(titleDiv);
+
+                        // Only show overlay when not booked and not past
+                        if (!isBooked && !isPast) {
+                            const overlay = document.createElement("div");
+                            overlay.className =
+                                "pointer-events-none absolute inset-0 hidden items-center justify-center gap-2 rounded-md bg-black/20 group-hover:flex";
+
+                            // Helper to create an icon button (render React Lucide icon into DOM)
+                            const makeIconBtn = (label: string, icon: any, onClick: () => void) => {
+                                const btn = document.createElement("button");
+                                btn.type = "button";
+                                btn.className =
+                                    "pointer-events-auto inline-flex h-7 w-7 items-center justify-center rounded bg-white/90 text-[#248FCA] shadow hover:bg-white";
+                                btn.title = label;
+                                btn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    onClick();
+                                };
+                                const mount = document.createElement("div");
+                                const root = createRoot(mount);
+                                root.render(icon);
+                                btn.appendChild(mount);
+                                return btn;
+                            };
+                            
+
+                            // Select (only for non-draft)
+                            if (!isDraft) {
+                                overlay.appendChild(
+                                    makeIconBtn("Chọn / Bỏ chọn", <MousePointer2 className="h-4 w-4" />, () => {
+                                        setSelectedKeys((prev) => {
+                                            const next = new Set(prev);
+                                            if (next.has(key)) next.delete(key);
+                                            else next.add(key);
+                                            return next;
+                                        });
+                                    })
+                                );
+                            }
+
+                            // Delete (toggle mark or remove draft immediately)
+                            overlay.appendChild(
+                                makeIconBtn("Xóa", <Trash2 className="h-4 w-4" />, () => {
+                                    // For draft: remove immediately from UI
+                                    if (!templateId) {
+                                        const nextState = cloneSchedule(scheduleData);
+                                        const d = nextState.timeTemplates.find((t) => t.date === date);
+                                        if (d) {
+                                            d.times = d.times.filter((_, idx) => idx !== slotIndex);
+                                            if (d.times.length === 0) {
+                                                nextState.timeTemplates = nextState.timeTemplates.filter((t) => t.date !== date);
+                                            }
+                                        }
+                                        const identityDraft = clientKey ? `draft:${clientKey}` : "";
+                                        if (identityDraft) {
+                                            changedKeysRef.current.delete(identityDraft);
+                                            setTimeout(() => upsertChanged(nextState), 0);
+                                        }
+                                        setScheduleData(nextState);
+                                        return;
+                                    }
+                                    // Existing slot: toggle mark for deletion
+                                    setMarkedForDeletion((prev) => {
+                                        const next = new Set(prev);
+                                        const ident = identity;
+                                        if (ident) {
+                                            if (next.has(ident)) {
+                                                next.delete(ident);
+                                                if (templateId)
+                                                    deletedIdsRef.current = deletedIdsRef.current.filter((id) => id !== templateId);
+                                            } else {
+                                                next.add(ident);
+                                                if (templateId)
+                                                    deletedIdsRef.current = [...deletedIdsRef.current, templateId];
+                                            }
+                                        }
+                                        return next;
+                                    });
+                                    setTimeout(() => upsertChanged(), 0);
+                                })
+                            );
+
+                            // Edit icon only for status=1 or draft
+                            if (status === 1 || isDraft) {
+                                overlay.appendChild(
+                                    makeIconBtn("Sửa", <SquarePen className="h-4 w-4" />, () => {
+                                        // Mirror handleEventClick logic
+                                        if (isPastByStart(date, startHms)) {
+                                            addToast({
+                                                type: "error",
+                                                description: "Thời gian đã qua, không thể chỉnh sửa.",
+                                                duration: 2000,
+                                            });
+                                            return;
+                                        }
+                                        if (status === 2) return;
+                                        const selectedDate = selectedWeekData.dates[dayIndex];
+                                        const day = scheduleData.timeTemplates.find((d) => d.date === selectedDate);
+                                        const slot = day?.times[slotIndex];
+                                        if (!slot) return;
+                                        setEditStart(ensureHms(slot.start).slice(0, 5));
+                                        setEditEnd(ensureHms(slot.end).slice(0, 5));
+                                        setEditTarget({ dayIndex, slotIndex, mode: "edit" });
+                                        setDialogOpen(true);
+                                    })
+                                );
+                            }
+
+                            container.appendChild(overlay);
+                        }
+
+                        return { domNodes: [container] } as any;
+                    }}
                     eventClassNames={(info) => {
                         const { key, status, identity } = info.event
                             .extendedProps as any;
@@ -644,9 +802,9 @@ export default function WeeklyCalendar({
                             classes.push("opacity-70 cursor-not-allowed");
                         // Past timeslots are visually disabled
                         const date = info.event.startStr?.split("T")[0] ?? "";
-                        const startHms = info.event.startStr
-                            ?.split("T")[1]
-                            ?.slice(0, 8) ?? "00:00:00";
+                        const startHms =
+                            info.event.startStr?.split("T")[1]?.slice(0, 8) ??
+                            "00:00:00";
                         if (isPastByStart(date, startHms)) {
                             classes.push("opacity-60 cursor-not-allowed");
                         }
@@ -655,32 +813,32 @@ export default function WeeklyCalendar({
                     select={handleDateSelect}
                     selectAllow={(arg) => {
                         const date = arg.startStr.split("T")[0];
-                        const hms = arg.startStr
-                            .split("T")[1]
-                            ?.slice(0, 8) ?? "00:00:00";
+                        const hms =
+                            arg.startStr.split("T")[1]?.slice(0, 8) ??
+                            "00:00:00";
                         const allowed = !isPastByStart(date, hms);
                         if (!allowed) {
                             addToast({
                                 type: "error",
                                 description:
                                     "Thời gian đã qua, không thể chỉnh sửa.",
-                                duration: 3000,
+                                duration: 2000,
                             });
                         }
                         return allowed;
                     }}
                     eventAllow={(dropInfo) => {
                         const targetDate = dropInfo.startStr.split("T")[0];
-                        const hms = dropInfo.startStr
-                            .split("T")[1]
-                            ?.slice(0, 8) ?? "00:00:00";
+                        const hms =
+                            dropInfo.startStr.split("T")[1]?.slice(0, 8) ??
+                            "00:00:00";
                         const allowed = !isPastByStart(targetDate, hms);
                         if (!allowed) {
                             addToast({
                                 type: "error",
                                 description:
                                     "Thời gian đã qua, không thể chỉnh sửa.",
-                                duration: 3000,
+                                duration: 2000,
                             });
                         }
                         return allowed;
@@ -725,11 +883,6 @@ export default function WeeklyCalendar({
                                     disabled={!canEditTime}
                                 />
                             </div>
-                            <p className="text-sm text-gray-500">
-                                Trạng thái mặc định lưu là "Không công khai" cho
-                                slot mới/chỉnh sửa.
-                            </p>
-
                             {(() => {
                                 if (!editTarget) return null;
                                 const key = `${editTarget.dayIndex}-${editTarget.slotIndex}`;
@@ -740,142 +893,7 @@ export default function WeeklyCalendar({
                                 );
                                 const slot = day?.times[editTarget.slotIndex];
                                 const status = slot?.status ?? 0;
-                                const isSelected = selectedKeys.has(key);
-                                const identity = slot ? slotIdentity(slot) : "";
-                                const isMarked = identity
-                                    ? markedForDeletion.has(identity)
-                                    : false;
-                                const isDraft = !slot?.id;
-                                return (
-                                    <div className="flex gap-2 pt-2">
-                                        {!isDraft && (
-                                            <Button
-                                                variant={
-                                                    isSelected
-                                                        ? "secondary"
-                                                        : "default"
-                                                }
-                                                className="border-[1px] border-[#248FCA] bg-white text-[#248FCA] hover:bg-[#248FCA]/10 cursor-pointer"
-                                                onClick={() => {
-                                                    setSelectedKeys((prev) => {
-                                                        const next = new Set(
-                                                            prev
-                                                        );
-                                                        if (next.has(key))
-                                                            next.delete(key);
-                                                        else next.add(key);
-                                                        return next;
-                                                    });
-                                                }}
-                                                disabled={status === 2}
-                                            >
-                                                <SquareMousePointer />
-                                                {isSelected
-                                                    ? "Bỏ chọn"
-                                                    : "Chọn"}
-                                            </Button>
-                                        )}
-                                        <Button
-                                            variant={
-                                                isMarked
-                                                    ? "secondary"
-                                                    : "destructive"
-                                            }
-                                            onClick={() => {
-                                                if (!slot?.id) {
-                                                    // Remove draft slot immediately from UI
-                                                    const nextState =
-                                                        cloneSchedule(
-                                                            scheduleData
-                                                        );
-                                                    const d =
-                                                        nextState.timeTemplates.find(
-                                                            (t) =>
-                                                                t.date === date
-                                                        );
-                                                    if (d) {
-                                                        d.times =
-                                                            d.times.filter(
-                                                                (_, idx) =>
-                                                                    idx !==
-                                                                    editTarget!
-                                                                        .slotIndex
-                                                            );
-                                                        if (
-                                                            d.times.length === 0
-                                                        ) {
-                                                            nextState.timeTemplates =
-                                                                nextState.timeTemplates.filter(
-                                                                    (t) =>
-                                                                        t.date !==
-                                                                        date
-                                                                );
-                                                        }
-                                                    }
-                                                    // remove from changed if present
-                                                    const identityDraft =
-                                                        slot?.clientKey
-                                                            ? `draft:${slot.clientKey}`
-                                                            : "";
-                                                    if (identityDraft) {
-                                                        changedKeysRef.current.delete(
-                                                            identityDraft
-                                                        );
-                                                        setTimeout(
-                                                            () =>
-                                                                upsertChanged(
-                                                                    nextState
-                                                                ),
-                                                            0
-                                                        );
-                                                    }
-                                                    setScheduleData(nextState);
-                                                    setDialogOpen(false);
-                                                    return;
-                                                }
-                                                // Toggle mark-for-deletion for existing slots (with id)
-                                                setMarkedForDeletion((prev) => {
-                                                    const next = new Set(prev);
-                                                    const ident = slotIdentity(
-                                                        slot!
-                                                    );
-                                                    if (next.has(ident)) {
-                                                        next.delete(ident);
-                                                        if (slot?.id)
-                                                            deletedIdsRef.current =
-                                                                deletedIdsRef.current.filter(
-                                                                    (id) =>
-                                                                        id !==
-                                                                        slot.id
-                                                                );
-                                                    } else {
-                                                        next.add(ident);
-                                                        if (slot?.id)
-                                                            deletedIdsRef.current =
-                                                                [
-                                                                    ...deletedIdsRef.current,
-                                                                    slot.id,
-                                                                ];
-                                                    }
-                                                    return next;
-                                                });
-                                                setTimeout(
-                                                    () => upsertChanged(),
-                                                    0
-                                                );
-                                            }}
-                                            disabled={status === 2}
-                                            className="cursor-pointer"
-                                        >
-                                            <Trash />
-                                            {isDraft
-                                                ? "Xóa khung giờ"
-                                                : isMarked
-                                                ? "Bỏ đánh dấu xóa"
-                                                : "Đánh dấu xóa"}
-                                        </Button>
-                                    </div>
-                                );
+                                return null;
                             })()}
                         </div>
                         <DialogFooter className="gap-2">

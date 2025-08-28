@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
-import { ArrowLeft, FileText, Globe, Info, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, FileText, Globe, Images, Info, MapPin, Phone } from "lucide-react";
 import {
     Dialog,
     DialogClose,
@@ -34,7 +34,6 @@ const Header = () => {
                     <Link href={`/admin/hospital`}>
                         <ArrowLeft color="#248fca" />
                     </Link>
-
                     <h1 className="text-2xl font-bold text-[var(--primary-color)]">
                         Thông tin chi tiết về bệnh viện
                     </h1>
@@ -81,7 +80,7 @@ export default function HospitalDetailComponent({
                                 alt="thumbnail"
                                 width={300}
                                 height={500}
-                                className="object-cover"
+                                className="object-cover rounded-2xl"
                             />
 
                             <div className="flex-1">
@@ -133,9 +132,9 @@ export default function HospitalDetailComponent({
                     {/* Hospital Images Carousel */}
                     <div className="p-6">
                         <div className="flex gap-2 items-center mb-5">
-                            <Info color="#248FCA" />
+                            <Images color="#248FCA" />
                             <span className="text-xl font-medium">
-                                Thông tin chi tiết về bệnh viện
+                                Ảnh giới thiệu về bệnh viện
                             </span>
                         </div>
                         <AutoCarousel
@@ -146,8 +145,8 @@ export default function HospitalDetailComponent({
                     {/* Hospital Details */}
                     <div className="p-6">
                         <div className="">
-                            <h3 className="text-lg font-semibold mb-4 flex gap-2">
-                                <FileText width={18} color="#248FCA" />
+                            <h3 className="text-xl font-medium mb-4 flex gap-2">
+                                <Info color="#248FCA" />
                                 Giới thiệu về bệnh viện
                             </h3>
                             <div
@@ -159,7 +158,7 @@ export default function HospitalDetailComponent({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="mt-8 flex justify-end gap-4">
+                        {/* <div className="mt-8 flex justify-end gap-4">
                             <Dialog
                                 open={isOpenDialog}
                                 onOpenChange={setIsDialogOpen}
@@ -229,7 +228,7 @@ export default function HospitalDetailComponent({
                                     Chỉnh sửa bệnh viện
                                 </Button>
                             </Link>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </main>

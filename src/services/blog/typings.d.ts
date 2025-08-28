@@ -67,6 +67,7 @@ declare namespace API {
         like: number;
         categories: Category[];
         status: number;
+        modifiedDate: string;
         moderator: Moderator;
         doctor: Doctor;
     };

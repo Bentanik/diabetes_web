@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { GET_DOCTORS_QUERY_KEY } from "../../hooks/use-get-doctors";
+import { useRouter } from "next/navigation";
 
 export const doctorSchema = z.object({
     phoneNumber: z.string().regex(/^(0|\+84)\d{9,10}$/, {
@@ -86,21 +87,23 @@ export default function useCreateDoctor() {
             introduction: "",
         },
     });
-
     const { mutate, isPending } = useServiceCreateDoctor();
     const { showBackdrop, hideBackdrop } = useBackdrop();
     const queryClient = useQueryClient();
+    const router = useRouter();
 
-    const onSubmit = (data: REQUEST.TCreateDoctor, onLoadData: () => void) => {
+    const onSubmit = (data: REQUEST.TCreateDoctor) => {
         showBackdrop();
         mutate(data, {
             onSuccess: async () => {
                 hideBackdrop();
-                onLoadData();
                 await queryClient.invalidateQueries({
                     queryKey: [GET_DOCTORS_QUERY_KEY],
                 });
                 form.reset();
+                setTimeout(() => {
+                    router.push("/hospitals/doctor");
+                }, 500);
             },
             onError: (err) => {
                 hideBackdrop();

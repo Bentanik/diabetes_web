@@ -1,7 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
 
-const CATEGORY =
-    "https://capstonegateway-dqdrf9g0g9h0ffdd.southeastasia-01.azurewebsites.net/media-service/api/v1/categories";
+const CATEGORY = "http://163.61.110.211:30000/media-service/api/v1/categories";
 const GET_CATEGORIES_SYSTEM = CATEGORY + "/admin";
 
 export default {
