@@ -24,9 +24,7 @@ import { Input } from "@/components/ui/input";
 import ExcelImportDialog from "./excel-import-dialog";
 import Header from "./header";
 import DateSelector from "./date-selector";
-import useUpdateConsultation, {
-    TimeTemplateFormData,
-} from "../hooks/use-update-consultation";
+import useUpdateConsultation from "../hooks/use-update-consultation";
 import { FormProvider, useForm } from "react-hook-form";
 import DoctorSelect from "./select-doctor";
 import { useWeekOptions } from "../hooks/use-week-options";
@@ -34,7 +32,6 @@ import { useConsultationSchedule } from "../hooks/use-consultation-schedule";
 import WeeklyCalendar from "./weekly-calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-
 
 export default function CreateDoctorSchedule() {
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
@@ -66,9 +63,6 @@ export default function CreateDoctorSchedule() {
         setScheduleData,
         isLoading: isLoadingConsultations,
         hasConsultationData,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
     } = useConsultationSchedule(selectedDoctorId, apiParams);
     const [changedTimeSlots, setChangedTimeSlots] = useState<any[]>([]);
     const [selectedStatus, setSelectedStatus] = useState<number>(0);
@@ -130,25 +124,18 @@ export default function CreateDoctorSchedule() {
             console.error("Error creating consultation:", error);
         }
     };
-
-    // const formatTimeToHMS = (time: string): string => {
-    //     if (time.includes(":") && time.split(":").length === 2) {
-    //         return `${time}:00`;
-    //     }
-    //     return time;
-    // };
-
+    //Update schedule submit
     const handleUpdateScheduleSubmit = async () => {
         try {
             if (triggerRemoveMarkedSlots) {
                 triggerRemoveMarkedSlots();
             }
-            const formData: TimeTemplateFormData = {
+            const updateForm = {
                 status: selectedStatus,
                 upsertTimeTemplates: changedTimeSlots,
                 templateIdsToDelete: deletedIds,
             };
-            await UpdateSubmit(formData);
+            await UpdateSubmit(updateForm);
 
             // Reset states after successful submission
             setChangedTimeSlots([]);
@@ -159,6 +146,7 @@ export default function CreateDoctorSchedule() {
         }
     };
 
+    // Create schedule submit
     const handleScheduleSubmit = async () => {
         try {
             const formData: ConsultationFormData = {
@@ -167,17 +155,16 @@ export default function CreateDoctorSchedule() {
             onSubmit(formData, () => {
                 form.reset();
                 setScheduleData({ timeTemplates: [] });
-   
             });
         } catch (error) {
             console.error("Error submitting schedule data:", error);
         }
     };
 
+    // Handle Create Schedule Use Import Excel
     const handleExcelImport = async (importedData: any[]) => {
         try {
             setLoading(true);
-
             // Group consultations by date
             const groupedByDate = importedData.reduce(
                 (acc: Record<string, any[]>, consultation) => {
@@ -209,32 +196,6 @@ export default function CreateDoctorSchedule() {
             ) {
                 throw new Error("Không có dữ liệu hợp lệ để import");
             }
-
-            // Log each template for debugging
-            transformedData.timeTemplates.forEach((template, index) => {
-                console.log(`Template ${index + 1}:`, {
-                    date: template.date,
-                    timesCount: template.times.length,
-                    times: template.times,
-                });
-
-                // Verify time format for each time slot
-                template.times.forEach((timeSlot, timeIndex) => {
-                    console.log(`  Time slot ${timeIndex + 1}:`, {
-                        start: timeSlot.start,
-                        end: timeSlot.end,
-                        startFormat:
-                            typeof timeSlot.start === "string"
-                                ? timeSlot.start.split(":").length
-                                : "N/A",
-                        endFormat:
-                            typeof timeSlot.end === "string"
-                                ? timeSlot.end.split(":").length
-                                : "N/A",
-                    });
-                });
-            });
-
             await handleFormSubmit(transformedData);
         } catch (error) {
             console.error("Error importing consultations:", error);
@@ -247,6 +208,7 @@ export default function CreateDoctorSchedule() {
         setSelectedWeek(newWeek);
         setEditingSlot(null);
     };
+
     const doctorSelectMethods = useForm({
         defaultValues: {
             doctorId: "",

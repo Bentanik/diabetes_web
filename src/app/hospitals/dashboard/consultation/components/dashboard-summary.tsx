@@ -7,7 +7,6 @@ import {
     CheckCircle,
     Clock,
     XCircle,
-    TrendingUp,
     Calendar,
     Clock as ClockIcon,
     BadgeCheckIcon,
