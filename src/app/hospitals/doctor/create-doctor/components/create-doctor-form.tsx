@@ -40,7 +40,6 @@ import useUploadUserImage from "@/app/hospitals/doctor/create-doctor/hooks/use-u
 import useCreateDoctor, {
     DoctorFormData,
 } from "@/app/hospitals/doctor/create-doctor/hooks/use-create-doctor";
-import { useRouter } from "next/navigation";
 import PhonePreview from "./phone-preview";
 import DateOfBirthPicker from "./date-picker";
 
@@ -50,7 +49,6 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
     const { isPending: isUploading, onSubmit: onSubmitImage } =
         useUploadUserImage();
     const [currentContentHtml, setCurrentContentHtml] = useState("");
-    const router = useRouter();
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
         null
     );
@@ -122,12 +120,7 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                 position: data.position,
                 introduction: data.introduction,
             };
-            onSubmit(formData, () => {
-                form.reset();
-                setTimeout(() => {
-                    router.push("/hospitals/doctor");
-                }, 500);
-            });
+            onSubmit(formData);
         } catch (error) {
             console.error(error);
         } finally {

@@ -24,14 +24,14 @@ export const useServiceCreateConsultation = ({
             addToast({
                 type: "success",
                 description: "Tạo cuộc tư vấn thành công",
-                duration: 5000,
+                duration: 2000,
             });
         },
         onError: () => {
             addToast({
                 type: "error",
                 description: "Tạo cuộc tư vấn thất bại!",
-                duration: 5000,
+                duration: 2000,
             });
         },
     });
@@ -50,14 +50,14 @@ export const useServiceUpdateConsultation = ({
             addToast({
                 type: "success",
                 description: "Cập nhật cuộc tư vấn thành công",
-                duration: 5000,
+                duration: 2000,
             });
         },
         onError: (err) => {
             addToast({
                 type: "error",
                 description: err.title,
-                duration: 5000,
+                duration: 2000,
             });
         },
     });

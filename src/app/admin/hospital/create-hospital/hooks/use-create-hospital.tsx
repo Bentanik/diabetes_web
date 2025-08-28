@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { GET_HOSPITALS_QUERY_KEY } from "../../hooks/use-get-hospitals";
+import { useRouter } from "next/navigation";
 
 export const hospitalSchema = z.object({
     name: z.string().min(1, "Tên bệnh viện là bắt buộc"),
@@ -39,6 +40,8 @@ export default function useCreateHospital() {
     const { mutate, isPending } = useServiceCreateHospital();
     const { showBackdrop, hideBackdrop } = useBackdrop();
     const queryClient = useQueryClient();
+    const router = useRouter();
+  
 
     const onSubmit = (
         data: REQUEST.TCreateHospital,
@@ -53,6 +56,7 @@ export default function useCreateHospital() {
                     queryKey: [GET_HOSPITALS_QUERY_KEY],
                 });
                 form.reset();
+                router.replace("/admin/hospital");
             },
             onError: (err) => {
                 hideBackdrop();

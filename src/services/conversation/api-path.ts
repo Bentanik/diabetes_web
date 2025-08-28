@@ -1,9 +1,8 @@
 /* eslint-disable import/no-anonymous-default-export */
 
-const CONVERSATION =
-    "https://chat-doctor-h5awemg3hcfacwdv.southeastasia-01.azurewebsites.net/api/v1/conversations";
+const CONVERSATION = "http://163.61.110.211:30000/api/v1/conversations";
 const HOSPITAL_CONVERSATION =
-    "https://chat-doctor-h5awemg3hcfacwdv.southeastasia-01.azurewebsites.net/api/v1/hospital-conversations";
+    "http://163.61.110.211:30000/api/v1/hospital-conversations";
 
 // Hospital
 const GET_CONVERSATIONS = HOSPITAL_CONVERSATION;

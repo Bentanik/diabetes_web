@@ -1,6 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
 const CONSULTATION =
-    "https://consultation-doctor-hzfhdqfhd9crd3es.southeastasia-01.azurewebsites.net/api/v1/doctors";
+    "http://163.61.110.211:30000/consultation-service/api/v1/doctors";
 
 const CREATE_CONSULTATION = (doctorId: string) =>
     `${CONSULTATION}/${doctorId}/consultation-templates`;
