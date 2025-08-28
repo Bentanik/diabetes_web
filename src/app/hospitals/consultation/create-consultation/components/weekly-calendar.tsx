@@ -277,7 +277,6 @@ export default function WeeklyCalendar({
         return evts;
     }, [scheduleData.timeTemplates, selectedWeekData.dates]);
 
-    //
     const backgroundEvents: EventInput[] = useMemo(() => {
         const today = getTodayStr();
         const nowHms = getNowHms();
@@ -358,7 +357,7 @@ export default function WeeklyCalendar({
             addToast({
                 type: "error",
                 description: "Khoảng thời gian tối thiểu là 15 phút",
-                duration: 3000,
+                duration: 2000,
             });
             return false;
         }
@@ -366,7 +365,7 @@ export default function WeeklyCalendar({
             addToast({
                 type: "error",
                 description: "Khung giờ bị chồng lấn trong cùng ngày",
-                duration: 3000,
+                duration: 2000,
             });
             return false;
         }
@@ -393,7 +392,7 @@ export default function WeeklyCalendar({
             addToast({
                 type: "error",
                 description: "Thời gian đã qua, không thể chỉnh sửa.",
-                duration: 3000,
+                duration: 2000,
             });
             return;
         }
@@ -422,7 +421,7 @@ export default function WeeklyCalendar({
                 addToast({
                     type: "error",
                     description: "Thời gian đã qua, không thể chỉnh sửa.",
-                    duration: 3000,
+                    duration: 2000,
                 });
                 return;
             }
@@ -445,7 +444,7 @@ export default function WeeklyCalendar({
                     addToast({
                         type: "error",
                         description: "Thời gian đã qua, không thể chỉnh sửa.",
-                        duration: 3000,
+                        duration: 2000,
                     });
                     return;
                 }
@@ -514,7 +513,7 @@ export default function WeeklyCalendar({
             addToast({
                 type: "error",
                 description: "Chỉ được di chuyển trong cùng một ngày",
-                duration: 3000,
+                duration: 2000,
             });
             (arg as any).revert?.();
             return;
@@ -770,7 +769,7 @@ export default function WeeklyCalendar({
                                             addToast({
                                                 type: "error",
                                                 description: "Thời gian đã qua, không thể chỉnh sửa.",
-                                                duration: 3000,
+                                                duration: 2000,
                                             });
                                             return;
                                         }
@@ -823,7 +822,7 @@ export default function WeeklyCalendar({
                                 type: "error",
                                 description:
                                     "Thời gian đã qua, không thể chỉnh sửa.",
-                                duration: 3000,
+                                duration: 2000,
                             });
                         }
                         return allowed;
@@ -839,7 +838,7 @@ export default function WeeklyCalendar({
                                 type: "error",
                                 description:
                                     "Thời gian đã qua, không thể chỉnh sửa.",
-                                duration: 3000,
+                                duration: 2000,
                             });
                         }
                         return allowed;

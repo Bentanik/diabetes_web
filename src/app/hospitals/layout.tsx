@@ -48,14 +48,42 @@ export default function HospitalLayout({
     };
 
     const isItemActive = (item: SidebarItem) => {
-        if (pathname === item.href) return true;
+        // Active when exact match or any nested path under the item's href
+        if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
+            return true;
+        }
         if (item.subItems) {
-            return item.subItems.some((subItem) => pathname === subItem.href);
+            return item.subItems.some(
+                (subItem) =>
+                    pathname === subItem.href ||
+                    pathname.startsWith(`${subItem.href}/`)
+            );
         }
         return false;
     };
 
-    const isSubItemActive = (href: string) => pathname === href;
+    const isSubItemActive = (href: string) => {
+        // Determine the most specific matching subItem (longest href prefix)
+        const currentItem = sidebar_items.find(
+            (it) => pathname === it.href || pathname.startsWith(`${it.href}/`)
+        ) as SidebarItem | undefined;
+
+        if (!currentItem || !currentItem.subItems || currentItem.subItems.length === 0) {
+            return pathname === href || pathname.startsWith(`${href}/`);
+        }
+
+        const matching = currentItem.subItems
+            .filter(
+                (s) => pathname === s.href || pathname.startsWith(`${s.href}/`)
+            )
+            .sort((a, b) => b.href.length - a.href.length);
+
+        if (matching.length > 0) {
+            return matching[0].href === href;
+        }
+
+        return pathname === href || pathname.startsWith(`${href}/`);
+    };
     const { handleLogout } = useLogout();
 
     return (

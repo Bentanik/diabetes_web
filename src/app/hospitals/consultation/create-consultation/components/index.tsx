@@ -7,7 +7,6 @@ import {
     Save,
     Building2,
     Phone,
-    BadgeCheck,
     BadgeCheckIcon,
 } from "lucide-react";
 import {
@@ -32,16 +31,10 @@ import { FormProvider, useForm } from "react-hook-form";
 import DoctorSelect from "./select-doctor";
 import { useWeekOptions } from "../hooks/use-week-options";
 import { useConsultationSchedule } from "../hooks/use-consultation-schedule";
-import type { TimeSlot } from "../hooks/use-consultation-schedule";
 import WeeklyCalendar from "./weekly-calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
-interface DaySchedule {
-    date: string;
-    times: TimeSlot[];
-}
 
 export default function CreateDoctorSchedule() {
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
@@ -174,7 +167,7 @@ export default function CreateDoctorSchedule() {
             onSubmit(formData, () => {
                 form.reset();
                 setScheduleData({ timeTemplates: [] });
-                // setHasChanges(false);
+   
             });
         } catch (error) {
             console.error("Error submitting schedule data:", error);
@@ -201,7 +194,6 @@ export default function CreateDoctorSchedule() {
                 {}
             );
 
-            // Transform to the expected API format
             const transformedData: REQUEST.TCreateConsultation = {
                 timeTemplates: Object.entries(groupedByDate).map(
                     ([date, times]) => ({
@@ -211,9 +203,6 @@ export default function CreateDoctorSchedule() {
                 ),
             };
 
-            console.log("Transformed data for API:", transformedData);
-
-            // Validate the transformed data structure
             if (
                 !transformedData.timeTemplates ||
                 transformedData.timeTemplates.length === 0

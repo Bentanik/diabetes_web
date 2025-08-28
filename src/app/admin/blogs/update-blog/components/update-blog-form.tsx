@@ -172,7 +172,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
             };
             onSubmit(formData, () => {
                 setIsDialogOpen(false);
-                form.reset();
             });
         } catch (error) {
             console.error("Error updating post:", error);
@@ -188,11 +187,11 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
         setIsDialogOpen(false);
     };
 
-    useEffect(() => {
-        if (blog_detail && blog_detail.status !== -2) {
-            router.push("/admin/blogs");
-        }
-    }, [blog_detail, router]);
+    // useEffect(() => {
+    //     if (blog_detail && blog_detail.status !== -2) {
+    //         router.push("/admin/blogs");
+    //     }
+    // }, [blog_detail, router]);
 
     return (
         <div className="min-h-screen">
