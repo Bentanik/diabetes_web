@@ -86,7 +86,6 @@ export default function useCreateDoctor() {
             introduction: "",
         },
     });
-
     const { mutate, isPending } = useServiceCreateDoctor();
     const { showBackdrop, hideBackdrop } = useBackdrop();
     const queryClient = useQueryClient();
