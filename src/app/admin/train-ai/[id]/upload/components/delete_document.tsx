@@ -147,7 +147,7 @@ export default function DeleteDocumentModal({ isOpen, onClose, document }: Delet
                                 {/* File info */}
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-gray-900 truncate text-base">
-                                        {document.file.file_name}
+                                        {document.title}
                                     </p>
                                     <div className="flex items-center gap-3 mt-2">
                                         <span className="text-xs text-gray-500 uppercase font-medium bg-gray-100 px-2 py-1 rounded">

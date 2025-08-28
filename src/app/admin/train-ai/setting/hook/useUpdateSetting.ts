@@ -1,4 +1,5 @@
 import { useBackdrop } from "@/context/backdrop_context";
+import { useNotificationContext } from "@/context/notification_context";
 import {
   useUpdateSettingsService,
 } from "@/services/train-ai/services";
@@ -10,6 +11,9 @@ export default function useUpdateSetting() {
   const backdrop = useBackdrop();
   const queryClient = useQueryClient();
 
+  const { addSuccess, addError } = useNotificationContext()
+
+
   const handleUpdateChatSetting = (data: REQUEST.TUpdateSettingsRequest, handleSuccess: () => void) => {
     backdrop.showBackdrop();
     mutate(data, {
@@ -18,8 +22,10 @@ export default function useUpdateSetting() {
           queryKey: [KNOWLEDGE_QUERY_KEY],
         });
         handleSuccess();
+        addSuccess("Thành công","Cập nhật cài đặt thành công");
       },
       onError: () => {
+        addError("Thất bại", "Đã có lỗi xảy ra");
       },
       onSettled: () => {
         backdrop.hideBackdrop();

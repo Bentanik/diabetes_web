@@ -1,19 +1,15 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-    SettingsIcon,
-    SquarePercentIcon,
-} from "lucide-react";
-import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
-import NotificationDropdown from "@/components/notification";
-import Link from "next/link";
+"use client"
+import { motion } from "framer-motion"
+import { ArrowLeftIcon, SearchIcon, SettingsIcon, SquarePercentIcon } from "lucide-react"
+import ProfileHospitalMenu from "@/components/profile_hospital_menu"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import NotificationDropdown from "@/components/notification"
+import { useRouter } from "next/navigation"
 
 export default function Header() {
-    const [createFolderModalOpen, setCreateFolderModalOpen] = useState(false);
+
+    const router = useRouter()
 
     return (
         <motion.div
@@ -25,14 +21,26 @@ export default function Header() {
             }}
         >
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-[#248fca]">
-                        Huấn luyện AI
-                    </h1>
-                    <p className="text-gray-600 mt-1 text-sm">
-                        Huấn luyện AI để tự động phân tích và đưa ra lời khuyên
-                        cho bệnh nhân
-                    </p>
+                <div className="flex items-center gap-3">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => router.back()}
+                        className="flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors hover:cursor-pointer"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5 text-gray-700" />
+                    </motion.button>
+                    <div className="h-6 w-px bg-gray-300"></div>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 rounded-lg">
+                            <SearchIcon className="w-5 h-5 text-[#248fca]" />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            {" "}
+                            <h1 className="text-xl font-semibold text-[#248fca]">Tìm kiếm tài liệu</h1>
+                            <p className="text-sm text-gray-600">Tìm kiếm tài liệu theo ngữ nghĩa</p>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex items-center gap-4">
                     <motion.div
@@ -73,12 +81,6 @@ export default function Header() {
                     </div>
                 </div>
             </div>
-
-            {/* Create Folder Modal */}
-            <CreateKnowlegeModal
-                isOpen={createFolderModalOpen}
-                onClose={() => setCreateFolderModalOpen(false)}
-            />
         </motion.div>
     );
 }
