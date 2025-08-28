@@ -81,7 +81,7 @@ export const parseTime = (timeValue: any) => {
                     .padStart(2, "0")}:00`;
             }
         }
-        
+
         // Handle time without leading zeros (e.g., "1:45" -> "01:45:00")
         const simpleTimeMatch = timeValue.match(/^(\d{1,2}):(\d{1,2})$/);
         if (simpleTimeMatch) {
@@ -93,7 +93,7 @@ export const parseTime = (timeValue: any) => {
                     .padStart(2, "0")}:00`;
             }
         }
-        
+
         // If no pattern matches, return the original value
         return timeValue;
     }
@@ -208,12 +208,12 @@ export const validateAndTransformData = (rawData: any[]) => {
             const parsedEndTime = parseTime(endTime);
             dataItem.startTime = parsedStartTime || startTime;
             dataItem.endTime = parsedEndTime || endTime;
-            
+
             // Ensure time format is HH:MM for API
-            if (parsedStartTime && typeof parsedStartTime === 'string') {
+            if (parsedStartTime && typeof parsedStartTime === "string") {
                 dataItem.startTime = parsedStartTime;
             }
-            if (parsedEndTime && typeof parsedEndTime === 'string') {
+            if (parsedEndTime && typeof parsedEndTime === "string") {
                 dataItem.endTime = parsedEndTime;
             }
 

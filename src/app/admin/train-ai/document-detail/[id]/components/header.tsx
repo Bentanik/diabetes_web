@@ -49,7 +49,7 @@ export default function Header({
 
                     <div className="flex items-start gap-3 flex-1">
                         <div className="p-2 bg-[#248fca]/10 rounded-lg mt-1">
-                            {getFileIcon(documentData?.file.file_type || 'file')}
+                            {getFileIcon(documentData?.file.type || 'file')}
                         </div>
                         <div className="flex-1">
                             {documentData ? (
@@ -77,7 +77,7 @@ export default function Header({
                                         </div>
                                         <div className="flex items-center gap-1 text-xs text-gray-500">
                                             <ArchiveIcon className="w-3 h-3" />
-                                            <span>{documentData.file?.file_type?.toUpperCase() || 'FILE'}</span>
+                                            <span>{documentData.file?.type?.toUpperCase() || 'FILE'}</span>
                                         </div>
                                     </div>
                                 </>
@@ -94,11 +94,11 @@ export default function Header({
                 <div className="flex items-center gap-3 ml-4">
                     {/* Status Badge */}
                     {documentData && (
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${documentData.type === 'upload_document'
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${documentData.document_type === 'uploaded_document'
                             ? 'bg-yellow-100 text-yellow-700 border-yellow-200'
                             : 'bg-green-100 text-green-700 border-green-200'
                             }`}>
-                            {documentData.type === 'upload_document' ? 'Chưa được huấn luyện' : 'Đã huấn luyện'}
+                            {documentData.document_type === 'uploaded_document' ? 'Chưa được huấn luyện' : 'Đã huấn luyện'}
                         </span>
                     )}
                 </div>
