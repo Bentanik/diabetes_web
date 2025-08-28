@@ -212,7 +212,6 @@ export default function ConsultationChart({
                         revenue: 0,
                     };
                 }
-
                 acc[weekKey].consultations += item.consultations;
                 acc[weekKey].revenue += item.revenue;
             }
@@ -300,8 +299,8 @@ export default function ConsultationChart({
                                 type="monotone"
                                 dataKey="revenue"
                                 stackId="2"
-                                stroke="#248FCA"
-                                fill="#92c7e5"
+                                // stroke="#248FCA"
+                                // fill="#92c7e5"
                                 fillOpacity={0.3}
                                 strokeWidth={2}
                             />

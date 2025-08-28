@@ -74,11 +74,7 @@ export default function DoctorSelect({
                             }>
                         ) => {
                             field.onChange(
-                                selectedOption ? selectedOption.value : "",
-                                console.log(
-                                    "slect doctor option nè" +
-                                        selectedOption?.value
-                                )
+                                selectedOption ? selectedOption.value : ""
                             );
                             if (onDoctorChange) {
                                 const selectedDoctor = selectedOption

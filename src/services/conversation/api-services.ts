@@ -51,23 +51,17 @@ export const deleteConversationAsync = async ({
 
 export const deleteParticipantAsync = async (
     { conversationId }: REQUEST.ConversationId,
-    body: REQUEST.DeleteParticipant
+    { memberId }: REQUEST.MemberId
 ) => {
     const params: Record<
         string,
         string | number | boolean | string[] | undefined
     > = {};
 
-    if (body.participantId && body.participantId.trim() !== "") {
-        params.participantId = body.participantId.trim();
-    }
-
     const response = await request<TResponse>(
-        API_ENDPOINTS.DELETE_PARTICIPANT(conversationId),
+        API_ENDPOINTS.DELETE_PARTICIPANT(conversationId) + `/${memberId}`,
         {
             method: "DELETE",
-            data: body,
-            params: Object.keys(params).length > 0 ? params : [],
             headers: {
                 "Content-Type": "application/json",
             },

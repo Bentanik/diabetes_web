@@ -53,7 +53,6 @@ interface WeeklyCalendarProps {
     onStatusChange?: (status: number) => void;
     resetSignal: number;
 }
-
 // Các hàm hỗ trợ
 
 // Đánh dấu một slot để tracking thay đổi
@@ -653,17 +652,32 @@ export default function WeeklyCalendar({
                     weekends={true}
                     events={[...events, ...backgroundEvents]}
                     eventContent={(arg) => {
-                        const { dayIndex, slotIndex, status, key, identity, templateId, clientKey } = arg.event
-                            .extendedProps as any;
+                        const {
+                            dayIndex,
+                            slotIndex,
+                            status,
+                            key,
+                            identity,
+                            templateId,
+                            clientKey,
+                        } = arg.event.extendedProps as any;
                         const date = arg.event.startStr?.split("T")[0] ?? "";
-                        const startHms = arg.event.startStr?.split("T")[1]?.slice(0, 8) ?? "00:00:00";
-                        const startHM = arg.event.startStr?.split("T")[1]?.slice(0, 5) ?? "";
-                        const endHM = arg.event.endStr?.split("T")[1]?.slice(0, 5) ?? startHM;
+                        const startHms =
+                            arg.event.startStr?.split("T")[1]?.slice(0, 8) ??
+                            "00:00:00";
+                        const startHM =
+                            arg.event.startStr?.split("T")[1]?.slice(0, 5) ??
+                            "";
+                        const endHM =
+                            arg.event.endStr?.split("T")[1]?.slice(0, 5) ??
+                            startHM;
                         const isPast = isPastByStart(date, startHms);
                         const isDraft = !templateId;
                         const isBooked = status === 2;
                         const isSelected = selectedKeys.has(key);
-                        const isMarked = identity ? markedForDeletion.has(identity) : false;
+                        const isMarked = identity
+                            ? markedForDeletion.has(identity)
+                            : false;
 
                         // Base label (keep existing title rendering)
                         const title = arg.event.title;
@@ -671,10 +685,12 @@ export default function WeeklyCalendar({
 
                         // Build a container with hover overlay
                         const container = document.createElement("div");
-                        container.className = "relative group h-full flex items-center justify-center";
+                        container.className =
+                            "relative group h-full flex items-center justify-center";
 
                         const titleDiv = document.createElement("div");
-                        titleDiv.className = "px-2 py-1 text-xs font-medium w-full text-center";
+                        titleDiv.className =
+                            "px-2 py-1 text-xs font-medium w-full text-center";
                         titleDiv.textContent = mergedLabel;
                         container.appendChild(titleDiv);
 
@@ -685,7 +701,11 @@ export default function WeeklyCalendar({
                                 "pointer-events-none absolute inset-0 hidden items-center justify-center gap-2 rounded-md bg-black/20 group-hover:flex";
 
                             // Helper to create an icon button (render React Lucide icon into DOM)
-                            const makeIconBtn = (label: string, icon: any, onClick: () => void) => {
+                            const makeIconBtn = (
+                                label: string,
+                                icon: any,
+                                onClick: () => void
+                            ) => {
                                 const btn = document.createElement("button");
                                 btn.type = "button";
                                 btn.className =
@@ -702,87 +722,148 @@ export default function WeeklyCalendar({
                                 btn.appendChild(mount);
                                 return btn;
                             };
-                            
 
                             // Select (only for non-draft)
                             if (!isDraft) {
                                 overlay.appendChild(
-                                    makeIconBtn("Chọn / Bỏ chọn", <MousePointer2 className="h-4 w-4" />, () => {
-                                        setSelectedKeys((prev) => {
-                                            const next = new Set(prev);
-                                            if (next.has(key)) next.delete(key);
-                                            else next.add(key);
-                                            return next;
-                                        });
-                                    })
+                                    makeIconBtn(
+                                        "Chọn / Bỏ chọn",
+                                        <MousePointer2 className="h-4 w-4" />,
+                                        () => {
+                                            setSelectedKeys((prev) => {
+                                                const next = new Set(prev);
+                                                if (next.has(key))
+                                                    next.delete(key);
+                                                else next.add(key);
+                                                return next;
+                                            });
+                                        }
+                                    )
                                 );
                             }
 
                             // Delete (toggle mark or remove draft immediately)
                             overlay.appendChild(
-                                makeIconBtn("Xóa", <Trash2 className="h-4 w-4" />, () => {
-                                    // For draft: remove immediately from UI
-                                    if (!templateId) {
-                                        const nextState = cloneSchedule(scheduleData);
-                                        const d = nextState.timeTemplates.find((t) => t.date === date);
-                                        if (d) {
-                                            d.times = d.times.filter((_, idx) => idx !== slotIndex);
-                                            if (d.times.length === 0) {
-                                                nextState.timeTemplates = nextState.timeTemplates.filter((t) => t.date !== date);
+                                makeIconBtn(
+                                    "Xóa",
+                                    <Trash2 className="h-4 w-4" />,
+                                    () => {
+                                        // For draft: remove immediately from UI
+                                        if (!templateId) {
+                                            const nextState =
+                                                cloneSchedule(scheduleData);
+                                            const d =
+                                                nextState.timeTemplates.find(
+                                                    (t) => t.date === date
+                                                );
+                                            if (d) {
+                                                d.times = d.times.filter(
+                                                    (_, idx) =>
+                                                        idx !== slotIndex
+                                                );
+                                                if (d.times.length === 0) {
+                                                    nextState.timeTemplates =
+                                                        nextState.timeTemplates.filter(
+                                                            (t) =>
+                                                                t.date !== date
+                                                        );
+                                                }
                                             }
+                                            const identityDraft = clientKey
+                                                ? `draft:${clientKey}`
+                                                : "";
+                                            if (identityDraft) {
+                                                changedKeysRef.current.delete(
+                                                    identityDraft
+                                                );
+                                                setTimeout(
+                                                    () =>
+                                                        upsertChanged(
+                                                            nextState
+                                                        ),
+                                                    0
+                                                );
+                                            }
+                                            setScheduleData(nextState);
+                                            return;
                                         }
-                                        const identityDraft = clientKey ? `draft:${clientKey}` : "";
-                                        if (identityDraft) {
-                                            changedKeysRef.current.delete(identityDraft);
-                                            setTimeout(() => upsertChanged(nextState), 0);
-                                        }
-                                        setScheduleData(nextState);
-                                        return;
+                                        // Existing slot: toggle mark for deletion
+                                        setMarkedForDeletion((prev) => {
+                                            const next = new Set(prev);
+                                            const ident = identity;
+                                            if (ident) {
+                                                if (next.has(ident)) {
+                                                    next.delete(ident);
+                                                    if (templateId)
+                                                        deletedIdsRef.current =
+                                                            deletedIdsRef.current.filter(
+                                                                (id) =>
+                                                                    id !==
+                                                                    templateId
+                                                            );
+                                                } else {
+                                                    next.add(ident);
+                                                    if (templateId)
+                                                        deletedIdsRef.current =
+                                                            [
+                                                                ...deletedIdsRef.current,
+                                                                templateId,
+                                                            ];
+                                                }
+                                            }
+                                            return next;
+                                        });
+                                        setTimeout(() => upsertChanged(), 0);
                                     }
-                                    // Existing slot: toggle mark for deletion
-                                    setMarkedForDeletion((prev) => {
-                                        const next = new Set(prev);
-                                        const ident = identity;
-                                        if (ident) {
-                                            if (next.has(ident)) {
-                                                next.delete(ident);
-                                                if (templateId)
-                                                    deletedIdsRef.current = deletedIdsRef.current.filter((id) => id !== templateId);
-                                            } else {
-                                                next.add(ident);
-                                                if (templateId)
-                                                    deletedIdsRef.current = [...deletedIdsRef.current, templateId];
-                                            }
-                                        }
-                                        return next;
-                                    });
-                                    setTimeout(() => upsertChanged(), 0);
-                                })
+                                )
                             );
 
                             // Edit icon only for status=1 or draft
                             if (status === 1 || isDraft) {
                                 overlay.appendChild(
-                                    makeIconBtn("Sửa", <SquarePen className="h-4 w-4" />, () => {
-                                        // Mirror handleEventClick logic
-                                        if (isPastByStart(date, startHms)) {
-                                            addToast({
-                                                type: "error",
-                                                description: "Thời gian đã qua, không thể chỉnh sửa.",
-                                                duration: 2000,
+                                    makeIconBtn(
+                                        "Sửa",
+                                        <SquarePen className="h-4 w-4" />,
+                                        () => {
+                                            // Mirror handleEventClick logic
+                                            if (isPastByStart(date, startHms)) {
+                                                addToast({
+                                                    type: "error",
+                                                    description:
+                                                        "Thời gian đã qua, không thể chỉnh sửa.",
+                                                    duration: 2000,
+                                                });
+                                                return;
+                                            }
+                                            if (status === 2) return;
+                                            const selectedDate =
+                                                selectedWeekData.dates[
+                                                    dayIndex
+                                                ];
+                                            const day =
+                                                scheduleData.timeTemplates.find(
+                                                    (d) =>
+                                                        d.date === selectedDate
+                                                );
+                                            const slot = day?.times[slotIndex];
+                                            if (!slot) return;
+                                            setEditStart(
+                                                ensureHms(slot.start).slice(
+                                                    0,
+                                                    5
+                                                )
+                                            );
+                                            setEditEnd(
+                                                ensureHms(slot.end).slice(0, 5)
+                                            );
+                                            setEditTarget({
+                                                dayIndex,
+                                                slotIndex,
+                                                mode: "edit",
                                             });
-                                            return;
+                                            setDialogOpen(true);
                                         }
-                                        if (status === 2) return;
-                                        const selectedDate = selectedWeekData.dates[dayIndex];
-                                        const day = scheduleData.timeTemplates.find((d) => d.date === selectedDate);
-                                        const slot = day?.times[slotIndex];
-                                        if (!slot) return;
-                                        setEditStart(ensureHms(slot.start).slice(0, 5));
-                                        setEditEnd(ensureHms(slot.end).slice(0, 5));
-                                        setEditTarget({ dayIndex, slotIndex, mode: "edit" });
-                                        setDialogOpen(true);
-                                    })
+                                    )
                                 );
                             }
 

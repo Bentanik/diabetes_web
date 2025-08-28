@@ -56,14 +56,19 @@ export default function GroupDetailComponent({
     const [currentPage, setCurrentPage] = useState<number>(1);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectDeleteUserId, setSelectDeleteUserId] = useState<string>("");
     const [selectedUserForDeletion, setSelectedUserForDeletion] = useState<
         string | null
     >(null);
     const pageSize = 10;
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
-    const { onSubmit, isPending: deletePending } = useDeleteParticipant({
-        conversationId,
-    });
+
+    const { onSubmit, isPending: deletePending } = useDeleteParticipant(
+        {
+            conversationId,
+        },
+        { memberId: selectDeleteUserId }
+    );
 
     // Gọi hook useGetConversationDetail
     const { conversation_detail, isPending, isError, error } =
@@ -123,17 +128,15 @@ export default function GroupDetailComponent({
         if (!onSubmit || typeof onSubmit !== "function") {
             return;
         }
+        // Cập nhật selectDeleteUserId với userId được truyền vào
+        setSelectDeleteUserId(userId);
         setIsSubmitting(true);
-        try {
-            const participantId: REQUEST.DeleteParticipant = {
-                participantId: userId,
-            };
 
-            await onSubmit(participantId, () => {
-                setSelectedUserForDeletion(null);
-            });
+        try {
+            await onSubmit();
+            setSelectedUserForDeletion(null);
         } catch (error) {
-            console.error("Error updating post:", error);
+            console.error("Error deleting member:", error);
         } finally {
             setIsSubmitting(false);
         }
@@ -354,7 +357,7 @@ export default function GroupDetailComponent({
                                                                     className="gap-2 cursor-pointer hover:bg-red-200 hover:border-red-200"
                                                                     disabled={
                                                                         isSubmitting ||
-                                                                        isPending
+                                                                        deletePending
                                                                     }
                                                                 >
                                                                     Xóa người

@@ -20,27 +20,30 @@ interface UseConsultationDashboardProps {
 const generateMockDataForMonth = (year: number, month: number) => {
     const daysInMonth = new Date(year, month, 0).getDate();
     const monthData: any = {};
-    
+
     let weekNumber = 1;
     let currentWeek: any[] = [];
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
-        const date = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        const date = `${year}-${month.toString().padStart(2, "0")}-${day
+            .toString()
+            .padStart(2, "0")}`;
         const consultations = Math.floor(Math.random() * 20) + 5; // 5-25 consultations
-        const revenue = consultations * (Math.floor(Math.random() * 500000) + 2000000); // 2M-2.5M per consultation
+        const revenue =
+            consultations * (Math.floor(Math.random() * 500000) + 2000000); // 2M-2.5M per consultation
         const completed = Math.floor(consultations * 0.8); // 80% completed
         const pending = Math.floor(consultations * 0.15); // 15% pending
         const cancelled = consultations - completed - pending; // remaining cancelled
-        
+
         currentWeek.push({
             date,
             consultations,
             revenue,
             completed,
             pending,
-            cancelled
+            cancelled,
         });
-        
+
         // Tạo tuần mới khi đủ 7 ngày hoặc hết tháng
         if (currentWeek.length === 7 || day === daysInMonth) {
             monthData[`week-${year}-${month}-${weekNumber}`] = currentWeek;
@@ -48,7 +51,7 @@ const generateMockDataForMonth = (year: number, month: number) => {
             currentWeek = [];
         }
     }
-    
+
     return monthData;
 };
 
@@ -66,8 +69,8 @@ const mockConsultationData = {
         "9": generateMockDataForMonth(2025, 9),
         "10": generateMockDataForMonth(2025, 10),
         "11": generateMockDataForMonth(2025, 11),
-        "12": generateMockDataForMonth(2025, 12)
-    }
+        "12": generateMockDataForMonth(2025, 12),
+    },
 };
 
 export const useConsultationDashboardMock = ({
@@ -90,13 +93,29 @@ export const useConsultationDashboardMock = ({
                 fromDate = selectedWeekData.weekStart;
                 toDate = selectedWeekData.weekEnd;
             } else {
-                fromDate = new Date(parseInt(selectedYear), parseInt(selectedMonth) - 1, 1);
-                toDate = new Date(parseInt(selectedYear), parseInt(selectedMonth), 0);
+                fromDate = new Date(
+                    parseInt(selectedYear),
+                    parseInt(selectedMonth) - 1,
+                    1
+                );
+                toDate = new Date(
+                    parseInt(selectedYear),
+                    parseInt(selectedMonth),
+                    0
+                );
             }
         } else if (selectedYear && selectedMonth) {
             // Tháng cụ thể
-            fromDate = new Date(parseInt(selectedYear), parseInt(selectedMonth) - 1, 1);
-            toDate = new Date(parseInt(selectedYear), parseInt(selectedMonth), 0);
+            fromDate = new Date(
+                parseInt(selectedYear),
+                parseInt(selectedMonth) - 1,
+                1
+            );
+            toDate = new Date(
+                parseInt(selectedYear),
+                parseInt(selectedMonth),
+                0
+            );
         } else if (selectedYear) {
             // Năm cụ thể
             fromDate = new Date(parseInt(selectedYear), 0, 1);
@@ -125,21 +144,28 @@ export const useConsultationDashboardMock = ({
 
                 if (selectedYear && selectedMonth && selectedWeek) {
                     // Lấy data theo tuần
-                    const weekData = (mockConsultationData as any)[selectedYear]?.[selectedMonth]?.[selectedWeek];
+                    const weekData = (mockConsultationData as any)[
+                        selectedYear
+                    ]?.[selectedMonth]?.[selectedWeek];
                     if (weekData) {
                         allConsultations = weekData;
                     }
                 } else if (selectedYear && selectedMonth) {
                     // Lấy data theo tháng
-                    const monthData = (mockConsultationData as any)[selectedYear]?.[selectedMonth];
+                    const monthData = (mockConsultationData as any)[
+                        selectedYear
+                    ]?.[selectedMonth];
                     if (monthData) {
                         Object.values(monthData).forEach((weekData: any) => {
-                            allConsultations = allConsultations.concat(weekData);
+                            allConsultations =
+                                allConsultations.concat(weekData);
                         });
                     }
                 } else if (selectedYear) {
                     // Lấy data theo năm - tất cả 12 tháng
-                    const yearData = (mockConsultationData as any)[selectedYear];
+                    const yearData = (mockConsultationData as any)[
+                        selectedYear
+                    ];
                     if (yearData) {
                         // Tạo dữ liệu cho từng tháng
                         for (let month = 1; month <= 12; month++) {
@@ -152,28 +178,38 @@ export const useConsultationDashboardMock = ({
                                     revenue: 0,
                                     completed: 0,
                                     pending: 0,
-                                    cancelled: 0
+                                    cancelled: 0,
                                 };
-                                
-                                Object.values(monthData).forEach((weekData: any) => {
-                                    weekData.forEach((dayData: any) => {
-                                        monthTotal.consultations += dayData.consultations;
-                                        monthTotal.revenue += dayData.revenue;
-                                        monthTotal.completed += dayData.completed;
-                                        monthTotal.pending += dayData.pending;
-                                        monthTotal.cancelled += dayData.cancelled;
-                                    });
-                                });
-                                
+
+                                Object.values(monthData).forEach(
+                                    (weekData: any) => {
+                                        weekData.forEach((dayData: any) => {
+                                            monthTotal.consultations +=
+                                                dayData.consultations;
+                                            monthTotal.revenue +=
+                                                dayData.revenue;
+                                            monthTotal.completed +=
+                                                dayData.completed;
+                                            monthTotal.pending +=
+                                                dayData.pending;
+                                            monthTotal.cancelled +=
+                                                dayData.cancelled;
+                                        });
+                                    }
+                                );
+
                                 // Tạo một record đại diện cho tháng
                                 allConsultations.push({
-                                    date: `${selectedYear}-${monthKey.padStart(2, '0')}-01`,
+                                    date: `${selectedYear}-${monthKey.padStart(
+                                        2,
+                                        "0"
+                                    )}-01`,
                                     consultations: monthTotal.consultations,
                                     revenue: monthTotal.revenue,
                                     completed: monthTotal.completed,
                                     pending: monthTotal.pending,
                                     cancelled: monthTotal.cancelled,
-                                    month: monthKey
+                                    month: monthKey,
                                 });
                             }
                         }
@@ -187,11 +223,26 @@ export const useConsultationDashboardMock = ({
                 }
 
                 // Tính toán các metrics
-                const totalConsultations = allConsultations.reduce((sum, item) => sum + item.consultations, 0);
-                const totalRevenue = allConsultations.reduce((sum, item) => sum + item.revenue, 0);
-                const completedConsultations = allConsultations.reduce((sum, item) => sum + item.completed, 0);
-                const pendingConsultations = allConsultations.reduce((sum, item) => sum + item.pending, 0);
-                const cancelledConsultations = allConsultations.reduce((sum, item) => sum + item.cancelled, 0);
+                const totalConsultations = allConsultations.reduce(
+                    (sum, item) => sum + item.consultations,
+                    0
+                );
+                const totalRevenue = allConsultations.reduce(
+                    (sum, item) => sum + item.revenue,
+                    0
+                );
+                const completedConsultations = allConsultations.reduce(
+                    (sum, item) => sum + item.completed,
+                    0
+                );
+                const pendingConsultations = allConsultations.reduce(
+                    (sum, item) => sum + item.pending,
+                    0
+                );
+                const cancelledConsultations = allConsultations.reduce(
+                    (sum, item) => sum + item.cancelled,
+                    0
+                );
 
                 // Xử lý chart data theo period type
                 let chartData: Array<{
@@ -208,20 +259,29 @@ export const useConsultationDashboardMock = ({
                     }));
                 } else if (selectedYear && selectedMonth && !selectedWeek) {
                     // Tháng: hiển thị theo tuần
-                    const monthData = (mockConsultationData as any)[selectedYear]?.[selectedMonth];
+                    const monthData = (mockConsultationData as any)[
+                        selectedYear
+                    ]?.[selectedMonth];
                     if (monthData) {
-                        chartData = Object.entries(monthData).map(([weekKey, weekData]: [string, any]) => {
-                            const weekTotal = weekData.reduce((sum: any, dayData: any) => ({
-                                consultations: sum.consultations + dayData.consultations,
-                                revenue: sum.revenue + dayData.revenue,
-                            }), { consultations: 0, revenue: 0 });
-                            
-                            return {
-                                date: weekKey,
-                                consultations: weekTotal.consultations,
-                                revenue: weekTotal.revenue,
-                            };
-                        });
+                        chartData = Object.entries(monthData).map(
+                            ([weekKey, weekData]: [string, any]) => {
+                                const weekTotal = weekData.reduce(
+                                    (sum: any, dayData: any) => ({
+                                        consultations:
+                                            sum.consultations +
+                                            dayData.consultations,
+                                        revenue: sum.revenue + dayData.revenue,
+                                    }),
+                                    { consultations: 0, revenue: 0 }
+                                );
+
+                                return {
+                                    date: weekKey,
+                                    consultations: weekTotal.consultations,
+                                    revenue: weekTotal.revenue,
+                                };
+                            }
+                        );
                     } else {
                         chartData = [];
                     }
@@ -241,7 +301,12 @@ export const useConsultationDashboardMock = ({
                         completedConsultations,
                         pendingConsultations,
                         cancelledConsultations,
-                        completionRate: totalConsultations > 0 ? (completedConsultations / totalConsultations) * 100 : 0,
+                        completionRate:
+                            totalConsultations > 0
+                                ? (completedConsultations /
+                                      totalConsultations) *
+                                  100
+                                : 0,
                     },
                     chartData,
                     consultationsByDate: {},
