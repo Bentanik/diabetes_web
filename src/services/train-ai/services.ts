@@ -14,7 +14,9 @@ import {
   editKnowledgeAsync,
   updateStatusDocumentChunkAsync,
   updateDocumentAsync,
+  getRetrievedContextAsync,
 } from "@/services/train-ai/api-services";
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const KNOWLEDGE_QUERY_KEY = "knowledge";
@@ -22,6 +24,7 @@ export const DOCUMENTS_QUERY_KEY = "documents";
 export const DOCUMENT_QUERY_KEY = "document";
 export const SETTINGS_DOCUMENT_QUERY_KEY = "setting_documents";
 export const DOCUMENT_CHUNK_QUERY_KEY = "document_chunk";
+export const RETRIEVE_DOCUMENT_QUERY_KEY = "retrieve_document";
 
 interface IGetKnowledgesService {
   search: string;
@@ -223,5 +226,15 @@ export const useUpdateStatusDocumentChunkService = () => {
     REQUEST.TUpdateStatusDocumentChunkRequest
   >({
     mutationFn: (data) => updateStatusDocumentChunkAsync(data),
+  });
+};
+
+export const useGetRetrievedContextService = (query: string) => {
+  return useQuery({
+    queryKey: [RETRIEVE_DOCUMENT_QUERY_KEY, query],
+    queryFn: () => getRetrievedContextAsync({ query }),
+    select: (data) => data.data,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
   });
 };

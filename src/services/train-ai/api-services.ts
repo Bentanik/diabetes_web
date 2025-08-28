@@ -292,3 +292,19 @@ export const updateStatusDocumentChunkAsync = async (
 
   return response.data;
 };
+
+export const getRetrievedContextAsync = async (
+  data: REQUEST.TGetRetrievedContextRequest
+) => {
+  const response = await request<TResponseData<API.TSearchDocument[]>>(
+    API_ENDPOINTS.RETRIEVE_DOCUMENT,
+    {
+      method: "GET",
+      params: {
+        search: data.query,
+      },
+    }
+  );
+
+  return response.data;
+};

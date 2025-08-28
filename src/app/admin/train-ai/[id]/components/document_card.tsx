@@ -248,7 +248,7 @@ export default function DocumentCard({
                                 Sửa
                             </Button>}
 
-                        <TooltipProvider>
+                        {!isUploadDoc && <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <div className="flex items-center gap-1 h-6">
@@ -274,7 +274,7 @@ export default function DocumentCard({
                                     </p>
                                 </TooltipContent>
                             </Tooltip>
-                        </TooltipProvider>
+                        </TooltipProvider>}
                     </div>
 
                     <div className="flex items-center gap-1 text-xs text-gray-400 h-6">

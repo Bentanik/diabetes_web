@@ -39,12 +39,11 @@ export default function UploadPageComponent({ id }: { id: string }) {
 
     const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeByIdService(id);
 
-    // Timeout handler - 10 giây
     useEffect(() => {
         if (isLoading && !knowledgeBase) {
             const timer = setTimeout(() => {
                 setLoadingTimeout(true);
-            }, 10000); // 10 seconds
+            }, 10000);
 
             return () => clearTimeout(timer);
         } else {

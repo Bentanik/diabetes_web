@@ -26,6 +26,7 @@ import useUpdateSetting from "@/app/admin/train-ai/setting/hook/useUpdateSetting
 import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
 import { formatFileSize } from "@/utils/file";
 import DeleteKnowledgeModal from "@/app/admin/train-ai/components/delete_knowlege";
+import { useRouter } from "next/navigation";
 
 interface KnowledgeItemProps {
     knowledgeBase: API.TKnowledge;
@@ -139,6 +140,8 @@ export default function KnowledgeSetting() {
 
     const { handleUpdateChatSetting } = useUpdateSetting();
 
+    const router = useRouter();
+
     // API call with optimized parameters
     const {
         knowledges: data,
@@ -227,7 +230,7 @@ export default function KnowledgeSetting() {
                 list_knowledge_ids: selectedKnowledgeBases,
             };
 
-            handleUpdateChatSetting(request, () => {});
+            handleUpdateChatSetting(request, () => { });
         } catch (error) {
             console.error("Error saving settings:", error);
         }
@@ -243,6 +246,10 @@ export default function KnowledgeSetting() {
             .map((id) => knowledgeBases.find((kb: API.TKnowledge) => kb.id === id))
             .filter(Boolean);
     }, [selectedKnowledgeBases, knowledgeBases]);
+
+    const handleFindDocument = useCallback(() => {
+        router.push("/admin/train-ai/search-document");
+    }, []);
 
     // Loading state
     if (isPending && currentPage === 1 && !searchTerm) {
@@ -459,7 +466,7 @@ export default function KnowledgeSetting() {
 
                         <Button
                             className="w-full bg-[#248fca] hover:bg-[#197bb5] text-white rounded-lg font-semibold py-2 gap-2 transition cursor-pointer"
-                            onClick={handleSaveSettings}
+                            onClick={handleFindDocument}
                         >
                             <SearchIcon className="w-4 h-4" />
                             Tìm kiếm tài liệu theo ngữ nghĩa

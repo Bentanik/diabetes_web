@@ -37,10 +37,11 @@ export default function DocumentChunkList({ id }: DocumentChunkListProps) {
     switch (qualityFilter) {
         case "high":
             minScore = 0.8
+            maxScore = 1
             break
         case "medium":
             minScore = 0.5
-            maxScore = 0.8
+            maxScore = 0.79
             break
         case "low":
             maxScore = 0.5
@@ -155,7 +156,7 @@ export default function DocumentChunkList({ id }: DocumentChunkListProps) {
                                                 <SelectItem value="all">Tất cả mức độ</SelectItem>
                                                 <SelectItem value="high">Chất lượng cao</SelectItem>
                                                 <SelectItem value="medium">Chất lượng trung bình</SelectItem>
-                                                <SelectItem value="low">Cần cải thiện</SelectItem>
+                                                <SelectItem value="low">Chất lượng thấp</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -376,32 +377,24 @@ export default function DocumentChunkList({ id }: DocumentChunkListProps) {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="space-y-6">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="text-center p-4 bg-white rounded-xl border border-slate-100">
-                                            <div className="text-sm font-bold" style={{ color: "#248fca" }}>
+                                <CardContent>
+                                    <div>
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="font-semibold text-slate-700 flex items-center gap-2 text-sm">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                                    />
+                                                </svg>
+                                                Danh sách thay đổi
+                                            </h4><div className="text-sm font-bold" style={{ color: "#248fca" }}>
                                                 {document_chunk_changes.length}
                                             </div>
-                                            <div className="text-sm text-slate-600 font-medium">Đã chỉnh sửa</div>
-                                        </div>
-                                        <div className="text-center p-4 bg-white rounded-xl border border-slate-100">
-                                            <div className="text-sm font-bold text-slate-600">{currentPageChunks.length}</div>
-                                            <div className="text-sm text-slate-600 font-medium">Tổng đoạn</div>
-                                        </div>
-                                    </div>
 
-                                    <div className="mt-6">
-                                        <h4 className="font-semibold text-slate-700 mb-4 flex items-center gap-2 text-sm">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                                                />
-                                            </svg>
-                                            Danh sách thay đổi
-                                        </h4>
+                                        </div>
                                         <div className="space-y-3 max-h-48 overflow-y-auto">
                                             {document_chunk_changes.map((c) => (
                                                 <div

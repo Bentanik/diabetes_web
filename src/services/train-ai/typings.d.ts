@@ -65,6 +65,10 @@ declare namespace REQUEST {
     description?: string;
     is_active?: boolean;
   };
+
+  type TGetRetrievedContextRequest = {
+    query: string;
+  };
 }
 
 declare namespace API {
@@ -125,5 +129,11 @@ declare namespace API {
     temperature: number;
     max_tokens: number;
     search_accuracy: number;
+  };
+
+  type TSearchDocument = {
+    document: TDocument;
+    score: number;
+    content: string;
   };
 }

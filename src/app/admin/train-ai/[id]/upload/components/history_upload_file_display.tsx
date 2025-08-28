@@ -299,7 +299,7 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                             document.document_status === "normal" &&
                             getTopicRelevanceBadge(document.priority_diabetes, "Đái tháo đường")}
                         {(document.processing_status.status === "processing" || document.processing_status.status === "queued") && (
-                            <div className="flex flex-col w-full max-w-xs gap-1">
+                            <div className="flex flex-col w-full gap-1">
                                 <div className="flex items-center gap-2">
                                     <Progress
                                         value={document.processing_status.progress}
