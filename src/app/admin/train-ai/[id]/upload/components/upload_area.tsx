@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { UploadIcon } from "lucide-react"
+import { UploadIcon, FileText } from "lucide-react"
 
 interface UploadAreaProps {
     isDragOver: boolean
@@ -11,6 +11,7 @@ interface UploadAreaProps {
     onDrop: (e: React.DragEvent) => void
     onFileUpload: () => void
     job: API.TJob | null
+    fileCount?: number
 }
 
 export default function UploadArea({
@@ -20,6 +21,7 @@ export default function UploadArea({
     onDrop,
     onFileUpload,
     job,
+    fileCount = 0,
 }: UploadAreaProps) {
     const isDisabled = job !== null
 
@@ -54,10 +56,25 @@ export default function UploadArea({
                         Chọn tài liệu
                     </Button>
 
+                    {/* File count display */}
+                    {fileCount > 0 && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center justify-center gap-2 text-[#248fca]">
+                                <FileText className="w-4 h-4" />
+                                <span className="text-sm font-medium">
+                                    {fileCount} tài liệu đã được chọn
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Improved file types display */}
                     <div className="mt-4 space-y-1">
                         <p className="text-sm text-gray-600 font-medium">
-                            Định dạng hỗ trợ: PDF, DOCX
+                            Định dạng hỗ trợ: PDF, DOCX, TXT
+                        </p>
+                        <p className="text-xs text-gray-500">
+                            Bạn có thể chọn nhiều tài liệu cùng lúc
                         </p>
                     </div>
                 </div>

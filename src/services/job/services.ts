@@ -6,6 +6,7 @@ export const JOB_DOCUMENT_HISTORY_QUERY_KEY = "job-document-history";
 export const useGetJobDocumentHistoryService = (
   params: {
     search: string;
+    progress?: number;
     sort_by: "created_at" | "updated_at";
     sort_order: "asc" | "desc";
     page: number;
@@ -16,6 +17,7 @@ export const useGetJobDocumentHistoryService = (
     knowledge_id?: string;
   } = {
     search: "",
+    progress: undefined,
     sort_by: "created_at",
     sort_order: "desc",
     page: 1,

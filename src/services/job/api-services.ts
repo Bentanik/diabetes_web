@@ -4,6 +4,7 @@ import request from "@/services/interceptor";
 export const getJobDocumentHistoryAsync = async (
   params: {
     search: string;
+    progress?: number;
     sort_by: "created_at" | "updated_at";
     sort_order: "asc" | "desc";
     page: number;
@@ -13,6 +14,7 @@ export const getJobDocumentHistoryAsync = async (
     knowledge_id?: string;
   } = {
     search: "",
+    progress: undefined,
     sort_by: "created_at",
     sort_order: "desc",
     page: 1,
