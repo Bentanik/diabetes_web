@@ -68,18 +68,17 @@ export const useServiceDeleteConversation = ({
     });
 };
 
-export const useServiceDeleteParticipant = ({
-    conversationId,
-}: REQUEST.ConversationId) => {
+export const useServiceDeleteParticipant = (
+    { conversationId }: REQUEST.ConversationId,
+    { memberId }: REQUEST.MemberId
+) => {
     const { addToast } = useToast();
 
-    return useMutation<TResponse, TMeta, REQUEST.DeleteParticipant>({
-        mutationFn: async (data: REQUEST.DeleteParticipant) => {
+    return useMutation<TResponse, TMeta>({
+        mutationFn: async () => {
             const response = await deleteParticipantAsync(
                 { conversationId },
-                {
-                    participantId: data.participantId,
-                }
+                { memberId }
             );
 
             return response as TResponse;

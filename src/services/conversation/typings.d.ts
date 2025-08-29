@@ -48,6 +48,10 @@ declare namespace REQUEST {
     export type ConversationId = {
         conversationId: string;
     };
+
+    export type MemberId = {
+        memberId: string;
+    };
 }
 
 declare namespace API {
