@@ -1,21 +1,12 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-    ChartBarStackedIcon,
-    SettingsIcon,
-    SquarePercentIcon,
-} from "lucide-react";
-import ProfileHospitalMenu from "@/components/profile_hospital_menu";
-import CreateKnowlegeModal from "@/app/admin/train-ai/components/create_knowlege";
-import NotificationDropdown from "@/components/notification";
-import Link from "next/link";
+"use client"
+import { motion } from "framer-motion"
+import { ArrowLeftIcon, ChartBarStackedIcon, SettingsIcon, SquarePercentIcon } from "lucide-react"
+import ProfileHospitalMenu from "@/components/profile_hospital_menu"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import NotificationDropdown from "@/components/notification"
 
 export default function Header() {
-    const [createFolderModalOpen, setCreateFolderModalOpen] = useState(false);
-
     return (
         <motion.div
             initial={{ y: -20, opacity: 0 }}
@@ -26,31 +17,26 @@ export default function Header() {
             }}
         >
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-[#248fca]">
-                        Huấn luyện AI
-                    </h1>
-                    <p className="text-gray-600 mt-1 text-sm">
-                        Huấn luyện AI để tự động phân tích và đưa ra lời khuyên
-                        cho bệnh nhân
-                    </p>
+                <div className="flex items-center gap-3">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5 text-gray-700" />
+                    </motion.button>
+                    <div className="h-6 w-px bg-gray-300"></div>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 rounded-lg">
+                            <ChartBarStackedIcon className="w-5 h-5 text-[#248fca]" />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <h1 className="text-xl font-semibold text-[#248fca]">Thống kê câu hỏi</h1>
+                            <p className="text-sm text-gray-600">Thống kê các câu hỏi</p>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <Link href={"/admin/train-ai/statistic-question"}>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="gap-2 bg-transparent"
-                            >
-                                <ChartBarStackedIcon className="w-4 h-4" />
-                                Thống kê câu hỏi
-                            </Button>
-                        </Link>
-                    </motion.div>
                     <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -89,12 +75,6 @@ export default function Header() {
                     </div>
                 </div>
             </div>
-
-            {/* Create Folder Modal */}
-            <CreateKnowlegeModal
-                isOpen={createFolderModalOpen}
-                onClose={() => setCreateFolderModalOpen(false)}
-            />
-        </motion.div>
+        </motion.div >
     );
 }

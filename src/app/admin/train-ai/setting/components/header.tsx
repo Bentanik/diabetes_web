@@ -41,7 +41,7 @@ export default function Header() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                <NotificationDropdown />
+                    <NotificationDropdown />
                     <div>
                         <ProfileHospitalMenu profile={1} />
                     </div>
