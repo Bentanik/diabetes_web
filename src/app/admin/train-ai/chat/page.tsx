@@ -1,9 +1,15 @@
 "use client";
+import { Metadata } from 'next';
 import ChatMain from "@/app/admin/train-ai/chat/components";
 import ProfileHospitalMenu from "@/components/profile_hospital_menu";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { BellIcon } from "lucide-react";
+
+export const metadata: Metadata = {
+    title: "Chat AI",
+    description: "Trao đổi với trợ lý AI về kiến thức tiểu đường",
+};
 
 export default function ChatPage() {
 

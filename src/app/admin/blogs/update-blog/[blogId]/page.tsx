@@ -1,7 +1,13 @@
 "use client";
 
 import React, { use } from "react";
+import { Metadata } from 'next';
 import UpdateBlogComponent from "../components";
+
+export const metadata: Metadata = {
+    title: "Cập nhật Blog",
+    description: "Chỉnh sửa và cập nhật nội dung blog",
+};
 
 type BlogDetailPageProps = {
     params: Promise<{

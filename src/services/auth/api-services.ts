@@ -54,7 +54,7 @@ export const loginAsync = async (body: REQUEST.TLogin) => {
 
 export const refreshTokenAsync = async (body: REQUEST.TRereshToken) => {
     const response = await request<TResponseData<API.TLoginResponseDto>>(
-        API_ENDPOINTS.LOGIN,
+        API_ENDPOINTS.REFRESH_TOKEN,
         {
             method: "POST",
             data: body,
@@ -64,7 +64,9 @@ export const refreshTokenAsync = async (body: REQUEST.TRereshToken) => {
     return response.data;
 };
 
-export const forgotPasswordAsync = async (body: REQUEST.TForgotPasswordEmail) => {
+export const forgotPasswordAsync = async (
+    body: REQUEST.TForgotPasswordEmail
+) => {
     const response = await request<TResponseData>(
         API_ENDPOINTS.FORGOT_PASSWORD,
         {
@@ -75,7 +77,9 @@ export const forgotPasswordAsync = async (body: REQUEST.TForgotPasswordEmail) =>
     return response.data;
 };
 
-export const verifyForgotPasswordAsync = async (body: REQUEST.TVerifyForgotPassword) => {
+export const verifyForgotPasswordAsync = async (
+    body: REQUEST.TVerifyForgotPassword
+) => {
     const response = await request<TResponseData>(
         API_ENDPOINTS.VERIFY_FORGOT_PASSWORD,
         {
@@ -87,11 +91,8 @@ export const verifyForgotPasswordAsync = async (body: REQUEST.TVerifyForgotPassw
 };
 
 export const logoutAsync = async () => {
-    const response = await request<TResponseData>(
-        API_ENDPOINTS.LOGOUT,
-        {
-            method: "DELETE",
-        }
-    );
+    const response = await request<TResponseData>(API_ENDPOINTS.LOGOUT, {
+        method: "DELETE",
+    });
     return response.data;
 };

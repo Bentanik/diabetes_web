@@ -1,5 +1,11 @@
 import React from "react";
+import { Metadata } from 'next';
 import BlogDetail from "../components";
+
+export const metadata: Metadata = {
+    title: "Chi tiết Blog",
+    description: "Xem chi tiết nội dung blog",
+};
 
 type BlogDetailPageProps = {
     params: Promise<{

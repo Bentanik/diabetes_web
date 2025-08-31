@@ -1,8 +1,14 @@
 'use client'
 
 import React, { useState } from 'react'
+import { Metadata } from 'next'
 import ForgotPasswordSendMail from '@/app/(auth)/forgot-password/components/forgot-password-sendmail';
 import ForgotPasswordOtp from '@/app/(auth)/forgot-password/components/forgot-password-otp';
+
+export const metadata: Metadata = {
+    title: "Quên mật khẩu",
+    description: "Khôi phục mật khẩu tài khoản",
+};
 
 export default function ForgotPasswordPage() {
     const [currentStep, setCurrentStep] = useState<'sendmail' | 'otp'>('sendmail');
