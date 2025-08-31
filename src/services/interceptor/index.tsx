@@ -64,7 +64,7 @@ const errorHandler = async (error: AxiosError) => {
         }
     }
 
-    if (error.response?.status === 403 && error?.config) {
+    if (error.response?.status === 401 && error?.config) {
         const originalRequest = error?.config;
         const refreshToken = getStorageItem("refreshToken");
         if (!refreshTokenPromise) {
