@@ -68,7 +68,11 @@ export default function HospitalLayout({
             (it) => pathname === it.href || pathname.startsWith(`${it.href}/`)
         ) as SidebarItem | undefined;
 
-        if (!currentItem || !currentItem.subItems || currentItem.subItems.length === 0) {
+        if (
+            !currentItem ||
+            !currentItem.subItems ||
+            currentItem.subItems.length === 0
+        ) {
             return pathname === href || pathname.startsWith(`${href}/`);
         }
 

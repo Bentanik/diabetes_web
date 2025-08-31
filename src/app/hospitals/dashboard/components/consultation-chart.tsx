@@ -37,7 +37,7 @@ interface ConsultationChartProps {
     isLoading: boolean;
     selectedYear: string;
     selectedMonth: string;
-    selectedWeek: string;
+    statisticsType?: string | null;
 }
 
 const formatDate = (dateString: string) => {
@@ -76,7 +76,8 @@ const CustomTooltip = ({ active, payload, label, periodType }: any) => {
         } else if (periodType === "month") {
             periodLabel = `${label}`;
         } else {
-            periodLabel = `${formatDate(label)}`;
+            // Nếu là ngày, label đã là format "day/month" nên không cần format lại
+            periodLabel = `${label}`;
         }
 
         return (
@@ -105,7 +106,6 @@ export default function ConsultationChart({
     isLoading,
     selectedYear,
     selectedMonth,
-    selectedWeek,
 }: ConsultationChartProps) {
     if (isLoading) {
         return (
@@ -122,14 +122,7 @@ export default function ConsultationChart({
 
     if (!data || !data.chartData || data.chartData.length === 0) {
         return (
-            <Card className="mb-6">
-                <CardContent className="pt-6">
-                    <div className="text-center text-gray-500">
-                        <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>Không có dữ liệu để hiển thị biểu đồ</p>
-                    </div>
-                </CardContent>
-            </Card>
+            null
         );
     }
 
@@ -138,18 +131,13 @@ export default function ConsultationChart({
     let chartTitle = "Tổng cuộc tư vấn";
     let xAxisLabel = "Ngày";
 
-    if (selectedYear && !selectedMonth && !selectedWeek) {
+    if (selectedYear && !selectedMonth) {
         periodType = "year";
         chartTitle = `Tổng cuộc tư vấn năm ${selectedYear}`;
         xAxisLabel = "Tháng";
-    } else if (selectedYear && selectedMonth && !selectedWeek) {
+    } else if (selectedYear && selectedMonth) {
         periodType = "month";
         chartTitle = `Tổng cuộc tư vấn tháng ${selectedMonth} năm ${selectedYear}`;
-        xAxisLabel = "Tuần";
-    } else if (selectedYear && selectedMonth && selectedWeek) {
-        periodType = "week";
-        const weekNumber = selectedWeek.split("-").pop();
-        chartTitle = `Tổng cuộc tư vấn tuần ${weekNumber} tháng ${selectedMonth} năm ${selectedYear}`;
         xAxisLabel = "Ngày";
     }
 
@@ -197,46 +185,12 @@ export default function ConsultationChart({
         }
 
         chartData = sortedMonthlyData;
-    } else if (periodType === "month") {
-        // Nhóm dữ liệu theo tuần - hiển thị từng tuần riêng biệt
-        const weeklyData = chartData.reduce((acc: any, item) => {
-            // Sử dụng trực tiếp dữ liệu từ hook đã được xử lý
-            if (item.date && item.date.startsWith("week-")) {
-                const weekNumber = item.date.split("-").pop();
-                const weekKey = `Tuần ${weekNumber}`;
-
-                if (!acc[weekKey]) {
-                    acc[weekKey] = {
-                        week: weekKey,
-                        consultations: 0,
-                        revenue: 0,
-                    };
-                }
-                acc[weekKey].consultations += item.consultations;
-                acc[weekKey].revenue += item.revenue;
-            }
-            return acc;
-        }, {});
-
-        // Sắp xếp theo thứ tự tuần
-        const sortedWeeklyData = Object.keys(weeklyData)
-            .sort((a, b) => {
-                const weekA = parseInt(a.split(" ")[1]);
-                const weekB = parseInt(b.split(" ")[1]);
-                return weekA - weekB;
-            })
-            .map((weekKey) => ({
-                date: weekKey,
-                consultations: weeklyData[weekKey].consultations,
-                revenue: weeklyData[weekKey].revenue,
-            }));
-
-        chartData = sortedWeeklyData;
     } else {
-        // Dữ liệu theo ngày (giữ nguyên)
+        // Dữ liệu theo ngày (giữ nguyên format gốc)
         chartData = data.chartData.map((item) => ({
             ...item,
-            date: formatDate(item.date),
+            // Không format date vì item.date đã là format "day/month"
+            date: item.date,
         }));
     }
 
@@ -252,8 +206,6 @@ export default function ConsultationChart({
                             {xAxisLabel}:{" "}
                             {periodType === "year"
                                 ? "12 tháng"
-                                : periodType === "month"
-                                ? `${chartData.length} tuần`
                                 : `${chartData.length} ngày`}
                         </CardDescription>
                     </div>
@@ -299,7 +251,7 @@ export default function ConsultationChart({
                                 type="monotone"
                                 dataKey="revenue"
                                 stackId="2"
-                                // stroke="#248FCA"
+                                // stroke="#071d34"
                                 // fill="#92c7e5"
                                 fillOpacity={0.3}
                                 strokeWidth={2}
