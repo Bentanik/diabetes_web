@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { BellIcon } from "lucide-react";
 
 export default function ChatPage() {
-
     return (
         <div className="">
             <motion.div

@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { AppSidebar } from "@/components/app-sidebar"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
@@ -9,6 +10,11 @@ import {
 } from "@/components/ui/sidebar"
 
 import data from "./data.json"
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Bảng điều khiển chính của hệ thống",
+};
 
 export default function Page() {
   return (

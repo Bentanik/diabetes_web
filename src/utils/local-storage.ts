@@ -1,41 +1,41 @@
 export const getStorageItem = (
-  key: string,
-  defaultValue?: string
+    key: string,
+    defaultValue?: string
 ): string | undefined => {
-  return (
-    (localStorage.getItem(key) !== null && localStorage.getItem(key)) ||
-    defaultValue
-  );
+    return (
+        (localStorage.getItem(key) !== null && localStorage.getItem(key)) ||
+        defaultValue
+    );
 };
 
 export const setStorageItem = (key: string, value: string): void => {
-  localStorage.setItem(key, value);
+    localStorage.setItem(key, value);
 };
 
 export const removeStorageItem = (key: string): void => {
-  localStorage.removeItem(key);
+    localStorage.removeItem(key);
 };
 
 // Lưu thông tin đăng nhập vào localStorage
 export const setAuthStorage = (authData: API.TAuthTokenDto): void => {
-  setStorageItem("accessToken", authData.accessToken || "");
-  setStorageItem("refreshToken", authData.refreshToken || "");
+    setStorageItem("accessToken", authData.accessToken || "");
+    setStorageItem("refreshToken", authData.refreshToken || "");
 };
 
 // Lấy thông tin đăng nhập từ localStorage
 export const getAuthStorage = (): API.TAuthTokenDto | null => {
-  const accessToken = getStorageItem("accessToken");
+    const accessToken = getStorageItem("accessToken");
 
-  if (!accessToken) return null;
+    if (!accessToken) return null;
 
-  return {
-    accessToken,
-    refreshToken: null,
-    tokenType: "Bearer",
-  };
+    return {
+        accessToken,
+        refreshToken: null,
+        tokenType: "Bearer",
+    };
 };
 
 export const removeAuthStorage = () => {
-  removeStorageItem("accessToken");
-  removeStorageItem("refreshToken");
+    removeStorageItem("accessToken");
+    removeStorageItem("refreshToken");
 };

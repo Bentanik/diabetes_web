@@ -5,7 +5,7 @@ import {
     removeStorageItem,
     setAuthStorage,
 } from "@/utils/local-storage";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 //   import { refreshToken } from "@/services/auth/api-services";
 import useToast from "@/hooks/use-toast";
 import { refreshTokenAsync } from "@/services/auth/api-services";
@@ -26,9 +26,10 @@ const handleLogout = () => {
 
 let refreshTokenPromise: any = null;
 
-const errorHandler = async (error: AxiosError) => {
+const errorHandler = async (error: any) => {
     const responseMeta: TMeta = error.response?.data as TMeta;
     const { addToast } = useToast();
+
     if (!error?.response) {
         const result: TMeta = {
             detail: "Network not available!",
@@ -64,7 +65,7 @@ const errorHandler = async (error: AxiosError) => {
         }
     }
 
-    if (error.response?.status === 403 && error?.config) {
+    if (error.response?.status === 401 && error?.config) {
         const originalRequest = error?.config;
         const refreshToken = getStorageItem("refreshToken");
         if (!refreshTokenPromise) {
@@ -96,24 +97,24 @@ const errorHandler = async (error: AxiosError) => {
 };
 
 request.interceptors.request.use(
-    (config) => {
+    (config: any) => {
         const token = getStorageItem("accessToken");
-        if (token) {
+        if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error: any) => Promise.reject(error)
 );
 
 request.interceptors.response.use(
-    (response) => {
+    (response: any) => {
         if (response.data?.status && response.data?.status >= 400) {
             return Promise.reject(response.data);
         }
         return response;
     },
-    (error) => {
+    (error: any) => {
         return errorHandler(error);
     }
 );
