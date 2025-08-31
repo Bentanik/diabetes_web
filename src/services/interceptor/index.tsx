@@ -3,7 +3,7 @@
 import {
     getStorageItem,
     removeStorageItem,
-    setStorageItem,
+    setAuthStorage,
 } from "@/utils/local-storage";
 import axios, { AxiosError } from "axios";
 //   import { refreshToken } from "@/services/auth/api-services";
@@ -64,22 +64,7 @@ const errorHandler = async (error: AxiosError) => {
         }
     }
 
-    if (error?.response?.status === 403) {
-        const result: TMeta = {
-            detail: "Not permission",
-            errorCode: "Forbident",
-            status: 403,
-            title: "Not permission",
-        };
-        addToast({
-            type: "error",
-            description: "Sorry, you do not permission",
-            duration: 5000,
-        });
-        return Promise.reject(result);
-    }
-
-    if (error.response?.status === 401 && error?.config) {
+    if (error.response?.status === 403 && error?.config) {
         const originalRequest = error?.config;
         const refreshToken = getStorageItem("refreshToken");
         if (!refreshTokenPromise) {
@@ -87,8 +72,8 @@ const errorHandler = async (error: AxiosError) => {
                 refreshToken: refreshToken || "",
             })
                 .then((res: any) => {
-                    setStorageItem("accessToken", res.value.data.accessToken);
-                    setStorageItem("refreshToken", res.value.data.refreshToken);
+                    const authToken = res.data.authToken as API.TAuthTokenDto;
+                    setAuthStorage(authToken);
                 })
                 .catch((err: any) => {
                     removeStorageItem("accessToken");

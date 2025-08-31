@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
-    ChartBarStackedIcon,
     SettingsIcon,
     SquarePercentIcon,
 } from "lucide-react";
@@ -36,21 +35,6 @@ export default function Header() {
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        <Link href={"/admin/train-ai/statistic-question"}>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="gap-2 bg-transparent"
-                            >
-                                <ChartBarStackedIcon className="w-4 h-4" />
-                                Thống kê câu hỏi
-                            </Button>
-                        </Link>
-                    </motion.div>
                     <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}

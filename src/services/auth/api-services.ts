@@ -54,7 +54,7 @@ export const loginAsync = async (body: REQUEST.TLogin) => {
 
 export const refreshTokenAsync = async (body: REQUEST.TRereshToken) => {
     const response = await request<TResponseData<API.TLoginResponseDto>>(
-        API_ENDPOINTS.LOGIN,
+        API_ENDPOINTS.REFRESH_TOKEN,
         {
             method: "POST",
             data: body,
