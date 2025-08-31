@@ -1,20 +1,17 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { Metadata } from 'next'
-import ForgotPasswordSendMail from '@/app/(auth)/forgot-password/components/forgot-password-sendmail';
-import ForgotPasswordOtp from '@/app/(auth)/forgot-password/components/forgot-password-otp';
-
-export const metadata: Metadata = {
-    title: "Quên mật khẩu",
-    description: "Khôi phục mật khẩu tài khoản",
-};
+import React, { useState } from "react";
+import { Metadata } from "next";
+import ForgotPasswordSendMail from "@/app/(auth)/forgot-password/components/forgot-password-sendmail";
+import ForgotPasswordOtp from "@/app/(auth)/forgot-password/components/forgot-password-otp";
 
 export default function ForgotPasswordPage() {
-    const [currentStep, setCurrentStep] = useState<'sendmail' | 'otp'>('sendmail');
-    const [email, setEmail] = useState('');
+    const [currentStep, setCurrentStep] = useState<"sendmail" | "otp">(
+        "sendmail"
+    );
+    const [email, setEmail] = useState("");
 
-    const handleStepChange = (step: 'sendmail' | 'otp', userEmail?: string) => {
+    const handleStepChange = (step: "sendmail" | "otp", userEmail?: string) => {
         setCurrentStep(step);
         if (userEmail) {
             setEmail(userEmail);
@@ -22,12 +19,15 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div className='w-full'>
-            {currentStep === 'sendmail' ? (
+        <div className="w-full">
+            {currentStep === "sendmail" ? (
                 <ForgotPasswordSendMail onSuccess={handleStepChange} />
             ) : (
-                <ForgotPasswordOtp email={email} onBack={() => handleStepChange('sendmail')} />
+                <ForgotPasswordOtp
+                    email={email}
+                    onBack={() => handleStepChange("sendmail")}
+                />
             )}
         </div>
-    )
+    );
 }
