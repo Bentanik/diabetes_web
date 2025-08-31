@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useGetYearlyStatistic } from "./use-get-yearly-statistic";
 import { useGetMonthlyStatistic } from "./use-get-monthly-statistic";
 
@@ -12,7 +12,6 @@ export const useConsultationDashboard = ({
     selectedMonth,
 }: UseConsultationDashboardProps) => {
     const [dashboardData, setDashboardData] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(false);
 
     // Sử dụng 2 hook mới với enabled option
     const { 
@@ -68,18 +67,38 @@ export const useConsultationDashboard = ({
         return null;
     }, [selectedYear, selectedMonth]);
 
-    // Transform data từ API response
-    const transformApiData = (apiData: any, year: string, month: string) => {
+    // Transform data từ API response - tối ưu hóa cho yearly data
+    const transformApiData = useCallback((apiData: any, year: string, month: string) => {
         if (!apiData) return null;
 
         // Transform based on data structure
         if (apiData.months) {
-            // Yearly data
-            const chartData = apiData.months.map((monthData: any) => ({
-                date: `Tháng ${monthData.month}`,
-                consultations: monthData.totalConsultations,
-                revenue: monthData.revenue,
-            }));
+            // Yearly data - tối ưu hóa cực đoan cho hiệu suất
+            const monthMap = new Map();
+            
+            // Xử lý dữ liệu months một lần duy nhất và tối ưu hóa
+            const months = apiData.months;
+            const monthsLength = months.length;
+            
+            for (let i = 0; i < monthsLength; i++) {
+                const monthData = months[i];
+                monthMap.set(monthData.month, monthData);
+            }
+
+            // Pre-allocate array với kích thước cố định và tối ưu hóa vòng lặp
+            const chartData = new Array(12);
+            
+            // Tạo chart data cho tất cả 12 tháng một cách hiệu quả nhất
+            for (let m = 0; m < 12; m++) {
+                const monthKey = m + 1;
+                const monthData = monthMap.get(monthKey);
+                
+                chartData[m] = {
+                    date: `Tháng ${monthKey}`,
+                    consultations: monthData ? monthData.totalConsultations : 0,
+                    revenue: monthData ? monthData.revenue : 0,
+                };
+            }
 
             return {
                 summary: {
@@ -100,29 +119,32 @@ export const useConsultationDashboard = ({
                 },
             };
         } else if (apiData.days) {
-            // Monthly data - hiển thị tất cả các ngày trong tháng
+            // Monthly data - tối ưu hóa với Map và pre-allocate array
             const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
-            const chartData = [];
+            const dayMap = new Map();
             
-            // Tạo dữ liệu cho tất cả các ngày trong tháng
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayData = apiData.days.find((d: any) => d.day === day);
+            // Tạo Map cho dữ liệu days để tìm kiếm nhanh hơn
+            const days = apiData.days;
+            const daysLength = days.length;
+            
+            for (let i = 0; i < daysLength; i++) {
+                const dayData = days[i];
+                dayMap.set(dayData.day, dayData);
+            }
+
+            // Pre-allocate array với kích thước cố định
+            const chartData = new Array(daysInMonth);
+            
+            // Tạo dữ liệu cho tất cả các ngày trong tháng một cách hiệu quả
+            for (let day = 0; day < daysInMonth; day++) {
+                const dayKey = day + 1;
+                const dayData = dayMap.get(dayKey);
                 
-                if (dayData) {
-                    // Nếu có dữ liệu cho ngày này
-                    chartData.push({
-                        date: `${day}/${month}`,
-                        consultations: dayData.totalConsultations,
-                        revenue: dayData.revenue,
-                    });
-                } else {
-                    // Nếu không có dữ liệu, vẫn hiển thị với giá trị 0
-                    chartData.push({
-                        date: `${day}/${month}`,
-                        consultations: 0,
-                        revenue: 0,
-                    });
-                }
+                chartData[day] = {
+                    date: `${dayKey}/${month}`,
+                    consultations: dayData ? dayData.totalConsultations : 0,
+                    revenue: dayData ? dayData.revenue : 0,
+                };
             }
 
             return {
@@ -146,16 +168,11 @@ export const useConsultationDashboard = ({
         }
 
         return null;
-    };
+    }, [dateRange]);
 
-    // Xử lý dữ liệu khi có thay đổi
-    useEffect(() => {
-        if (!selectedYear) {
-            setDashboardData(null);
-            return;
-        }
-
-        setIsLoading(true);
+    // Xử lý dữ liệu khi có thay đổi - sử dụng useMemo để tối ưu hóa
+    const processedData = useMemo(() => {
+        if (!selectedYear) return null;
 
         try {
             let data;
@@ -174,30 +191,39 @@ export const useConsultationDashboard = ({
 
             if (data) {
                 // Transform data to match expected format
-                const transformedData = transformApiData(data, selectedYear, selectedMonth);
-                setDashboardData(transformedData);
-            } else {
-                setDashboardData(null);
+                return transformApiData(data, selectedYear, selectedMonth);
             }
+            
+            return null;
         } catch (error) {
             console.error("Error processing statistics:", error);
-            setDashboardData(null);
-        } finally {
-            setIsLoading(false);
+            return null;
         }
-    }, [selectedYear, selectedMonth, yearlyStatistic, monthlyStatistic, isYearlyError, isMonthlyError]);
+    }, [selectedYear, selectedMonth, yearlyStatistic, monthlyStatistic, isYearlyError, isMonthlyError, transformApiData]);
 
-    // Tính toán loading state
-    const isLoadingState = isLoading || isYearlyPending || isMonthlyPending;
+    // Cập nhật dashboard data khi processed data thay đổi
+    useEffect(() => {
+        setDashboardData(processedData);
+    }, [processedData]);
+
+    // Tính toán loading state - tối ưu hóa để hiển thị loading ngay lập tức
+    const isLoadingState = useMemo(() => {
+        if (selectedYear && selectedMonth) {
+            return isMonthlyPending;
+        } else if (selectedYear) {
+            return isYearlyPending;
+        }
+        return false;
+    }, [selectedYear, selectedMonth, isYearlyPending, isMonthlyPending]);
 
     // Hàm refetch để gọi lại API khi cần
-    const refetch = () => {
+    const refetch = useCallback(() => {
         if (selectedYear && selectedMonth) {
             refetchMonthly();
         } else if (selectedYear) {
             refetchYearly();
         }
-    };
+    }, [selectedYear, selectedMonth, refetchMonthly, refetchYearly]);
 
     return {
         dashboardData,

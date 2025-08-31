@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, memo } from "react";
 import { TrendingUp } from "lucide-react";
 import {
     Card,
@@ -65,7 +65,7 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
 };
 
-const CustomTooltip = ({ active, payload, label, periodType }: any) => {
+const CustomTooltip = memo(({ active, payload, label, periodType }: any) => {
     if (active && payload && payload.length > 0) {
         const consultations = payload[0]?.value || 0;
         const revenue = payload[1]?.value || 0;
@@ -99,14 +99,16 @@ const CustomTooltip = ({ active, payload, label, periodType }: any) => {
         );
     }
     return null;
-};
+});
 
-export default function ConsultationChart({
+CustomTooltip.displayName = "CustomTooltip";
+
+const ConsultationChart = memo(({
     data,
     isLoading,
     selectedYear,
     selectedMonth,
-}: ConsultationChartProps) {
+}: ConsultationChartProps) => {
     if (isLoading) {
         return (
             <Card className="mb-6">
@@ -126,73 +128,78 @@ export default function ConsultationChart({
         );
     }
 
-    // Xác định loại period để hiển thị chart phù hợp
-    let periodType = "day";
-    let chartTitle = "Tổng cuộc tư vấn";
-    let xAxisLabel = "Ngày";
+    // Sử dụng useMemo để tối ưu hóa việc xử lý dữ liệu
+    const { chartData, periodType, chartTitle, xAxisLabel, tooltipPeriodType } = useMemo(() => {
+        // Xác định loại period để hiển thị chart phù hợp
+        let periodType = "day";
+        let chartTitle = "Tổng cuộc tư vấn";
+        let xAxisLabel = "Ngày";
 
-    if (selectedYear && !selectedMonth) {
-        periodType = "year";
-        chartTitle = `Tổng cuộc tư vấn năm ${selectedYear}`;
-        xAxisLabel = "Tháng";
-    } else if (selectedYear && selectedMonth) {
-        periodType = "month";
-        chartTitle = `Tổng cuộc tư vấn tháng ${selectedMonth} năm ${selectedYear}`;
-        xAxisLabel = "Ngày";
-    }
+        if (selectedYear && !selectedMonth) {
+            periodType = "year";
+            chartTitle = `Tổng cuộc tư vấn năm ${selectedYear}`;
+            xAxisLabel = "Tháng";
+        } else if (selectedYear && selectedMonth) {
+            periodType = "month";
+            chartTitle = `Tổng cuộc tư vấn tháng ${selectedMonth} năm ${selectedYear}`;
+            xAxisLabel = "Ngày";
+        }
 
-    // Xử lý dữ liệu chart theo period type
-    let chartData = data.chartData;
-    let tooltipPeriodType = periodType;
+        // Xử lý dữ liệu chart theo period type
+        let chartData = data.chartData;
+        let tooltipPeriodType = periodType;
 
-    if (periodType === "year") {
-        // Nhóm dữ liệu theo tháng - mỗi tháng là một điểm dữ liệu riêng biệt
-        const monthlyData = chartData.reduce((acc: any, item) => {
-            const month = new Date(item.date).getMonth() + 1;
-            const monthKey = month.toString();
+        if (periodType === "year") {
+            // Tối ưu hóa cực đoan: Sử dụng Map và pre-allocate array
+            const monthlyDataMap = new Map();
+            
+            // Xử lý dữ liệu gốc một lần duy nhất với vòng lặp tối ưu
+            const originalData = chartData;
+            const dataLength = originalData.length;
+            
+            for (let i = 0; i < dataLength; i++) {
+                const item = originalData[i];
+                const month = new Date(item.date).getMonth() + 1;
+                const monthKey = month.toString();
+                
+                if (!monthlyDataMap.has(monthKey)) {
+                    monthlyDataMap.set(monthKey, {
+                        month: monthKey,
+                        consultations: 0,
+                        revenue: 0,
+                    });
+                }
+                
+                const existing = monthlyDataMap.get(monthKey);
+                existing.consultations += item.consultations;
+                existing.revenue += item.revenue;
+            }
 
-            if (!acc[monthKey]) {
-                acc[monthKey] = {
-                    month: monthKey,
-                    consultations: 0,
-                    revenue: 0,
+            // Tạo dữ liệu cho tất cả 12 tháng một cách hiệu quả nhất
+            const sortedMonthlyData = new Array(12);
+            for (let month = 0; month < 12; month++) {
+                const monthKey = (month + 1).toString();
+                const monthData = monthlyDataMap.get(monthKey);
+                
+                sortedMonthlyData[month] = {
+                    date: formatMonth(monthKey),
+                    consultations: monthData ? monthData.consultations : 0,
+                    revenue: monthData ? monthData.revenue : 0,
                 };
             }
 
-            acc[monthKey].consultations += item.consultations;
-            acc[monthKey].revenue += item.revenue;
-            return acc;
-        }, {});
-
-        // Sắp xếp theo thứ tự tháng và tạo dữ liệu cho tất cả 12 tháng
-        const sortedMonthlyData = [];
-        for (let month = 1; month <= 12; month++) {
-            const monthKey = month.toString();
-            if (monthlyData[monthKey]) {
-                sortedMonthlyData.push({
-                    date: formatMonth(monthKey),
-                    consultations: monthlyData[monthKey].consultations,
-                    revenue: monthlyData[monthKey].revenue,
-                });
-            } else {
-                // Nếu không có dữ liệu cho tháng này, tạo dữ liệu mặc định
-                sortedMonthlyData.push({
-                    date: formatMonth(monthKey),
-                    consultations: 0,
-                    revenue: 0,
-                });
-            }
+            chartData = sortedMonthlyData;
+        } else {
+            // Dữ liệu theo ngày (giữ nguyên format gốc)
+            chartData = data.chartData.map((item) => ({
+                ...item,
+                // Không format date vì item.date đã là format "day/month"
+                date: item.date,
+            }));
         }
 
-        chartData = sortedMonthlyData;
-    } else {
-        // Dữ liệu theo ngày (giữ nguyên format gốc)
-        chartData = data.chartData.map((item) => ({
-            ...item,
-            // Không format date vì item.date đã là format "day/month"
-            date: item.date,
-        }));
-    }
+        return { chartData, periodType, chartTitle, xAxisLabel, tooltipPeriodType };
+    }, [data.chartData, selectedYear, selectedMonth]);
 
     return (
         <Card className="my-6">
@@ -262,4 +269,8 @@ export default function ConsultationChart({
             </CardContent>
         </Card>
     );
-}
+});
+
+ConsultationChart.displayName = "ConsultationChart";
+
+export default ConsultationChart;

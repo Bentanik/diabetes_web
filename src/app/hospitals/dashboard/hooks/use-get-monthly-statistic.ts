@@ -31,9 +31,11 @@ export const useGetMonthlyStatistic = (params: REQUEST.MonthlyDashboardParams, o
             totalCanceled: 0,
             days: [],
         },
-        staleTime: 0, // Luôn coi data là stale để gọi lại API
-        refetchOnWindowFocus: true,
+        staleTime: 0, // Luôn coi data là stale để gọi lại API mỗi lần
+        gcTime: 0, // Không giữ cache để đảm bảo gọi API mới
+        refetchOnWindowFocus: false, // Tắt refetch khi focus window
         refetchOnMount: true, // Luôn gọi lại khi mount
+        refetchOnReconnect: true, // Gọi lại khi reconnect
         enabled: options?.enabled ?? true,
     });
     return { monthlyStatistic, isPending, isError, error, refetch };
