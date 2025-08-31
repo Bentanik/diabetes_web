@@ -130,7 +130,7 @@ export default function CreateListDocument({
                         {/* Upload All Button */}
                         <div className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${hasValidationErrors()
                                 ? 'bg-red-50 border-red-200'
-                                : 'bg-blue-50 border-blue-200'
+                                : 'bg-[#248fca]/10 border-[#248fca]/20'
                             }`}>
                             <div className="flex items-center gap-3">
                                 <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${hasValidationErrors()
@@ -164,8 +164,8 @@ export default function CreateListDocument({
                             <div className="flex items-center gap-3">
                                 {/* Progress indicator for upload all */}
                                 {isUploading && (
-                                    <div className="flex items-center gap-2 text-blue-600">
-                                        <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+                                    <div className="flex items-center gap-2 text-[#248fca]">
+                                        <div className="w-4 h-4 border-2 border-[#248fca] border-t-[#248fca] rounded-full animate-spin"></div>
                                         <span className="text-xs font-medium">Đang xử lý...</span>
                                     </div>
                                 )}
@@ -203,13 +203,13 @@ export default function CreateListDocument({
                                 <div key={index} className={`border rounded-lg p-4 transition-all duration-200 ${hasFieldErrors
                                         ? 'border-red-200 bg-red-50'
                                         : doc.isProcessing
-                                            ? 'border-blue-200 bg-blue-50 shadow-md'
+                                            ? 'border-[#248fca]/20 bg-[#248fca]/10 shadow-md'
                                             : 'border-gray-200 bg-gray-50 hover:shadow-sm'
                                     }`}>
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-3">
                                             <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-colors ${doc.isProcessing
-                                                    ? 'bg-blue-100 text-blue-600'
+                                                    ? 'bg-[#248fca]/10 text-[#248fca]'
                                                     : hasFieldErrors
                                                         ? 'bg-red-100 text-red-600'
                                                         : 'bg-[#248fca]/10 text-[#248fca]'
@@ -221,7 +221,7 @@ export default function CreateListDocument({
                                                 )}
                                             </div>
                                             <div>
-                                                <h3 className={`text-sm font-medium transition-colors ${doc.isProcessing ? 'text-blue-900' : 'text-gray-900'
+                                                <h3 className={`text-sm font-medium transition-colors ${doc.isProcessing ? 'text-[#248fca]' : 'text-gray-900'
                                                     }`}>
                                                     {doc.file.name}
                                                 </h3>
@@ -232,7 +232,7 @@ export default function CreateListDocument({
                                         </div>
                                         <div className="flex items-center gap-2">
                                             {doc.isProcessing && (
-                                                <div className="flex items-center gap-2 text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+                                                <div className="flex items-center gap-2 text-[#248fca] bg-[#248fca]/10 px-3 py-1 rounded-full">
                                                     <Clock className="w-4 h-4 animate-spin" />
                                                     <span className="text-xs font-medium">Đang tải lên...</span>
                                                 </div>
@@ -322,7 +322,7 @@ export default function CreateListDocument({
                                                 className={`mt-1 focus-visible:ring-0 transition-colors input-auth ${hasTitleError
                                                         ? 'border-red-300 focus:border-red-500 bg-red-50'
                                                         : doc.isProcessing
-                                                            ? 'border-blue-300 bg-blue-50'
+                                                            ? 'border-[#248fca]/30 bg-[#248fca]/10'
                                                             : 'border-gray-300 hover:border-gray-400'
                                                     }`}
                                                 disabled={doc.isProcessing}
@@ -346,7 +346,7 @@ export default function CreateListDocument({
                                                 className={`mt-1 focus-visible:ring-0 transition-colors input-auth ${hasDescriptionError
                                                         ? 'border-red-300 focus:border-red-500 bg-red-50'
                                                         : doc.isProcessing
-                                                            ? 'border-blue-300 bg-blue-50'
+                                                            ? 'border-[#248fca]/30 bg-[#248fca]/10'
                                                             : 'border-gray-300 hover:border-gray-400'
                                                     }`}
                                                 rows={3}
@@ -383,8 +383,8 @@ export default function CreateListDocument({
 
                                         {/* Upload Progress Indicator */}
                                         {doc.isProcessing && (
-                                            <div className="w-full bg-blue-100 rounded-full h-2 overflow-hidden">
-                                                <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '100%' }}></div>
+                                            <div className="w-full bg-[#248fca]/10 rounded-full h-2 overflow-hidden">
+                                                <div className="bg-[#248fca] h-2 rounded-full animate-pulse" style={{ width: '100%' }}></div>
                                             </div>
                                         )}
                                     </div>

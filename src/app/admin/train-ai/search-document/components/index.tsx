@@ -15,9 +15,11 @@ export default function SearchDocumentComponent() {
     const debouncedSearchValue = useDebounce(searchValue, 500)
 
     const { data: retrievedContext, isLoading: isRetrievedContextLoading } =
-        useGetRetrievedContextService(debouncedSearchValue)
+    useGetRetrievedContextService(debouncedSearchValue);
 
-    const hasSearched = !!debouncedSearchValue.trim() && !isRetrievedContextLoading
+    const hasSearched =
+        !!debouncedSearchValue.trim() && !isRetrievedContextLoading;
+
 
     return (
         <div className="min-h-screen bg-gray-50">
