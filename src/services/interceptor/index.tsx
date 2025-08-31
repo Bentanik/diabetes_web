@@ -3,7 +3,7 @@
 import {
     getStorageItem,
     removeStorageItem,
-    setStorageItem,
+    setAuthStorage,
 } from "@/utils/local-storage";
 import axios from "axios";
 //   import { refreshToken } from "@/services/auth/api-services";
@@ -43,76 +43,57 @@ const errorHandler = async (error: any) => {
             duration: 5000,
         });
         return Promise.reject(result);
-    }
-
-    // Xử lý lỗi 403 và refresh token trước
-    if (
-        error.response?.status === 403 &&
-        error?.config &&
-        !(error.config as any)._retry
-    ) {
-        const originalRequest = error?.config;
-        const refreshToken = getStorageItem("refreshToken");
-
-        if (refreshToken) {
-            if (!refreshTokenPromise) {
-                refreshTokenPromise = refreshTokenAsync({
-                    refreshToken: refreshToken,
-                })
-                    .then((res: any) => {
-                        setStorageItem("accessToken", res.value.accessToken);
-                        setStorageItem(
-                            "refreshToken",
-                            res.value.data.refreshToken
-                        );
-                        return res;
-                    })
-                    .catch((err: any) => {
-                        removeStorageItem("accessToken");
-                        removeStorageItem("refreshToken");
-                        location.href = "/";
-                        return Promise.reject(err);
-                    })
-                    .finally(() => {
-                        refreshTokenPromise = null;
-                    });
-            }
-
-            return refreshTokenPromise.then(() => {
-                // Đánh dấu request này đã retry để tránh vòng lặp vô hạn
-                (originalRequest as any)._retry = true;
-                originalRequest.headers.Authorization = `Bearer ${getStorageItem(
-                    "accessToken"
-                )}`;
-                return request(originalRequest);
-            });
-        } else {
-            // Không có refresh token, redirect về trang chủ
-            location.href = "/";
-            return Promise.reject(error);
+    } else {
+        switch (responseMeta.errorCode) {
+            case "auth_forgot_01":
+                addToast({
+                    type: "error",
+                    description: responseMeta.detail,
+                    duration: 5000,
+                });
+                break;
+            case "account_ban_01":
+                addToast({
+                    type: "error",
+                    description: responseMeta.detail,
+                    duration: 5000,
+                });
+                handleLogout();
+                break;
+            default:
+                break;
         }
     }
 
-    // Xử lý các lỗi khác sau khi đã xử lý 403
-    switch (responseMeta.errorCode) {
-        case "auth_forgot_01":
-            addToast({
-                type: "error",
-                description: responseMeta.detail,
-                duration: 5000,
-            });
-            break;
-        case "account_ban_01":
-            addToast({
-                type: "error",
-                description: responseMeta.detail,
-                duration: 5000,
-            });
-            handleLogout();
-            break;
-        default:
-            break;
+    if (error.response?.status === 401 && error?.config) {
+        const originalRequest = error?.config;
+        const refreshToken = getStorageItem("refreshToken");
+        if (!refreshTokenPromise) {
+            refreshTokenPromise = refreshTokenAsync({
+                refreshToken: refreshToken || "",
+            })
+                .then((res: any) => {
+                    const authToken = res.data.authToken as API.TAuthTokenDto;
+                    setAuthStorage(authToken);
+                })
+                .catch((err: any) => {
+                    removeStorageItem("accessToken");
+                    location.href = "/";
+                    return Promise.reject(err);
+                })
+                .finally(() => {
+                    refreshTokenPromise = null;
+                });
+        }
+
+        return refreshTokenPromise.then(() => {
+            originalRequest.headers.Authorization =
+                getStorageItem("accessToken");
+            return request(originalRequest);
+        });
     }
+
+    return Promise.reject(responseMeta);
 };
 
 request.interceptors.request.use(

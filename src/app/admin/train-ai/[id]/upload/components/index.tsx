@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
@@ -6,30 +5,39 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/admin/train-ai/[id]/upload/components/header";
 import UploadArea from "@/app/admin/train-ai/[id]/upload/components/upload_area";
 import ValidationInfo from "@/app/admin/train-ai/[id]/upload/components/validation_info";
-import WarningModal from "@/app/admin/train-ai/[id]/upload/components/warning_modal";
+
 import { useNotificationContext } from "@/context/notification_context";
 import { useUploadDocument } from "@/app/admin/train-ai/[id]/upload/hooks/useUploadDocument";
 import { fileForTrainAI } from "@/lib/validations/file_train_ai";
-import HistoryUploadFileDisplay from "@/app/admin/train-ai/[id]/upload/components/history_upload_file_display";
 import { useGetKnowledgeByIdService } from "@/services/train-ai/services";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import CreateDocumentModal from "@/app/admin/train-ai/[id]/upload/components/create-document";
-import { CreateDocumentFormData } from "@/lib/validations/document.schema";
+import CreateListDocument from "@/app/admin/train-ai/[id]/upload/components/create_list_document";
+import { getJobDocumentHistoryAsync } from "@/services/job/api-services";
+import HistoryUploadFileDisplay from "@/app/admin/train-ai/[id]/upload/components/history_upload_file_display";
+
+interface FileToUpload {
+    file: File;
+    name: string;
+    description: string;
+    validationErrors?: string[];
+    isProcessing?: boolean;
+    apiErrors?: {
+        title?: string;
+        description?: string;
+    };
+}
 
 export default function UploadPageComponent({ id }: { id: string }) {
     const router = useRouter();
 
     const [isDragOver, setIsDragOver] = useState(false);
-    const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
-    const [warningErrors, setWarningErrors] = useState<string[]>([]);
 
-    const [isCreateDocumentModalOpen, setIsCreateDocumentModalOpen] = useState(false);
-
-    const [fileToUpload, setFileToUpload] = useState<File | null>(null);
-
+    // State cho multiple files
+    const [filesToUpload, setFilesToUpload] = useState<FileToUpload[]>([]);
+    
     // State cho timeout handling
     const [loadingTimeout, setLoadingTimeout] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
@@ -38,6 +46,41 @@ export default function UploadPageComponent({ id }: { id: string }) {
     const { addSuccess, addError } = useNotificationContext();
 
     const { data: knowledgeBase, isLoading, error, refetch: refetchKB } = useGetKnowledgeByIdService(id);
+
+    // Fetch job history
+    const fetchJobHistory = useCallback(async () => {
+        try {
+            const response = await getJobDocumentHistoryAsync({
+                search: "",
+                sort_by: "created_at",
+                sort_order: "desc",
+                page: 1,
+                limit: 50,
+                type: "upload_document",
+                knowledge_id: id,
+            });
+            
+            if (response && response.data) {
+            }
+        } catch (error) {
+            console.error("Failed to fetch job history:", error);
+            addError("Lỗi", "Không thể tải lịch sử upload");
+        }
+    }, [id, addError]);
+
+    // Load jobs on component mount
+    useEffect(() => {
+        fetchJobHistory();
+    }, [fetchJobHistory]);
+
+    // Auto-refresh jobs every 10 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchJobHistory();
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, [fetchJobHistory]);
 
     useEffect(() => {
         if (isLoading && !knowledgeBase) {
@@ -57,95 +100,54 @@ export default function UploadPageComponent({ id }: { id: string }) {
         refetchKB();
     }, [refetchKB]);
 
-    const handleOpenCreateDocumentModal = () => {
-        setIsCreateDocumentModalOpen(true);
-    };
+    const validateAndAddFiles = useCallback((files: FileList | File[]) => {
+        const newFiles: FileToUpload[] = [];
+        const errors: string[] = [];
 
-    const handleCloseCreateDocumentModal = () => {
-        setIsCreateDocumentModalOpen(false);
-        setFileToUpload(null);
-    };
-
-
-    const handleOpenWarningModal = (errors: string[]) => {
-        setWarningErrors(errors);
-        setIsWarningModalOpen(true);
-    };
-
-    const handleCloseWarningModal = () => {
-        setIsWarningModalOpen(false);
-        setWarningErrors([]);
-        setFileToUpload(null);
-    };
-
-    const handleConfirmWarningModal = () => {
-        if (fileToUpload) {
-            handleOpenCreateDocumentModal();
-        }
-        setIsWarningModalOpen(false);
-        setWarningErrors([]);
-        setFileToUpload(null);
-    };
-
-    const handleUploadFile = useCallback(
-        async (data: CreateDocumentFormData, file: File) => {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("knowledge_id", id);
-            formData.append("title", data.name);
-            formData.append("description", data.description);
-
-            try {
-                handleUploadDocument(formData, {
-                    onSuccess: () => {
-                        addSuccess(
-                            "Tải lên tài liệu thành công",
-                            "Tài liệu đã được tải lên thành công"
-                        );
-                    },
-                    onError: () => {
-                        addError(
-                            "Lỗi tải lên",
-                            "Đã xảy ra lỗi khi tải lên tài liệu"
-                        );
-                    },
-                });
-            } catch {
-                addError(
-                    "Lỗi tải lên",
-                    "Đã xảy ra lỗi không xác định khi tải lên tài liệu"
-                );
+        Array.from(files).forEach((file) => {
+            const validationResult = fileForTrainAI.validate(file);
+            
+            if (validationResult.blockingErrors.length > 0) {
+                errors.push(`${file.name}: ${validationResult.blockingErrors.join(", ")}`);
+                return;
             }
-        },
-        []
-    );
+
+            const fileToUpload: FileToUpload = {
+                file,
+                name: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension for default name
+                description: "",
+                validationErrors: validationResult.warningErrors,
+            };
+
+            newFiles.push(fileToUpload);
+        });
+
+        if (errors.length > 0) {
+            addError(
+                "Tệp không hợp lệ",
+                errors.join("\n")
+            );
+        }
+
+        if (newFiles.length > 0) {
+            setFilesToUpload(prev => [...prev, ...newFiles]);
+        }
+    }, [addError]);
 
     const handleFileSelect = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
-            const file = event.target.files?.[0];
-            if (file) {
-                const validationResult = fileForTrainAI.validate(file);
-                if (validationResult.blockingErrors.length > 0) {
-                    addError(
-                        "Tệp không hợp lệ",
-                        validationResult.blockingErrors.join("\n")
-                    );
-                    return;
-                }
-                setFileToUpload(file);
-                if (validationResult.warningErrors.length > 0) {
-                    handleOpenWarningModal(validationResult.warningErrors);
-                    return;
-                }
-                handleOpenCreateDocumentModal();
+            const files = event.target.files;
+            if (files && files.length > 0) {
+                validateAndAddFiles(files);
             }
         },
-        [addError]
+        [validateAndAddFiles]
     );
 
     const handleFileUpload = useCallback(() => {
         const input = document.createElement("input");
         input.type = "file";
+        input.multiple = true; // Enable multiple file selection
         input.accept = ".pdf,.docx,.txt";
         input.onchange = (e) =>
             handleFileSelect(e as unknown as React.ChangeEvent<HTMLInputElement>);
@@ -170,26 +172,225 @@ export default function UploadPageComponent({ id }: { id: string }) {
         (e: React.DragEvent) => {
             e.preventDefault();
             setIsDragOver(false);
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                const validationResult = fileForTrainAI.validate(file);
-                if (validationResult.blockingErrors.length > 0) {
-                    addError(
-                        "Tệp không hợp lệ",
-                        validationResult.blockingErrors.join("\n")
-                    );
-                    return;
-                }
-                setFileToUpload(file);
-                if (validationResult.warningErrors.length > 0) {
-                    handleOpenWarningModal(validationResult.warningErrors);
-                    return;
-                }
-                handleOpenCreateDocumentModal();
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                validateAndAddFiles(files);
             }
         },
-        [addError]
+        [validateAndAddFiles]
     );
+
+    const handleEditDocument = (index: number, field: "name" | "description", value: string) => {
+        setFilesToUpload(prev => prev.map((file, i) => 
+            i === index ? { 
+                ...file, 
+                [field]: value,
+                // Clear API errors when user edits
+                apiErrors: field === 'name' 
+                    ? { ...file.apiErrors, title: undefined }
+                    : { ...file.apiErrors, description: undefined }
+            } : file
+        ));
+    };
+
+    const handleDeleteDocument = (index: number) => {
+        setFilesToUpload(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Common upload function
+    const uploadDocument = async (fileData: FileToUpload, index: number) => {
+        // Set processing state for this specific document
+        setFilesToUpload(prev => prev.map((file, i) => 
+            i === index ? { ...file, isProcessing: true } : file
+        ));
+
+        try {
+            // Create form data and upload
+            const formData = new FormData();
+            formData.append("files", fileData.file);
+            formData.append("knowledge_id", id);
+            formData.append("titles", fileData.name);
+            formData.append("descriptions", fileData.description);
+
+            await new Promise((resolve, reject) => {
+                handleUploadDocument(formData, {
+                    onSuccess: () => {
+                        resolve(true);
+                    },
+                    onError: (error: TMeta) => {
+                        if (error.errorCode === "DOCUMENT_TITLE_EXISTS") {
+                            setFilesToUpload(prev => prev.map((file, i) => 
+                                i === index ? { ...file, apiErrors: { title: "Tên tài liệu đã tồn tại" } } : file
+                            ));
+                            reject(new Error("DOCUMENT_TITLE_EXISTS"));
+                        } else {
+                            reject(new Error("Upload failed"));
+                        }
+                    },
+                });
+            });
+            
+            addSuccess(
+                "Tải lên thành công",
+                `Tài liệu "${fileData.name}" đã được tải lên thành công`
+            );
+
+            // Remove the successfully uploaded file from the list
+            setFilesToUpload(prev => prev.filter((_, i) => i !== index));
+            
+            return true;
+        } catch {
+            addError(
+                "Lỗi tải lên",
+                `Đã xảy ra lỗi khi tải lên tài liệu "${fileData.name}"`
+            );
+            return false;
+        } finally {
+            // Remove processing state
+            setFilesToUpload(prev => prev.map((file, i) => 
+                i === index ? { ...file, isProcessing: false } : file
+            ));
+        }
+    };
+
+    const handleProcessDocument = async (index: number) => {
+        const fileData = filesToUpload[index];
+        
+        // Check for API errors first
+        if (fileData.apiErrors?.title || fileData.apiErrors?.description) {
+            addError(
+                "Lỗi từ hệ thống",
+                "Vui lòng sửa lỗi trước khi tải lên"
+            );
+            return;
+        }
+        
+        // Validate title and description
+        if (!fileData.name.trim()) {
+            addError(
+                "Lỗi validation",
+                "Tiêu đề tài liệu không được để trống"
+            );
+            return;
+        }
+        
+        if (!fileData.description.trim()) {
+            addError(
+                "Mô tả tài liệu không được để trống",
+                "Mô tả tài liệu không được để trống"
+            );
+            return;
+        }
+        
+        if (fileData.validationErrors && fileData.validationErrors.length > 0) {
+            // For files with validation errors, just open the modal directly
+            // The validation errors will be displayed in the CreateListDocument component
+            return;
+        }
+
+        // Upload single document
+        await uploadDocument(fileData, index);
+        
+        // Refresh job history to show new job
+        setTimeout(() => {
+            fetchJobHistory();
+        }, 1000);
+    };
+
+    const handleUploadAllDocuments = async () => {
+        // Check for API errors first
+        const documentsWithApiErrors = filesToUpload.filter(doc => 
+            doc.apiErrors?.title || doc.apiErrors?.description
+        );
+        
+        if (documentsWithApiErrors.length > 0) {
+            addError(
+                "Lỗi từ hệ thống",
+                `Có ${documentsWithApiErrors.length} tài liệu có lỗi từ hệ thống. Vui lòng sửa lỗi trước khi tải lên.`
+            );
+            return;
+        }
+        
+        // Validate all documents before uploading
+        const invalidDocuments = filesToUpload.filter(doc => 
+            !doc.name.trim() || !doc.description.trim()
+        );
+        
+        if (invalidDocuments.length > 0) {
+            addError(
+                "Lỗi validation",
+                `Có ${invalidDocuments.length} tài liệu chưa nhập đầy đủ thông tin. Vui lòng kiểm tra lại tiêu đề và mô tả.`
+            );
+            return;
+        }
+
+        // Get valid documents for upload
+        const validDocuments = filesToUpload.filter(doc => 
+            !doc.validationErrors || doc.validationErrors.length === 0
+        );
+
+        if (validDocuments.length === 0) {
+            addError("Lỗi", "Không có tài liệu nào hợp lệ để upload");
+            return;
+        }
+
+        // Set processing state for all documents
+        setFilesToUpload(prev => prev.map(file => ({ ...file, isProcessing: true })));
+
+        try {
+            // Create single FormData for all documents
+            const formData = new FormData();
+            formData.append("knowledge_id", id);
+            
+            // Append all files, titles, and descriptions
+            validDocuments.forEach((doc) => {
+                formData.append("files", doc.file);
+                formData.append("titles", doc.name);
+                formData.append("descriptions", doc.description);
+            });
+
+            // Upload all documents at once
+            await new Promise((resolve, reject) => {
+                handleUploadDocument(formData, {
+                    onSuccess: () => {
+                        resolve(true);
+                    },
+                    onError: (error: TMeta) => {
+                        if (error.errorCode === "DOCUMENT_TITLE_EXISTS") {
+                            setFilesToUpload(prev => prev.map(file => ({ ...file, apiErrors: { title: "Tên tài liệu đã tồn tại" } })));
+                            reject(new Error("DOCUMENT_TITLE_EXISTS"));
+                        } else {
+                            reject(new Error("Bulk upload failed"));
+                        }
+                    },
+                });
+            });
+            
+            addSuccess(
+                "Tải lên thành công",
+                `Đã tải lên thành công ${validDocuments.length} tài liệu`
+            );
+
+            // Clear all successfully uploaded files
+            setFilesToUpload(prev => prev.filter(file => 
+                file.validationErrors && file.validationErrors.length > 0
+            ));
+
+        } catch {
+            addError(
+                "Lỗi tải lên",
+                `Đã xảy ra lỗi khi tải lên tài liệu`
+            );
+        } finally {
+            // Remove processing state
+            setFilesToUpload(prev => prev.map(file => ({ ...file, isProcessing: false })));
+        }
+
+        // Refresh job history to show new jobs
+        setTimeout(() => {
+            fetchJobHistory();
+        }, 1000);
+    };
 
     // Loading Skeleton Component
     const LoadingSkeleton = () => (
@@ -356,26 +557,30 @@ export default function UploadPageComponent({ id }: { id: string }) {
                             onDrop={handleDrop}
                             onFileUpload={handleFileUpload}
                             job={null}
+                            fileCount={filesToUpload.length}
                         />
                         <ValidationInfo />
                     </div>
                     <div className="lg:col-span-2 flex flex-col gap-4">
-                        <HistoryUploadFileDisplay knowledgeId={id} />
+                        <div>
+                            <CreateListDocument 
+                                knowledge_id={id} 
+                                documents={filesToUpload}
+                                onDocumentsChange={setFilesToUpload}
+                                onEditDocument={handleEditDocument}
+                                onDeleteDocument={handleDeleteDocument}
+                                onProcessDocument={handleProcessDocument}
+                                onUploadAll={handleUploadAllDocuments}
+                            />
+                        </div>
+                        
+                        {/* Upload Progress Component */}
+                        <HistoryUploadFileDisplay
+                            knowledgeId={id}
+                        />
                     </div>
                 </div>
             </div>
-            <WarningModal
-                isOpen={isWarningModalOpen}
-                onClose={handleCloseWarningModal}
-                onConfirm={handleConfirmWarningModal}
-                errors={warningErrors}
-            />
-            <CreateDocumentModal
-                isOpen={isCreateDocumentModalOpen}
-                onClose={handleCloseCreateDocumentModal}
-                uploadedFile={fileToUpload}
-                handleUploadFile={handleUploadFile}
-            />
         </div>
     );
 }

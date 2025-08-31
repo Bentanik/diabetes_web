@@ -17,7 +17,7 @@ declare namespace API {
   };
 
   type TStatus = {
-    status: "queued" | "processing" | "completed" | "failed";
+    status: "queued" | "processing" | "completed" | "failed" | "pending";
     progress: number;
     progress_message: string;
   };

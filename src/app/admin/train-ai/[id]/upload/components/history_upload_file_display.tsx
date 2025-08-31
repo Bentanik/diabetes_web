@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -298,6 +297,11 @@ const HistoryDocumentItem = ({ document, onDelete, onDownload }: HistoryDocument
                         {document.processing_status.status === "completed" &&
                             document.document_status === "normal" &&
                             getTopicRelevanceBadge(document.priority_diabetes, "Đái tháo đường")}
+                        {document.processing_status.status === "pending" && <div className="flex flex-col w-full gap-1">
+                            <span className="text-xs text-[#248fca] font-medium">
+Tài liệu đã vào hàng đợi, đang chờ xử lý
+                                    </span>
+                            </div>}
                         {(document.processing_status.status === "processing" || document.processing_status.status === "queued") && (
                             <div className="flex flex-col w-full gap-1">
                                 <div className="flex items-center gap-2">
@@ -378,16 +382,10 @@ export default function HistoryUploadFileDisplay({ knowledgeId }: HistoryUploadF
                             <HistoryIcon className="w-5 h-5" />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-[#248fca] font-semibold">Lịch sử tải tài liệu</span>
-                            <span className="text-sm text-gray-500">Theo dõi các tài liệu đã tải lên gần đây</span>
+                            <span className="text-[#248fca] font-semibold">Tiến trình tải tài liệu</span>
+                            <span className="text-sm text-gray-500">Theo dõi các tài liệu đã và đang được xử lý</span>
                         </div>
                     </div>
-                    <Link
-                        href={`#`}
-                        className="text-sm text-[#248fca] hover:text-[#1f7fb2] transition-colors"
-                    >
-                        Xem tất cả
-                    </Link>
                 </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex flex-col">
@@ -427,13 +425,11 @@ export default function HistoryUploadFileDisplay({ knowledgeId }: HistoryUploadF
                     </div>
                 ) : (
                     <div className="flex items-center justify-center p-12">
-                        <div className="text-center space-y-3">
-                            <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mx-auto">
-                                <HistoryIcon className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <div>
-                                <p className="text-xl font-medium text-gray-900 mb-1">Chưa có lịch sử tải nào</p>
-                                <p className="text-xs text-gray-500">Lịch sử tải sẽ hiển thị ở đây</p>
+                         <div className="text-center space-y-4">
+                            <div className="text-center py-8 text-gray-500 space-y-2">
+                                <HistoryIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                <p>Chưa có tài liệu nào được tải lên</p>
+                                <p className="text-sm">Tài liệu sẽ xuất hiện ở đây khi bạn bắt đầu tải lên</p>
                             </div>
                         </div>
 
