@@ -14,15 +14,21 @@ export const packageSchema = z.object({
     price: z
         .union([z.string(), z.number()])
         .transform((val) => (typeof val === "string" ? Number(val) : val))
-        .refine((val) => !isNaN(val) && val >= 1000, "Giá tối thiểu là 1,000 VNĐ"),
+        .refine(
+            (val) => !isNaN(val) && val >= 1000,
+            "Giá tối thiểu là 1,000 VNĐ"
+        ),
     sessions: z
         .union([z.string(), z.number()])
         .transform((val) => (typeof val === "string" ? Number(val) : val))
-        .refine((val) => !isNaN(val) && Number.isInteger(val) && val >= 1, "Số lượt phải là số nguyên tối thiểu 1"),
-    durationInMonths: z
-        .union([z.string(), z.number()])
-        .transform((val) => (typeof val === "string" ? Number(val) : val))
-        .refine((val) => !isNaN(val) && Number.isInteger(val) && val >= 1, "Thời hạn phải là số nguyên tối thiểu 1"),
+        .refine(
+            (val) => !isNaN(val) && Number.isInteger(val) && val >= 1,
+            "Số lượt phải là số nguyên tối thiểu 1"
+        ),
+    durations: z.string().refine((val) => {
+        const num = Number(val);
+        return !isNaN(num) && Number.isInteger(num) && num >= 1;
+    }, "Thời hạn phải là số nguyên tối thiểu 1"),
 });
 
 export type PackageFormData = z.infer<typeof packageSchema>;
@@ -34,7 +40,7 @@ export default function useCreatePackage() {
             description: "",
             price: 0,
             sessions: 0,
-            durationInMonths: 0,
+            durations: "",
         },
     });
 

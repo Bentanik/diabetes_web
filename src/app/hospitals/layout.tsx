@@ -152,8 +152,9 @@ export default function HospitalLayout({
                             return null;
                         }
                         if (
-                            userState.user?.roles?.includes("HospitalStaff") &&
-                            item.href === "/hospitals/hospital-staff"
+                            (userState.user?.roles?.includes("HospitalStaff") &&
+                                item.href === "/hospitals/hospital-staff") ||
+                            item.href === "/hospitals/dashboard"
                         ) {
                             return null;
                         }
