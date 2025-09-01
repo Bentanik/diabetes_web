@@ -30,7 +30,7 @@ export default function HomeFeature() {
                     {FEATURES.map((feature, index) => (
                         <motion.div
                             key={index}
-                            className="bg-white rounded-3xl p-8 shadow-md border border-gray-100 flex flex-col md:flex-row items-center gap-8"
+                            className="bg-white rounded-3xl p-8 flex flex-col md:flex-row items-center gap-8"
                             initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, delay: 0.3 + index * 0.2 }}
@@ -40,18 +40,26 @@ export default function HomeFeature() {
                                 <h3 className="text-2xl md:text-3xl font-bold text-[#248fca] mb-3">
                                     {feature.title}
                                 </h3>
-                                <p className="text-gray-600 text-base md:text-lg leading-relaxed">
+                                <p className="text-gray-600 text-base md:text-lg">
                                     {feature.description}
                                 </p>
                             </div>
-                            <div className="flex-shrink-0">
-                                <Image
-                                    src="/images/phone_feature.png"
-                                    alt="feature"
-                                    width={200}
-                                    height={350}
-                                    className="rounded-[2rem] shadow-lg border border-white/20"
+                            <div className="relative mt-24">
+                            <Image
+                                    src="/images/phone.png"
+                                    alt="phone frame"
+                                    width={300}
+                                    height={500}
+                                    className="mx-auto relative z-20"
                                 />
+                                <Image
+                                    src={feature.image}
+                                    alt="feature"
+                                    width={280}
+                                    height={400}
+                                    className="rounded-[2rem] h-[520px] shadow-lg border border-white/20 top-5 left-3 absolute z-10"
+                                />
+                 
                             </div>
                         </motion.div>
                     ))}
