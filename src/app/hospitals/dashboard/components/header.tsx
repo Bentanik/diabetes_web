@@ -8,7 +8,7 @@ export default function Header() {
             <div>
                 <div className="flex items-center gap-5">
                     <Link href={`/hospitals/doctor`}>
-                        <ArrowLeft color="#248fca" />
+                        <ArrowLeft color="#071d34" />
                     </Link>
 
                     <h1 className="text-2xl font-bold text-[var(--primary-color)]">

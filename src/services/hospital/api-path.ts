@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-const HOSPITAL = "http://163.61.110.211:30000/user-service/api/v1/hospitals";
+const HOSPITAL = "https://diadoctor.site/user-service/api/v1/hospitals";
 const CREATE_DOCTOR = HOSPITAL + "/doctors";
 const GET_DOCTORS = HOSPITAL + "/me/doctors";
 const GET_HOSPITALS_CURSOR = HOSPITAL;

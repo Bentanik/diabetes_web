@@ -1,9 +1,9 @@
 /* eslint-disable import/no-anonymous-default-export */
 const HOSPITAL_STAFF_ADMIN =
-    "http://163.61.110.211:30000/user-service/api/v1/hospitals/me/hospitalstaffs";
+    "https://diadoctor.site/user-service/api/v1/hospitals/me/hospitalstaffs";
 
 const HOSPITAL_STAFF =
-    "http://163.61.110.211:30000/user-service/api/v1/hospitals/hospitalstaffs";
+    "https://diadoctor.site/user-service/api/v1/hospitals/hospitalstaffs";
 
 const GET_HOSPITAL_STAFFS = HOSPITAL_STAFF_ADMIN;
 const GET_HOSPITAL_STAFF = (hospitalStaffId: string) =>
