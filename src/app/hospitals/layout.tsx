@@ -144,17 +144,22 @@ export default function HospitalLayout({
                         const isExpanded = expandedItems.has(index);
                         const hasSubItems =
                             item.subItems && item.subItems.length > 0;
+                        const isAdmin =
+                            userState.user?.roles?.includes("HospitalAdmin");
+                        const isStaff =
+                            userState.user?.roles?.includes("HospitalStaff");
+
                         if (
-                            userState.user?.roles?.includes("HospitalAdmin") &&
+                            isAdmin &&
                             item.href !== "/hospitals/hospital-staff" &&
                             item.href !== "/hospitals/dashboard"
                         ) {
                             return null;
                         }
                         if (
-                            (userState.user?.roles?.includes("HospitalStaff") &&
-                                item.href === "/hospitals/hospital-staff") ||
-                            item.href === "/hospitals/dashboard"
+                            isStaff &&
+                            (item.href === "/hospitals/hospital-staff" ||
+                                item.href === "/hospitals/dashboard")
                         ) {
                             return null;
                         }
