@@ -5,16 +5,10 @@ import {
     Users,
     DollarSign,
     CheckCircle,
-    Clock,
-    XCircle,
     Calendar,
     Clock as ClockIcon,
-    BadgeCheckIcon,
-    Building2,
-    Phone,
+    CircleXIcon,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 interface DashboardSummaryProps {
     data: {
@@ -47,13 +41,13 @@ const formatCurrency = (amount: number) => {
 
 const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    
+
     try {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
             return "N/A";
         }
-        
+
         return date.toLocaleDateString("vi-VN", {
             day: "2-digit",
             month: "2-digit",
@@ -87,21 +81,12 @@ export default function DashboardSummary({
     }
 
     if (!data) {
-        return (
-            null
-        );
+        return null;
     }
 
     const { summary, period } = data;
 
     const summaryCards = [
-        {
-            title: "Tổng cuộc tư vấn",
-            value: summary.totalConsultations,
-            icon: Users,
-            color: "text-blue-600",
-            bgColor: "bg-blue-50",
-        },
         {
             title: "Doanh thu",
             value: formatCurrency(summary.totalRevenue),
@@ -110,11 +95,25 @@ export default function DashboardSummary({
             bgColor: "bg-green-50",
         },
         {
+            title: "Tổng cuộc tư vấn",
+            value: summary.totalConsultations,
+            icon: Users,
+            color: "text-blue-600",
+            bgColor: "bg-blue-50",
+        },
+        {
             title: "Hoàn thành",
             value: summary.completedConsultations,
             icon: CheckCircle,
             color: "text-green-600",
             bgColor: "bg-green-50",
+        },
+        {
+            title: "Đã hủy",
+            value: summary.cancelledConsultations,
+            icon: CircleXIcon,
+            color: "text-red-600",
+            bgColor: "bg-red-50",
         },
     ];
 
@@ -146,7 +145,7 @@ export default function DashboardSummary({
             <div className="flex gap-10">
                 {/* Status Cards */}
                 <></>
-                <div className="flex-2 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                <div className="flex-2 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {summaryCards.map((card, index) => (
                         <div
                             key={index}
