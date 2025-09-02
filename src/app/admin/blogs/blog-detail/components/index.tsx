@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/stores";
@@ -30,7 +29,6 @@ export default function BlogDetail({ blogId }: REQUEST.BlogId) {
     return (
         <div>
             {/* Header */}
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <div className="mt-5 py-[2%] px-[10%] bg-[#ffffff] shadow-2xl rounded-2xl">
                 {/* Header */}
                 <div>

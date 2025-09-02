@@ -53,7 +53,7 @@ export default function AuthCarousel() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/70"></div>
                         <motion.div
-                            className="absolute bottom-20 left-10 text-white px-6 py-4 max-w-lg"
+                            className="absolute bottom-20 left-10 text-white px-6 py-4"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{
                                 opacity: index === i ? 1 : 0,
@@ -65,7 +65,7 @@ export default function AuthCarousel() {
                                 delay: 0.2,
                             }}
                         >
-                            <p className="text-2xl font-semibold leading-[1.8]">
+                            <p className="text-[2.8rem] font-bold">
                                 {slide.text}
                             </p>
                         </motion.div>

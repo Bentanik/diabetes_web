@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useGetHospitalStaffDetail } from "../hooks/use-get-hospital-staff";
-import { Toaster } from "sonner";
 
 const Header = () => {
     return (
@@ -107,8 +106,6 @@ export default function HospitalStaffDetailComponent({
 
     return (
         <div>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-
             <header>
                 <Header />
             </header>

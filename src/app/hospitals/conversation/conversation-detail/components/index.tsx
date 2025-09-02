@@ -38,7 +38,6 @@ import GroupUserDialog from "./user-dialog";
 import GroupDoctorDialog from "./doctor-dialog";
 import GroupStaffDialog from "./staff-dialog";
 import PaginatedComponent from "@/components/paginated";
-import { Toaster } from "sonner";
 import Header from "./header";
 
 const sortBy = [
@@ -144,7 +143,6 @@ export default function GroupDetailComponent({
 
     return (
         <div>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <header>
                 <Header conversationId={conversationId} />{" "}
             </header>

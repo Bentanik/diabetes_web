@@ -9,7 +9,6 @@ import {
     Upload,
     Smartphone,
 } from "lucide-react";
-import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -195,7 +194,6 @@ export default function UpdateBlogForm({ blogId }: REQUEST.BlogId) {
 
     return (
         <div className="min-h-screen">
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <Form {...form}>
                 <motion.div className="space-y-4">
                     <div className="flex gap-10">
