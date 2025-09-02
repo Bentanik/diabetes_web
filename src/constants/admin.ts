@@ -15,11 +15,6 @@ import {
 } from "lucide-react";
 export const sidebar_items = [
     {
-        href: "/admin/home",
-        icon: ActivityIcon,
-        label: "Dashboard",
-    },
-    {
         href: "/admin/hospital",
         icon: HospitalIcon,
         label: "Quản lý bệnh viện",
@@ -55,11 +50,6 @@ export const sidebar_items = [
         ],
     },
     {
-        href: "/admin/users",
-        icon: UserIcon,
-        label: "Quản lý người dùng",
-    },
-    {
         href: "/admin/train-ai",
         icon: BrainIcon,
         label: "Huấn luyện AI",
@@ -75,11 +65,6 @@ export const sidebar_items = [
                 icon: BotMessageSquare,
             },
         ],
-    },
-    {
-        href: "/mentor/setting",
-        icon: BarChart,
-        label: "Báo cáo",
     },
     {
         href: "/admin/blogs",
