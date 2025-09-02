@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-no-undef */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import {
     type FormEvent,
@@ -111,7 +111,7 @@ export default function ChatMain() {
 
     const updateSession = async (data?: API.TChatSession | null) => {
         try {
-            if(data == null) return;
+            if (data == null) return;
 
             await axios.put(
                 `${API_BASE_URL}/session-chat`,
@@ -132,7 +132,7 @@ export default function ChatMain() {
         } finally {
             setIsLoading(false);
         }
-}
+    }
 
     const loadChatHistory = async () => {
         try {
@@ -240,8 +240,7 @@ export default function ChatMain() {
                     ];
                 });
             }
-        } catch (error) {
-            console.error("Error sending message:", error);
+        } catch {
             // Remove typing indicator and show error
             setMessages((prev) => {
                 const withoutTyping = prev.filter((msg) => !msg.isTyping);
