@@ -68,7 +68,11 @@ export default function HospitalLayout({
             (it) => pathname === it.href || pathname.startsWith(`${it.href}/`)
         ) as SidebarItem | undefined;
 
-        if (!currentItem || !currentItem.subItems || currentItem.subItems.length === 0) {
+        if (
+            !currentItem ||
+            !currentItem.subItems ||
+            currentItem.subItems.length === 0
+        ) {
             return pathname === href || pathname.startsWith(`${href}/`);
         }
 
@@ -140,16 +144,22 @@ export default function HospitalLayout({
                         const isExpanded = expandedItems.has(index);
                         const hasSubItems =
                             item.subItems && item.subItems.length > 0;
+                        const isAdmin =
+                            userState.user?.roles?.includes("HospitalAdmin");
+                        const isStaff =
+                            userState.user?.roles?.includes("HospitalStaff");
+
                         if (
-                            userState.user?.roles?.includes("HospitalAdmin") &&
+                            isAdmin &&
                             item.href !== "/hospitals/hospital-staff" &&
                             item.href !== "/hospitals/dashboard"
                         ) {
                             return null;
                         }
                         if (
-                            userState.user?.roles?.includes("HospitalStaff") &&
-                            item.href === "/hospitals/hospital-staff"
+                            isStaff &&
+                            (item.href === "/hospitals/hospital-staff" ||
+                                item.href === "/hospitals/dashboard")
                         ) {
                             return null;
                         }

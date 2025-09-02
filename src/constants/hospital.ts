@@ -12,11 +12,6 @@ import {
 } from "lucide-react";
 export const sidebar_items = [
     {
-        href: "/hospitals/home",
-        icon: ActivityIcon,
-        label: "Dashboard",
-    },
-    {
         href: "/hospitals/doctor",
         icon: UsersIcon,
         label: "Bác sĩ",
@@ -62,26 +57,16 @@ export const sidebar_items = [
         subItems: [
             {
                 label: "Quản lý tư vấn",
-                href: "/hospitals/dashboard/consultation",
+                href: "/hospitals/dashboard",
                 icon: SquareChartGantt,
             },
         ],
-    },
-    {
-        href: "/mentor/setting",
-        icon: UserCogIcon,
-        label: "Quản lí tài khoản",
     },
     {
         href: "/hospitals/consultation/create-consultation",
         icon: MessageCircle,
         label: "Quản lí cuộc tư vấn",
         subItems: [
-            // {
-            //     label: "Quản lý cuộc tư vấn",
-            //     href: "/hospitals/consultation/schedule",
-            //     icon: SquareChartGantt,
-            // },
             {
                 label: "Tạo lịch tư vấn",
                 href: "/hospitals/consultation/create-consultation",

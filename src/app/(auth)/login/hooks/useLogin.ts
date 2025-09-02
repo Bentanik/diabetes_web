@@ -51,13 +51,13 @@ export default function useLogin() {
                             return router.push("/admin/blogs");
                         }
                         if (roles.includes("SystemAdmin")) {
-                            return router.push("/admin/home");
+                            return router.push("/admin/hospital");
                         }
                         if (roles.includes("HospitalAdmin")) {
                             return router.push("/hospitals/hospital-staff");
                         }
                         if (roles.includes("HospitalStaff")) {
-                            return router.push("/hospitals/home");
+                            return router.push("/hospitals/doctor");
                         }
                         return router.push("/");
                     }

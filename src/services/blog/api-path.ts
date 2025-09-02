@@ -1,6 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
 
-const POST = "http://163.61.110.211:30000/media-service/api/v1/posts";
+const POST = "https://diadoctor.site/media-service/api/v1/posts";
 const CREATE_POST = POST;
 const GET_POSTS = POST + "/system";
 const GET_POST = (id: string) => `${GET_POSTS}/${id}`;

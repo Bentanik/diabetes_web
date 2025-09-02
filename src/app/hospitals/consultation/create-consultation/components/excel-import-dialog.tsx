@@ -113,7 +113,6 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                     `Đã xử lý thành công ${processedData.length} khung giờ`
                 );
             }
-
         } catch (err: any) {
             setError(`Lỗi xử lý file: ${err.message}`);
         } finally {
@@ -294,12 +293,13 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                                             {data.map((item, index) => (
                                                 <TableRow
                                                     key={index}
-                                                    className={`hover:bg-gray-50 ${!item.valid ||
+                                                    className={`hover:bg-gray-50 ${
+                                                        !item.valid ||
                                                         item.validationErrors
                                                             .length > 0
-                                                        ? "bg-red-100"
-                                                        : ""
-                                                        }`}
+                                                            ? "bg-red-100"
+                                                            : ""
+                                                    }`}
                                                 >
                                                     <TableCell>
                                                         {index + 1}
@@ -327,18 +327,19 @@ const ExcelImportDialog: React.FC<ExcelImportDialogProps> = ({
                                                         >
                                                             {item.duration
                                                                 ? `${Math.floor(
-                                                                    item.duration /
-                                                                    60
-                                                                )}h ${item.duration %
-                                                                60
-                                                                }m`
+                                                                      item.duration /
+                                                                          60
+                                                                  )}h ${
+                                                                      item.duration %
+                                                                      60
+                                                                  }m`
                                                                 : "N/A"}
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell>
                                                         {item.valid &&
-                                                            item.validationErrors
-                                                                .length === 0 ? (
+                                                        item.validationErrors
+                                                            .length === 0 ? (
                                                             <Badge
                                                                 variant="outline"
                                                                 className="bg-green-50 text-green-700 border-green-200"

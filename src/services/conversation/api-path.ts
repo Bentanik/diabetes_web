@@ -1,9 +1,9 @@
 /* eslint-disable import/no-anonymous-default-export */
 
 const CONVERSATION =
-    "http://163.61.110.211:30000/chat-service/api/v1/conversations";
+    "https://diadoctor.site/chat-service/api/v1/conversations";
 const HOSPITAL_CONVERSATION =
-    "http://163.61.110.211:30000/chat-service/api/v1/hospital-conversations";
+    "https://diadoctor.site/chat-service/api/v1/hospital-conversations";
 
 // Hospital
 const GET_CONVERSATIONS = HOSPITAL_CONVERSATION;

@@ -1,9 +1,9 @@
-"use client"
-import NotificationDropdown from "@/components/notification"
-import ProfileHospitalMenu from "@/components/profile_hospital_menu"
-import { motion } from "framer-motion"
-import { ArrowLeftIcon, SettingsIcon } from "lucide-react"
-import Link from "next/link"
+"use client";
+import NotificationDropdown from "@/components/notification";
+import ProfileHospitalMenu from "@/components/profile_hospital_menu";
+import { motion } from "framer-motion";
+import { ArrowLeftIcon, SettingsIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
     return (
@@ -34,8 +34,13 @@ export default function Header() {
                         <div className="flex flex-col gap-1">
                             {" "}
                             {/* Đã điều chỉnh gap */}
-                            <h1 className="text-xl font-semibold text-[#248fca]">Cài đặt hệ thống AI</h1>
-                            <p className="text-sm text-gray-600">Quản lý thư mục và prompt templates cho hệ thống AI.</p>
+                            <h1 className="text-xl font-semibold text-[#248fca]">
+                                Cài đặt hệ thống AI
+                            </h1>
+                            <p className="text-sm text-gray-600">
+                                Quản lý thư mục và prompt templates cho hệ thống
+                                AI.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -48,5 +53,5 @@ export default function Header() {
                 </div>
             </div>
         </motion.div>
-    )
+    );
 }

@@ -5,16 +5,10 @@ import {
     Users,
     DollarSign,
     CheckCircle,
-    Clock,
-    XCircle,
     Calendar,
     Clock as ClockIcon,
-    BadgeCheckIcon,
-    Building2,
-    Phone,
+    CircleXIcon,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 interface DashboardSummaryProps {
     data: {
@@ -35,6 +29,7 @@ interface DashboardSummaryProps {
         };
     } | null;
     isLoading: boolean;
+    statisticsType?: string | null;
 }
 
 const formatCurrency = (amount: number) => {
@@ -45,11 +40,22 @@ const formatCurrency = (amount: number) => {
 };
 
 const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
+    if (!dateString) return "N/A";
+
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return "N/A";
+        }
+
+        return date.toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        });
+    } catch (error) {
+        return "N/A";
+    }
 };
 
 export default function DashboardSummary({
@@ -75,28 +81,12 @@ export default function DashboardSummary({
     }
 
     if (!data) {
-        return (
-            <div className="bg-white rounded-2xl p-6 border border-gray-200 mb-6 shawdow-hospital">
-                <div className="text-center text-gray-500">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>
-                        Vui lòng chọn bác sĩ và khoảng thời gian để xem thống kê
-                    </p>
-                </div>
-            </div>
-        );
+        return null;
     }
 
     const { summary, period } = data;
 
     const summaryCards = [
-        {
-            title: "Tổng cuộc tư vấn",
-            value: summary.totalConsultations,
-            icon: Users,
-            color: "text-blue-600",
-            bgColor: "bg-blue-50",
-        },
         {
             title: "Doanh thu",
             value: formatCurrency(summary.totalRevenue),
@@ -105,26 +95,23 @@ export default function DashboardSummary({
             bgColor: "bg-green-50",
         },
         {
+            title: "Tổng cuộc tư vấn",
+            value: summary.totalConsultations,
+            icon: Users,
+            color: "text-blue-600",
+            bgColor: "bg-blue-50",
+        },
+        {
             title: "Hoàn thành",
             value: summary.completedConsultations,
             icon: CheckCircle,
             color: "text-green-600",
             bgColor: "bg-green-50",
         },
-    ];
-
-    const statusCards = [
-        {
-            title: "Đang chờ",
-            value: summary.pendingConsultations,
-            icon: Clock,
-            color: "text-yellow-600",
-            bgColor: "bg-yellow-50",
-        },
         {
             title: "Đã hủy",
             value: summary.cancelledConsultations,
-            icon: XCircle,
+            icon: CircleXIcon,
             color: "text-red-600",
             bgColor: "bg-red-50",
         },
@@ -135,8 +122,8 @@ export default function DashboardSummary({
             {/* Period Info */}
             <div className="bg-white rounded-2xl p-6 border border-gray-200 shawdow-hospital">
                 <div className="flex items-center gap-2 mb-4">
-                    <ClockIcon className="h-5 w-5 text-[#248FCA]" />
-                    <h3 className="text-lg font-semibold text-[#248FCA]">
+                    <ClockIcon className="h-5 w-5 text-[#071d34]" />
+                    <h3 className="text-lg font-semibold text-[#071d34]">
                         Khoảng thời gian đã chọn
                     </h3>
                 </div>
@@ -151,68 +138,14 @@ export default function DashboardSummary({
                             <span>Tháng: {period.month}</span>
                         </div>
                     )}
-                    {period.week && (
-                        <div className="flex items-center gap-2">
-                            <ClockIcon className="h-4 w-4" />
-                            <span>Tuần: {period.week}</span>
-                        </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>
-                            Từ {formatDate(period.fromDate)} đến{" "}
-                            {formatDate(period.toDate)}
-                        </span>
-                    </div>
                 </div>
             </div>
 
             {/* Main Summary Cards */}
             <div className="flex gap-10">
                 {/* Status Cards */}
-                {/* {selectedDoctor && ( */}
-                <Card className="flex-1 p-4 rounded-2xl border border-blue-200 shadow-sm">
-                    <CardContent className="p-0">
-                        <div className="flex items-center gap-5">
-                            <Avatar className="size-16">
-                                <AvatarImage
-                                    className="w-full h-full rounded-full object-cover"
-                                    src={"/images/default_img.jpg"}
-                                />
-                            </Avatar>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-3">
-                                    <div className="text-[1.1rem] font-semibold text-emerald-900">
-                                        {/* {selectedDoctor.name} */}
-                                        Nguyễn Mai Viết Vỹ
-                                    </div>
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-xs font-medium">
-                                        <BadgeCheckIcon className="w-4 h-4" />
-                                        {/* {getPositionName(
-                                            selectedDoctor.position
-                                        )} */}
-                                        Trưởng phòng
-                                    </span>
-                                </div>
-                                <div className="text-sm text-gray-700 flex items-center gap-2">
-                                    <Building2 className="w-4 h-4 text-blue-700" />
-                                    {/* <span>{selectedDoctor.hospital?.name}</span> */}
-                                    <span>Bệnh viện A</span>
-                                </div>
-                                <div className="text-sm text-gray-700 flex items-center gap-2">
-                                    <Phone className="w-4 h-4 text-blue-700" />
-                                    <span>
-                                        {/* {selectedDoctor.phoneNumber ||
-                                            "Chưa cập nhật"} */}
-                                        0909123456
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                {/* )} */}
-                <div className="flex-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                <></>
+                <div className="flex-2 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {summaryCards.map((card, index) => (
                         <div
                             key={index}

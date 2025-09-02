@@ -34,6 +34,11 @@ export default function CreatePackage() {
 
     const currentValues = form.watch();
 
+    const convertMonthsToTimeSpan = (months: number): string => {
+        const days = months * 30;
+        return `${days}.00:00:00`;
+    };
+
     const formattedPrice = useMemo(() => {
         return new Intl.NumberFormat("vi-VN", {
             style: "currency",
@@ -54,10 +59,11 @@ export default function CreatePackage() {
                     typeof data.sessions === "string"
                         ? Number(data.sessions)
                         : data.sessions,
-                durationInMonths:
-                    typeof data.durationInMonths === "string"
-                        ? Number(data.durationInMonths)
-                        : data.durationInMonths,
+                durations: convertMonthsToTimeSpan(
+                    typeof data.durations === "string"
+                        ? Number(data.durations)
+                        : data.durations
+                ),
             };
             onSubmit(formData);
         } catch (error) {
@@ -224,7 +230,7 @@ export default function CreatePackage() {
 
                                     <FormField
                                         control={form.control}
-                                        name="durationInMonths"
+                                        name="durations"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
@@ -235,13 +241,9 @@ export default function CreatePackage() {
                                                         type="text"
                                                         inputMode="numeric"
                                                         placeholder="5"
-                                                        value={
-                                                            field.value === 0
-                                                                ? ""
-                                                                : String(
-                                                                      field.value
-                                                                  )
-                                                        }
+                                                        value={String(
+                                                            field.value
+                                                        )}
                                                         onChange={(e) => {
                                                             const value =
                                                                 e.target.value;
@@ -315,9 +317,7 @@ export default function CreatePackage() {
                                             Thời hạn:
                                         </span>
                                         <span className="font-medium text-gray-800">
-                                            {currentValues.durationInMonths ||
-                                                0}{" "}
-                                            tháng
+                                            {currentValues.durations || 0} tháng
                                         </span>
                                     </div>
                                     <div className="h-px bg-gray-100" />
