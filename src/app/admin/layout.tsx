@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useAppSelector } from "@/stores";
 import useLogout from "@/hooks/use-logout";
+import { Toaster } from "sonner";
 
 interface SidebarSubItem {
     label: string;

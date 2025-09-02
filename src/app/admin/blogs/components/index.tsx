@@ -82,6 +82,8 @@ export default function ModeratorManageBlogComponent() {
         router.push(`?${params.toString()}`);
     };
 
+    const userState = useAppSelector((state) => state.userSlice);
+
     const handleStatusChange = (status: number) => {
         setSelectedStatus(status);
         updateURLParams({ status: status });

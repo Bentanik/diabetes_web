@@ -13,7 +13,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -130,7 +129,6 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
 
     return (
         <div className="min-h-screen">
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                     <div className="flex gap-10">
@@ -239,7 +237,9 @@ export default function CreateDoctorForm({ blogId }: REQUEST.BlogId) {
                                                             {...field}
                                                             placeholder="Nhập tên đệm bác sĩ"
                                                             className="h-12 text-base border-2 focus:border-[#248fca] transition-colors"
-                                                            onChange={field.onChange}
+                                                            onChange={
+                                                                field.onChange
+                                                            }
                                                         />
                                                     </div>
                                                 </FormControl>

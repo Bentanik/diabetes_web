@@ -5,7 +5,6 @@ import EditDoctor from "@/components/editor/editor";
 import { AlertCircle, Globe, Mail, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 
-import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Phone, UserPen, Award, Info } from "lucide-react";
@@ -107,7 +106,6 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
                 setPendingImages([]);
                 setUploadedImages([]);
                 form.reset();
- 
             });
         } catch (error) {
             console.error("Error updating post:", error);
@@ -116,7 +114,6 @@ export default function CreateHospitalForm({ hospitalId }: REQUEST.HospitalId) {
 
     return (
         <div className="min-h-screen">
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                     <div className="flex gap-10">

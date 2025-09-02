@@ -18,7 +18,6 @@ import {
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { useGetConversations } from "../hooks/use-get-conversations";
-import { Toaster } from "sonner";
 import Image from "next/image";
 import PaginatedComponent from "@/components/paginated";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -61,7 +60,6 @@ export default function GroupHospitalComponent() {
 
     return (
         <div>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             {/* Header */}
             <header>
                 <Header />
