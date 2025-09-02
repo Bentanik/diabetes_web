@@ -13,7 +13,7 @@ declare namespace REQUEST {
         description: string;
         price: number;
         sessions: number;
-        durationInMonths: number;
+        durations: string;
     };
 }
 
@@ -24,7 +24,7 @@ declare namespace API {
         description: string;
         price: number;
         sessions: number;
-        durationInMonths: number;
+        durations: string;
         isActive: boolean;
         createdDate: string;
     };

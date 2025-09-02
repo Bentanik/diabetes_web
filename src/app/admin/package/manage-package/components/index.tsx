@@ -49,6 +49,11 @@ export default function ManagePackage() {
         setCurrentPage(page);
     };
 
+    const convertTimeSpanToMonths = (timeSpan: string): number => {
+        const days = parseInt(timeSpan.split(".")[0]); // Lấy phần ngày từ "150.00:00:00"
+        return Math.round(days / 30); // Chia cho 30 để ra tháng
+    };
+
     const handlePerPageChange = (perPage: number) => {
         setItemsPerPage(perPage);
         setCurrentPage(1);
@@ -171,7 +176,10 @@ export default function ManagePackage() {
                                             Thời hạn:
                                         </span>
                                         <span className="font-medium text-gray-800">
-                                            {pkg.durationInMonths} tháng
+                                            {convertTimeSpanToMonths(
+                                                pkg.durations
+                                            )}{" "}
+                                            tháng
                                         </span>
                                     </div>
                                     <div className="h-px bg-gray-100" />

@@ -2,7 +2,7 @@
 const MEDIA = "https://diadoctor.site/media-service/api/v1/media";
 
 const CONVERSATION_MEDIA =
-    "https://diadoctor.site/media-service/api/v1/media/upload";
+    "https://diadoctor.site/chat-service/api/v1/media/upload";
 
 export default {
     MEDIA,

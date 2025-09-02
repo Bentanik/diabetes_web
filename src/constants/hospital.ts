@@ -12,11 +12,6 @@ import {
 } from "lucide-react";
 export const sidebar_items = [
     {
-        href: "/hospitals/home",
-        icon: ActivityIcon,
-        label: "Dashboard",
-    },
-    {
         href: "/hospitals/doctor",
         icon: UsersIcon,
         label: "Bác sĩ",
@@ -66,11 +61,6 @@ export const sidebar_items = [
                 icon: SquareChartGantt,
             },
         ],
-    },
-    {
-        href: "/mentor/setting",
-        icon: UserCogIcon,
-        label: "Quản lí tài khoản",
     },
     {
         href: "/hospitals/consultation/create-consultation",

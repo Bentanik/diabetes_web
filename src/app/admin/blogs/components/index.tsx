@@ -274,16 +274,15 @@ export default function ModeratorManageBlogComponent() {
                             className="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                         >
                             {/* Header */}
-                            <div>
+                            <div className="relative w-full h-[200px]">
                                 <Image
                                     src={
                                         data.thumbnail ||
                                         "/images/default_img.jpg"
                                     }
                                     alt="thumbnail"
-                                    width={50}
-                                    height={50}
-                                    className="w-full rounded-2xl h-[250px] object-cover"
+                                    fill
+                                    className="rounded-2xl object-cover"
                                 />
                             </div>
 

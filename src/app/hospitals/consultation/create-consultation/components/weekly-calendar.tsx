@@ -174,9 +174,9 @@ export default function WeeklyCalendar({
     // Xác định nếu thời gian có thể chỉnh sửa
     const canEditTime = useMemo(() => {
         if (!editTarget) return false;
-        if (editTarget.mode === "create") return true; // always editable when creating
+        if (editTarget.mode === "create") return true;
         if (!currentSlot) return false;
-        if (currentSlot.status === 2) return false; // booked
+        if (currentSlot.status === 2) return false;
         // editable if draft (no id) or status=1
         return !currentSlot.id || currentSlot.status === 1;
     }, [editTarget, currentSlot]);
@@ -300,6 +300,7 @@ export default function WeeklyCalendar({
         return bg;
     }, [selectedWeekData.dates]);
 
+    // Hàm gọi khi có thay đổi cần lưu
     const upsertChanged = (source?: { timeTemplates: DaySchedule[] }) => {
         const base = source ?? scheduleData;
         const changedArray = Array.from(changedKeysRef.current)
@@ -477,28 +478,6 @@ export default function WeeklyCalendar({
         setDialogOpen(false);
         setTimeout(() => upsertChanged(next), 0);
         onStatusChange?.(1);
-    };
-
-    const deleteFromDialog = () => {
-        if (!editTarget) return;
-        const date = selectedWeekData.dates[editTarget.dayIndex];
-        const next = cloneSchedule(scheduleData);
-        const day = next.timeTemplates.find((d) => d.date === date);
-        if (!day) return;
-        const slot = day.times[editTarget.slotIndex];
-        if (!slot) return;
-        if (slot.id) {
-            deletedIdsRef.current = [...deletedIdsRef.current, slot.id];
-        }
-        day.times = day.times.filter((_, idx) => idx !== editTarget.slotIndex);
-        if (day.times.length === 0) {
-            next.timeTemplates = next.timeTemplates.filter(
-                (d) => d.date !== date
-            );
-        }
-        setScheduleData(next);
-        setDialogOpen(false);
-        upsertChanged(next);
     };
 
     const handleEventDrop = (arg: EventDropArg) => {

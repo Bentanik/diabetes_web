@@ -245,16 +245,17 @@ export default function GroupDetailComponent({
                                         <TableCell>
                                             <div className="flex items-center space-x-3">
                                                 <div className="relative">
-                                                    <Image
-                                                        src={
-                                                            user.avatar ||
-                                                            "/images/default_user.png"
-                                                        }
-                                                        alt="avatar"
-                                                        width={50}
-                                                        height={50}
-                                                        className="rounded-full"
-                                                    />
+                                                    <div className="relative w-12 h-12">
+                                                        <Image
+                                                            src={
+                                                                user.avatar ||
+                                                                "/images/default_user.png"
+                                                            }
+                                                            alt="avatar"
+                                                            fill
+                                                            className="rounded-full object-cover"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </TableCell>

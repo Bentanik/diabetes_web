@@ -12,7 +12,7 @@ export const useServiceCreatePackage = () => {
                 description: data.description,
                 price: data.price,
                 sessions: data.sessions,
-                durationInMonths: data.durationInMonths,
+                durations: data.durations,
             });
             return response as TResponse;
         },
@@ -23,28 +23,5 @@ export const useServiceCreatePackage = () => {
                 duration: 5000,
             });
         },
-
-        // onError: (error: TMeta) => {
-        //     error.errors?.forEach((error) => {
-        //         console.log(error);
-
-        //         if (error.code === "hospital_error_01") {
-        //             addToast({
-        //                 type: "error",
-        //                 description:
-        //                     "Số điện thoại không được trùng. Vui lòng nhập lại !",
-        //                 duration: 5000,
-        //             });
-        //         }
-        //         if (error.code === "hospital_error_02") {
-        //             addToast({
-        //                 type: "error",
-        //                 description:
-        //                     "Email  không được trùng. Vui lòng nhập lại !",
-        //                 duration: 5000,
-        //             });
-        //         }
-        //     });
-        // },
     });
 };
