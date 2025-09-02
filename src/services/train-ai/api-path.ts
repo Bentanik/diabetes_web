@@ -1,5 +1,5 @@
 /* eslint-disable import/no-anonymous-default-export */
-const TRAIN_AI = "http://103.20.97.112:8000/api/v1/rag";
+const TRAIN_AI = "http://103.20.97.112:8000/ai-service/api/v1/rag";
 const KNOWLEDGES = TRAIN_AI + "/knowledges";
 
 const DOCUMENTS = `${TRAIN_AI}/documents`;

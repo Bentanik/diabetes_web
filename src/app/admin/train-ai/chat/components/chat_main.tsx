@@ -1,0 +1,452 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
+import {
+    type FormEvent,
+    type KeyboardEvent,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Send, Trash2, ChevronDown, Bot, User } from "lucide-react";
+import axios from "axios";
+import { useBackdrop } from "@/context/backdrop_context";
+import API_ENDPOINTS from "@/services/train-ai/api-path";
+
+
+type ChatMessage = {
+    id?: string;
+    session_id?: string;
+    user_id?: string;
+    role: "user" | "assistant" | "ai";
+    content: string;
+    created_at: string;
+    updated_at?: string;
+    isTyping?: boolean;
+};
+
+type ChatHistoryResponse = {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    data: ChatMessage[];
+};
+
+type ChatSessionResponse = {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    data: API.TChatSession[];
+};
+
+type SendMessageResponse = {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    data: {
+        id: string;
+        session_id: string;
+        user_id: string;
+        content: string;
+        role: "ai" | "user";
+        created_at: string;
+        updated_at: string;
+    };
+};
+
+const API_BASE_URL = API_ENDPOINTS.TRAIN_AI;
+const FIXED_USER_ID = "admin";
+
+const formatTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+
+export default function ChatMain() {
+    const [message, setMessage] = useState("");
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const listRef = useRef<HTMLDivElement | null>(null);
+    const [isAtBottom, setIsAtBottom] = useState(true);
+    const [isExternal, setIsExternal] = useState<boolean>(false);
+    const [session, setSession] = useState<API.TChatSession | null>(null)
+
+    const { showBackdrop, hideBackdrop } = useBackdrop()
+
+    useEffect(() => {
+        if (!listRef.current) return;
+        if (isAtBottom) {
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+        }
+    }, [messages, isAtBottom]);
+
+    const handleScroll = () => {
+        const el = listRef.current;
+        if (!el) return;
+        const threshold = 48;
+        const distanceFromBottom =
+            el.scrollHeight - el.clientHeight - el.scrollTop;
+        setIsAtBottom(distanceFromBottom <= threshold);
+    };
+
+    const scrollToBottom = () => {
+        const el = listRef.current;
+        if (!el) return;
+        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    };
+
+    // Load chat history on component mount
+    useEffect(() => {
+        loadChatHistory();
+    }, []);
+
+    useEffect(() => {
+        updateSession(session)
+    }, [isExternal])
+
+
+    const updateSession = async (data?: API.TChatSession | null) => {
+        try {
+            if (data == null) return;
+
+            await axios.put(
+                `${API_BASE_URL}/session-chat`,
+                {
+                    "session_id": data.id,
+                    "title": data.title,
+                    "external_knowledge": isExternal
+                },
+                {
+                    headers: {
+                        "accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                }
+            )
+        } catch (error) {
+            console.error("Error updating session:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const loadChatHistory = async () => {
+        try {
+            setIsLoading(true);
+            const response = await axios.get<ChatHistoryResponse>(
+                `${API_BASE_URL}/chat?user_id=${FIXED_USER_ID}`,
+                {
+                    headers: {
+                        accept: "application/json",
+                    },
+                }
+            );
+
+            const session_response = await axios.get<ChatSessionResponse>(
+                `${API_BASE_URL}/session-chat?user_id=${FIXED_USER_ID}`,
+                {
+                    headers: {
+                        accept: "application/json",
+                    },
+                }
+            )
+
+            if (response.data.isSuccess) {
+                const historyMessages = response.data.data.map((msg) => ({
+                    ...msg,
+                    role: msg.role === "ai" ? "assistant" : msg.role,
+                })) as ChatMessage[];
+                setMessages(historyMessages);
+            }
+
+            if (session_response.data.isSuccess) {
+                setIsExternal(session_response.data.data[0].external_knowledge)
+                setSession(session_response.data.data[0])
+            }
+        } catch (error) {
+            console.error("Error loading chat history:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const sendMessage = async (text: string) => {
+        const userMessage: ChatMessage = {
+            role: "user",
+            content: text,
+            created_at: new Date().toISOString(),
+        };
+
+        // Add user message and typing indicator
+        setMessages((prev) => [
+            ...prev,
+            userMessage,
+            {
+                role: "assistant",
+                content: "Đang soạn...",
+                created_at: new Date().toISOString(),
+                isTyping: true,
+            },
+        ]);
+
+        try {
+            const response = await axios.post<SendMessageResponse>(
+                `${API_BASE_URL}/chat`,
+                {
+                    content: text,
+                    user_id: FIXED_USER_ID,
+                },
+                {
+                    headers: {
+                        accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            // Remove typing indicator and add AI response from API
+            if (response.data.isSuccess && response.data.data) {
+                const aiMessage = response.data.data;
+                setMessages((prev) => {
+                    const withoutTyping = prev.filter((msg) => !msg.isTyping);
+                    return [
+                        ...withoutTyping,
+                        {
+                            id: aiMessage.id,
+                            session_id: aiMessage.session_id,
+                            user_id: aiMessage.user_id,
+                            role: aiMessage.role === "ai" ? "assistant" : aiMessage.role,
+                            content: aiMessage.content,
+                            created_at: aiMessage.created_at,
+                            updated_at: aiMessage.updated_at,
+                        },
+                    ];
+                });
+            } else {
+                // Handle unsuccessful response
+                setMessages((prev) => {
+                    const withoutTyping = prev.filter((msg) => !msg.isTyping);
+                    return [
+                        ...withoutTyping,
+                        {
+                            role: "assistant",
+                            content: "Xin lỗi, tôi không thể trả lời lúc này.",
+                            created_at: new Date().toISOString(),
+                        },
+                    ];
+                });
+            }
+        } catch {
+            // Remove typing indicator and show error
+            setMessages((prev) => {
+                const withoutTyping = prev.filter((msg) => !msg.isTyping);
+                return [
+                    ...withoutTyping,
+                    {
+                        role: "assistant",
+                        content: "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.",
+                        created_at: new Date().toISOString(),
+                    },
+                ];
+            });
+        }
+    };
+
+    const onSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        const text = message.trim();
+        if (!text) return;
+        setMessage("");
+        sendMessage(text);
+    };
+
+    const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            const text = message.trim();
+            if (!text) return;
+            setMessage("");
+            sendMessage(text);
+        }
+    };
+
+    const clearConversation = async () => {
+        showBackdrop();
+        await axios.delete(
+            `${API_BASE_URL}/chat/delete-chat-admin?user_id=${FIXED_USER_ID}`,
+        );
+        setMessages([]);
+        hideBackdrop();
+    };
+
+    return (
+        <div className="mx-auto">
+            <div
+                style={{ boxShadow: "rgba(0, 0, 0, 0.06) 0px 2px 6px" }}
+                className="relative bg-white rounded-3xl border border-gray-200 flex flex-col h-[calc(100vh-140px)] overflow-hidden"
+            >
+                {/* Modern Header */}
+                <div className="px-6 py-4 rounded-t-3xl bg-white border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div>
+                                <div className="font-semibold text-lg text-gray-800">
+                                    Phiên kiểm thử AI
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                    Kiểm tra đáp ứng hội thoại theo tri thức
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                className="bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors duration-200 rounded-full cursor-pointer"
+                                onClick={clearConversation}
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Xóa cuộc trò chuyện
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Messages Area */}
+                <div
+                    ref={listRef}
+                    onScroll={handleScroll}
+                    className="flex-1 overflow-y-auto p-6 space-y-3 bg-gray-50"
+                >
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <Bot className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <div className="text-gray-600 text-lg">
+                                Đang tải lịch sử...
+                            </div>
+                        </div>
+                    ) : messages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <Bot className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <div className="text-gray-400 text-lg">
+                                Chưa có tin nhắn
+                            </div>
+                            <div className="text-gray-400 text-sm mt-1">
+                                Hãy nhập câu hỏi bên dưới để bắt đầu
+                            </div>
+                        </div>
+                    ) : (
+                        messages.map((m, idx) => (
+                            <div key={`${m.created_at}-${idx}`} className="space-y-2">
+                                {idx > 0 && messages[idx - 1]?.role !== m.role && (
+                                    <div className="flex items-center gap-2 my-1">
+                                        <div className="h-px bg-gray-200 flex-1"></div>
+                                    </div>
+                                )}
+                                <div
+                                    className={`flex items-start gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}
+                                >
+                                    {/* Avatar */}
+                                    <div
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.role === "user"
+                                            ? "bg-gray-600"
+                                            : "bg-gray-500"
+                                            }`}
+                                    >
+                                        {m.role === "user" ? (
+                                            <User className="w-4 h-4 text-white" />
+                                        ) : (
+                                            <Bot className="w-4 h-4 text-white" />
+                                        )}
+                                    </div>
+
+                                    {/* Message Content */}
+                                    <div
+                                        className={`max-w-[75%] ${m.role === "user"
+                                            ? "items-end"
+                                            : "items-start"
+                                            } flex flex-col`}
+                                    >
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-xs font-medium text-gray-600">
+                                                {m.role === "user"
+                                                    ? "Bạn"
+                                                    : "Trợ lý AI"}
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                {formatTime(m.created_at)}
+                                            </span>
+                                        </div>
+
+                                        <div
+                                            className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm border ${m.role === "user"
+                                                ? "bg-white text-gray-800 border-gray-200 rounded-br-md"
+                                                : "bg-white text-gray-800 border-gray-200 rounded-bl-md"
+                                                }`}
+                                        >
+                                            {m.isTyping ? (
+                                                <div className="flex items-center gap-2 text-gray-500">
+                                                    <div className="flex gap-1">
+                                                        <div className="w-2 h-2 bg-current/60 rounded-full"></div>
+                                                        <div className="w-2 h-2 bg-current/60 rounded-full"></div>
+                                                        <div className="w-2 h-2 bg-current/60 rounded-full"></div>
+                                                    </div>
+                                                    <span className="ml-1">Đang soạn...</span>
+                                                </div>
+                                            ) : (
+                                                <div className="whitespace-pre-wrap break-words">
+                                                    {m.content}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Scroll to Bottom Button */}
+                {!isAtBottom && (
+                    <div className="absolute bottom-32 right-6 z-10">
+                        <Button
+                            onClick={scrollToBottom}
+                            size="sm"
+                            className="h-10 w-10 p-0 rounded-full bg-white border border-gray-200 shadow-md text-gray-600 hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                            variant="ghost"
+                        >
+                            <ChevronDown className="w-4 h-4" />
+                        </Button>
+                    </div>
+                )}
+
+                {/* Input Area */}
+                <div className="p-6 bg-white border-t border-gray-200">
+                    <form onSubmit={onSubmit} className="flex items-end gap-3">
+                        <div className="flex-1 relative">
+                            <Textarea
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                onKeyDown={onKeyDown}
+                                placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter để xuống dòng)"
+                                className="min-h-[44px] max-h-28 resize-none border-2 border-gray-200 rounded-2xl px-3 py-2 text-sm focus:border-[#248FCA] focus:ring-0 transition-colors duration-200 pr-12 bg-white focus-visible:ring-0"
+                                rows={1}
+                            />
+                        </div>
+                        <Button
+                            type="submit"
+                            disabled={!message.trim()}
+                            className="h-[44px] w-[44px] p-0 rounded-2xl bg-white text-gray-600 border border-[#248FCA]/30 hover:bg-[#248FCA]/5 transition-colors duration-200 shadow-sm disabled:opacity-50 cursor-pointer"
+                        >
+                            <Send className="w-4 h-4" />
+                        </Button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}
