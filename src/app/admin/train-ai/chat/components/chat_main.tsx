@@ -116,7 +116,7 @@ export default function ChatMain() {
                 {
                     "session_id": data.id,
                     "title": data.title,
-                    "external_knowledge": isExternal
+                    "external_knowledge": false
                 },
                 {
                     headers: {
