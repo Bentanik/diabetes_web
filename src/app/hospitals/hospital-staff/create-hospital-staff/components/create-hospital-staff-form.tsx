@@ -12,7 +12,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserPen, VenusAndMars } from "lucide-react";
@@ -64,7 +63,6 @@ export default function CreateHospitalStaffForm() {
 
     return (
         <div className="min-h-screen">
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleFormSubmit)}>
                     <div className="flex gap-10">

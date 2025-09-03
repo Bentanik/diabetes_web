@@ -17,8 +17,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useGetDoctors } from "../hooks/use-get-doctors";
 import { useDebounce } from "@/hooks/use-debounce";
-import PaginatedComponent from "@/components/paginated";
-import { Toaster } from "sonner";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import Header from "./header";
 import DoctorFilters from "./doctor-filter";
@@ -85,8 +83,6 @@ export default function DoctorComponent() {
 
     return (
         <div>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-
             {/* Header */}
             <header>
                 <Header />

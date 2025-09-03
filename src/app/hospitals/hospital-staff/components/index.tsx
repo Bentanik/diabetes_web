@@ -7,12 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useGetHospitalStaffs } from "../hooks/use-get-hospital-staffs";
 import { useDebounce } from "@/hooks/use-debounce";
-import PaginatedComponent from "@/components/paginated";
-import { Toaster } from "sonner";
 import { SkeletonFolderGrid } from "@/components/skeleton-card/skeleton-card";
 import Header from "./header";
 import HospitalStaffFilters from "./hospital-staff-filter";
-import { useSearchParams, useRouter } from "next/navigation";
 import Pagination from "@/components/shared/pagination";
 
 export default function HospitalStaffComponent() {
@@ -67,8 +64,6 @@ export default function HospitalStaffComponent() {
 
     return (
         <div>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-
             {/* Header */}
             <header>
                 <Header />
@@ -139,7 +134,7 @@ export default function HospitalStaffComponent() {
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
                                         <ClockPlus className="w-4 h-4" />
-                                        <span>Ngày tạo: </span>
+                                        <span>Ngày tham gia: </span>
                                     </div>
                                     <span className="">
                                         {" "}

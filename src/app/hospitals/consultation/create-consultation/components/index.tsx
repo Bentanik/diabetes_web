@@ -16,7 +16,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import useCreateConsultation, {
     ConsultationFormData,
 } from "../hooks/use-create-consultation";
@@ -229,8 +229,6 @@ export default function CreateDoctorSchedule() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-
             {/* Header */}
             <header>
                 <Header />

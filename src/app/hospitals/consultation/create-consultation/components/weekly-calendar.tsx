@@ -353,7 +353,7 @@ export default function WeeklyCalendar({
     ) => {
         const s = toMinutes(start);
         const e = toMinutes(end);
-        if (e - s < 15) {
+        if (e - s < 5) {
             addToast({
                 type: "error",
                 description: "Khoảng thời gian tối thiểu là 15 phút",
@@ -621,7 +621,7 @@ export default function WeeklyCalendar({
                     initialDate={selectedWeekData.dates[0]}
                     firstDay={1}
                     height="100%"
-                    slotDuration="00:15:00"
+                    slotDuration="00:05:00"
                     slotLabelInterval="01:00"
                     editable
                     selectable

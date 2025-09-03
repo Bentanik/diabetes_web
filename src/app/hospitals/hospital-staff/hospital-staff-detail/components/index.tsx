@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useGetHospitalStaffDetail } from "../hooks/use-get-hospital-staff";
-import { Toaster } from "sonner";
 
 const Header = () => {
     return (
@@ -99,7 +98,7 @@ export default function HospitalStaffDetailComponent({
             color: "black",
         },
         {
-            label: "Ngày tạo:",
+            label: "Ngày tham gia:",
             value: formatDate(hospital_staff_detail?.createdDate),
             color: "black",
         },
@@ -107,8 +106,6 @@ export default function HospitalStaffDetailComponent({
 
     return (
         <div>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-
             <header>
                 <Header />
             </header>
@@ -156,83 +153,6 @@ export default function HospitalStaffDetailComponent({
                                             )}
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="mt-10 flex justify-end gap-4">
-                                    <Dialog
-                                        open={isOpenDialog}
-                                        onOpenChange={setIsDialogOpen}
-                                    >
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                onClick={() => {
-                                                    setIsDialogOpen(true);
-                                                }}
-                                                variant="outline"
-                                                className="cursor-pointer px-6 py-6 min-w-[180px] hover:border-red-500 hover:text-red-500"
-                                            >
-                                                Xóa nhân viên
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[425px]">
-                                            <DialogHeader>
-                                                <DialogTitle className="text-[1.5rem]">
-                                                    Xóa nhân viên
-                                                </DialogTitle>
-                                            </DialogHeader>
-
-                                            {/* <Form {...form}> */}
-                                            {/* <Form> */}
-                                            <form
-                                                // onSubmit={form.handleSubmit(
-                                                //     handleRejectBlog
-                                                // )}
-                                                className="space-y-4"
-                                            >
-                                                <FormField
-                                                    // control={form.control}
-                                                    name="reasonRejected"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>
-                                                                Lý do từ chối
-                                                            </FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Điền lý do từ chối bài viết"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-
-                                                <DialogFooter className="mt-8">
-                                                    <DialogClose asChild>
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            className="cursor-pointer"
-                                                        >
-                                                            Hủy
-                                                        </Button>
-                                                    </DialogClose>
-                                                    <Button
-                                                        type="submit"
-                                                        // disabled={isPending}
-                                                        className="cursor-pointer bg-red-500 hover:bg-red-600"
-                                                    >
-                                                        {/* {isPending
-                                                                ? "Đang xử lý..."
-                                                                : "Từ chối"} */}
-                                                        Xóa nhân viên
-                                                    </Button>
-                                                </DialogFooter>
-                                            </form>
-                                            {/* </Form> */}
-                                        </DialogContent>
-                                    </Dialog>
                                 </div>
                             </div>
                         </div>

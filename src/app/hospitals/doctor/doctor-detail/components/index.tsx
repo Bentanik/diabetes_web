@@ -4,27 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { ArrowLeft, BadgeCheck } from "lucide-react";
 import Image from "next/image";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useGetDoctorDetail } from "../hooks/use-get-doctor";
-import { Toaster } from "sonner";
 
 const Header = () => {
     return (
@@ -75,8 +55,6 @@ export default function DoctorDetailComponent({ doctorId }: REQUEST.DoctorId) {
 
     return (
         <div>
-            <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
-
             <header>
                 <Header />
             </header>

@@ -1,5 +1,4 @@
-'use client';
-
+"use client";
 
 import { Backdrop } from "@/components/backdrop";
 import { NotificationProvider } from "@/context/notification_context";
@@ -22,9 +21,7 @@ export default function Provider({
             <NotificationProvider>
                 <BackdropProvider>
                     <Backdrop />
-                    <ReactQueryProvider>
-                        {children}
-                    </ReactQueryProvider>
+                    <ReactQueryProvider>{children}</ReactQueryProvider>
                 </BackdropProvider>
             </NotificationProvider>
         </StoreProvider>
