@@ -134,7 +134,7 @@ export default function HospitalStaffComponent() {
                                 <div className="flex items-center justify-between text-sm text-gray-600">
                                     <div className="flex items-center gap-2 ">
                                         <ClockPlus className="w-4 h-4" />
-                                        <span>Ngày tạo: </span>
+                                        <span>Ngày tham gia: </span>
                                     </div>
                                     <span className="">
                                         {" "}
