@@ -65,7 +65,7 @@ const errorHandler = async (error: any) => {
         }
     }
 
-    if (error.response?.status === 401 && error?.config) {
+    if (error.response?.status === 401 && error?.config || error.response?.status === 403 && error?.config) {
         const originalRequest = error?.config;
         const refreshToken = getStorageItem("refreshToken");
         if (!refreshTokenPromise) {
